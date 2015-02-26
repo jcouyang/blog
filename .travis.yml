@@ -1,12 +1,13 @@
 language: ruby
+before_install:
+- openssl aes-256-cbc -K $encrypted_23734ca30845_key -iv $encrypted_23734ca30845_iv
+  -in deploy.enc -out deploy -d
 install:
 - sudo add-apt-repository -y ppa:cassou/emacs
 - sudo apt-get -qq update
 - sudo apt-get -qq -f install
 - sudo apt-get -qq install emacs24 emacs24-el
-
 script:
 - ./ci-publish.sh
-
 after_success:
 - ./ci-push.sh
