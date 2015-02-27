@@ -1,0 +1,237 @@
+
+* 第一章  我每天用括号当早饭
+** 为什么要学习全是括号的语言
+选择Clojure是因为
+- 专门为多线程并发编程设计
+- 跑在JVM上，使部署变得简单
+- lisp语法太简单了，函数，函数，都是函数
+- 动态类型，更灵活
+- 数据结构都是Immutable，mutable is evil
+- 与Java交互
+- 丰富的第三方库
+
+*** lisp 是好东西
+
+[[./images/lisp_cycles.png]]
+
+上世纪50年代的就有了lisp语言，都不能说它不是一门语言，因为他太多种方言了。虽然一直都不温不火，但是随着系统逻辑和计算越来越复杂，再加上分布式和并行计算。人们突然发现函数式是一个好东西，state is evil。目前比较流行的lisp方言是Clojure，Scheme。
+  
+*** 函数式是好东西
+
+OO并没有想象中的好，带状态和mutable的代码特别难推理，非常难读。需要特别多的上下文才能推理当前属于哪种状态，有哪些行为。如果再加上多线程，那就更难推理代码的行为了。
+
+*** 多态是好东西
+
+OO的多态的概念倒是有趣的好东西。一个函数在不同类型的参数能有不同的行为，使得我们的能够更灵活的建立抽象。
+*** 多线程是好东西如果用的对
+
+- Immutablility 减少了很多多线程带来的问题
+- 加锁只会阻塞并使事情更复杂，Clojure用更妙的方式解决资源共享问题。
+  
+** 搭建环境
+
+首先得有一个管理依赖的玩意，如Ruby的bundler，python的pip，js的npm。clojure用leiningen。
+
+如果你用mac，简单的用brew安装leiningen
+
+#+BEGIN_SRC bash
+  brew install leiningen
+#+END_SRC
+
+clojure的编辑器我推荐使用emacs，如果你觉得emacs学习曲线太陡峭，那么[[http://lighttable.com/][light table]]是个不错的选择。
+
+
+** 来试试不一样的Clojure数据结构
+
+*** Number
+Cojure支持全面的数字类型，甚至包括分数。
+#+BEGIN_SRC clojure :exports both
+1/2
+#+END_SRC
+
+#+RESULTS:
+: => 1/2
+
+*** String
+
+字符串只能用双引号定义哦，字符串的连接不再是加号，而是str
+
+#+BEGIN_SRC clojure :exports both
+(str "What's your name? " "I'm fine! " "thank you! " "and you?")
+#+END_SRC
+
+#+RESULTS:
+: => "What's your name? I'm fine! thank you! and you?"
+
+*** Vector
+
+向量是indexed的集合，用方括号初始化
+#+BEGIN_SRC clojure :exports both
+  [1 2 3 4]
+  (vector 1 2 3 4)
+#+END_SRC
+
+#+RESULTS:
+: => [1 2 3 4]
+
+由于动态类型，还支持向量内的元素可以是任何类型
+#+BEGIN_SRC clojure :exports both
+(get [1 "2" {3 "4"}] 2)
+#+END_SRC
+
+#+RESULTS:
+: => {3 "4"}
+
+*** List
+
+和vector类似，但是却稍微不同
+#+BEGIN_SRC clojure 
+'(1 2 3 4)
+(list 1 2 3 4)
+#+END_SRC
+
+#+RESULTS:
+: => (1 2 3 4)
+
+但是取元素的时候就和vector有所不同了
+#+BEGIN_SRC clojure :exports both
+  (nth '(1 2 3 4) 2)
+#+END_SRC
+
+#+RESULTS:
+: => 3
+
+*** Set
+集合也一样，元素类型可以随意
+#+BEGIN_SRC clojure :exports both
+#{"1" 2 :3}
+(set ["1" 2 :3 :3])
+#+END_SRC
+
+#+RESULTS:
+: => #{2 "1" :3}
+
+*** Keyword
+慢着，刚刚的 =:3= 是个什么玩意
+
+没错，如果你用过ruby，基本上时一个东西,但是可以是任何字母，数字，符号，甚至包括unicode，比如emoji
+
+没有错了，那么我们其实是可以用中文和可爱的emoji编程的，虽然有点杀马特
+#+BEGIN_SRC clojure
+:abc
+:34
+:>_<b
+:你好
+:😱
+#+END_SRC
+
+*** Map
+map 非常简单，就像将键值对写在list里，不过需要用花括号
+
+跟其他语言不一样的是key可以是任何东西，甚至是list都可以作为key
+#+BEGIN_SRC clojure :exports both
+{:smile 😀}
+(get-in {:first-name "NiMa" :last-name "Wang" :属性 {:颜值 0 :吐槽能量 100 }} [:属性 :颜值])
+
+#+END_SRC
+
+#+RESULTS:
+: => 0
+
+=get-in= 通过一个path数组来找到深度的某个值。
+*** lisp专用的 ' 引号
+如果你觉得前面这些其实其他语言都有的话，那么你可能没有注意到在介绍list时有这样一个不起眼的玩意 '。
+
+这是什么啊？具体是什么可能需要专门的篇幅来介绍，但是这里我可以解释它大概是神马。
+
+如果在lisp里面见到单引号，那么你完全可以理解成literally后面那个东西，什么意思呢。
+
+#+BEGIN_SRC clojure
+  (let [男神 '(王尼玛 王大锤 张全蛋) 女神 '(孔连顺)]
+    (first 男神);=> 王尼玛
+    (first 女神);=> 孔连顺
+    (first ['男神 '女神]);=>男神
+    )
+                                          
+#+END_SRC
+可以看到 =男神= =女神= 都是list，但是如果在他们前面加个单引号后，他们就变成了字面的值，他们符号本身，而不会被eval成一个list。
+
+所以由于lisp里面所有的 =()= 括号都是list，但是他们是会被eval的list，他们的会返回eval后的值，但是如果在前面加上单引号，他们返回他们本身，list，不会被eval。
+
+
+** Let
+等等，刚刚那个 =let= 是什么玩意？let关键字非常有意思，在其他语言如js里虽然没有这个关键字，但是功能大致可以翻译成
+#+BEGIN_SRC javascript
+  (function(男神,女神){
+    男神[0]
+    女神[0]
+  }).call(this, ['王尼玛','王大锤','张全蛋'],['孔连顺'])
+#+END_SRC
+但是js里面很少这么干，不是么。我们通常会直接。
+#+BEGIN_SRC javascript
+var 男神=['王尼玛','王大锤','张全蛋'],女神=['孔连顺'];
+男神[0];
+女神[0];
+#+END_SRC
+用 =var= 有什么区别。当然就是scope不一样，前例中函数内部的 =男神= =女神= 两个值的绑定不会受到函数外的影响，同样也不会对外界造成任何影响。
+
+比如
+#+BEGIN_SRC javascript
+  var 男神='葫芦娃';
+    (function(男神,女神){
+      男神[0]; //=> 王尼玛
+    }).call(this, ['王尼玛','王大锤','张全蛋'],['孔连顺'])
+  男神; //=> 葫芦娃
+#+END_SRC
+
+** loop recur
+clojure的数据结构都是immutable的，意味着你（如果不用macro的话）不能像其他语言一样写for循环，也不能想其他语言这样这样的...
+#+BEGIN_SRC javascript
+  var 男神=['王尼玛','王大锤','张全蛋'];
+  男神[0]='葫芦娃';
+  男神 // => ['葫芦娃','王大锤','张全蛋']
+#+END_SRC
+后一种好解决，大不了创建一个新的 =男神= 但是for循环怎么搞？在函数式语言中，循环和遍历都必须要通过递归来实现呢。而在clojure中，写一个递归是如此的简单。
+#+BEGIN_SRC clojure
+
+#+END_SRC
+** 函数!函数!
+每个不带'的list都是函数表达式, 啊哈哈哈, 甚至是加减乘除. 比如 =(+ 1 2)=,  你可能觉得读着别扭. 但是如果
+#+BEGIN_SRC clojure
+(+ 1 2 3 4 5)
+#+END_SRC
+
+是不是瞬间感觉到加号不再是操作符, 而是函数呢. 如果ruby也可以定义函数叫 =+= 的话,那就是
+#+BEGIN_SRC ruby
++ 1, 2, 3, 4, 5
+#+END_SRC
+是不是觉得一点也不怪了.
+
+说到表达式, ruby或者js程序员经常这样干
+#+BEGIN_SRC ruby
+c = a || b
+#+END_SRC
+意思是如果 =a= 不空 =c= 就等于 =a=, 不然就等于 =b=
+
+而在clojure中, 可以用表达式来干更屌的事情
+#+BEGIN_SRC clojure
+(or 1 0) ;=> 1
+((or - +) 1 2 3) ;=> 6
+#+END_SRC
+看着怪怪的,加号怎么跟值一样被表达式返回,而且还在外面的表达式中变成了函数.
+
+如果要用js来实现一遍可能是比较困难的事情.or函数返回一个函数,再把参数apply到这个函数上.
+clojure是怎么做到的呢. 事实上lisp是非常简单的语言.
+它只是把表达式层层展开而已.不单单是参数可以展, 函数为什么也能展出来?
+
+首先不要想象他是一个函数, 比如 =\'(or - +)= 其实是一个list, 当不加点的时候, 相当于
+=(eval '(or - +))= , 这样一来, 既然是list, list里面的每个元素当然都可以也是list, =((or - +) 1 2 3)= 就是一个第一个元素为list的list而已, 当lisp eval
+这个list来取值的时候是从里到外进行eval, 然后把eval出来得到的大list再eval一下, 也就是
+
+#+BEGIN_SRC clojure
+((or - +) 1 2 3) ; (or - +) => +
+(+ 1 2 3)
+6
+#+END_SRC
+
+想想一下更复杂的场景
