@@ -49,7 +49,7 @@
        ("blog-static"
          :base-directory "./org/"
          :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
-         :publishing-directory "public"
+         :publishing-directory "../public"
          :recursive t
          :publishing-function org-publish-attachment
          )
