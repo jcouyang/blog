@@ -14,6 +14,7 @@
 (require 'htmlize)
 (setq blog-path (expand-file-name "org"))
 (setq org-html-validation-link nil)
+(setq org-confirm-babel-evaluate nil)
 (defun set-org-publish-project-alist ()
   "Set publishing projects for Orgweb and Worg."
   (interactive)
