@@ -9,6 +9,7 @@
 (require 'clojure-mode)
 (clojure-font-lock-setup)
 (require 'org)
+(require 'ox-org)
 (require 'htmlize)
 (setq blog-path (expand-file-name "org"))
 (setq org-html-validation-link nil)
