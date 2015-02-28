@@ -1231,7 +1231,9 @@ Returns value on success, else nil."
 
 (defun org-publish-cache-ctime-of-src (file)
   "Get the ctime of FILE as an integer."
-  (md5 file))
+  (md5 (with-temp-buffer
+         (insert-file-contents file)
+         (buffer-string))))
 
 
 (provide 'ox-publish)
