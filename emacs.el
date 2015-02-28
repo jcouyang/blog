@@ -12,6 +12,11 @@
 (require 'org)
 (require 'ox-org)
 (require 'htmlize)
+(custom-set-variables
+  ;; custom publish timestamp to public folder
+  '(org-publish-timestamp-directory
+     (convert-standard-filename "public/.org-timestamps/")))
+
 (setq blog-path (expand-file-name "org"))
 (setq org-html-validation-link nil)
 (setq org-confirm-babel-evaluate nil)
