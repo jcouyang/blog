@@ -70,6 +70,6 @@
          :with-toc nil
          :exclude ".*"
          :include ("index"))
-       ("blog" :components ("blog-notes" "blog-static" "blog-rss"))
-       )))
+       ("blog" :components ("blog-notes" "blog-static"))
+       ))
 (set-org-publish-project-alist)
