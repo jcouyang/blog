@@ -1180,7 +1180,7 @@ the file including them will be republished as well."
       (unless visiting (kill-buffer buf)))
     (if (null pstamp) t
       (let ((ctime (org-publish-cache-ctime-of-src filename)))
-	(not (= pstamp ctime)
+	(not (string= pstamp ctime)
 	    )))))
 
 (defun org-publish-cache-set-file-property
