@@ -16,7 +16,7 @@
   ;; custom publish timestamp to public folder
   '(org-publish-timestamp-directory
      (convert-standard-filename "public/.org-timestamps/")))
-
+(setq debug-on-error t)
 (setq blog-path (expand-file-name "org"))
 (setq org-html-validation-link nil)
 (setq org-confirm-babel-evaluate nil)
