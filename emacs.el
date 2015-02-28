@@ -42,19 +42,18 @@
         :headline-levels 2
         :section-numbers nil
         :with-toc t
+        :with-tags t
+        :with-tasks t
         :html-link-up "/index.html"
         :html-link-home "https://oyanglul.us/~jichao.ouyang.html"
         :auto-preamble t
         :html-postamble-format "%a %d" ;write author and date at end
         :auto-sitemap t
         :sitemap-title "Jichao Ouyang's Blog"
-        :sitemap-filename "index"
-        :auto-index t
-        :index-filename "sitemap.org"
-        :index-title "Jichao Ouyang's Blog"
-        :index-function org-publish-org-index
+        :sitemap-filename "index.org"
+        :sitemap-style list
         :sitemap-sort-files anti-chronologically
-        :sitemap-file-entry-format "%t (%d)" ;write title and date in sitemap
+        :sitemap-file-entry-format "*%t* =%d=" ;write title and date in sitemap
         :html-head-include-default-style nil
         )
 
