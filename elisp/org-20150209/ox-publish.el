@@ -1233,12 +1233,7 @@ Returns value on success, else nil."
 
 (defun org-publish-cache-ctime-of-src (file)
   "Get the ctime of FILE as an integer."
-  (let ((attr (file-attributes
-	       (expand-file-name (or (file-symlink-p file) file)
-				 (file-name-directory file)))))
-    (if (not attr) (error "No such file: \"%s\"" file)
-      (+ (lsh (car (nth 5 attr)) 16)
-	 (cadr (nth 5 attr))))))
+  (md5 file))
 
 
 (provide 'ox-publish)
