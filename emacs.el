@@ -11,7 +11,6 @@
 (clojure-font-lock-setup)
 (require 'org)
 (require 'ox-org)
-(require 'ox-rss)
 (require 'htmlize)
 (setq blog-path (expand-file-name "org"))
 (setq org-html-validation-link nil)
@@ -58,18 +57,6 @@
          :recursive t
          :publishing-function org-publish-attachment
          )
-       ("blog-rss"
-         :base-directory ,blog-path
-         :base-extension "org"
-         :rss-image-url "http://steckerhalter.co.vu/img/steckerhalter.png"
-         :publishing-directory "public"
-         :publishing-function org-rss-publish-to-rss
-         :section-numbers nil
-         :html-link-home "https://blog.oyanglul.us/"
-         :html-link-use-abs-url t
-         :with-toc nil
-         :exclude ".*"
-         :include ("index"))
        ("blog" :components ("blog-notes" "blog-static"))
-       ))
+       )))
 (set-org-publish-project-alist)
