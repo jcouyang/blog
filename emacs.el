@@ -20,6 +20,9 @@
 (setq blog-path (expand-file-name "org"))
 (setq org-html-validation-link nil)
 (setq org-confirm-babel-evaluate nil)
+(setq postamble (with-temp-buffer
+                           (insert-file-contents "html/postamble.html")
+                           (buffer-string)))
 (defun set-org-publish-project-alist ()
   "Set publishing projects for Orgweb and Worg."
   (interactive)
@@ -31,6 +34,7 @@
         :html-doctype "html5"
         :html-head "<link rel=\"stylesheet\" href=\"/style/worg.css\" />"
         :html-html5-fancy t
+        :html-postamble ,postamble
         ;; HTML directory
         :publishing-directory "public"
         :publishing-function org-html-publish-to-html
