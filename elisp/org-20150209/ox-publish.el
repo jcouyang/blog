@@ -1180,10 +1180,8 @@ the file including them will be republished as well."
       (unless visiting (kill-buffer buf)))
     (if (null pstamp) t
       (let ((ctime (org-publish-cache-ctime-of-src filename)))
-	(or (< pstamp ctime)
-	    (when included-files-ctime
-	      (not (null (delq nil (mapcar (lambda(ct) (< ctime ct))
-					   included-files-ctime))))))))))
+	(not (= pstamp ctime)
+	    )))))
 
 (defun org-publish-cache-set-file-property
   (filename property value &optional project-name)
