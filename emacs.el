@@ -21,8 +21,8 @@
 (setq org-html-validation-link nil)
 (setq org-confirm-babel-evaluate nil)
 (setq postamble (with-temp-buffer
-                           (insert-file-contents "html/postamble.html")
-                           (buffer-string)))
+                  (insert-file-contents "html/postamble.html")
+                  (buffer-string)))
 (defun set-org-publish-project-alist ()
   "Set publishing projects for Orgweb and Worg."
   (interactive)
@@ -44,6 +44,7 @@
         :with-toc t
         :with-tags t
         :with-tasks t
+        :with-sub-superscript t
         :html-link-up "/index.html"
         :html-link-home "https://oyanglul.us/~jichao.ouyang.html"
         :auto-preamble t
@@ -52,16 +53,19 @@
         :sitemap-title "Jichao Ouyang's Blog"
         :sitemap-filename "index.org"
         :sitemap-style list
-        :sitemap-sort-files anti-chronologically
+        :sitemap-sort-files chronologically
+        :sitemap-sort-folders "mix"
         :sitemap-file-entry-format "*%t* =%d=" ;write title and date in sitemap
+        :sitemap-ignore-case t
+        :makeindex t
         :html-head-include-default-style nil
         )
 
        ;; where static files (images, pdfs) are stored
        ("blog-static"
-         :base-directory "./org/"
-         :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
-         :publishing-directory "../public"
+         :base-directory ,blog-path
+         :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|woff2\\|woff"
+         :publishing-directory "public"
          :recursive t
          :publishing-function org-publish-attachment
          )
