@@ -1,5 +1,4 @@
 (add-to-list 'load-path "./elisp/org-20150209/")
-(add-to-list 'load-path "./elisp/org-plus-contrib-20150209/")
 (add-to-list 'load-path "./elisp/htmlize-20130208.402/")
 (add-to-list 'load-path "./elisp/color-theme-20080305.34/")
 (add-to-list 'load-path "./elisp/clojure-mode-20150114.248/")
