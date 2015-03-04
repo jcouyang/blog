@@ -1,3 +1,6 @@
+ #+DESCRIPTION: some tips and tricks when I using React
+ #+KEYS: react,react.js,tips,facebook
+ #+DATE: 2015-03-06
 ## React Tips
 ### [Prop Validation](http://facebook.github.io/react/docs/reusable-components.html#prop-validation)
 如果把每个Component想象成一个函数，那么props就是这个函数的参数。在有类型检查的语言中，很容易在编译期间就可以对参数类型检
@@ -6,20 +9,24 @@
 javascript没有类型检查，但是我们仍然能筒高React的Prop Validation在运行期间检查props的类型。
 
 只需要在Component声明里加上
+
 ```javascript
 propTypes: {
   aProperty: React.PropTypes.any.isRequired
   ...
 }
 ```
+
 ###Prop shortcut
 一个嵌套多层的Component可能会有非常多的参数要通过props往下传，那么我们可以简单的这样
+
 ```
 <a {...this.props}>
 ```
 就可以吧所有的props传给子元素
 
 但是如果某个中间Component消费了一些props, 那么我们完全可以只把剩下的props继续传下去。
+
 ```js
 var { checked, ...other } = this.props;
 var fancyClass = checked ? 'FancyChecked' : 'FancyUnchecked';
@@ -28,9 +35,11 @@ return (
   <div {...other} className={fancyClass} />
 );
 ```
+
 ###mixin
 可以mixin一些功能点
-```javascript  
+
+```javascript
 var SetIntervalMixin = {
   ...
 };
@@ -39,9 +48,11 @@ var TickTock = React.createClass({
   mixins: [SetIntervalMixin], // Use the mixin
 })
 ```
+
 ###className
 样式class在React中叫做className，同样他是一个字符串，但是React
 提供了方便的classset工具，让我们而已这样
+
 ```javascript
 var cx = React.addons.classSet;
 var classes = cx({
@@ -49,10 +60,13 @@ var classes = cx({
   'message-important': this.props.isImportant,
   'message-read': this.props.isRead
 });
-  ```
+```
+
 从此就不用麻烦的拼接字符串了。
+
 ###Inline style
 这么多年来我们一直被教育说不要用 `inline style`，但是React貌似非常支持这种写法
+
 ```javascript
 var divStyle = {
   color: 'white',
@@ -63,6 +77,7 @@ var divStyle = {
 
 React.render(<div style={divStyle}>Hello World!</div>, mountNode);
 ```
+
 开始不理解为什么要吧style从字符串改成一个map，但是看到最近React Native的session顿时开朗了。
 React Native把android和ios的Native ui都封装成了Component，但是native的ui并不会使用css来控制样式。
 那么facebook想出来的颠覆性的想法就是把样式写成inline的，然后native component去实现这些inline css样式
