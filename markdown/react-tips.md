@@ -1,6 +1,8 @@
+ #+TITLE: Some React Tips
  #+DESCRIPTION: some tips and tricks when I using React
  #+KEYS: react,react.js,tips,facebook
  #+DATE: <2015-03-06 Fri>
+
 ## React Tips
 ### [Prop Validation](http://facebook.github.io/react/docs/reusable-components.html#prop-validation)
 如果把每个Component想象成一个函数，那么props就是这个函数的参数。在有类型检查的语言中，很容易在编译期间就可以对参数类型检
