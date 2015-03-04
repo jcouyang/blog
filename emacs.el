@@ -52,7 +52,7 @@
         :sitemap-title "Jichao Ouyang's Blog"
         :sitemap-filename "index.org"
         :sitemap-style list
-        :sitemap-sort-files chronologically
+        :sitemap-sort-files anti-chronologically
         :sitemap-sort-folders "mix"
         :sitemap-file-entry-format "*%t* =%d=" ;write title and date in sitemap
         :sitemap-ignore-case t
