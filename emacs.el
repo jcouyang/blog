@@ -38,7 +38,7 @@
         :publishing-directory "public"
         :publishing-function org-html-publish-to-html
         :recursive t
-        :headline-levels 2
+        :headline-levels 3
         :section-numbers nil
         :with-toc t
         :with-tags t
@@ -52,7 +52,7 @@
         :sitemap-title "Jichao Ouyang's Blog"
         :sitemap-filename "index.org"
         :sitemap-style list
-        :sitemap-sort-files anti-chronologically
+        :sitemap-sort-files "anti-chronologically"
         :sitemap-sort-folders "mix"
         :sitemap-file-entry-format "*%t* =%d=" ;write title and date in sitemap
         :sitemap-ignore-case t
