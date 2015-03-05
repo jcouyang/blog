@@ -1,5 +1,7 @@
  #+TITLE: 3 Reason to move from jasmine to jest
+ 
  #+KEYS: jasmine,jest,facebook,javascript,test
+ 
  #+DATE: 2014-10-28
 
 - [slides](https://rawgit.com/jcouyang/cc0e65e36af9c7c001e2/raw/b100f45ebfe7c196043cb10f967123f9ebde7ffc/1-painless-javascript-testing.html#/28)
