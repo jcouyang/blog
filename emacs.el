@@ -44,6 +44,9 @@
         :with-tags t
         :with-tasks t
         :with-sub-superscript t
+        :with-timestamps t
+        :with-author t
+        :with-date t
         :html-link-up "/index.html"
         :html-link-home "https://oyanglul.us/~jichao.ouyang.html"
         :auto-preamble t
