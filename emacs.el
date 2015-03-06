@@ -1,10 +1,3 @@
-(require 'package)
-(package-initialize)
-(package-install 'org)
-(package-install 'htmlize)
-(package-install 'color-theme)
-(package-install 'clojure-mode)
-
 (require 'color-theme)
 (color-theme-initialize)
 (color-theme-standard)
@@ -13,10 +6,6 @@
 (require 'org)
 (require 'ox-org)
 (require 'htmlize)
-(custom-set-variables
-  ;; custom publish timestamp to public folder
-  '(org-publish-timestamp-directory
-     (convert-standard-filename "public/.org-timestamps/")))
 (setq debug-on-error t)
 (setq blog-path (expand-file-name "org"))
 (setq org-html-validation-link nil)
