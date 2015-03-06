@@ -1,5 +1,6 @@
 (source gnu)
 (source melpa)
+(source org)
 
 (depends-on "bind-key")
 (depends-on "cask")
@@ -26,6 +27,7 @@
 (depends-on "web-mode")
 (depends-on "yasnippet")
 (depends-on "org")
+(depends-on "org-plus-contrib")
 (depends-on "htmlize")
 (depends-on "color-theme")
 (depends-on "clojure-mode")
