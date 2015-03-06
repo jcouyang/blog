@@ -4,7 +4,6 @@
 (require 'clojure-mode)
 (clojure-font-lock-setup)
 (require 'org)
-(require 'ox-org)
 (require 'htmlize)
 (setq debug-on-error t)
 (setq blog-path (expand-file-name "org"))
