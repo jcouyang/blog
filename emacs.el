@@ -1,8 +1,3 @@
-(add-to-list 'load-path "./elisp/org-20150209/")
-(add-to-list 'load-path "./elisp/htmlize-20130208.402/")
-(add-to-list 'load-path "./elisp/color-theme-20080305.34/")
-(add-to-list 'load-path "./elisp/clojure-mode-20150114.248/")
-
 (require 'color-theme)
 (color-theme-initialize)
 (color-theme-standard)
@@ -11,10 +6,6 @@
 (require 'org)
 (require 'ox-org)
 (require 'htmlize)
-(custom-set-variables
-  ;; custom publish timestamp to public folder
-  '(org-publish-timestamp-directory
-     (convert-standard-filename "public/.org-timestamps/")))
 (setq debug-on-error t)
 (setq blog-path (expand-file-name "org"))
 (setq org-html-validation-link nil)
