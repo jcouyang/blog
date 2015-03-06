@@ -4,3 +4,5 @@ for file in $(find blog-master -iname "*.md")
   	pandoc $file -f markdown -t org -o ${file}.org
     cp ${file}.org org/
 done
+
+cp -r blog-master/org/* org/
