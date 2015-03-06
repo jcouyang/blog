@@ -1,7 +1,10 @@
-| #+TITLE: Some React Tips
-| #+DESCRIPTION: some tips and tricks when I using React
-| #+KEYS: react,react.js,tips,facebook
-| #+DATE: <2015-02-15>
+ #+TITLE: Some React Tips
+
+ #+DESCRIPTION: some tips and tricks when I using React
+
+ #+KEYS: react,react.js,tips,facebook
+ 
+ #+DATE: <2015-02-15>
  
 ### Prop Validation
 
