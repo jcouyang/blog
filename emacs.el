@@ -20,7 +20,7 @@
   (interactive)
   (setq org-publish-project-alist
     `(("blog-notes"
-        ;; Directory for source files in org format
+       ;; Directory for source files in org format
         :base-directory ,blog-path
         :base-extension "org"
         :html-doctype "html5"
@@ -41,7 +41,7 @@
         :with-author t
         :with-date t
         :html-link-up "/index.html"
-        :html-link-home "https://oyanglul.us/~jichao.ouyang.html"
+        :html-link-home "/jichao.ouyang.html"
         :auto-preamble t
         :html-postamble-format "%a %d" ;write author and date at end
         :auto-sitemap t
