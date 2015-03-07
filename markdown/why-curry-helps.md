@@ -1,5 +1,6 @@
-# 柯里化 currying
-## 为什么要柯里化
+ #+TITLE: 为什么要柯里化
+
+ #+DESCRIPTION: 柯里化是函数式的一个基本概念，但是平常见到的使用频率并不见得高，js流行的自称函数式库的Underscore都没有鼓励（至少从设计上）使用柯里化，但是实际上确实非常有用的一项函数式编程技术。
 
 还记得 Haskell Curry吗![](http://s3.amazonaws.com/lyah/curry.png)
 
