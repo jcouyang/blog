@@ -7,4 +7,7 @@ for file in $(find org -iname "*.md")
       touch -r $file ${file}.org
 done
 
+ls -al org/
+ls -al org/markdown/
+
 
