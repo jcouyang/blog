@@ -1,9 +1,10 @@
 #!/bin/bash
-wget https://github.com/jcouyang/blog/archive/master.zip
-unzip master.zip
-rm -rf org
-ls -al blog-master
-mv blog-master/org org
+for FILE in $(git ls-files)
+do
+    TIME=$(git log --pretty=format:%cd -n 1 --date=iso $FILE)
+    TIME=$(date -j -f '%Y-%m-%d %H:%M:%S %z' "$TIME" +%Y%m%d%H%M.%S)
+    touch -m -t $TIME $FILE
+done
 
 for file in $(find org -iname "*.md")
   do
