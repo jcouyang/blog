@@ -1,7 +1,9 @@
 #!/bin/bash
+wget https://github.com/jcouyang/blog/archive/master.zip
+unzip master.zip
 rm -rf org
+ls -al blog-master
 mv blog-master/org org
-ls -al org
 
 for file in $(find org -iname "*.md")
   do
