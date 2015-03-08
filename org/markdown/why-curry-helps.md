@@ -86,7 +86,7 @@ console.log(concatArray(['1','2','3'], plus(2)))
 1. 处理数组中字符的函数被提取出来, 作为参数传入
 2. 提取成柯里化的函数, 部分配置好后传入, 好处显而易见, 这下接口非常通畅
 无论是外层调用
-```
+```javascript
 concatArray(['1','2','3'], multiple(2))
 ```
 还是内部的 map 函数
@@ -121,7 +121,7 @@ ghci> :t max 3
 现在是不是清晰了, 在 Haskell 中每给定一个参数, 函数如果是多参数的, 该函数还会返回一个处理余下参数的函数. 这就是自动柯里化.
 
 而在 Javascript(以及大多数语言) 中不是的, 如果给定多参函数的部分参数, 函数会默认其他参数是` undefined`, 而不会返回处理剩余参数的函数.
-```js
+```javascript
 function willNotCurry(a, b, c) {
     console.log(a, b, c)
     return a*b-c;
@@ -132,7 +132,7 @@ willNotCurry(1)
 ```
 
 如果使用自动柯里化的库 [eweda](https://github.com/CrossEye/eweda), 前面的例子简直就完美了
-```
+```javascript
 var multiple = curry(function(a, b){
   return +b*a + ''
 })
