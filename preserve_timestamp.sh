@@ -72,7 +72,7 @@ IFS_BAK=$IFS
 IFS="
 "
 # Loop through and fix timestamps on all files in our checked-out repository
-for file in $(find org -type file)
+for file in $(find org -type f)
 do
 	updateFileTimeStamp "${file}" "${file}"
 done
