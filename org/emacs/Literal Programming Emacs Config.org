@@ -8,7 +8,7 @@ https://github.com/purcell/color-theme-sanityinc-tomorrow
   (load-theme 'sanityinc-tomorrow-eighties)
 #+END_SRC
 
-also, there're plainty of popular theme of your choice
+also, there're several of popular themes of your choice
 
 http://emacsthemes.caisah.info/installed-emacs-themes/
 
@@ -25,6 +25,7 @@ http://emacsthemes.caisah.info/installed-emacs-themes/
     (setq mac-command-modifier 'meta)) (ref:meta-key)
   (tool-bar-mode -1)
   (scroll-bar-mode -1)
+  (inhibit-startup-message t)
   (delete-selection-mode 1) ; delete selection when paste
   (keyboard-translate ?\C-h ?\C-?) (ref:delete-key)
   (global-auto-revert-mode 1)  ;auto revert buffers when changed on dis
@@ -34,8 +35,6 @@ http://emacsthemes.caisah.info/installed-emacs-themes/
   (setq exec-path (append exec-path '("/usr/local/bin")))
 
 #+END_SRC
-
-#+RESULTS:
 
 * Key Bindings
 
@@ -50,8 +49,8 @@ emacs 最大亮点之一就是其快捷键众多, 当然用户都喜欢根据自
                             (format "key-chord-define-global \"%s\"" key)
                           (format "global-set-key (kbd \"%s\")" key)))
                    (command (car (last l))))
-                   (princ (format "(%s %s)\n" def command))))
-            keys)
+              (princ (format "(%s %s)\n" def command))))
+          keys)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :noweb yes :results silent
@@ -80,22 +79,36 @@ emacs 最大亮点之一就是其快捷键众多, 当然用户都喜欢根据自
 * Modes
 
 ** cider
+
+Cider 是 clojure 的repl插件
+
+看参照https://github.com/clojure-emacs/cider#keyboard-shortcuts 默认的一些快捷键
+
 #+BEGIN_SRC emacs-lisp
 (setq org-babel-clojure-backend 'cider)
 #+END_SRC
 
 ** company
+
+company 是用来取代 autocomplete-mode的自动补全的插件，不要以为是单词 /company/ 的意思，其实是 /comp +lete+ any/。选择company是因为速度要快一些。根据他的比较可以看看 [[https://github.com/company-mode/company-mode/issues/68][这里]]。
+
+company自带了一系列的 backend 你可以像 [[(backends)][这样]] enable。
 Completion will start automatically after you type a few letters. Use M-n and M-p to select, <return> to complete or <tab> to complete the common part. Search through the completions with C-s, C-r and C-o. Press M-(digit) to quickly complete with one of the first 10 candidates.
 
 When the completion candidates are shown, press <f1> to display the documentation for the selected candidate, or C-w to see its source. Not all back-ends support this.
 
 document
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp -n -r
   (require 'company)
-  (add-to-list 'company-backends 'company-dabbrev t)
+  (add-to-list 'company-backends 'company-dabbrev t) 
   (add-to-list 'company-backends 'company-ispell t)
   (add-to-list 'company-backends 'company-files t)
+  (add-to-list 'company-backends 'company-css t) (ref:backends)
+  (add-to-list 'company-backends 'company-nxml t)
+  (add-to-list 'company-backends 'company-ropemacs t)
+  (add-to-list 'company-backends 'company-yasnippet t)
+  (add-to-list 'company-backends 'company-tern t)
   ;; not always down case
   (setq company-dabbrev-downcase nil)
   (add-hook 'after-init-hook 'global-company-mode)
@@ -146,10 +159,68 @@ helm 可以让你很方便的在项目里快速浏览文件
 
 其中第[[(caching)]]和[[(indexing)]]两行能加速projectile index一个大的repo时的速度。
 
+** iedit
+#+BEGIN_SRC emacs-lisp
+  (require 'iedit)
+  (setq iedit-unmatched-lines-invisible-default t)
+#+END_SRC
+** js2-mode
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
+  (setq js2-basic-offset 2)
+  (setq js2-allow-rhino-new-expr-initializer nil)
+  (setq js2-enter-indents-newline nil)
+  (setq js2-global-externs '("module" "require" "buster" "sinon" "assert" "refute" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__dirname" "console" "JSON"))
+  (setq js2-idle-timer-delay 0.1)
+  (setq js2-indent-on-enter-key nil)
+  (setq js2-mirror-mode nil)
+  (setq js2-strict-inconsistent-return-warning nil)
+  (setq js2-auto-indent-p t)
+  (setq js2-include-rhino-externs nil)
+  (setq js2-include-gears-externs nil)
+  (setq js2-concat-multiline-strings 'eol)
+  (setq js2-rebind-eol-bol-keys nil)
+  (setq js2-mode-show-parse-errors t)
+  (setq js2-mode-show-strict-warnings t)
+  (add-hook 'js2-mode-hook (lambda () (flycheck-mode 1)))
+  (add-hook 'js2-mode-hook 'ac-js2-mode)
+  (add-hook 'js2-mode-hook 
+            (lambda () 
+              (push '("function" . ?ƒ) prettify-symbols-alist)))
+  
+#+END_SRC
+
+Got most of that from [[https://github.com/magnars/.emacs.d/blob/master/setup-js2-mode.el][Magnars' .emacs.d]].
+
+** json-mode
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.json\\'" . json-mode))
+
+
+  (add-hook 'json-mode-hook
+            (lambda ()
+              (setq js-indent-level 2)))
+#+END_SRC
+
+#+RESULTS:
+
+=json-mode= adds a bit better syntax highlighting for =.json= files.
+
+
 ** Nyancati
 #+BEGIN_SRC emacs-lisp
 (nyan-mode t)
 #+END_SRC
+
+** on-screen
+翻页的事后加一条小黑线，不然找不到翻哪了
+#+BEGIN_SRC emacs-lisp
+  (on-screen-global-mode 1)
+  (setq on-screen-highlight-method 'narrow-line)
+#+END_SRC
+
 
 ** org
 #+BEGIN_SRC emacs-lisp
@@ -258,13 +329,10 @@ helm 可以让你很方便的在项目里快速浏览文件
   
 #+END_SRC
   
-  #+RESULTS:
-  | emacs          | :base-directory | ~/steckemacs                                        | :base-extension | org  | :publishing-directory | ~/Dropbox/octopress/source/emacs/               | :sub-superscript      |                                                 | :recursive | t | :publishing-function | org-html-publish-to-html       | :headline-levels |  4 | :html-extension | markdown | :body-only | t |
-  | clojure-static | :base-directory | ~/Documents/Books/clojure-by-example/manuscript_org | :base-extension | png\ | jpg\                  | jpeg                                            | :publishing-directory | ~/Documents/Books/clojure-by-example/manuscript | :recursive | t | :publishing-function | org-publish-attachment         |                  |    |                 |          |            |   |
-  | clojure-md     | :base-directory | ~/Documents/Books/clojure-by-example/manuscript_org | :base-extension | org  | :publishing-directory | ~/Documents/Books/clojure-by-example/manuscript | :sub-superscript      |                                                 | :recursive | t | :publishing-function | org-leanpub-publish-to-leanpub | :html-extension  | md | :body-only      | t        |            |   |
-  | clojure-book   | :components     | (clojure-md clojure-static)                         |                 |      |                       |                                                 |                       |                                                 |            |   |                      |                                |                  |    |                 |          |            |   |
   
 ** pallet
+
+pallet 可以让你在emacs里安装和卸载的插件同步到 =Cask= file
 #+BEGIN_SRC emacs-lisp
 (require 'pallet)
 (pallet-mode t)
@@ -285,37 +353,171 @@ helm 可以让你很方便的在项目里快速浏览文件
 (define-key company-active-map [tab] 'seq-company-tab)
 #+END_SRC
 
-#+RESULTS:
-: seq-company-tab
 
 ** smartparens
 #+BEGIN_SRC emacs-lisp
 (require 'smartparens-config)
 (smartparens-global-mode t)
-;; highlights matching pairs
+
 (show-smartparens-global-mode t)
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;; keybinding management
+
+(define-key sp-keymap (kbd "C-M-f") 'sp-forward-sexp)
+(define-key sp-keymap (kbd "C-M-b") 'sp-backward-sexp)
+
+(define-key sp-keymap (kbd "C-M-d") 'sp-down-sexp)
+(define-key sp-keymap (kbd "C-M-a") 'sp-backward-down-sexp)
+(define-key sp-keymap (kbd "C-S-a") 'sp-beginning-of-sexp)
+(define-key sp-keymap (kbd "C-S-d") 'sp-end-of-sexp)
+
+(define-key sp-keymap (kbd "C-M-e") 'sp-up-sexp)
+(define-key emacs-lisp-mode-map (kbd ")") 'sp-up-sexp)
+(define-key sp-keymap (kbd "C-M-u") 'sp-backward-up-sexp)
+(define-key sp-keymap (kbd "C-M-t") 'sp-transpose-sexp)
+
+(define-key sp-keymap (kbd "C-M-n") 'sp-next-sexp)
+(define-key sp-keymap (kbd "C-M-p") 'sp-previous-sexp)
+
+(define-key sp-keymap (kbd "C-M-k") 'sp-kill-sexp)
+(define-key sp-keymap (kbd "C-M-w") 'sp-copy-sexp)
+
+(define-key sp-keymap (kbd "M-<delete>") 'sp-unwrap-sexp)
+;(define-key sp-keymap (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)
+
+(define-key sp-keymap (kbd "C-<right>") 'sp-forward-slurp-sexp)
+(define-key sp-keymap (kbd "C-<left>") 'sp-forward-barf-sexp)
+(define-key sp-keymap (kbd "C-M-<left>") 'sp-backward-slurp-sexp)
+(define-key sp-keymap (kbd "C-M-<right>") 'sp-backward-barf-sexp)
+
+(define-key sp-keymap (kbd "M-D") 'sp-splice-sexp)
+(define-key sp-keymap (kbd "C-M-<delete>") 'sp-splice-sexp-killing-forward)
+(define-key sp-keymap (kbd "C-M-<backspace>") 'sp-splice-sexp-killing-backward)
+(define-key sp-keymap (kbd "C-S-<backspace>") 'sp-splice-sexp-killing-around)
+
+(define-key sp-keymap (kbd "C-]") 'sp-select-next-thing-exchange)
+(define-key sp-keymap (kbd "C-<left_bracket>") 'sp-select-previous-thing)
+(define-key sp-keymap (kbd "C-M-]") 'sp-select-next-thing)
+
+(define-key sp-keymap (kbd "M-F") 'sp-forward-symbol)
+(define-key sp-keymap (kbd "M-B") 'sp-backward-symbol)
+
+(define-key sp-keymap (kbd "H-t") 'sp-prefix-tag-object)
+(define-key sp-keymap (kbd "H-p") 'sp-prefix-pair-object)
+(define-key sp-keymap (kbd "H-s c") 'sp-convolute-sexp)
+(define-key sp-keymap (kbd "H-s a") 'sp-absorb-sexp)
+(define-key sp-keymap (kbd "H-s e") 'sp-emit-sexp)
+(define-key sp-keymap (kbd "H-s p") 'sp-add-to-previous-sexp)
+(define-key sp-keymap (kbd "H-s n") 'sp-add-to-next-sexp)
+(define-key sp-keymap (kbd "H-s j") 'sp-join-sexp)
+(define-key sp-keymap (kbd "H-s s") 'sp-split-sexp)
+
+;;;;;;;;;;;;;;;;;;
+;; pair management
+
+(sp-local-pair 'minibuffer-inactive-mode "'" nil :actions nil)
+
+;;; markdown-mode
+(sp-with-modes '(markdown-mode gfm-mode rst-mode)
+  (sp-local-pair "*" "*" :bind "C-*")
+  (sp-local-tag "2" "**" "**")
+  (sp-local-tag "s" "```scheme" "```")
+  (sp-local-tag "<"  "<_>" "</_>" :transform 'sp-match-sgml-tags))
+
+;;; tex-mode latex-mode
+(sp-with-modes '(tex-mode plain-tex-mode latex-mode)
+  (sp-local-tag "i" "\"<" "\">"))
+
+;;; html-mode
+(sp-with-modes '(html-mode sgml-mode)
+  (sp-local-pair "<" ">"))
+
+;;; lisp modes
+(sp-with-modes sp--lisp-modes
+  (sp-local-pair "(" nil :bind "C-("))
 
 #+END_SRC
 
 #+RESULTS:
-: t
+| sgml-mode                | (:open < :close > :actions (wrap insert autoskip navigate) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add)) |                                                                                                                                                                                                                                                                                                                                      |                                                                                                                                                                                                                                                                                                                                      |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| html-mode                | (:open < :close > :actions (wrap insert autoskip navigate) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add)) |                                                                                                                                                                                                                                                                                                                                      |                                                                                                                                                                                                                                                                                                                                      |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| rst-mode                 | (:open * :close * :actions (wrap insert autoskip navigate) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add)) |                                                                                                                                                                                                                                                                                                                                      |                                                                                                                                                                                                                                                                                                                                      |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| gfm-mode                 | (:open * :close * :actions (wrap insert autoskip navigate) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add)) |                                                                                                                                                                                                                                                                                                                                      |                                                                                                                                                                                                                                                                                                                                      |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| markdown-mode            | (:open * :close * :actions (wrap insert autoskip navigate) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add)) |                                                                                                                                                                                                                                                                                                                                      |                                                                                                                                                                                                                                                                                                                                      |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| minibuffer-inactive-mode | (:open ' :actions nil :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                      |                                                                                                                                                                                                                                                                                                                                      |                                                                                                                                                                                                                                                                                                                                      |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| common-lisp-mode         | (:open ( :actions (:add) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                   | (:open ` :close ' :skip-match #[(ms mb me) \301\232\203 \302\303\304\305#\206 \306 ?\207\306 ?\207 [ms ' sp-lisp-invalid-hyperlink-p ` navigate _ sp-point-in-string-or-comment] 4] :actions (:add) :when (sp-in-string-p sp-in-comment-p) :unless (sp-lisp-invalid-hyperlink-p) :pre-handlers (:add) :post-handlers (:add)) | (:open ' :actions nil :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                                                                                                                                                                                                                        |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| clojure-mode             | (:open ( :actions (:add) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                   | (:open ` :close ' :skip-match #[(ms mb me) \301\232\203 \302\303\304\305#\206 \306 ?\207\306 ?\207 [ms ' sp-lisp-invalid-hyperlink-p ` navigate _ sp-point-in-string-or-comment] 4] :actions (:add) :when (sp-in-string-p sp-in-comment-p) :unless (sp-lisp-invalid-hyperlink-p) :pre-handlers (:add) :post-handlers (:add)) | (:open ' :actions nil :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                                                                                                                                                                                                                        |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| cider-repl-mode          | (:open ( :actions (:add) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                   | (:open ` :close ' :skip-match #[(ms mb me) \301\232\203 \302\303\304\305#\206 \306 ?\207\306 ?\207 [ms ' sp-lisp-invalid-hyperlink-p ` navigate _ sp-point-in-string-or-comment] 4] :actions (:add) :when (sp-in-string-p sp-in-comment-p) :unless (sp-lisp-invalid-hyperlink-p) :pre-handlers (:add) :post-handlers (:add)) | (:open ' :actions nil :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                                                                                                                                                                                                                        |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| monroe-mode              | (:open ( :actions (:add) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                   | (:open ` :close ' :skip-match #[(ms mb me) \301\232\203 \302\303\304\305#\206 \306 ?\207\306 ?\207 [ms ' sp-lisp-invalid-hyperlink-p ` navigate _ sp-point-in-string-or-comment] 4] :actions (:add) :when (sp-in-string-p sp-in-comment-p) :unless (sp-lisp-invalid-hyperlink-p) :pre-handlers (:add) :post-handlers (:add)) | (:open ' :actions nil :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                                                                                                                                                                                                                        |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| slime-repl-mode          | (:open ( :actions (:add) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                   | (:open ` :close ' :skip-match #[(ms mb me) \301\232\203 \302\303\304\305#\206 \306 ?\207\306 ?\207 [ms ' sp-lisp-invalid-hyperlink-p ` navigate _ sp-point-in-string-or-comment] 4] :actions (:add) :when (sp-in-string-p sp-in-comment-p) :unless (sp-lisp-invalid-hyperlink-p) :pre-handlers (:add) :post-handlers (:add)) | (:open ' :actions nil :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                                                                                                                                                                                                                        |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| eshell-mode              | (:open ( :actions (:add) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                   | (:open ` :close ' :skip-match #[(ms mb me) \301\232\203 \302\303\304\305#\206 \306 ?\207\306 ?\207 [ms ' sp-lisp-invalid-hyperlink-p ` navigate _ sp-point-in-string-or-comment] 4] :actions (:add) :when (sp-in-string-p sp-in-comment-p) :unless (sp-lisp-invalid-hyperlink-p) :pre-handlers (:add) :post-handlers (:add)) | (:open ' :actions nil :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                                                                                                                                                                                                                        |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| lisp-mode                | (:open ( :actions (:add) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                   | (:open ` :close ' :skip-match #[(ms mb me) \301\232\203 \302\303\304\305#\206 \306 ?\207\306 ?\207 [ms ' sp-lisp-invalid-hyperlink-p ` navigate _ sp-point-in-string-or-comment] 4] :actions (:add) :when (sp-in-string-p sp-in-comment-p) :unless (sp-lisp-invalid-hyperlink-p) :pre-handlers (:add) :post-handlers (:add)) | (:open ' :actions nil :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                                                                                                                                                                                                                        |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| geiser-repl-mode         | (:open ( :actions (:add) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                   | (:open ` :close ' :skip-match #[(ms mb me) \301\232\203 \302\303\304\305#\206 \306 ?\207\306 ?\207 [ms ' sp-lisp-invalid-hyperlink-p ` navigate _ sp-point-in-string-or-comment] 4] :actions (:add) :when (sp-in-string-p sp-in-comment-p) :unless (sp-lisp-invalid-hyperlink-p) :pre-handlers (:add) :post-handlers (:add)) | (:open ' :actions nil :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                                                                                                                                                                                                                        |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| inferior-scheme-mode     | (:open ( :actions (:add) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                   | (:open ` :close ' :skip-match #[(ms mb me) \301\232\203 \302\303\304\305#\206 \306 ?\207\306 ?\207 [ms ' sp-lisp-invalid-hyperlink-p ` navigate _ sp-point-in-string-or-comment] 4] :actions (:add) :when (sp-in-string-p sp-in-comment-p) :unless (sp-lisp-invalid-hyperlink-p) :pre-handlers (:add) :post-handlers (:add)) | (:open ' :actions nil :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                                                                                                                                                                                                                        |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| scheme-interaction-mode  | (:open ( :actions (:add) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                   | (:open ` :close ' :skip-match #[(ms mb me) \301\232\203 \302\303\304\305#\206 \306 ?\207\306 ?\207 [ms ' sp-lisp-invalid-hyperlink-p ` navigate _ sp-point-in-string-or-comment] 4] :actions (:add) :when (sp-in-string-p sp-in-comment-p) :unless (sp-lisp-invalid-hyperlink-p) :pre-handlers (:add) :post-handlers (:add)) | (:open ' :actions nil :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                                                                                                                                                                                                                        |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| scheme-mode              | (:open ( :actions (:add) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                   | (:open ` :close ' :skip-match #[(ms mb me) \301\232\203 \302\303\304\305#\206 \306 ?\207\306 ?\207 [ms ' sp-lisp-invalid-hyperlink-p ` navigate _ sp-point-in-string-or-comment] 4] :actions (:add) :when (sp-in-string-p sp-in-comment-p) :unless (sp-lisp-invalid-hyperlink-p) :pre-handlers (:add) :post-handlers (:add)) | (:open ' :actions nil :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                                                                                                                                                                                                                        |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| lisp-interaction-mode    | (:open ( :actions (:add) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                   | (:open ` :close ' :skip-match #[(ms mb me) \301\232\203 \302\303\304\305#\206 \306 ?\207\306 ?\207 [ms ' sp-lisp-invalid-hyperlink-p ` navigate _ sp-point-in-string-or-comment] 4] :actions (:add) :when (sp-in-string-p sp-in-comment-p) :unless (sp-lisp-invalid-hyperlink-p) :pre-handlers (:add) :post-handlers (:add)) | (:open ' :actions nil :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                                                                                                                                                                                                                        |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| inf-clojure-mode         | (:open ( :actions (:add) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                   | (:open ` :close ' :skip-match #[(ms mb me) \301\232\203 \302\303\304\305#\206 \306 ?\207\306 ?\207 [ms ' sp-lisp-invalid-hyperlink-p ` navigate _ sp-point-in-string-or-comment] 4] :actions (:add) :when (sp-in-string-p sp-in-comment-p) :unless (sp-lisp-invalid-hyperlink-p) :pre-handlers (:add) :post-handlers (:add)) | (:open ' :actions nil :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                                                                                                                                                                                                                        |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| inferior-lisp-mode       | (:open ( :actions (:add) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                   | (:open ` :close ' :skip-match #[(ms mb me) \301\232\203 \302\303\304\305#\206 \306 ?\207\306 ?\207 [ms ' sp-lisp-invalid-hyperlink-p ` navigate _ sp-point-in-string-or-comment] 4] :actions (:add) :when (sp-in-string-p sp-in-comment-p) :unless (sp-lisp-invalid-hyperlink-p) :pre-handlers (:add) :post-handlers (:add)) | (:open ' :actions nil :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                                                                                                                                                                                                                        |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| inferior-emacs-lisp-mode | (:open ( :actions (:add) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                   | (:open ` :close ' :skip-match #[(ms mb me) \301\232\203 \302\303\304\305#\206 \306 ?\207\306 ?\207 [ms ' sp-lisp-invalid-hyperlink-p ` navigate _ sp-point-in-string-or-comment] 4] :actions (:add) :when (sp-in-string-p sp-in-comment-p) :unless (sp-lisp-invalid-hyperlink-p) :pre-handlers (:add) :post-handlers (:add)) | (:open ' :actions nil :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                                                                                                                                                                                                                        |                                                                                               |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| emacs-lisp-mode          | (:open ( :actions (:add) :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                   | (:open \\{ :close } :actions (wrap insert autoskip navigate) :when (sp-in-docstring-p) :unless (:add) :pre-handlers (:add) :post-handlers (:add))                                                                                                                                                                                    | (:open ` :close ' :skip-match #[(ms mb me) \301\232\203 \302\303\304\305#\206 \306 ?\207\306 ?\207 [ms ' sp-lisp-invalid-hyperlink-p ` navigate _ sp-point-in-string-or-comment] 4] :actions (:add) :when (sp-in-string-p sp-in-comment-p) :unless (sp-lisp-invalid-hyperlink-p) :pre-handlers (:add) :post-handlers (:add)) | (:open ' :actions nil :when (:add) :unless (:add) :pre-handlers (:add) :post-handlers (:add)) |                                                             |                                                                                             |                                                             |                                                             |                                                             |                                                             |
+| t                        | (:open \\( :close \\) :actions (insert wrap autoskip navigate))                                                                    | (:open \{ :close \} :actions (insert wrap autoskip navigate))                                                                                                                                                                                                                                                                        | (:open \( :close \) :actions (insert wrap autoskip navigate))                                                                                                                                                                                                                                                                        | (:open \" :close \" :actions (insert wrap autoskip navigate))                                 | (:open " :close " :actions (insert wrap autoskip navigate)) | (:open ' :close ' :actions (wrap insert autoskip navigate) :unless (sp-point-after-word-p)) | (:open ( :close ) :actions (insert wrap autoskip navigate)) | (:open [ :close ] :actions (insert wrap autoskip navigate)) | (:open { :close } :actions (insert wrap autoskip navigate)) | (:open ` :close ` :actions (insert wrap autoskip navigate)) |
+
+** tern
+A JavaScript code analyzer
+非常给力的 javascript 编辑工具, 支持 auto completion, jump to
+definition, find type of, rename variable 等 这些 IDE 才能提供的语言向
+的支持.
+
+
+# #+BEGIN_QUOTE
+# Tern is a stand-alone, editor-independent JavaScript analyzer that can be used to improve the JavaScript integration of existing editors.
+# #+END_QUOTE
+
+Needs the =tern= binary to be present, which can be installed with =npm=:
+
+#+BEGIN_SRC shell-script
+  sudo npm install -g tern
+#+END_SRC
+
+这里完了要改 tern.el 的一行代码, 傻逼的居然用相对路径
+#+BEGIN_SRC lisp
+(bin-file (expand-file-name "../bin/tern" (file-name-directory (file-truename script-file)))))
+#+END_SRC
+
+
+M-.
+    Jump to the definition of the thing under the cursor.
+M-,
+    Brings you back to last place you were when you pressed M-..
+C-c C-r
+    Rename the variable under the cursor.
+C-c C-c
+    Find the type of the thing under the cursor.
+C-c C-d
+    Find docs of the thing under the cursor. Press again to open the associated URL (if any).
+
+See the [[http://ternjs.net/][project homepage]] for more info.
+
 
 ** textmate
 #+BEGIN_SRC emacs-lisp
-  (textmate-mode 1)
-         (define-key *textmate-mode-map* [(control return)] 'textmate-next-line)
-         (define-key *textmate-mode-map* [(meta shift t)] 'textmate-clear-cache)
-         (define-key *textmate-mode-map* [(meta \])] 'align)
-         (define-key *textmate-mode-map* [(meta \[)] 'indent-according-to-mode)
-         (define-key *textmate-mode-map* [(meta shift \])]  'textmate-shift-right)
-         (define-key *textmate-mode-map* [(meta shift \[)] 'textmate-shift-left)
-         (define-key *textmate-mode-map* [(meta /)] 'comment-or-uncomment-region-or-line)
-         (define-key *textmate-mode-map* [(meta t)] 'textmate-goto-file)
-         (define-key *textmate-mode-map* [(meta shift l)] 'textmate-select-line)
-         (define-key *textmate-mode-map* [(meta up)] 'textmate-column-up)
-         (define-key *textmate-mode-map* [(meta down)] 'textmate-column-down)
-         (define-key *textmate-mode-map* [(meta shift up)] 'textmate-column-up-with-select)
-         (define-key *textmate-mode-map* [(meta shift down)] 'textmate-column-down-with-select)
+  (require 'textmate)
+  (textmate-mode)
+  (define-key *textmate-mode-map* [(control return)] 'textmate-next-line)
+  (define-key *textmate-mode-map* [(meta shift t)] 'textmate-clear-cache)
+  (define-key *textmate-mode-map* [(meta \])] 'align)
+  (define-key *textmate-mode-map* [(meta \[)] 'indent-according-to-mode)
+  (define-key *textmate-mode-map* [(meta shift \])]  'textmate-shift-right)
+  (define-key *textmate-mode-map* [(meta shift \[)] 'textmate-shift-left)
+  (define-key *textmate-mode-map* [(meta /)] 'comment-or-uncomment-region-or-line)
+  (define-key *textmate-mode-map* [(meta t)] 'textmate-goto-file)
+  (define-key *textmate-mode-map* [(meta shift l)] 'textmate-select-line)
+  (define-key *textmate-mode-map* [(meta up)] 'textmate-column-up)
+  (define-key *textmate-mode-map* [(meta down)] 'textmate-column-down)
+  (define-key *textmate-mode-map* [(meta shift up)] 'textmate-column-up-with-select)
+  (define-key *textmate-mode-map* [(meta shift down)] 'textmate-column-down-with-select)
 #+END_SRC
 
 #+RESULTS:
