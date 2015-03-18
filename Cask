@@ -4,8 +4,8 @@
 
 (depends-on "org")
 (depends-on "org-plus-contrib")
-(depends-on "org-rss")
 (depends-on "htmlize")
 (depends-on "color-theme")
 (depends-on "clojure-mode")
+(depends-on "org-blog" :git "https://github.com/jcouyang/org-blog.git")
 

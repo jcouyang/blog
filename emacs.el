@@ -55,6 +55,7 @@
         :sitemap-file-entry-format "*%t* =%d=" ;write title and date in sitemap
         :sitemap-ignore-case t
         :blog-export-dates t
+        :sitemap-date-format "%b %d, %Y"
         :blog-title "Jichao Ouyang's Blog"
         :makeindex t
         :html-head-include-default-style nil
