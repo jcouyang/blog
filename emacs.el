@@ -4,6 +4,7 @@
 (require 'clojure-mode)
 (clojure-font-lock-setup)
 (require 'org)
+(require 'org-blog)
 (require 'htmlize)
 (setq debug-on-error t)
 (setq blog-path (expand-file-name "org"))
@@ -46,12 +47,15 @@
         :html-postamble-format "%a %d" ;write author and date at end
         :auto-sitemap t
         :sitemap-title "Jichao Ouyang's Blog"
+        :sitemap-function org-blog-export
         :sitemap-filename "index.org"
-        :sitemap-style list
-        :sitemap-sort-files "anti-chronologically"
-        :sitemap-sort-folders "mix"
+        :sitemap-style tree
+        :sitemap-sort-files anti-chronologically
+        :sitemap-sort-folders mix
         :sitemap-file-entry-format "*%t* =%d=" ;write title and date in sitemap
         :sitemap-ignore-case t
+        :blog-export-dates t
+        :blog-title "Jichao Ouyang's Blog"
         :makeindex t
         :html-head-include-default-style nil
         )
@@ -64,6 +68,18 @@
          :recursive t
          :publishing-function org-publish-attachment
          )
-       ("blog" :components ("blog-notes" "blog-static"))
+       ("rss"
+         :base-directory ,blog-path
+         :base-extension "org"
+         :html-link-home "https://blog.oyanglul.us"
+         :html-link-use-abs-url t
+         :rss-extension "xml"
+         :publishing-directory "public"
+         :publishing-function (org-rss-publish-to-rss)
+         :section-numbers nil
+         :exclude ".*"            ;; To exclude all files...
+         :include ("index.org")   ;; ... except index.org.
+         :table-of-contents nil)
+       ("blog" :components ("blog-notes" "blog-static" "rss"))
        )))
 (set-org-publish-project-alist)
