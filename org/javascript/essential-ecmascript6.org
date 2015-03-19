@@ -1,7 +1,12 @@
-#+TITLE: Essential EcmaScript 6 [%]
+#+TITLE: Essential EcmaScript 6
 #+DATE: <2015-03-16 Mon>
 
-* Arrow Function
+* PROCESS [20%]
+** DONE Arrow Function
+:LOGBOOK:  
+- State "DONE"       from "DONE"       [2015-03-20 Fri 00:00]
+- State "DONE"       from ""           [2015-03-20 Fri 00:00]
+:END:      
 来看看越来越函数式の JavaScript
 
 新的草案[[http://kangax.github.io/compat-table/es6/][ECMAScript 6]]
@@ -18,7 +23,7 @@ Haskell(单箭头) 或者Scala(双箭头), 会发现都用的是箭头来表示�
 另外每节的最后我都会给出完整代码的可执行的 jsbin 链接.
 #+END_QUOTE
 
-*** 声明一个箭头函数
+**** 声明一个箭头函数
 
 你可以用两种方式定义一个箭头函数
 
@@ -32,7 +37,7 @@ Haskell(单箭头) 或者Scala(双箭头), 会发现都用的是箭头来表示�
 
 单个表达式可以写成一行, 而多行语句则需要 block ={}= 括起来.
 
-*** 为什么要用箭头函数
+**** 为什么要用箭头函数
 
 看看旧的匿名函数怎么写一个使数组中数字都乘2的函数.
 
@@ -56,7 +61,7 @@ Haskell(单箭头) 或者Scala(双箭头), 会发现都用的是箭头来表示�
 可以将给定 =x=, 映射到 =y=.
 翻译这句话的最简单的方式不就是=f = (x => x*2)=
 
-*** Lexical =this=
+**** Lexical =this=
 
 如果你觉得这还不足以说服改变匿名函数的写法,
 那么想想以前写匿名函数中的经常需要=var self = this=的苦恼.
@@ -97,41 +102,75 @@ Haskell(单箭头) 或者Scala(双箭头), 会发现都用的是箭头来表示�
 this 会自动 capture 外层函数的=this= 值.
 
 [[http://jsbin.com/vawobe/2/edit?js][完整代码]]
-* Proxy
+** DONE Proxy
+:LOGBOOK:  
+- State "DONE"       from ""           [2015-03-20 Fri 00:00]
+:END:      
 名字解释了一切, 对, 代理, 就是能帮你做一些事情的东西.
 
 JavaScript是动态语言,也就是说最关心的事情是行为.所以行为也能通過meta programming让其带那么一些行为.
 
 试试把下列代码考到Firefox的Console中
 #+BEGIN_SRC javascript
-  let do_something = function(){
-    return "doing something"
+  let github_api = function(){};
+  github_api.path='https://api.github.com';
+  let restful = function restfulize(api){
+      return new Proxy(api, {
+          get: function(receiver, name){
+              receiver.path+='/'+name;
+              return restfulize(receiver);
+          },
+          apply: function(receiver, that, args){
+              console.log(`sending request to ${receiver.path}`)
+          }
+      })
   }
-  let fancy_do_something = new Proxy(do_something, {
-      apply: function(receiver, that, args){
-        console.log(`fancy ${receiver(args)}`)
-      }
-  })
 
-  fancy_do_something()
+  restful(github_api).user.jcouyang()
+// => "sending request to https://api.github.com/user/jcouyang"
 #+END_SRC
 
+简单的几行代码,我们就自制了一个接口非常流畅的restful api client. 再也不用麻烦的拼接字符串,
+转成代理的方法适当接口更已读且易于重用.
 
+magic到底在哪呢, =proxy= 给目标函数代理了两个方法, 一个 =get=, 一个 =apply=,
+- =get= 不管从 =proxy= 中取任何值都会运行 =get=. 
+一直返回新的相同但是path变化了的 =proxy=, 所以不管是 =.user= 还是 =.jcouyang= 
+都是拼接成 =path=, 并返回一个新的以新 =path= 为目标的proxy
+- =apply= 里面是运行这个proxy时要做的事情. 所以当我调用 =jcouyang()= 的时候, log就打出来了.
 
-* Destructuring
+** IN PROGRESS Destructuring
+:LOGBOOK:  
+- State "IN PROGRESS" from ""           [2015-03-20 Fri 00:01]
+:END:      
 
-* Tail Calling
+#+BEGIN_SRC clojure
+  (let [[first & rest] [1 2 3 4 5]]
+       rest
+       ) ; => (2 3 4 5)
+#+END_SRC
 
-* Template Strings
+终于也可以在 JavaScript 里面这样干了.
+#+BEGIN_SRC javascript
+let [孔连顺, 张全蛋] = ['女神', '男神']
+孔连顺 //=> 男神1
+张全蛋 //=> 男神2
+#+END_SRC
 
-* Class
+当然可以对Map这样干
 
-* Symbols
+** TODO Tail Calling
 
-* Let
+** TODO Template Strings
 
-* Promises
+** TODO Class
 
-* Generator
+** TODO Symbols
+
+** TODO Let
+
+** TODO Promises
+
+** TODO Generator
 
 [fn:1] Chrome有一个 feature toggle 可以打开部分 es6 功能 [[chrome://flags/#enable-javascript-harmony]]
