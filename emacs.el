@@ -55,7 +55,12 @@
         :sitemap-file-entry-format "*%t* =%d=" ;write title and date in sitemap
         :sitemap-ignore-case t
         :blog-content-lines 7
-        :blog-entry-format  "* [[%l][%t]]\n\n=by= /%a/ - =%d=\n%c...\n"
+        :blog-entry-format  "* [[%l][%t]]
+:PROPERTIES:
+:PUBDATE: %D
+:END:
+%c...
+"
         :blog-export-dates t
         :sitemap-date-format "%b %d, %Y"
         :blog-title "Jichao Ouyang's Blog"
