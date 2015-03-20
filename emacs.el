@@ -61,6 +61,7 @@
         :blog-title "Jichao Ouyang's Blog"
         :makeindex t
         :html-head-include-default-style nil
+        :exclude "archive.org"
         )
 
        ;; where static files (images, pdfs) are stored
