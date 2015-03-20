@@ -1,6 +1,7 @@
 (require 'color-theme)
 (color-theme-initialize)
 (color-theme-gtk-ide)
+
 (require 'clojure-mode)
 (clojure-font-lock-setup)
 (require 'org)
@@ -44,17 +45,13 @@
         :html-link-up "/index.html"
         :html-link-home "/jichao.ouyang.html"
         :auto-preamble t
-        :html-postamble-format "%a %d" ;write author and date at end
         :auto-sitemap t
+        :sitemap-filename "index.org"
+        :html-postamble-format "%a %d" ;write author and date at end
         :sitemap-title "Jichao Ouyang's Blog"
         :sitemap-function org-blog-export
-        :sitemap-filename "index.org"
-        :sitemap-style tree
-        :sitemap-sort-files anti-chronologically
-        :sitemap-sort-folders mix
-        :sitemap-file-entry-format "*%t* =%d=" ;write title and date in sitemap
-        :sitemap-ignore-case t
         :blog-content-lines 7
+        :exclude ".*(index\.org|archive\.org)"
         :blog-entry-format  "* [[%l][%t]]
 :PROPERTIES:
 :PUBDATE: %D
@@ -66,7 +63,6 @@
         :blog-title "Jichao Ouyang's Blog"
         :makeindex t
         :html-head-include-default-style nil
-        :exclude "archive.org"
         )
 
        ;; where static files (images, pdfs) are stored
