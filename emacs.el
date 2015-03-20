@@ -32,7 +32,7 @@
         :publishing-directory "public"
         :publishing-function org-html-publish-to-html
         :recursive t
-        :headline-levels 3
+        :headline-levels 4
         :section-numbers nil
         :with-toc t
         :with-tags t
@@ -54,6 +54,7 @@
         :sitemap-sort-folders mix
         :sitemap-file-entry-format "*%t* =%d=" ;write title and date in sitemap
         :sitemap-ignore-case t
+        :blog-content-lines 7
         :blog-export-dates t
         :sitemap-date-format "%b %d, %Y"
         :blog-title "Jichao Ouyang's Blog"
