@@ -1,6 +1,6 @@
 (require 'color-theme)
 (color-theme-initialize)
-(color-theme-standard)
+(color-theme-gtk-ide)
 (require 'clojure-mode)
 (clojure-font-lock-setup)
 (require 'org)
