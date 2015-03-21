@@ -5,6 +5,7 @@
 (depends-on "org")
 (depends-on "org-plus-contrib")
 (depends-on "htmlize")
+(depends-on "dash")
 (depends-on "color-theme")
 (depends-on "clojure-mode")
 (depends-on "color-theme-sanityinc-tomorrow")

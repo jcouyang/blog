@@ -51,7 +51,6 @@
         :sitemap-title "Jichao Ouyang's Blog"
         :sitemap-function org-blog-export
         :blog-content-lines 7
-        :exclude ".*(index\.org|archive\.org)"
         :blog-entry-format  "* [[%l][%t]]
 :PROPERTIES:
 :PUBDATE: %D
