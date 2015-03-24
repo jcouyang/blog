@@ -1,7 +1,6 @@
 (require 'color-theme)
 (color-theme-initialize)
 (color-theme-gtk-ide)
-
 (require 'clojure-mode)
 (clojure-font-lock-setup)
 (require 'org)
@@ -51,11 +50,16 @@
         :sitemap-title "Jichao Ouyang's Blog"
         :sitemap-function org-blog-export
         :blog-content-lines 7
-        :blog-entry-format  "* [[%l][%t]]
+        :blog-entry-format  "
+* [[%l][%t]]
 :PROPERTIES:
+:HTML_CONTAINER_CLASS: blogentry
 :PUBDATE: %D
 :END:
-%c...
+/%d/
+
+%p
+-------
 "
         :blog-export-dates t
         :sitemap-date-format "%b %d, %Y"
