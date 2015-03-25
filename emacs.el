@@ -1,3 +1,4 @@
+(load-file "config.el")
 (require 'color-theme)
 (color-theme-initialize)
 (color-theme-gtk-ide)
@@ -34,36 +35,16 @@
         :recursive t
         :headline-levels 4
         :section-numbers nil
-        :with-toc t
-        :with-tags t
-        :with-tasks t
-        :with-sub-superscript t
-        :with-timestamps t
-        :with-author t
-        :with-date t
         :html-link-up "/index.html"
-        :html-link-home "/jichao.ouyang.html"
+        :html-link-home ,config-home-link
         :auto-preamble t
         :auto-sitemap t
         :sitemap-filename "index.org"
-        :html-postamble-format "%a %d" ;write author and date at end
-        :sitemap-title "Jichao Ouyang's Blog"
         :sitemap-function org-blog-export
-        :blog-content-lines 7
-        :blog-entry-format  "
-* [[%l][%t]]
-:PROPERTIES:
-:HTML_CONTAINER_CLASS: blogentry
-:PUBDATE: %D
-:END:
-/%d/
-
-%p
--------
-"
+        :blog-entry-format ,config-entry-format
         :blog-export-dates t
-        :sitemap-date-format "%b %d, %Y"
-        :blog-title "Jichao Ouyang's Blog"
+        :sitemap-date-format ,config-date-format
+        :blog-title ,config-blog-title
         :makeindex t
         :html-head-include-default-style nil
         )
@@ -79,7 +60,7 @@
        ("rss"
          :base-directory ,blog-path
          :base-extension "org"
-         :html-link-home "https://blog.oyanglul.us"
+         :html-link-home ,config-home-link
          :html-link-use-abs-url t
          :rss-extension "xml"
          :publishing-directory "public"
