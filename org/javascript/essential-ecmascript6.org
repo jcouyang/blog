@@ -9,24 +9,18 @@
 feature)离我们越来越近了, 而且我们已经可以通过 [[https://babeljs.io/][babel]] 在项目中使用这些新的features. 是时候让我们
 重新认识一下 JavaScript 了. 下面列出了一部分比较让人兴奋和期待的features. 剧透一下我最激动的还是[[*Tail%20Calling][ Tail Calling]]
 
-* PROCESS [77%]
-** DONE Arrow Function
+* Arrow Function
 :LOGBOOK:  
 - State "DONE"       from "DONE"       [2015-03-20 Fri 14:58]
 :END:      
 #+INDEX: Arrow Function
 #+INDEX: lambda
-我們先來看看 arrow
-function，为什么叫箭头函数，如果之前用过
-Haskell(单箭头) 或者Scala(双箭头), 会发现都用的是箭头来表示简单映射关系函数.
 
 #+BEGIN_QUOTE
 由于 arrow function 只在Firefox 22以上版本实现,
 这里所有代码都可以在Firefox的Console中调试, 其他chrome 什么的都没有实现(完全)[fn:1].
 另外每节的最后我都会给出完整代码的可执行的 jsbin 链接.
 #+END_QUOTE
-
-**** 声明一个箭头函数
 
 你可以用两种方式定义一个箭头函数
 
@@ -39,8 +33,6 @@ Haskell(单箭头) 或者Scala(双箭头), 会发现都用的是箭头来表示�
 #+END_SRC
 
 单个表达式可以写成一行, 而多行语句则需要 block ={}= 括起来.
-
-**** 为什么要用箭头函数
 
 看看旧的匿名函数怎么写一个使数组中数字都乘2的函数.
 
@@ -59,54 +51,12 @@ Haskell(单箭头) 或者Scala(双箭头), 会发现都用的是箭头来表示�
 因为你看惯了 JavaScript 的匿名函数,
 你的大脑编译器自动的忽略了,因为他们不需要显示的存在.
 
-而=map(x => x*2)= 要更 make sense,
+而 =map(x => x*2)= 要更 make sense,
 因为我们需要的匿名函数只需要做一件事情, 我们需要的是 一个函数 =f=,
 可以将给定 =x=, 映射到 =y=.
 翻译这句话的最简单的方式不就是 =f = (x => x*2)=
 
-**** Lexical =this=
-
-如果你觉得这还不足以说服改变匿名函数的写法,
-那么想想以前写匿名函数中的经常需要=var self = this=的苦恼.
-
-#+BEGIN_SRC javascript
-    var Multipler = function(inc){
-      this.inc = inc;
-    }
-    Multipler.prototype.multiple = function(numbers){
-      return numbers.map(function(number){
-        return this.inc * number;
-      })
-    }
-    new Multipler(2).multiple([1,2,3,4]) // => [NaN, NaN, NaN, NaN]  不 work, 因为 map 里面的 this 指向的是全局变量( window)
-
-    Multipler.prototype.multiple = function(numbers){
-      var self = this; // 保持 Multipler 的 this 的缓存
-      return numbers.map(function(number){
-        return self.inc * number;
-      })
-    }
-    new Multipler(2).multiple([1,2,3,4]) // => [ 2, 4, 6, 8 ]
-#+END_SRC
-
-很怪不是吗, 确实是 Javascript 的一个 bug, 因此经常出现在各种面试题中.
-
-试试替换成 arrow function
-
-#+BEGIN_SRC javascript
-    Multipler.prototype.multiple = function(numbers){
-      return numbers.map(number => number*this.inc);
-    };
-
-    console.log(new Multipler(2).multiple([1,2,3,4]));// => [ 2, 4, 6, 8 ]
-#+END_SRC
-
-不需要 =var self = this= 了是不是很开心☺.现在, arrow function 里面的
-this 会自动 capture 外层函数的=this= 值.
-
-[[http://jsbin.com/vawobe/2/edit?js][完整代码]]
-
-** DONE Let
+* Let
 :LOGBOOK:  
 - State "DONE"       from "TODO"       [2015-03-22 Sun 15:37]
 :END:      
@@ -154,7 +104,7 @@ es5 的 =let= 完全等价应该是
   console.log(a)
 #+END_SRC
 
-** DONE Proxy
+* DONE Proxy
 名字解释了一切, 对, 代理, 就是能帮你做一些事情的东西.
 
 JavaScript是动态语言,也就是说最关心的事情是行为.所以行为也能通過meta programming让其带那么一些行为.
@@ -188,7 +138,7 @@ magic到底在哪呢, =proxy= 给目标函数代理了两个方法, 一个 [[(ge
 都是拼接成 =path=, 并返回一个新的以新 =path= 为目标的proxy
 - =apply= 里面是运行这个proxy时要做的事情. 所以当我调用 [[(jcouyang)][jcouyang()]] 的时候, log就打出来了.
 
-** DONE Destructuring
+* Destructuring
 :LOGBOOK:  
 - State "DONE"       from "IN PROGRESS" [2015-03-22 Sun 00:10]
 :END:      
@@ -215,7 +165,7 @@ let {女神, 男神} = {'男神': ['唐马儒', '张全蛋'], '女神': '孔连�
 #+END_SRC
 
 
-** DONE Tail Calling
+* Tail Calling
 :LOGBOOK:  
 - State "DONE"       from "IN PROGRESS" [2015-03-22 Sun 10:46]
 - State "IN PROGRESS" from "TODO"       [2015-03-22 Sun 10:16]
@@ -253,7 +203,7 @@ function a(_x) {
 }
 #+END_SRC
 
-** DONE Template Strings
+* Template Strings
 :LOGBOOK:  
 - State "DONE"       from "TODO"       [2015-03-22 Sun 10:46]
 :END:      
@@ -269,12 +219,43 @@ console.log(`${hi} 你妹`)
 #+END_SRC
 
 
-** TODO Class
+* Class
+:LOGBOOK:  
+- State "DONE"       from "TODO"       [2015-03-27 Fri 16:32]
+:END:      
 虽然只是 syntax sugar, 但是终于不用怪怪的用函数当对象模板了. 木哈哈哈
 
-** TODO Promises
+#+BEGIN_SRC javascript
+  class Duck extends Bird {
+      constructor() {
+          super();
+          this.name = "donald"
+          //...
+      }
+      say() {
+          return this.name + " quack";
+      }
+      static say() {
+          return "quack";
+      }
+  }
+#+END_SRC
 
-** DONE Generator
+* Promises
+虽然已经习惯用更强大的 [[https://github.com/cujojs/when][第三方库]] 干这个事情, 但是原生支持的话也是极好的.
+#+BEGIN_SRC javascript
+  new Promise((resolve, reject) => {
+      console.log('first')
+      setTimeout(resolve, 1000);
+  }).then(() => {
+      console.log('next 1s')
+      throw new Error("hmm");
+  }).catch(err => {
+      console.log('finally error')
+  })
+#+END_SRC
+
+* Generator
 :LOGBOOK:  
 - State "DONE"       from "TODO"       [2015-03-22 Sun 20:36]
 :END:      
