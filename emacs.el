@@ -40,6 +40,7 @@
         :auto-preamble t
         :auto-sitemap t
         :sitemap-filename "index.org"
+        :exclude "\!.*\.org"
         :sitemap-function org-blog-export
         :blog-entry-format ,config-entry-format
         :blog-export-dates t
