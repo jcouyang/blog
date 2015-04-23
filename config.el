@@ -1,5 +1,5 @@
 (setq config-blog-title "Jichao Ouyang' Blog"
-      config-home-link "https://blog.oyanglul.us"
+      config-home-link "/~jichao.ouyang.html"
       config-date-format "%b %d, %Y"
       config-entry-format "
 * [[%l][%t]]
