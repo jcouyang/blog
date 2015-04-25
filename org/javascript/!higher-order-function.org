@@ -15,7 +15,7 @@
     (y) => x(y)
 #+END_EXAMPLE
 
-可以卡出来虽然只是调用 f, 但是返回还有一个函数x要求值.
+可以看出来调用 f 时却又返回了一个函数x.
 
 还记得高等数学里面的导数吗, 两阶以上的导数叫高阶导数.
 因为求导一次以后返回的可以求导.
@@ -26,16 +26,19 @@
 
 [[./images/higherorder/recursion.png]]
 
-高阶函数很多典型的应用如 =map=, =reduce=.
+高阶函数最常见的应用如 =map=, =reduce=.
 他们都是以传入不同的函数来以不同的方式操作数组元素.
 
-而柯里化, 则是每次消费一个参数并返回一个逐步被配置好的函数.
+另外 /柯里化/, 则是每次消费一个参数并返回一个逐步被配置好的函数.
+#+INDEX: 柯里化
+#+INDEX: currying
 
 高阶函数的这些应用都是为函数的组合提供灵活性.
 在本章结束相信你会很好的体会到函数组合的强大之处.
+
 ** Higher-order function
 
-在 JavaScript 中, 使用高阶函数是非常方便的.
+函数在 JavaScript 中是一等公民, 因此在 JavaScript 中, 使用高阶函数是非常方便的.
 
 *** 函数作为参数
 
@@ -47,6 +50,7 @@
 
 如果我们要逆序的排序, 把减号左右的 =x= 和 =y= 呼唤,就这么简单,
 但如果我是一个对象数组, 要根据对象的 =id= 排序:
+
 #+BEGIN_SRC js
   [{id:1, name:'one'},
    {id:3, name:'three'}, 
@@ -63,7 +67,7 @@
 内部的一个工具函数 =aliasFor=, 他的作用是给函数 E 的一些方法起一些别名:
 
 #+BEGIN_QUOTE
-*Note* 听起来很怪不是吗, 函数怎么有方法, 实际上 JavaScript 的 =function=
+听起来很怪不是吗, 函数怎么有方法, 实际上 JavaScript 的 =function=
 是一个特殊 *对象*, 试试在 Firefox console 里敲 =console.log.=
 是不是看到了一些方法, 但是 =typeof console.log= 是 function
 #+END_QUOTE
@@ -96,7 +100,7 @@
     aliasFor('reduce').is('reduceLeft').is('foldl')
 #+END_SRC
 
-[[http://jsbin.com/qohil/1/watch?js,console][完整代码]]
+#+HTML: <a class="jsbin-embed" href="http://jsbin.com/qohil/1/embed?js,console">完整代码</a><script src="http://static.jsbin.com/js/embed.js"></script>
 
 #+BEGIN_QUOTE
   另外, 函数作为返回值的重要应用, 柯里化与闭包,
@@ -282,7 +286,7 @@ multiple 函数换掉. 这样一来 =concatArray= 就不能同时处理加, 乘�
     })
 #+END_EXAMPLE
 
-[[http://jsbin.com/hamoq/4/embed?js,console][完整代码]]
+#+HTML: <a class="jsbin-embed" href="http://jsbin.com/hamoq/1/embed?js,console">完整代码</a><script src="http://static.jsbin.com/js/embed.js"></script>
 
 ** 函数组合 function composition
 
@@ -300,7 +304,7 @@ reverse 函数组合出来的.
 的组合 =g(f(x))= 就是 A到 C 的映射。上一章实现的 map 函数就相当于
 =reverse.fold=.
 
-*** COMMENT compose
+*** Compose
 
 我们可以用 Eweda 非常方便的 compose 方法来组合函数
 
@@ -352,7 +356,7 @@ underscore 里会这样写:
 groupedTasks, 我要按类型选出 completed 为 true 并按 id 排序.
 如我现在数据是这个：
 
-#+BEGIN_EXAMPLE
+#+BEGIN_EXAMPLE js
     groupedTasks = [
       [{completed:false, id:1},{completed:true, id:2}],
       [{completed:false, id:4},{completed:true, id:3}]
@@ -437,4 +441,4 @@ compose 相反. 比如 =pipe(f, g)=, =f= 会先执行, 然后结果传给 =g=,
   )(data)
 #+END_SRC
 
-[[http://jsbin.com/hivaje/1/edit?js][完整代码]]
+#+HTML: <a class="jsbin-embed" href="http://jsbin.com/hivaje/1/embed?js,console">完整代码</a><script src="http://static.jsbin.com/js/embed.js"></script>
