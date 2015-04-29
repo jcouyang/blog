@@ -34,6 +34,7 @@
         :publishing-function org-html-publish-to-html
         :recursive t
         :headline-levels 4
+        :with-sub-superscript nil
         :section-numbers nil
         :html-link-up "/index.html"
         :html-link-home ,config-home-link
