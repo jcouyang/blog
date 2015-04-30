@@ -26,7 +26,7 @@
         :base-directory ,blog-path
         :base-extension "org"
         :html-doctype "html5"
-        :html-head "<meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link rel=\"stylesheet\" href=\"/style/pixyll.css\" />"
+        :html-head "<meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link rel=\"stylesheet\" href=\"/style/pixyll.css\"/><link rel=\"alternate\" type=\"application/rss+xml\" title=\"Jichao Ouyang\" href=\"http://blog.oyanglul.us/index.xml\"/>"
         :html-html5-fancy t
         :html-postamble ,postamble
         ;; HTML directory
