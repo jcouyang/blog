@@ -16,6 +16,8 @@ CSP的阵营, 叫做 Core.async.
 ** 什么是并发
 并发可能很容易和并行混淆, 但是结合我们自己想一想,还是很容易分得清的.
 
+[[./images/typing.gif]]
+
 如果我正在上班写代码,想加个班然后发个短信给老婆说晚点回, 发完以后继续敲代码. 那么发短信和敲代码两个任务就是 *并发*.
 
 但如果我还特别喜欢音乐, 所以我边听音乐边敲代码, 那么交代吗和听音乐两个任务就是并行了.
@@ -27,6 +29,8 @@ CSP的阵营, 叫做 Core.async.
 
 继续敲代码这个例子, 我现在fork出来一个手发短信, 但是我还是只有一个脑袋, 在发短信的时候我的脑子还是只能集中在
 如何编制一个理由向老婆请假, 而另外两只手只能放在键盘上什么也改不了, 知道短信发出去, 再继续写代码.
+
+[[./images/octo-leela.gif]]
 
 所以多线程开销还是很大(我得再长一个手...), 而且其他两只手其实是闲置(阻塞)着的.
 
@@ -103,7 +107,7 @@ CSP 的概念非常简单, 想象一下 event loop 是这样一个时序
 (reading-text)
 
 #+END_SRC
-#+HTML: <a class="jsbin-embed" href="http://jsbin.com/muliva/2/embed?output">JS Bin</a><script src="http://static.jsbin.com/js/embed.js"></script>
+#+HTML: <a class="jsbin-embed" href="http://jsbin.com/muliva/2/embed?console">JS Bin</a><script src="http://static.jsbin.com/js/embed.js"></script>
 
 不懂clojure没有关系,我可以解释 +我不听我不听我不听!+ 而且我还会在后面用JS实现一遍
 - 可以看出 boss yelling, wife texting, me working 和 reading text 四个任务是 *并发* 进行的
@@ -115,6 +119,8 @@ CSP 的概念非常简单, 想象一下 event loop 是这样一个时序
 ** Generator
 [[http://blog.dev/javascript/essential-ecmascript6.html#sec-9][ES6 终于支持了Generator]], 目前Firefox与Chrome都已经实现.[fn:1] Generator在每次被调用时放回 =yield= 的值, 并保存状态, 下次调用时继续运行. 
 这种功能听起来刚好符合上例中神奇的 parking 的行为, 因此完全可以用 generator 来实现 CSP.
+
+[[./images/bender-generator.gif]]
 
 ** CSP in JavaScript[fn:2]
 瞅瞅我们都要实现写什么
@@ -176,7 +182,7 @@ function timeout(interval){
 #+END_SRC
 
 *** take <!
-- 当 generator 从 channel 中 take 数据时
+当 generator 从 channel 中 take 数据时
   - 如果 channel 空, 状态变为 park
   - 如果 channel 非空, 获得数据, 状态改成 continue
   - 如果是 timeout channel, 状态置成 timeout
@@ -214,8 +220,53 @@ function put(chan, val) {
 }
 #+END_SRC
 
+*** 开始翻译Clojure
+现在可以原原本本的将之前的clojure的例子翻译成JavaScript了
+#+BEGIN_SRC javascript
+function boss_yelling(){
+  go(function*(){
+    for(var i=0;;i++){
+      yield take(timeout(1000));
+      yield put(work, "boss say: work "+i);
+    }
+  });
+}
+
+function wife_texting(){
+  go(function*(){
+    for(;;){
+      yield take(timeout(4000));
+      yield put(text, "wife say: come home");
+    }
+  });
+}
+
+function working(){
+  go(function*(){
+    for(;;){
+      var task = yield take(work);
+      console.log(task, "me working");
+    }
+  });
+}
+
+function texting(){
+  go(function*(){
+    for(;;){
+      var read = yield take(text);
+      console.log(read, "me ignoring");
+    }
+  });
+}
+boss_yelling();
+wife_texting();
+working();
+texting();
+#+END_SRC
+
 完整代码
-#+HTML: <a class="jsbin-embed" href="http://jsbin.com/savepe/1/embed?js,console">JS Bin</a><script src="http://static.jsbin.com/js/embed.js"></script>
+#+HTML: <a class="jsbin-embed" href="http://jsbin.com/savepe/5/embed?js,console">JS Bin</a><script src="http://static.jsbin.com/js/embed.js"></script>
+
 
 * Footnotes
 
