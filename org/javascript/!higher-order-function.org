@@ -131,24 +131,24 @@ JavaScript 吧.
 
 *** 我们来看一个问题
 
-**** 1. 写一个函数, 可以连接字符数组, 如 =f(['1','2']) => '12'=
+**** 写一个函数, 可以连接字符数组, 如 =f(['1','2']) => '12'=
 
 好吧,如果不用柯里化, 怎么写? 啊哈 =reduce=
 
-#+BEGIN_EXAMPLE js
+#+BEGIN_SRC js
     var concatArray = function(chars){
       return chars.reduce(function(a, b){
         return a.concat(b);
       });
     }
     concat(['1','2','3']) // => '123'
-#+END_EXAMPLE
+#+END_SRC
 
 很简单,对吧.
 
-**** 2. 现在我要其中所有数字加1, 然后在连接
+**** 现在我要其中所有数字加1, 然后在连接
 
-#+BEGIN_EXAMPLE js
+#+BEGIN_SRC js
     var concatArray = function(chars, inc){
       return chars.map(function(char){
         return (+char)+inc + '';
@@ -157,11 +157,11 @@ JavaScript 吧.
       });
     }
     console.log(concatArray(['1','2','3'], 1))// => '234'
-#+END_EXAMPLE
+#+END_SRC
 
-**** 3. 所有数字乘以2, 再重构试试看
+**** 所有数字乘以2, 再重构试试看
 
-#+BEGIN_EXAMPLE js
+#+BEGIN_SRC js
     var multiple = function(a, b){
       return +a*b + ''
     }
@@ -173,7 +173,7 @@ JavaScript 吧.
       });
     }
     console.log(concatArray(['1','2','3'], 2)) // => '246'
-#+END_EXAMPLE
+#+END_SRC
 
 是不是已经看出问题了呢?
 如果我在需要每个数字都减2,是不是很麻烦呢.需要将 =map= 参数匿名函数中的
@@ -182,7 +182,7 @@ multiple 函数换掉. 这样一来 =concatArray= 就不能同时处理加, 乘�
 
 *** 柯里化函数接口
 
-#+BEGIN_EXAMPLE js
+#+BEGIN_SRC js
     var multiple = function(a){
       return function(b){
         return +b*a + ''
@@ -202,7 +202,7 @@ multiple 函数换掉. 这样一来 =concatArray= 就不能同时处理加, 乘�
     }
     console.log(concatArray(['1','2','3'], multiple(2)))
     console.log(concatArray(['1','2','3'], plus(2)))
-#+END_EXAMPLE
+#+END_SRC
 
 有什么不一样呢 1. 处理数组中字符的函数被提取出来, 作为参数传入 2.
 提取成柯里化的函数, 部分配置好后传入, 好处显而易见, 这下接口非常通畅
