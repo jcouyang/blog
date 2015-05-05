@@ -1,4 +1,4 @@
-#+title: CSP, Clojure core.async 以及 JavaScript
+#+title: Clojure 风格的 JavaScript 并发编程
 #+description: 用原生 javascript es6 实现类似clojure core.async 风格的异步任务, 拜拜 callback hell
 #+keywords: javascript, es6, clojure, clojurescript, core.async, ecmascript6, golang, go, callback hell
 #+author: Jichao Ouyang
@@ -25,14 +25,16 @@ CSP的阵营, 叫做 Core.async.
 所以说, 并行与并发的最大区别就是后者任务之间是互相阻塞的, 任务不能同时运行,因此在执行一个任务时就得阻塞另外一个任务.
 
 ** 异步与多线程
-说到并发, 大概都会联想到多线程, 其实多线程与并发也没有半点关系.
+说到并发, 大概都会联想到多线程.
 
 继续敲代码这个例子, 我现在fork出来一个手发短信, 但是我还是只有一个脑袋, 在发短信的时候我的脑子还是只能集中在
-如何编制一个理由向老婆请假, 而另外两只手只能放在键盘上什么也改不了, 知道短信发出去, 再继续写代码.
+如何编制一个理由向老婆请假, 而另外两只手只能放在键盘上什么也改不了, 直到短信发出去, 再继续写代码.
 
 [[./images/octo-leela.gif]]
 
-所以多线程开销还是很大(我得再长一个手...), 而且其他两只手其实是闲置(阻塞)着的.
+所以多线程开销还是很大(我得再长一个手...完了还要缩回去...), 而且其他两只手其实是闲置(阻塞)着的.
+
+[[https://www.evernote.com/shard/s23/sh/a65f9743-792e-4f57-8108-ede856b3f464/725cdaf31754164ac80e82f1cbf6f5d6/deep/0/Csp.png]]
 
 因此, 另外一种更省资源的处理并发的方式就出现了--异步. 对了, 就是我们在js里经常发ajax的那个异步.
 
@@ -45,11 +47,45 @@ CSP的阵营, 叫做 Core.async.
 ** CSP
 那么你就要问了, 你是怎么知道手机响的, 还不是要开一个线程让耳朵监听着. 对的, 但是异步只需要很少的有限个线程就好了, 比如我有十个手机
 要发给十个老婆, 我还是两个线程, 而如果是多线程的话我要fork出来十只手. JS的异步就是这么干的, 一个专门
-的 event loop 用于挂各种需要监听的任务.
+的 [[https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/EventLoop][event loop]] 用于挂各种需要执行的任务.
+
+*** Event loop
+Event loop 模式非常简单, 浏览器运行javascript就是从 event loop 里面取任务, 队列中任务的来源为函数调用栈与事件绑定.比如
+- 每写一行 =f()=, 就会加到event loop的队列中, event loop运行该任务直到调用栈
+- 每写一次执行到 =setTimeout(somefunction,0)=, 会立马往队列加入 =somefunction= (如果不是0, 则是n长时间后加入队列)
+
+[[https://www.evernote.com/shard/s23/sh/609488c9-b816-425e-9031-f0a2b1ac72f8/a3b5af41e63435d2b3fef4bff653b790/deep/0/Csp.png]]
+
+#+BEGIN_SRC javascript
+function a(){
+  console.log('a');
+}
+function b(){
+  console.log('b');
+}
+function timeout(){
+  console.log('timeout');
+}
+setTimeout(timeout,0);
+a();
+b();
+// => "a"
+// => "b"
+// => "timeout"
+#+END_SRC
+
+所以这样一行代码的消息队列应该是这样的(处理顺序从左至右)
+
+  +-----------+-----+-----+--------+
+  |setTimeout |a    |b    |timeout |
+  +-----------+-----+-----+--------+
+
+
+现在我们用JS的异步模型来再实现一下前面的例子
 
 #+HTML:  <a class="jsbin-embed" href="http://jsbin.com/jobope/2/embed?js,console">JS Bin</a><script src="http://static.jsbin.com/js/embed.js"></script>
 
-js把判断老婆同不同意的函数挂到了event loop, 就继续执行下一任务, 如果有短信回复的事件触发,那么就执行这个函数,也就是看看短信老婆同不同意.
+js把判断老婆同不同意的函数挂到了event loop队列中, 就继续执行下一任务, 如果有短信回复的事件触发,那么就执行这个函数,也就是看看短信老婆同不同意.
 
 用event loop这种事件回调的形式看起来还挺高效的, 而且js一直也是这么用的, 但是当事件多了之后就会出现 /Callback hell/,
 为什么说是 callback hell 呢, 仔细看看前面例子中
@@ -66,10 +102,14 @@ js把判断老婆同不同意的函数挂到了event loop, 就继续执行下一
 
 于是CSP及时跑出来把大家从callback hell中拯救出来.
 
-CSP 的概念非常简单, 想象一下 event loop 是这样一个时序
+*** CSP, Channel, Goroutines
 
-1. CSP 把这个loop时序转换成一个队列,再把loop上挂的任务转换成数据, 我们把这个队列叫做 /channel/
-2. 所有的任务等待队列中的数据
+CSP 的概念非常简单, 想象一下 event loop
+
+1. CSP 把这个event loop的消息队列转换成一个数据队列, 把这个队列叫做 /channel/
+2. 任务等待队列中的数据
+
+[[https://www.evernote.com/shard/s23/sh/8c5eadb4-678b-4aec-b7df-ca03ffc36da5/775db9fd0da008539b45b924d30c1c50/deep/0/Csp.png]]
 
 这样就成功的把任务和异步数据成功从 callback hell 分离开来.
 
@@ -116,21 +156,23 @@ CSP 的概念非常简单, 想象一下 event loop 是这样一个时序
 - 拿 =work= 来说, =(<! texting)= 就是从 channel texting 中取数据, 如果texting为空,则parking
 - 而对于任务 =wife-texting=, =(>! texting "wife say: come home!")= 是往 channel texting 中加数据, 如果 channel 已满, 则 parking
 
+
+* CSP in JavaScript[fn:2]
+瞅瞅我们都要实现写什么
+- goroutines
+- timeout
+- take (<!)
+- put (>!)
+当然首先要实现最重要的 goroutines, 但是在这之前, 让我们看看JavaScript一个碉堡的新feature -- /generator/
+
 ** Generator
 [[http://blog.dev/javascript/essential-ecmascript6.html#sec-9][ES6 终于支持了Generator]], 目前Firefox与Chrome都已经实现.[fn:1] Generator在每次被调用时放回 =yield= 的值, 并保存状态, 下次调用时继续运行. 
 这种功能听起来刚好符合上例中神奇的 parking 的行为, 因此完全可以用 generator 来实现 CSP.
 
 [[./images/bender-generator.gif]]
 
-** CSP in JavaScript[fn:2]
-瞅瞅我们都要实现写什么
-- goroutines
-- timeout
-- take (<!)
-- put (>!)
-当然首先要实现最重要的 goroutines
 
-*** Goroutines in JavaScript
+** Goroutines in JavaScript
 goroutines 其实就是一个状态机
 - 一个函数
 - 他可以接受一个 [[(generator)][generator]]
@@ -160,7 +202,7 @@ function go(machine) {
 }
 #+END_SRC
 
-*** timeout
+** timeout
 一个类似于 thread sleep 的功能, 想让任务能等待个一段时间再执行,
 只需要在 =go_= 中加入一个 timeout 的 =case= 就好了
 #+BEGIN_SRC javascript
@@ -181,7 +223,7 @@ function timeout(interval){
 }
 #+END_SRC
 
-*** take <!
+** take <!
 当 generator 从 channel 中 take 数据时
   - 如果 channel 空, 状态变为 park
   - 如果 channel 非空, 获得数据, 状态改成 continue
@@ -202,7 +244,7 @@ function take(chan) {
 }
 #+END_SRC
 
-*** put >!
+** put >!
 当 generator 往 channel 中 put 数据
   - 如果 channel 空, 状态变为 continue, 放入数据
   - 如果 channel 非空, parking
@@ -220,7 +262,7 @@ function put(chan, val) {
 }
 #+END_SRC
 
-*** 开始翻译Clojure
+** JavaScript 版本 的 CSP
 现在可以原原本本的将之前的clojure的例子翻译成JavaScript了
 #+BEGIN_SRC javascript
 function boss_yelling(){
@@ -272,8 +314,4 @@ texting();
 
 [fn:1] Chrome有一个 feature toggle 可以打开部分 es6 功能.  打开 =chrome://flags/#enable-javascript-harmony= 设置为 =true=
 
-[fn:2] 深受 http://swannodette.github.io/2013/08/24/es6-generators-and-csp/ 启发
-
-
-
-
+[fn:2] 里面的go的实现来自 http://swannodette.github.io/2013/08/24/es6-generators-and-csp/
