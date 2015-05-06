@@ -16,14 +16,14 @@ Functor 是 可以被 map over 的类型. 什么叫 map over...
 
 =fmap= 又是什么东西, fmap 是 map over Functor 的函数.
 这个函数只干一个事情, 可能通过前面解释的一点点
-Haskell功夫,你可能能翻译=(a -> b) -> fa -> f b=了把. 给定一个从=a= 到=b=
+Haskell功夫,你可能能翻译 =(a -> b) -> fa -> f b= 了把. 给定一个从 =a= 到 =b=
 的映射函数, 再给定一个 a 的 Functor, 返回一个 b 的 Functor.
 
 虽然个个字都认识, 但怎么就不知道啥意思.
 
 如果我再说一个新词, 你是不是会疯掉了-- Lift.
 
-好吧, 把他们都串起来, 你就明白了. 1. 平常我们可以把=a=到=b=
+好吧, 把他们都串起来, 你就明白了. 1. 平常我们可以把 =a= 到 =b=
 的映射可以叫做 map, 映射的方式就是函数了. 2.
 那么类似的对于函数或者其他可以做这种 map 操作的类型或一种计算方式, 叫做
 Functor. 3. 而这种 map 就叫做 fmap, 给定 a 集合到 b
@@ -33,9 +33,14 @@ Functor. 3. 而这种 map 就叫做 fmap, 给定 a 集合到 b
 的映射 lift(举) 到另一个层面上.
 
 [[http://learnyouahaskell-zh-tw.csie.org/img/lifter.png]]
-虽然 lifting 很形象, 但是还是越说越抽象了, 来举个栗子. ### 举个栗子🌰 >
-*note* 注意我们还没有实现 Functor, 因此下面的栗子还不能运行在你的
+
+虽然 lifting 很形象, 但是还是越说越抽象了, 来举个栗子. 
+** 举个栗子🌰 
+#+BEGIN_QUOTE
+注意我们还没有实现 Functor, 因此下面的栗子还不能运行在你的
 console.
+
+#+END_QUOTE
 
 前面说了, Functor 可以是数组, 因为数组可以被 map over
 
@@ -56,8 +61,8 @@ console.
     fmap(plus1, times2)(3) // => 7 (3*2+1)
 #+END_SRC
 
-看到 fmap 返回的是一个函数, 因为你 map over 的是一个函数=times2=. 还记得
-=(a -> b) -> f a -> f b=的公式么, 因为现在的 Functor 为 Function 类型,
+看到 fmap 返回的是一个函数, 因为你 map over 的是一个函数 =times2=. 还记得
+=(a -> b) -> f a -> f b= 的公式么, 因为现在的 Functor 为 Function 类型,
 我们可以把=f=替换成函数也就是 x 到 y 的映射, 因此我们可以将该公式替换为
 
 #+BEGIN_EXAMPLE
@@ -178,9 +183,9 @@ either
     (a -> c) -> (b -> c) -> Either a b -> c
 #+END_EXAMPLE
 
-想必你已经对箭头=->=非常熟了吧.如果前面几章你都跳过了,我再翻译下好了.
-这里表示接收函数=a->c=和函数=b->c=, 再接收一个 Either, 如果 Either
-的值在左边,则使用函数映射=a->c=, 若值在右边,则应用第二个函数映射=b->c=.
+想必你已经对箭头 =->= 非常熟了吧.如果前面几章你都跳过了,我再翻译下好了.
+这里表示接收函数 =a->c= 和函数 =b->c=, 再接收一个 Either, 如果 Either
+的值在左边,则使用函数映射 =a->c=, 若值在右边,则应用第二个函数映射 =b->c=.
 
 作为 Monad, 它还必须具备一个方法 '>>='(这个符号好眼熟的说, 看看 haskell
 的 logo, 你就知道 Monad 是有多重要), 也就是 bind 方法.
@@ -341,11 +346,11 @@ bind 方法的意思很简单, 就是给这个盒子加一个操作,
 我们来总结下两种做法有什么区别: 1. 一般做法每次都会检查查尔斯挂了没挂,
 也就是重复获得之前操作的 context 2. Monad 不对异常做处理,
 只是不停地往盒子里加操作. 你可以看到对错误的处理推到了最后取值的 either.
-2. Monad 互相传递的只是盒子, 而一般写法会把异常往下传如="dead"=,
+2. Monad 互相传递的只是盒子, 而一般写法会把异常往下传如 ="dead"=,
 这样导致后面的操作都得先判断这个异常.
 
 #+BEGIN_QUOTE
-  *comment* 由于是用 JavaScript, pole 不限定类型,
+  由于是用 JavaScript, pole 不限定类型,
   所以这里单纯的用字符串代表 pole 的异常状态. 但如果换成强类型的 Java,
   可能实现就没这么简单了.
 #+END_QUOTE
@@ -364,7 +369,7 @@ context.
 
 你知道 ES6有个新的 类型
 [[https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#Browser_compatibility][Promise]]
-吗, 如果不知道, 想必也听过 jQuery 的 =$.ajax=吧, 但如果你没听过 promise,
+吗, 如果不知道, 想必也听过 jQuery 的 =$.ajax= 吧, 但如果你没听过 promise,
 说明你没有认真看过他的返回值:
 
 #+BEGIN_SRC js
@@ -384,7 +389,7 @@ context.
     ***/
 #+END_SRC
 
-我们看到返回了好多=Deferred=类型的玩意, 我们来试试这玩意有什么用
+我们看到返回了好多 =Deferred= 类型的玩意, 我们来试试这玩意有什么用
 
 #+BEGIN_SRC js
     anotherPromise = aPromise.then(_ => _.data.forEach(y=> console.log(y.description)))
@@ -407,7 +412,7 @@ context.
 
 看见没有, 他又返回了同样一个东西, 而且传给 then
 的函数可以操作这个对象里面的值. 这个对象其实就是 Promise 了.
-为什么说这是 Monad 呢, 来试试再写一次=走钢丝=:
+为什么说这是 Monad 呢, 来试试再写一次 =走钢丝=:
 
 #+BEGIN_QUOTE
   这里我们用的是 ES6 的 Promise, 而不用 jQuery Defered, 记得用 firefox
