@@ -62,7 +62,7 @@
        ("rss"
          :base-directory ,blog-path
          :base-extension "org"
-         :html-link-home ,config-home-link
+         :html-link-home ,config-base-url
          :html-link-use-abs-url t
          :rss-extension "xml"
          :publishing-directory "public"
