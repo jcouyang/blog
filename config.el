@@ -6,6 +6,7 @@
 * [[%l][%t]]
 :PROPERTIES:
 :HTML_CONTAINER_CLASS: blogentry
+:RSS_PERMALINK: %L
 :PUBDATE: %D
 :END:
 /%d/
