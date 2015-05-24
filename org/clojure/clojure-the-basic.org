@@ -3,16 +3,68 @@
 #+KEYWORDS: clojure,tutorial,emacs,lisp,jvm
 #+DATE: <2015-02-26 Thu>
 #+BEGIN_SRC emacs-lisp
-(require 'ob-clojure)** Number
+;; please using cider version of ob-clojure 
+(require 'ob-clojure)
+(setq org-babel-clojure-backend 'cider)
+#+END_SRC
+
+#+RESULTS:
+: cider
+
+* 我每天用括号当早饭
+** 为什么要学习全是括号的语言
+选择Clojure是因为
+- 专门为多线程并发编程设计
+- 跑在JVM上，使部署变得简单
+- lisp语法太简单了，函数，函数，都是函数
+- 动态类型，更灵活
+- 数据结构都是Immutable，mutable is evil
+- 与Java交互
+- 丰富的第三方库
+
+*** lisp 是好东西
+
+[[./images/lisp_cycles.png]]
+
+上世纪50年代的就有了lisp语言，都不能说它不是一门语言，因为他太多种方言了。虽然一直都不温不火，但是随着系统逻辑和计算越来越复杂，再加上分布式和并行计算。人们突然发现函数式是一个好东西，state is evil。目前比较流行的lisp方言是Clojure，Scheme。
+  
+*** 函数式是好东西
+
+OO并没有想象中的好，带状态和mutable的代码特别难推理，非常难读。需要特别多的上下文才能推理当前属于哪种状态，有哪些行为。如果再加上多线程，那就更难推理代码的行为了。
+
+*** 多态是好东西
+
+OO的多态的概念倒是有趣的好东西。一个函数在不同类型的参数能有不同的行为，使得我们的能够更灵活的建立抽象。
+*** 多线程是好东西如果用的对
+
+- Immutablility 减少了很多多线程带来的问题
+- 加锁只会阻塞并使事情更复杂，Clojure用更妙的方式解决资源共享问题。
+  
+** TODO 搭建环境
+
+首先得有一个管理依赖的玩意，如Ruby的bundler，python的pip，js的npm。clojure用leiningen。
+
+如果你用mac，简单的用brew安装leiningen
+
+#+BEGIN_SRC bash
+  brew install leiningen
+#+END_SRC
+
+clojure的编辑器我推荐使用emacs，如果你觉得emacs学习曲线太陡峭，那么[[http://lighttable.com/][light table]]是个不错的选择。
+
+
+** 来试试不一样的Clojure数据结构
+
+*** Number
 Cojure支持全面的数字类型，甚至包括分数。
 #+BEGIN_SRC clojure :exports both
 1/2
 #+END_SRC
 
 #+RESULTS:
-: 1/2
+: => 1/2
 
-** String
+*** String
 
 字符串只能用双引号定义哦，字符串的连接不再是加号，而是str
 
@@ -21,13 +73,9 @@ Cojure支持全面的数字类型，甚至包括分数。
 #+END_SRC
 
 #+RESULTS:
+: => "What's your name? I'm fine! thank you! and you?"
 
-字符串随便换行
-#+BEGIN_SRC clojure
-(def a "i am a
-break")
-#+END_SRC
-** Vector
+*** Vector
 
 向量是indexed的集合，用方括号初始化
 #+BEGIN_SRC clojure :exports both
@@ -46,7 +94,7 @@ break")
 #+RESULTS:
 : => {3 "4"}
 
-** List
+*** List
 
 和vector类似，但是却稍微不同
 #+BEGIN_SRC clojure 
@@ -65,7 +113,7 @@ break")
 #+RESULTS:
 : => 3
 
-** Set
+*** Set
 集合也一样，元素类型可以随意
 #+BEGIN_SRC clojure :exports both
 #{"1" 2 :3}
@@ -75,7 +123,7 @@ break")
 #+RESULTS:
 : => #{2 "1" :3}
 
-** Keyword
+*** Keyword
 慢着，刚刚的 =:3= 是个什么玩意
 
 没错，如果你用过ruby，基本上时一个东西,但是可以是任何字母，数字，符号，甚至包括unicode，比如emoji
@@ -89,7 +137,7 @@ break")
 :😱
 #+END_SRC
 
-** Map
+*** Map
 map 非常简单，就像将键值对写在list里，不过需要用花括号
 
 跟其他语言不一样的是key可以是任何东西，甚至是list都可以作为key
@@ -103,7 +151,7 @@ map 非常简单，就像将键值对写在list里，不过需要用花括号
 : => 0
 
 =get-in= 通过一个path数组来找到深度的某个值。
-** lisp专用的 ' 引号
+*** lisp专用的 ' 引号
 如果你觉得前面这些其实其他语言都有的话，那么你可能没有注意到在介绍list时有这样一个不起眼的玩意 '。
 
 这是什么啊？具体是什么可能需要专门的篇幅来介绍，但是这里我可以解释它大概是神马。
@@ -122,8 +170,10 @@ map 非常简单，就像将键值对写在list里，不过需要用花括号
 
 所以由于lisp里面所有的 =()= 括号都是list，但是他们是会被eval的list，他们的会返回eval后的值，但是如果在前面加上单引号，他们返回他们本身，list，不会被eval。
 
+** Special Forms
+*** def
 
-** Let
+*** let
 等等，刚刚那个 =let= 是什么玩意？let关键字非常有意思，在其他语言如js里虽然没有这个关键字，但是功能大致可以翻译成
 #+BEGIN_SRC javascript
   (function(男神,女神){
@@ -148,7 +198,7 @@ var 男神=['王尼玛','王大锤','张全蛋'],女神=['孔连顺'];
   男神; //=> 葫芦娃
 #+END_SRC
 
-** TODO loop recur
+*** TODO loop recur
 clojure的数据结构都是immutable的，意味着你（如果不用macro的话）不能像其他语言一样写for循环，也不能想其他语言这样这样的...
 #+BEGIN_SRC javascript
   var 男神=['王尼玛','王大锤','张全蛋'];
@@ -159,6 +209,7 @@ clojure的数据结构都是immutable的，意味着你（如果不用macro的�
 #+BEGIN_SRC clojure
 
 #+END_SRC
+
 ** 函数!函数!
 每个不带'的list都是函数表达式, 啊哈哈哈, 甚至是加减乘除. 比如 =(+ 1 2)=,  你可能觉得读着别扭. 但是如果
 #+BEGIN_SRC clojure
@@ -197,4 +248,6 @@ clojure是怎么做到的呢. 事实上lisp是非常简单的语言.
 (+ 1 2 3)
 6
 #+END_SRC
+
+*** lambda
 
