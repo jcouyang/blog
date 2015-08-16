@@ -7,6 +7,7 @@
 (require 'org)
 (require 'org-blog)
 (require 'htmlize)
+(setq make-backup-files nil)
 (setq debug-on-error t)
 (setq blog-path (expand-file-name "org"))
 (setq org-html-validation-link nil)
