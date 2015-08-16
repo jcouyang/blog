@@ -1,0 +1,183 @@
+#+title: 入语言第二试: readtable 与 core.async
+#+description: ru-lang version 0.2.1 新特性，引入 core.async 及 readtable
+#+keywords: macro, core.async, goroutine, coroutine, javascript, clojure, lisp, sweetjs, meta programming
+#+date: <2015-08-16 Sun>
+
+#+HTML: <a aria-label="Star jcouyang/ru on GitHub" data-count-aria-label="# stargazers on GitHub" data-count-api="/repos/jcouyang/ru#stargazers_count" data-count-href="/jcouyang/ru/stargazers" data-style="mega" data-icon="octicon-star" href="https://github.com/jcouyang/ru" class="github-button">Star</a>
+
+#+HTML: <a href="https://news.ycombinator.com/submit" class="hn-button" data-url="http://ru-lang.org" data-count="horizontal">Vote on Hacker News</a><script type="text/javascript">var HN=[];HN.factory=function(e){return function(){HN.push([e].concat(Array.prototype.slice.call(arguments,0)))};},HN.on=HN.factory("on"),HN.once=HN.factory("once"),HN.off=HN.factory("off"),HN.emit=HN.factory("emit"),HN.load=function(){var e="hn-button.js";if(document.getElementById(e))return;var t=document.createElement("script");t.id=e,t.src="//hn-button.herokuapp.com/hn-button.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(t,n)},HN.load();</script>
+
+俺的小公举淼淼最近各种 +发肚子拉烧+ 发烧拉肚子，难得抽点时间给入语言ru-lang加入俩个大大的 features，忍不住要 marketing 一下。
+
+[[./images/shit-bricks.gif]]
+
+紧接[[./clojure-essence-in-javascript-macro-2.org][上篇]]，在简单的介绍我是如何移植 clojure 的一些 macro 到 JavaScript 之后，我要介绍两个革命性的移植
+
+- readtable
+- core.async
+
+* Readtable
+readtable 在 clojure 中的意义是说 macro 可以按照几种 readtable 进行扩展，比如遇到特殊符号‘#’，就可以用另一张 table 中的 macro 来扩展了。
+
+#+BEGIN_SRC clojure
+(+ 1 2) ; a list
+#(+ 1 2) ; => (fn (+ 1 2))
+
+{:a 1 :b 2} ; hash map
+#{:a 1 :b 2} ; set
+#+END_SRC
+
+由于 sweet.js 也支持 readtable，虽然并不是很完美，我就尝试了一下让 ru-lang  也能在遇到‘#’的时候做一些特俗的扩展。比如这是我想要实现的功能，让这几种 literal 的写法遇到‘#’后扩展成 mori 对应的数据结构：
+#+BEGIN_SRC javascript
+#[bar, he] // => mori.vector(bar,he)
+#{a: 1, b: 2} //=> mori.hashMap('a', 1, 'b', 2)
+##{1, 2, 3} //=> mori.set([1,2,3])
+#+END_SRC
+
+#+BEGIN_QUOTE
+我还抽空做了一个 ru-lang repl,  所有 ru-lang 都可以在这里试运行 http://ru-lang.org/try/
+#+END_QUOTE
+
+实现再简单不过了，先创建一个 readtable，挂上‘#’
+#+BEGIN_SRC javascript
+  sweet.currentReadtable().extend({
+  '#': function(ch, reader) {
+  ...
+  }
+  })
+#+END_SRC
+
+以 vector 为例，当遇到‘#’后边为 =()= 时，将它变成 mori.vector...就好了：
+#+BEGIN_SRC javascript
+module.exports = sweet.currentReadtable().extend({
+  '#': function(ch, reader) {
+    var hashtag = reader.readIdentifier();
+    var pun = reader.readToken();
+    switch(pun.value){
+    case '[]':
+      return [reader.makeIdentifier('mori.vector')].concat(
+        reader.makeDelimiter('()',pun.inner)
+      );
+...
+#+END_SRC
+
+这样一来，我们就可以像原生 literal 创建数据结构一样使用到 mori 的可持久性数据结构了。
+
+#+BEGIN_QUOTE
+ 这里引入的 mori 是我 fork 的版本（swannodette 好像最近忙着实现 [[https://github.com/omcljs/om][om next]] 并没有心思维护 mori 的样子），暂且叫做 conjs，当然完全兼容 mori 重要的是我加入了一些其他 clojurescript 的函数以及 core.async，你可以通过 npm install [[http://github.com/jcouyang/conjs][con.js]] 安装使用。
+#+END_QUOTE
+
+* core.async
+首先，不知道这是什么的童鞋请回到[[./clojure-core.async-essence-in-native-javascript.org][这一篇]]，然后，感谢 clojurescript 的实现，使得这次移植这么顺利。懂得童鞋就会怀疑，clojurescript 不是还是用得 clojure 的 macro 来生成对应的状态机么？怎么可能轻松移植到 javascript？
+
+但是，我真的只加了几行代码就移过来了（此处掌声）
+
+[[./images/applause.jpg]]
+
+不信请看 https://github.com/jcouyang/conjs/commit/aaf843d3a1c8cf97ff8d453242fe5ea4a213a9e2
+
+移植了以后看我怎么用（更多测试在[[https://github.com/jcouyang/conjs/blob/c8af05791befa230ed73125804fa29cc0f3201fc/spec/mori-spec.js#L196][这里]]）
+#+BEGIN_SRC javascript
+  var c = async.chan()
+  async.take$(c ,function(x){
+      expect(x).toBe('something in channel')
+      done()
+  })
+  async.put$(c, 'something in channel')
+#+END_SRC
+
+等一下，这怎么是回调的 take， =go block= 在哪里？ =<! >!= 在哪里？
+
+那些都是 macro，当然我还要实现对应的 macro 了，先来看下加了  go block macro 后的效果:
+
+#+BEGIN_SRC javascript
+    var channel1 = mori.async.chan();
+    var channel2 = mori.async.chan();
+    var data2 = [1,2,3];
+    go {
+      var a <! channel1;
+      var b <! channel2;
+      expect(a).toBe("data1");
+      expect(b).toEqual([1,2,3]);
+      done();
+    };
+    go {data2 >! channel2};
+    go {'data1' >! channel1};
+#+END_SRC
+
+当然还支持 alts
+
+#+BEGIN_SRC javascript
+    var channela = mori.async.chan();
+    var channelb = mori.async.chan();
+    var data2 = [1,2,3];    
+    go {
+      var anywho <!alts [channela, channelb];
+      // vector.a(0) is equals to nth(vector, 0)
+      expect(anywho.a(0)).toEqual([1,2,3]);
+      expect(anywho.a(1)).toBe(channelb);
+      done();
+    };
+    go {data2 >! channelb};
+    go {'data1' >! channela};
+#+END_SRC
+
+ go block macro 的实现其实也没有花[[https://github.com/jcouyang/ru/blob/master/macro/async.sjs][太多的代码]]， 以 take 为例，只需要把后面的句子都放入 take 的 callback 中好了，通过我的 [[./clojure-essence-in-javascript-macro.org][sweet macro 简介]] 我想这里应该能看懂的：
+#+BEGIN_SRC javascript
+  let (<!) = macro {
+      rule infix { var $left:ident |  $right:expr $rest $[...] } => {
+          return mori.async.take$($right, function (value) {
+              $left = value
+              $rest $[...]
+          })
+      }
+      ...
+  }
+
+#+END_SRC
+
+-  一个 infix macro，左边是take应该付给的变量，右边是 take 的 channel
+- 剩下的 body 直接全丢到 take 的 callback 中。
+
+所以，上面的 take 测试放到 [[http://ru-lang.org/try/#%2520%2520%2520%2520var%2520channel1%2520%3D%2520mori.async.chan%2528%2529%3B%250A%2520%2520%2520%2520var%2520channel2%2520%3D%2520mori.async.chan%2528%2529%3B%250A%2520%2520%2520%2520var%2520data2%2520%3D%2520%5B1,2,3%5D%3B%250A%2520%2520%2520%2520go%2520{%250A%2520%2520%2520%2520%2520%2520var%2520a%2520%253C!%2520channel1%3B%250A%2520%2520%2520%2520%2520%2520var%2520b%2520%253C!%2520channel2%3B%250A%2520%2520%2520%2520%2520%2520expect%2528a%2529.toBe%2528%2522data1%2522%2529%3B%250A%2520%2520%2520%2520%2520%2520expect%2528b%2529.toEqual%2528%5B1,2,3%5D%2529%3B%250A%2520%2520%2520%2520%2520%2520done%2528%2529%3B%250A%2520%2520%2520%2520}%3B%250A%2520%2520%2520%2520go%2520{data2%2520%253E!%2520channel2}%3B%250A%2520%2520%2520%2520go%2520{%2527data1%2527%2520%253E!%2520channel1}%3B][ru-lang repl]] 中会编译成
+#+BEGIN_SRC javascript
+go {
+  var a <! channel1;
+  var b <! channel2;
+  expect(a).toBe("data1");
+  expect(b).toEqual([1,2,3]);
+  done();
+};
+// => 
+(function () {
+    return mori.async.take$(channel1, function (value) {
+        a = value;
+        return mori.async.take$(channel2, function (value$2) {
+            b = value$2;
+            expect(a).toBe('data1');
+            expect(b).toEqual([
+                1,
+                2,
+                3
+            ]);
+            done();
+        });
+    });
+}());
+#+END_SRC
+
+[[./images/what.gif]]
+
+ 没错，把 core.async 移植到 javascript，即不需要 ES6 的 generator，也不需要任何生成状态机的 macro。macro，core.async channel，callback，就这么简单，任何浏览器都能用得 core.async go block 就这么移植好了。
+
+ 从此，javascript 轻松用 persistent data structure 不是梦， 不用状态机和ES6 generator的goroutine 也不是梦。
+
+
+ 最后，小广告
+#+BEGIN_QUOTE
+如果对这个项目有兴趣, 不妨接着在hacker news
+#+HTML: <a href="https://news.ycombinator.com/submit" class="hn-button" data-url="http://ru-lang.org" data-count="horizontal">Vote on Hacker News</a><script type="text/javascript">var HN=[];HN.factory=function(e){return function(){HN.push([e].concat(Array.prototype.slice.call(arguments,0)))};},HN.on=HN.factory("on"),HN.once=HN.factory("once"),HN.off=HN.factory("off"),HN.emit=HN.factory("emit"),HN.load=function(){var e="hn-button.js";if(document.getElementById(e))return;var t=document.createElement("script");t.id=e,t.src="//hn-button.herokuapp.com/hn-button.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(t,n)},HN.load();</script>
+上讨论或 vote, 或者帮我在github上再加颗星
+#+HTML: <a aria-label="Star jcouyang/ru on GitHub" data-count-aria-label="# stargazers on GitHub" data-count-api="/repos/jcouyang/ru#stargazers_count" data-count-href="/jcouyang/ru/stargazers" data-style="mega" data-icon="octicon-star" href="https://github.com/jcouyang/ru" class="github-button">Star</a><script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+也是极好的.
+#+END_QUOTE
