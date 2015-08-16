@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Essential EcmaScript 6</title>
+<!-- 2015-08-16 Sun 14:18 -->
+<meta  charset="utf-8">
+<meta  name="generator" content="Org-mode">
+<meta  name="author" content="Jichao Ouyang">
+<meta  name="description" content="新的草案[[http://kangax.github.io/compat-table/es6/][ECMAScript 6]](虽然说是草案,但你可以看到 Firefox 其实已经实现大部分的feature)离我们越来越近了, 而且我们已经可以通过 [[https://babeljs.io/][babel]] 在项目中使用这些新的features. 是时候让我们重新认识一下 JavaScript 了. 下面列出了一部分比较让人兴奋和期待的features. 剧透一下我最激动的还是[[*Tail%20Calling][ Tail Calling]]"
+>
+<meta  name="keywords" content="es6, EcmaScript 6, babel, javascript, functional">
+<link rel="apple-touch-icon" sizes="57x57" href="/assets/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/assets/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/assets/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/assets/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/assets/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/assets/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/assets/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/assets/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="/assets/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+<link rel="manifest" href="/assets/manifest.json">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="/assets/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/style/pixyll.css"/>
+<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="http://blog.oyanglul.us/index.xml"/>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="/index.html"> UP </a>
+ |
+ <a accesskey="H" href="/~jichao.ouyang.html"> HOME </a>
+</div><div id="content">
+<h1 class="title">Essential EcmaScript 6</h1>
+<nav id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">Arrow Function</a></li>
+<li><a href="#sec-2">Let</a></li>
+<li><a href="#sec-3"><span class="done DONE">DONE</span> Proxy</a></li>
+<li><a href="#sec-4">Destructuring</a></li>
+<li><a href="#sec-5">Tail Calling</a></li>
+<li><a href="#sec-6">Template Strings</a></li>
+<li><a href="#sec-7">Class</a></li>
+<li><a href="#sec-8">Promises</a></li>
+<li><a href="#sec-9">Generator</a></li>
+</ul>
+</div>
+</nav>
+<p>
+新的草案<a href="http://kangax.github.io/compat-table/es6/">ECMAScript 6</a>
+(虽然说是草案,但你可以看到 Firefox 其实已经实现大部分的
+feature)离我们越来越近了, 而且我们已经可以通过 <a href="https://babeljs.io/">babel</a> 在项目中使用这些新的features. 是时候让我们
+重新认识一下 JavaScript 了. 下面列出了一部分比较让人兴奋和期待的features. 剧透一下我最激动的还是<i> Tail Calling</i>
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Arrow Function</h2>
+<div class="outline-text-2" id="text-1">
+<blockquote>
+<p>
+由于 arrow function 只在Firefox 22以上版本实现,
+这里所有代码都可以在Firefox的Console中调试, 其他chrome 什么的都没有实现(完全)<sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup>.
+另外每节的最后我都会给出完整代码的可执行的 jsbin 链接.
+</p>
+</blockquote>
+
+<p>
+你可以用两种方式定义一个箭头函数
+</p>
+
+<pre class="example">
+([param] [, param]) =&gt; {
+   statements
+}
+// or
+param =&gt; expression
+</pre>
+
+<p>
+单个表达式可以写成一行, 而多行语句则需要 block <code>{}</code> 括起来.
+</p>
+
+<p>
+看看旧的匿名函数怎么写一个使数组中数字都乘2的函数.
+</p>
+
+<pre class="example">
+var a = [1,2,3,4,5];
+a.map(function(x){ return x*2 });
+</pre>
+
+<p>
+用箭头函数会变成
+</p>
+
+<pre class="example">
+a.map(x =&gt; x*2);
+</pre>
+
+<p>
+只是少了 <code>function</code> 和 <code>return</code> 以及 block, 不是吗? 如果觉得差不多,
+因为你看惯了 JavaScript 的匿名函数,
+你的大脑编译器自动的忽略了,因为他们不需要显示的存在.
+</p>
+
+<p>
+而 <code>map(x =&gt; x*2)</code> 要更 make sense,
+因为我们需要的匿名函数只需要做一件事情, 我们需要的是 一个函数 <code>f</code>,
+可以将给定 <code>x</code>, 映射到 <code>y</code>.
+翻译这句话的最简单的方式不就是 <code>f = (x =&gt; x*2)</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Let</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+我喜欢用 <code>let</code> 替换了以前的 <code>var</code>, 为什么, 以前的var有什么不好.
+</p>
+
+<p>
+<code>var</code> 的意思是变量, 它自己没有任何的scope,所以的作用范围非常难以推断.
+但是我们通常只想在一个scope里给定一个值,而不影响scope外界的任何绑定.
+</p>
+
+<p>
+想想以前 <code>var</code> 的scope是什么, <code>function</code>
+</p>
+<div class="org-src-container">
+
+<pre class="src src-javascript"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span> = <span style="color: #8b0000;">'first assign'</span>
+<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">b</span> (){
+    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span> = <span style="color: #8b0000;">'second assign'</span>
+    console.log(a)
+}
+console.log(a)
+b()
+console.log(a)
+</pre>
+</div>
+
+<p>
+来看看 lisp 给了我们很好的模范如何解决绑定这种问题.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00008b;">let</span> ((something 2))
+  (+ something 1)
+  ) <span style="color: #8c8c8c; font-style: italic;">; </span><span style="color: #8c8c8c; font-style: italic;">=&gt; 3</span>
+</pre>
+</div>
+
+<p>
+es5 的 <code>let</code> 完全等价应该是
+</p>
+<div class="org-src-container">
+
+<pre class="src src-javascript">(<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">something</span>){
+    <span style="color: #00008b;">return</span> something +=1
+}).call(<span style="color: #6b8e23;">this</span>, 2)
+</pre>
+</div>
+
+<p>
+<code>let</code> 内的任何操作都不会影响外部绑定. 这样更安全而且容易推断, 这也是很多库用来封装js模块的方式, 比如jquery, 比如coffee会自动
+对每个模块添加类似的function wrapper.
+</p>
+
+<p>
+而es6, <code>let</code> 给我们带来了scope. 注意看,除了括号成了中括号,好像就是 lisp 那个意思了.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-javascript"><span style="color: #00008b;">let</span> <span style="color: #b8860b;">a</span> = <span style="color: #8b0000;">'first assign'</span>
+{
+    <span style="color: #00008b;">let</span> <span style="color: #b8860b;">a</span> = <span style="color: #8b0000;">'second assign'</span>
+    console.log(a)
+}
+console.log(a)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="done DONE">DONE</span> Proxy</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+名字解释了一切, 对, 代理, 就是能帮你做一些事情的东西.
+</p>
+
+<p>
+JavaScript是动态语言,也就是说最关心的事情是行为.所以行为也能通過meta programming让其带那么一些行为.
+</p>
+
+<p>
+试试把下列代码考到Firefox的Console中
+</p>
+<div class="org-src-container">
+
+<pre class="src src-javascript">  <span style="color: #00008b;">let</span> <span style="color: #b8860b;">github_api</span> = <span style="color: #00008b;">function</span>(){};
+  github_api.path=<span style="color: #8b0000;">'https://api.github.com'</span>;
+  <span style="color: #00008b;">let</span> <span style="color: #b8860b;">restful</span> = <span style="color: #00008b;">function</span> restfulize(<span style="color: #b8860b;">api</span>){
+      <span style="color: #00008b;">return</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Proxy</span>(api, {
+<span id="coderef-get" class="coderef-off">          <span style="color: #6a5acd;">get</span>: <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">receiver</span>, <span style="color: #b8860b;">name</span>){</span>
+              receiver.path+=<span style="color: #8b0000;">'/'</span>+name;
+              <span style="color: #00008b;">return</span> restfulize(receiver);
+          },
+<span id="coderef-apply" class="coderef-off">          <span style="color: #6a5acd;">apply</span>: <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">receiver</span>, <span style="color: #b8860b;">that</span>, <span style="color: #b8860b;">args</span>){</span>
+              console.log(`sending request to ${receiver.path}`)
+          }
+      })
+  }
+
+<span id="coderef-jcouyang" class="coderef-off">  restful(github_api).user.jcouyang()</span>
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; "sending request to https://api.github.com/user/jcouyang"</span>
+</pre>
+</div>
+
+<p>
+简单的几行代码,我们就自制了一个接口非常流畅的restful api client. 再也不用麻烦的拼接字符串,
+转成代理的方法适当接口更已读且易于重用.
+</p>
+
+<p>
+magic到底在哪呢, <code>proxy</code> 给目标函数代理了两个方法, 一个 <a href="#coderef-get"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-get');" onmouseout="CodeHighlightOff(this, 'coderef-get');">get</a>, 一个 <a href="#coderef-apply"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-apply');" onmouseout="CodeHighlightOff(this, 'coderef-apply');">apply</a>,
+</p>
+<ul class="org-ul">
+<li><code>get</code> 不管从 <code>proxy</code> 中取任何值都会运行 <code>get</code>. 
+</li>
+</ul>
+<p>
+一直返回新的相同但是path变化了的 <code>proxy</code>, 所以不管是 <code>.user</code> 还是 <code>.jcouyang</code> 
+都是拼接成 <code>path</code>, 并返回一个新的以新 <code>path</code> 为目标的proxy
+</p>
+<ul class="org-ul">
+<li><code>apply</code> 里面是运行这个proxy时要做的事情. 所以当我调用 <a href="#coderef-jcouyang"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-jcouyang');" onmouseout="CodeHighlightOff(this, 'coderef-jcouyang');">jcouyang()</a> 的时候, log就打出来了.
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4">Destructuring</h2>
+<div class="outline-text-2" id="text-4">
+
+<figure>
+<p><img src="http://i.giphy.com/G9hwRUsSFrPpK.gif" alt="G9hwRUsSFrPpK.gif">
+</p>
+</figure>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00008b;">let</span> [[first &amp; rest] [1 2 3 4 5]]
+     rest
+     ) <span style="color: #8c8c8c; font-style: italic;">; =&gt; (2 3 4 5)</span>
+</pre>
+</div>
+
+<p>
+终于也可以在 JavaScript 里面这样干了.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-javascript"><span style="color: #00008b;">let</span> [&#23380;&#36830;&#39034;, &#24352;&#20840;&#34507;] = [<span style="color: #8b0000;">'&#22899;&#31070;'</span>, <span style="color: #8b0000;">'&#30007;&#31070;'</span>]
+&#23380;&#36830;&#39034; <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; &#30007;&#31070;1</span>
+&#24352;&#20840;&#34507; <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; &#30007;&#31070;2</span>
+</pre>
+</div>
+
+<p>
+当然可以对Map这样干
+</p>
+<div class="org-src-container">
+
+<pre class="src src-javascript"><span style="color: #00008b;">let</span> {&#22899;&#31070;, &#30007;&#31070;} = {<span style="color: #8b0000;">'&#30007;&#31070;'</span>: [<span style="color: #8b0000;">'&#21776;&#39532;&#20754;'</span>, <span style="color: #8b0000;">'&#24352;&#20840;&#34507;'</span>], <span style="color: #8b0000;">'&#22899;&#31070;'</span>: <span style="color: #8b0000;">'&#23380;&#36830;&#39034;'</span>}
+&#22899;&#31070; <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; &#23380;&#36830;&#39034;</span>
+&#30007;&#31070; <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; ['&#21776;&#39532;&#20754;', '&#24352;&#20840;&#34507;']</span>
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5">Tail Calling</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+这可以说是最令人高兴的feature了,在js里写递归实在是容易爆栈的一件事情.
+</p>
+
+
+<figure>
+<p><img src="./images/tail-recur.gif" alt="tail-recur.gif">
+</p>
+</figure>
+
+<p>
+终于, 终于有了尾递归优化. 虽然大部分浏览器,包括firefox都没有实现, 但其实我们已经可以用中间编译器babel帮我们编译成
+优化过的尾递归.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">a</span>(<span style="color: #b8860b;">b</span>){
+  <span style="color: #00008b;">if</span>(b&lt;0)<span style="color: #00008b;">return</span> <span style="color: #8b0000;">"hehe"</span>
+  <span style="color: #00008b;">return</span> a(b-1)
+}
+</pre>
+</div>
+
+<p>
+duang的一下就变成了循环. 妈的再也不用担心我的 <del>菊花</del> 栈被爆了.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">a</span>(<span style="color: #b8860b;">_x</span>) {
+  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">_again</span> = <span style="color: #6b8e23;">true</span>;
+
+  _function: <span style="color: #00008b;">while</span> (_again) {
+    _again = <span style="color: #6b8e23;">false</span>;
+    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">b</span> = _x;
+
+    <span style="color: #00008b;">if</span> (b &lt; 0) {
+      <span style="color: #00008b;">return</span> <span style="color: #8b0000;">"hehe"</span>;
+    }_x = b - 1;
+    _again = <span style="color: #6b8e23;">true</span>;
+    <span style="color: #00008b;">continue</span> _function;
+  }
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6">Template Strings</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+ruby和coffeescript里面这个很fancy的东西
+</p>
+<div class="org-src-container">
+
+<pre class="src src-ruby">hi=<span style="color: #8b0000;">'&#20182;&#26159;'</span>
+<span style="color: #228b22;">puts</span> <span style="color: #8b0000;">"</span><span style="color: #b8860b;">#{hi}</span><span style="color: #8b0000;"> &#20320;&#22969;&#22969;"</span>
+</pre>
+</div>
+<p>
+终于要可以在js里原生使用了
+</p>
+<div class="org-src-container">
+
+<pre class="src src-javascript"><span style="color: #00008b;">let</span> <span style="color: #b8860b;">i</span> = <span style="color: #8b0000;">'&#20320;&#20204;'</span>,
+    love = <span style="color: #8b0000;">'&#19981;&#33021;&#22312;&#19968;&#36215;'</span>,
+    your = <span style="color: #8b0000;">'&#20182;&#26159;'</span>,
+    sister = <span style="color: #8b0000;">'&#20320;&#22969;&#22969;'</span>
+
+console.log(`${i} ${love} ${your} ${sister}`)
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; "&#20320;&#20204; &#19981;&#33021;&#22312;&#19968;&#36215; &#20182;&#26159; &#20320;&#22969;&#22969;"</span>
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7">Class</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+虽然只是 syntax sugar, 但是终于不用怪怪的用函数当对象模板了. 木哈哈哈
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-javascript"><span style="color: #00008b;">class</span> Duck <span style="color: #00008b;">extends</span> Bird {
+    constructor() {
+        <span style="color: #00008b;">super</span>();
+        <span style="color: #6b8e23;">this</span>.name = <span style="color: #8b0000;">"donald"</span>
+        <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">...</span>
+    }
+    say() {
+        <span style="color: #00008b;">return</span> <span style="color: #6b8e23;">this</span>.name + <span style="color: #8b0000;">" quack"</span>;
+    }
+    <span style="color: #00008b;">static</span> say() {
+        <span style="color: #00008b;">return</span> <span style="color: #8b0000;">"quack"</span>;
+    }
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8">Promises</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+虽然已经习惯用更强大的 <a href="https://github.com/cujojs/when">第三方库</a> 干这个事情, 但是原生支持的话也是极好的.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-javascript"><span style="color: #00008b;">new</span> <span style="color: #36648b;">Promise</span>((resolve, reject) =&gt; {
+    console.log(<span style="color: #8b0000;">'first'</span>)
+    setTimeout(resolve, 1000);
+}).then(() =&gt; {
+    console.log(<span style="color: #8b0000;">'next 1s'</span>)
+    <span style="color: #00008b;">throw</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Error</span>(<span style="color: #8b0000;">"hmm"</span>);
+}).<span style="color: #00008b;">catch</span>(err =&gt; {
+    console.log(<span style="color: #8b0000;">'finally error'</span>)
+})
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9">Generator</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+对于python程序员来说, <code>yield</code> 这个关键字可能再熟悉不过了, 终于, js 也有 <code>yield</code> 了.
+</p>
+
+
+<figure>
+<p><img src="http://i.giphy.com/XFITRJv9IMhi0.gif" alt="XFITRJv9IMhi0.gif">
+</p>
+</figure>
+
+<div class="org-src-container">
+
+<pre class="src src-javascript"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">fibonacci</span> = {
+<span id="coderef-iterator" class="coderef-off">  [Symbol.iterator]: <span style="color: #00008b;">function</span>*() {</span>
+    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">pre</span> = 0, <span style="color: #b8860b;">cur</span> = 1;
+    <span style="color: #00008b;">for</span> (;;) {
+      <span style="color: #00008b;">var</span> <span style="color: #b8860b;">temp</span> = pre;
+      pre = cur;
+      cur += temp;
+<span id="coderef-yield" class="coderef-off">      <span style="color: #00008b;">yield</span> cur;</span>
+    }
+  }
+}
+</pre>
+</div>
+
+<p>
+这短短几行代码里有三个es6的新feature
+</p>
+
+<ul class="org-ul">
+<li>Symbol: es6的新的primitive类型, <a href="#coderef-iterator"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-iterator');" onmouseout="CodeHighlightOff(this, 'coderef-iterator');"><code>Symbol.iterator</code></a> 是一个全局的symbol
+</li>
+<li>Iterator: 对象的 <a href="#coderef-iterator"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-iterator');" onmouseout="CodeHighlightOff(this, 'coderef-iterator');"><code>iterator</code></a> 上挂的函数会在被遍历的时候x调用, 如 <a href="#coderef-forof"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-forof');" onmouseout="CodeHighlightOff(this, 'coderef-forof');"><code>for..of</code></a>
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-javascript"><span id="coderef-forof" class="coderef-off"><span style="color: #00008b;">for</span> (<span style="color: #00008b;">var</span> <span style="color: #b8860b;">n</span> of fibonacci) {</span>
+  <span style="color: #00008b;">if</span> (n &gt; 100)
+    <span style="color: #00008b;">break</span>;
+  console.log(n);
+}
+</pre>
+</div>
+<ul class="org-ul">
+<li>Generator: <a href="#coderef-iterator"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-iterator');" onmouseout="CodeHighlightOff(this, 'coderef-iterator');"><code>function*</code></a> 声明该函数为生成器函数, 在每次被调用的时候返回 <a href="#coderef-yield"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-yield');" onmouseout="CodeHighlightOff(this, 'coderef-yield');"><code>yield</code></a> 的值.
+</li>
+</ul>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p class="footpara">
+Chrome有一个 feature toggle 可以打开部分 es6 功能 <i>chrome://flags/#enable-javascript-harmony</i>
+</p></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<p>Author: Jichao Ouyang</p>
+<p>Modified: 2015-08-16 Sun 13:47</p>
+<p><a href="https://travis-ci.org/jcouyang/blog"><img src="https://travis-ci.org/jcouyang/blog.svg?branch=master"></a> with <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p>&lt;&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+<p><a href="/index.xml">RSS</a> | <a href="/archive.html">ARCHIVE</a> | <a href="/theindex.html">INDEX</a> | <a href="#" id="edit-in-github">EDIT</a></p>
+
+<script>
+ (function(){
+   document.getElementById('edit-in-github').addEventListener("click",function(){
+     var pathname = window.location.pathname;
+     window.location.href = "https://github.com/jcouyang/blog/edit/master/org"+pathname.replace(".html",".org");
+   })
+ })()
+</script>
+<!-- Google Analystics -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-32314154-10', 'auto');
+  ga('send', 'pageview');
+
+</script>
+<!-- Disqus -->
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+ var disqus_shortname = 'orgblog';
+ var href = window.location.href;
+ href.replace(/^https/, 'http');
+ var disqus_url = href;
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<!-- Swiftype Search -->
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v1/st.js','_st');
+
+  _st('install','eGLqWnAM75a66SiXKVW3');
+</script>
+</div>
+</body>
+</html>
