@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>Functional JavaScript Mini Book</title>
-<!-- 2015-08-16 Sun 14:18 -->
+<!-- 2015-08-17 Mon 22:59 -->
 <meta  charset="utf-8">
 <meta  name="generator" content="Org-mode">
 <meta  name="author" content="Jichao Ouyang">
@@ -158,14 +158,15 @@ for the JavaScript code in this tag.
 </li>
 <li><a href="#sec-6">6. Monad</a>
 <ul>
-<li><a href="#sec-6-1">6.1. Either</a>
+<li><a href="#sec-6-1">6.1. Either</a></li>
+<li><a href="#sec-6-2">6.2. 走钢索</a>
 <ul>
-<li><a href="#sec-6-1-1">6.1.1. 一般解法</a></li>
-<li><a href="#sec-6-1-2">6.1.2. 现在来试试用 Either</a></li>
+<li><a href="#sec-6-2-1">6.2.1. 一般解法</a></li>
+<li><a href="#sec-6-2-2">6.2.2. 现在来试试用 Either</a></li>
 </ul>
 </li>
-<li><a href="#sec-6-2">6.2. 到底有什么用呢, Monad</a></li>
-<li><a href="#sec-6-3">6.3. Monad 在 JavaScript 中的应用</a></li>
+<li><a href="#sec-6-3">6.3. 到底有什么用呢, Monad</a></li>
+<li><a href="#sec-6-4">6.4. Monad 在 JavaScript 中的应用</a></li>
 </ul>
 </li>
 </ul>
@@ -1683,15 +1684,23 @@ Haskell功夫,你可能能翻译 <code>(a -&gt; b) -&gt; fa -&gt; f b</code> 了
 </p>
 
 <p>
-好吧, 把他们都串起来, 你就明白了. 1. 平常我们可以把 <code>a</code> 到 <code>b</code>
-的映射可以叫做 map, 映射的方式就是函数了. 2.
-那么类似的对于函数或者其他可以做这种 map 操作的类型或一种计算方式, 叫做
-Functor. 3. 而这种 map 就叫做 fmap, 给定 a 集合到 b
-集合的映射方式(也就是一个函数), 就能找到 对 a 的一种计算(computation,
-任何可变换的类型, 这就是 Functor) 的变换 &#x2013; 对 b 的对应计算方式. 4.
-如果该计算是一个函数, 那么这个操作叫做 lifting. 非常形象的, 根据 a 到 b
-的映射 lift(举) 到另一个层面上.
+好吧, 把他们都串起来, 你就明白了. 
 </p>
+<ol class="org-ol">
+<li>平常我们可以把 <code>a</code> 到 <code>b</code> 的映射可以叫做 map, 映射的方式就是函数了. 
+</li>
+<li>那么类似的对于函数或者其他可以做这种 map 操作的类型或一种计算方式, 叫做 Functor. 
+</li>
+<li>而这种 map 就叫做 fmap, 给定 a 集合到 b 集合的映射方式(也就是一个函数), 就能找到 对 a 的一种计算(computation,
+</li>
+</ol>
+<p>
+任何可变换的类型, 这就是 Functor) 的变换 &#x2013; 对 b 的对应计算方式. 
+</p>
+<ol class="org-ol">
+<li>如果该计算是一个函数, 那么这个操作叫做 lifting. 非常形象的, 根据 a 到 b 的映射 lift(举) 到另一个层面上.
+</li>
+</ol>
 
 
 <figure>
@@ -1794,8 +1803,8 @@ Either也是 Functor, 慢着, Either 是什么类型, 好吧,在解释 Either �
 
 <div class="org-src-container">
 
-<pre class="src src-js"> <span style="color: #00008b;">var</span> <span style="color: #b8860b;">types</span> = <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">obj</span>) {
-<span style="color: #00008b;">throw</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">TypeError</span>(<span style="color: #8b0000;">"fmap called on unregistered type: "</span> + obj);
+<pre class="src src-js"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">types</span> = <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">obj</span>) {
+  <span style="color: #00008b;">throw</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">TypeError</span>(<span style="color: #8b0000;">"fmap called on unregistered type: "</span> + obj);
 };
 </pre>
 </div>
@@ -1933,8 +1942,13 @@ either
 的 logo, 你就知道 Monad 是有多重要), 也就是 bind 方法.
 </p>
 
+
+<figure>
+<p><img src="http://www.haskell.org/wikistatic/haskellwiki_logo.png" alt="haskellwiki_logo.png">
+</p>
+</figure>
+
 <p>
-<img src="http://www.haskell.org/wikistatic/haskellwiki_logo.png" alt="haskellwiki_logo.png">
 bind 方法的意思很简单, 就是给这个盒子加一个操作,
 比如往盒子在加放射性原子,如果猫活着,就是绿巨猫,
 如果猫是死的,那就是绿巨死猫.
@@ -1950,22 +1964,32 @@ Right(<span style="color: #8b0000;">"deadcat"</span>).bind(cat =&gt; <span style
 </div>
 
 <p>
-这有个毛用啊. 表急&#x2026; 来看个经典例子 ### 走钢索
+这有个毛用啊. 表急&#x2026; 来看个经典例子 
 </p>
+</div>
+</div>
 
+<div id="outline-container-sec-6-2" class="outline-3">
+<h3 id="sec-6-2"><span class="section-number-3">6.2</span> 走钢索</h3>
+<div class="outline-text-3" id="text-6-2">
 <p>
 皮尔斯决定要辞掉他的工作改行试着走钢索。他对走钢索蛮在行的，不过仍有个小问题。就是鸟会停在他拿的平衡竿上。他们会飞过来停一小会儿，然后再飞走。这样的情况在两边的鸟的数量一样时并不是个太大的问题。但有时候，所有的鸟都会想要停在同一边，皮尔斯就失去了平衡，就会让他从钢索上掉下去。
 </p>
 
+
+<figure>
+<p><img src="http://learnyouahaskell-zh-tw.csie.org/img/pierre.png" alt="pierre.png">
+</p>
+</figure>
+
 <p>
-<img src="http://learnyouahaskell-zh-tw.csie.org/img/pierre.png" alt="pierre.png">
 我们这边假设两边的鸟差异在三个之内的时候，皮尔斯仍能保持平衡。
 </p>
 </div>
 
-<div id="outline-container-sec-6-1-1" class="outline-4">
-<h4 id="sec-6-1-1"><span class="section-number-4">6.1.1</span> 一般解法</h4>
-<div class="outline-text-4" id="text-6-1-1">
+<div id="outline-container-sec-6-2-1" class="outline-4">
+<h4 id="sec-6-2-1"><span class="section-number-4">6.2.1</span> 一般解法</h4>
+<div class="outline-text-4" id="text-6-2-1">
 <p>
 首先看看不用 Monad 怎么解
 </p>
@@ -2015,9 +2039,9 @@ console.log(result);
 </div>
 </div>
 
-<div id="outline-container-sec-6-1-2" class="outline-4">
-<h4 id="sec-6-1-2"><span class="section-number-4">6.1.2</span> 现在来试试用 Either</h4>
-<div class="outline-text-4" id="text-6-1-2">
+<div id="outline-container-sec-6-2-2" class="outline-4">
+<h4 id="sec-6-2-2"><span class="section-number-4">6.2.2</span> 现在来试试用 Either</h4>
+<div class="outline-text-4" id="text-6-2-2">
 <p>
 我们先把皮尔斯放进 Either 盒子里, 这样皮尔斯的状态只有打开 Either
 才能看见. 假设 Either Right 是活着, Left 的话皮尔斯挂了.
@@ -2134,21 +2158,21 @@ either(dead, stillAlive, eitherDeadOrNot)
 </div>
 </div>
 
-<div id="outline-container-sec-6-2" class="outline-3">
-<h3 id="sec-6-2"><span class="section-number-3">6.2</span> 到底有什么用呢, Monad</h3>
-<div class="outline-text-3" id="text-6-2">
+<div id="outline-container-sec-6-3" class="outline-3">
+<h3 id="sec-6-3"><span class="section-number-3">6.3</span> 到底有什么用呢, Monad</h3>
+<div class="outline-text-3" id="text-6-3">
 <p>
-我们来总结下两种做法有什么区别: 1. 一般做法每次都会检查查尔斯挂了没挂,
-也就是重复获得之前操作的 context 2. Monad 不对异常做处理,
-只是不停地往盒子里加操作. 你可以看到对错误的处理推到了最后取值的 either.
+我们来总结下两种做法有什么区别:
 </p>
+
 <ol class="org-ol">
-<li>Monad 互相传递的只是盒子, 而一般写法会把异常往下传如 ="dead"=,
+<li>一般做法每次都会检查查尔斯挂了没挂, 也就是重复获得之前操作的 context 
+</li>
+<li>Monad 不对异常做处理, 只是不停地往盒子里加操作. 你可以看到对错误的处理推到了最后取值的 either.
+</li>
+<li>Monad 互相传递的只是盒子, 而一般写法会把异常往下传如 <code>dead</code>, 这样导致后面的操作都得先判断这个异常.
 </li>
 </ol>
-<p>
-这样导致后面的操作都得先判断这个异常.
-</p>
 
 <blockquote>
 <p>
@@ -2174,9 +2198,9 @@ Maybe 有两种状态, 一种是有值 Just, 一种是没东西 Nothing,
 </div>
 </div>
 
-<div id="outline-container-sec-6-3" class="outline-3">
-<h3 id="sec-6-3"><span class="section-number-3">6.3</span> Monad 在 JavaScript 中的应用</h3>
-<div class="outline-text-3" id="text-6-3">
+<div id="outline-container-sec-6-4" class="outline-3">
+<h3 id="sec-6-4"><span class="section-number-3">6.4</span> Monad 在 JavaScript 中的应用</h3>
+<div class="outline-text-3" id="text-6-4">
 <p>
 你知道 ES6有个新的 类型
 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#Browser_compatibility">Promise</a>
@@ -2323,7 +2347,7 @@ clojure中的数据结构和函数. document严重过时, 建议看导入的<a h
 <div id="postamble" class="status">
 <p>Author: Jichao Ouyang</p>
 <p>Modified: 2015-08-16 Sun 13:47</p>
-<p><a href="https://travis-ci.org/jcouyang/blog"><img src="https://travis-ci.org/jcouyang/blog.svg?branch=master"></a> with <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p>&lt;&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
 <p><a href="/index.xml">RSS</a> | <a href="/archive.html">ARCHIVE</a> | <a href="/theindex.html">INDEX</a> | <a href="#" id="edit-in-github">EDIT</a></p>
 
