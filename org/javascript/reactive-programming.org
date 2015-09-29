@@ -1,5 +1,5 @@
 #+title: Monadic Reactive Programming in JavaScript
-#+description:  当我们都用习惯 Promise Monad 之后，我再来介绍一个跟时间相关的 Monad reactive prograaming 中的 Stream。
+#+description:  当我们都用习惯 Promise Monad 之后，我再来介绍一个跟时间相关的 Monad reactive prograaming 中的 Stream
 #+date: <2015-09-29 Tue>
 
 当我们都用习惯 Promise Monad 之后，我再来介绍一个跟时间相关的 Stream Monad，通过 Stream Monad，我们可以完成 Promise 或者是数组的奇淫巧计，而且符合所有 monad 的公理，于是我们叫它 Monadic Reactive Programming。
@@ -26,7 +26,7 @@ $('input').onChange(_=>acc+=_)
 
 而不可变的函数式应该如何解决这种问题呢？
 
-下面开始用 [[https://github.com/cujojs/most][cujojs/most]]：
+下面开始用 [[https://github.com/cujojs/most][cujojs/most]] :
 
 #+BEGIN_SRC javascript
 most.fromEvent('input', document.querySelector('input'))
@@ -40,14 +40,14 @@ most.fromEvent('input', document.querySelector('input'))
 每个 most 的 Stream 都是一个 functor，因此我们可以 map 一个函数到流上。
 
 #+BEGIN_SRC javascript
-most.from([1,2,3,4]) //<1>
+most.from([1,2,3,4]) // (ref:mostfrom)
     .map(_=>_*2)
-    .observe(_=>console.log(_)); //<2>
+    .observe(_=>console.log(_)); // (ref:observe)
 #+END_SRC
 
-这段代码会依次输出 `2 4 6 8`。
-<1> most.from 会从一个数组生成一个 most 流，跟之前的 most.fromEvent  生成一个输入流一样。
-<2> observe 用于观察流内的数据，每次流的数据变化，都会触发 observe 上的回调。
+这段代码会依次输出 =2 4 6 8=。
+- [[(mostfrom)][most.from]] 会从一个数组生成一个 most 流，跟之前的 most.fromEvent  生成一个输入流一样。
+- [[(observe)][observe]] 用于观察流内的数据，每次流的数据变化，都会触发 observe 上的回调。
 
 ** Applicative
 
@@ -57,7 +57,6 @@ most.from([1,2,3,4]) //<1>
 most.of(_=>_*2)
   .ap(most.from([1,2,3,4]))
   .observe(_=>console.log(_))
-
 #+END_SRC
 
 除了使用 Applicative 之外，我们还可以把函数 lift 起来，这样在使用上跟一般的函数就没有什么区别了，只是现在 lifted 的函数可以操作 most 流。(虽然不知道为什么官网并没有推荐（deprecated） 使用 lift，反倒我觉得是用 lift 更适合函数的重用。)
@@ -72,13 +71,14 @@ lifedMultiple2(most.of(3))
 ** Monad
 
 当然，most 的 Stream 同时也是 Monad，因此可以方便的 flatmap 一个返回 stream 的函数。
+
 #+BEGIN_SRC javascript
 most.from([1, 2])
     .flatMap(x=>most.periodic(x * 1000).take(5).constant(x))
     .observe(_=>console.log(_));
 #+END_SRC
 
-思考一下这里如果是一个数组 `[1,2]`，比如 flatMap `x=>[x*2]` 会得到一个展开的数组 `[2,4]`，而不是`[[2],[4]]`。 同样的，flatMap 一个流，得到应该是 flat 过的流，那么这里产生的两个流，`1-1-1-1-1`，和 `2---2---2---2---2`，想象一下要把两个流展开放到一个流里，空间的元素放到数组中是可以按空间排列，那么元素放到流中则是应该按照时间排列，我们做一个简单的对齐：
+思考一下这里如果是一个数组 =[1,2]=，比如 flatMap =x=>[x*2]= 会得到一个展开的数组 =[2,4]=，而不是 =[[2],[4]]= 。 同样的，flatMap 一个流，得到应该是 flat 过的流，那么这里产生的两个流，=1-1-1-1-1=，和 =2---2---2---2---2=，想象一下要把两个流展开放到一个流里，空间的元素放到数组中是可以按空间排列，那么元素放到流中则是应该按照时间排列，我们做一个简单的对齐：
 
 #+BEGIN_EXAMPLE
 1-1-1-1-1
@@ -88,4 +88,4 @@ most.from([1, 2])
 2-1-2-1-2--2--2
 #+END_EXAMPLE
 
-其中每一个 `-` 代表一秒，所以输出会是 `12-1-12-1-12--2--2`。数字之间没有 `-` 代表会同时打印，因此有可能会出现 2 在 1前的可能，其实应该是同时的。
+其中每一个 =-= 代表一秒，所以输出会是 =12-1-12-1-12--2--2=。数字之间没有 =-= 代表会同时打印，因此有可能会出现 2 在 1前的可能，其实应该是同时的。
