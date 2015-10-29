@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- 2015-10-29 Thu 23:14 -->
+<meta  charset="utf-8">
+<meta  name="viewport" content="width=device-width, initial-scale=1">
+<title>使用 dotfiles 和 stow 管理你的 dotfiles</title>
+<meta  name="generator" content="Org-mode">
+<meta  name="author" content="欧阳继超">
+<link rel="apple-touch-icon" sizes="57x57" href="/assets/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/assets/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/assets/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/assets/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/assets/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/assets/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/assets/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/assets/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="/assets/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+<link rel="manifest" href="/assets/manifest.json">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="/assets/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/style/pixyll.css"/>
+<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="http://blog.oyanglul.us/index.xml"/>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="/index.html"> UP </a>
+ |
+ <a accesskey="H" href="/~jichao.ouyang.html"> HOME </a>
+</div><div id="content">
+<header>
+<h1 class="title">使用 dotfiles 和 stow 管理你的 dotfiles</h1>
+</header><nav id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgheadline1">使用 stow 管理 symlink</a></li>
+<li><a href="#orgheadline2">push to github</a></li>
+<li><a href="#orgheadline3">submodule vs subtree</a></li>
+</ul>
+</div>
+</nav>
+<p>
+可能看标题你觉得我疯了，什么叫用 dotfiles 管理你的 dotfiles。
+</p>
+
+<p>
+第一个 <a href="http://dotfiles.github.io/">dotfiles</a> 指将 HOME 目录下的 <code>.XXX</code> (它们是真的字面意思dotfiles) 文件同步到 Github 上的方式。
+通常情况下，我们在开发过程中装的大部分工具，都会在 HOME 目录下创建一个以 <code>.</code> 开头的文件或目录，放置配置或者状态。
+</p>
+
+<p>
+因此我们希望的是用 github 版本管理这些 <b>配置</b> ，而不是 <b>状态</b> 。
+</p>
+
+<p>
+好吧，让我们来看看到底如何版本管理这些 “dotfiles”。
+</p>
+
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1">使用 stow 管理 symlink</h2>
+<div class="outline-text-2" id="text-orgheadline1">
+<p>
+GNU stow 是管理符号链接（symlink）的一个小公举。只需要
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">brew install stow
+</pre>
+</div>
+<p>
+或者如果你非 mac 机器，请访问<a href="http://www.gnu.org/software/stow/">官网</a>看看如何安装
+</p>
+
+<p>
+安装了 stow 之后，我们可以开始 symlink 一些 dotfiles 了。以 fish 和 omf 为例，它们本来的 HOME 目录下
+的结构应该是这样的：
+</p>
+<pre class="example">
+<span class="linenr">1: </span>⋊&gt; ~/dotfiles on master ⨯ tree ~/.config                                             22:25:34
+<span class="linenr">2: </span>/Users/jcouyang/.config
+<span class="linenr">3: </span>├── fish
+<span class="linenr">4: </span>│   ├── config.fish
+<span class="linenr">5: </span>│   ├── fish_history
+<span class="linenr">6: </span>│   └── fishd.a45e60d0d7e3
+<span class="linenr">7: </span>└── omf
+<span class="linenr">8: </span>    ├── bundle
+<span class="linenr">9: </span>    └── theme
+</pre>
+
+<p>
+ 注意看我们需要版本管理文件应该是 config.fish 和 omf 下的所有文件，于是，我将这些文件考到我新建
+的 <code>~/dotfiles</code> 目录下
+</p>
+
+<pre class="example">
+mkdir ~/dotfiles/
+cd ~/dotfiles
+mkdir -p fish/.config/fish
+mv ~/.config/fish/config.fish fish/.config/fish/
+ls fish/.config/fish/
+</pre>
+
+<p>
+现在可以使用 stow 创建 symlink 了。
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">stow fish
+</pre>
+</div>
+
+<p>
+瞅瞅 现在 <code>~/.config</code> 变什么样了
+</p>
+<pre class="example">
+⋊&gt; ~/dotfiles on master ⨯ tree ~/.config                                             22:33:55
+/Users/jcouyang/.config
+├── fish
+│   ├── config.fish -&gt; ../../dotfiles/fish/.config/fish/config.fish
+│   ├── fish_history
+│   └── fishd.a45e60d0d7e3
+</pre>
+
+<p>
+<code>config.fish</code> 被链到了我创建的 <code>dotfiles/fish</code> 底下同样的目录中。
+</p>
+
+<p>
+这样其实每次修改 <code>config.fish</code> 都实际上是在修改 <code>~/dotfiles</code>  下的 <code>config.fish</code>
+</p>
+
+<p>
+ 另外我们在试试管理 omf(oh-my-fish)，似乎 omf下面没有什么状态，bundle 和 theme 都是配置，所以
+与其 symlink 文件，不如 symlink 整个 omf 目录。同样在 <code>~/dotfiles</code>  目录下运行
+</p>
+
+<pre class="example">
+mkdir -p ~/dotfiles/omf/.config
+mv ~/.config/omf ~/dotfiles/omf/.config/omf
+stow omf
+</pre>
+<p>
+这时候再看看 <code>~/.config</code>
+</p>
+<pre class="example">
+/Users/jcouyang/.config
+├── fish
+│   ├── config.fish -&gt; ../../dotfiles/fish/.config/fish/config.fish
+│   ├── fish_history
+│   └── fishd.a45e60d0d7e3
+└── omf -&gt; ../dotfiles/omf/.config/omf
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-2">
+<h2 id="orgheadline2">push to github</h2>
+<div class="outline-text-2" id="text-orgheadline2">
+<p>
+强烈推荐先安装 <a href="http://hub.github.com/">hub</a>
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">brew install hub
+hub create dotfiles
+git add .
+git commit -m <span style="color: #8b0000;">"my awesome dotfiles"</span>
+git push origin master
+</pre>
+</div>
+
+<p>
+就这么简单，你的配置文件就安全的放到了 github 上，并且以后每一次改动都再也不怕改挂了。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-2">
+<h2 id="orgheadline3">submodule vs subtree</h2>
+<div class="outline-text-2" id="text-orgheadline3">
+<p>
+但是我有些配置文件其实在另外一个 repo 上，这时候我怎么能跟这个 <code>dotfiles</code> repo 合到一起呢？
+</p>
+
+<p>
+比如<a href="https://github.com/jcouyang/.emacs.d">我的 emacs 配置文件</a>，其实是单独管理在另一 repo 的。
+</p>
+
+<p>
+这时候 git 为我们提供了两种方式来管理 submodule 和 subtree。 我用的是后一种，至于 submodule
+为什么不适用，网上有<a href="http://blogs.atlassian.com/2013/05/alternatives-to-git-submodule-git-subtree/">大量文章</a>解释，我就懒得翻译了。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">&#8906;&gt; ~/dotfiles on master &#10799; git subtree add --prefix emacs/.emacs.d git@github.com:jcouyang/.emacs.d.git master --squash
+</pre>
+</div>
+<p>
+这行 subtree 命令把我的 emacs 配置从我的 repo 下下来作为 subtree，并 squash(合成一个) commits
+</p>
+
+<p>
+这时我的 git树是这样的
+</p>
+<pre class="example">
+\* commit b33c46bfebe4a28849aa967222555a4676fdb9f4 (HEAD -&gt; master)
+|\  Merge: 1b240f8 e6dacdc
+| | Author: Jichao Ouyang &lt;oyanglulu@gmail.com&gt;
+| | Date:   Thu Oct 29 21:33:06 2015 +0800
+| |
+| |     Merge commit 'e6dacdcd1f85cdcb3b5fa488edb7b8f31c297b3f' as 'emacs/.emacs.d'
+| |
+| * commit e6dacdcd1f85cdcb3b5fa488edb7b8f31c297b3f
+</pre>
+
+<p>
+可以看见把 我的 emacs repo merge 了进来，这样就跟在 <code>dotfiles</code> repo 的代码一样，该 commit 的 commit 该
+ push 的 push。
+</p>
+
+<p>
+下面看如何 push 回我的 emacs repo。
+</p>
+
+<p>
+比如我现在对 subtree emacs 做了改动并 commit 了。然后
+</p>
+
+<pre class="example">
+git remote add emacs git@github.com:jcouyang/.emacs.d.git
+git subtree push --prefix emacs/.emacs.d emacs master
+</pre>
+<ol class="org-ol">
+<li>先把 emacs 的 repo 加到我的 remote 里，给个名字 emacs</li>
+<li>用 subtree push 直接 push 到 remote emacs，branch master</li>
+</ol>
+
+<p>
+<b>LLAP 🖖</b>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p>Author: 欧阳继超</p>
+<p>Modified: 2015-10-29 Thu 23:13</p>
+<p><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.2)</p>
+<p>&lt;&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+<p><a href="/index.xml">RSS</a> | <a href="/archive.html">ARCHIVE</a> | <a href="/theindex.html">INDEX</a> | <a href="#" id="edit-in-github">EDIT</a></p>
+
+<script>
+ (function(){
+   document.getElementById('edit-in-github').addEventListener("click",function(){
+     var pathname = window.location.pathname;
+     window.location.href = "https://github.com/jcouyang/blog/edit/master/org"+pathname.replace(".html",".org");
+   })
+ })()
+</script>
+<!-- Google Analystics -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-32314154-10', 'auto');
+  ga('send', 'pageview');
+
+</script>
+<!-- Disqus -->
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+ var disqus_shortname = 'orgblog';
+ var href = window.location.href;
+ href.replace(/^https/, 'http');
+ var disqus_url = href;
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<!-- Swiftype Search -->
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v1/st.js','_st');
+
+  _st('install','eGLqWnAM75a66SiXKVW3');
+</script>
+<script>
+ ((window.gitter = {}).chat = {}).options = {
+   room: 'oyanglul.us'
+ };
+</script>
+<script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
+</div>
+</body>
+</html>
