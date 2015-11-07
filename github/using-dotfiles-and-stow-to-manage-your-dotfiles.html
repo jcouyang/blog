@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- 2015-10-29 Thu 23:22 -->
+<!-- 2015-11-08 Sun 00:47 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
 <title>使用 dotfiles 和 stow 管理你的 dotfiles</title>
@@ -87,9 +87,15 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">使用 stow 管理 symlink</a></li>
-<li><a href="#orgheadline2">push to github</a></li>
-<li><a href="#orgheadline3">submodule vs subtree</a></li>
+<li><a href="#orgheadline1">使用 stow 管理 symlink</a>
+<ul>
+<li><a href="#orgheadline2">stow 文件</a></li>
+<li><a href="#orgheadline3">stow 目录</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline4">push to github</a></li>
+<li><a href="#orgheadline5">submodule vs subtree</a></li>
+<li><a href="#orgheadline6">㊙ Sensitive dotfiles</a></li>
 </ul>
 </div>
 </nav>
@@ -108,7 +114,7 @@ for the JavaScript code in this tag.
 
 <blockquote>
 <p>
-下面例子中的 dotfiles repo 可以在<a href="https://github.com/jcouyang/dotfiles">这里找到</a>
+下面例子中的 dotfiles repo 在<a href="https://github.com/jcouyang/dotfiles">这里</a>
 </p>
 </blockquote>
 
@@ -146,7 +152,11 @@ GNU stow 是管理符号链接（symlink）的一个小公举。只需要
 <span class="linenr">8: </span>    ├── bundle
 <span class="linenr">9: </span>    └── theme
 </pre>
+</div>
 
+<div id="outline-container-orgheadline2" class="outline-3">
+<h3 id="orgheadline2">stow 文件</h3>
+<div class="outline-text-3" id="text-orgheadline2">
 <p>
  注意看我们需要版本管理文件应该是 config.fish 和 omf 下的所有文件，于是，我将这些文件考到我新建
 的 <code>~/dotfiles</code> 目录下
@@ -182,15 +192,21 @@ ls fish/.config/fish/
 </pre>
 
 <p>
-<code>config.fish</code> 被链到了我创建的 <code>dotfiles/fish</code> 底下同样的目录中。
+<code>config.fish</code> 被链到了我创建的 <code>dotfiles/fish</code> 底下同样的目录中。 重要的是两个状态文件 <code>fish_history</code> 和
+<code>fish.blahblah</code> 任然在 <code>~/.config/fish</code> 下，我们并不想要他们到我们的 dotfiles 中来。
 </p>
 
 <p>
-这样其实每次修改 <code>config.fish</code> 都实际上是在修改 <code>~/dotfiles</code>  下的 <code>config.fish</code>
+于是，这样其实每次修改 <code>config.fish</code> 都实际上是在修改 <code>~/dotfiles</code>  下的 <code>config.fish</code>
 </p>
+</div>
+</div>
 
+<div id="outline-container-orgheadline3" class="outline-3">
+<h3 id="orgheadline3">stow 目录</h3>
+<div class="outline-text-3" id="text-orgheadline3">
 <p>
- 另外我们在试试管理 omf(oh-my-fish)，似乎 omf下面没有什么状态，bundle 和 theme 都是配置，所以
+另外我们在试试管理 omf(oh-my-fish)，似乎 omf下面没有什么状态，bundle 和 theme 都是配置，所以
 与其 symlink 文件，不如 symlink 整个 omf 目录。同样在 <code>~/dotfiles</code>  目录下运行
 </p>
 
@@ -210,12 +226,20 @@ stow omf
 │   └── fishd.a45e60d0d7e3
 └── omf -&gt; ../dotfiles/omf/.config/omf
 </pre>
+<p>
+我们把整个 omf 目录都链到了 dotfile 目录下
+</p>
+</div>
 </div>
 </div>
 
-<div id="outline-container-orgheadline2" class="outline-2">
-<h2 id="orgheadline2">push to github</h2>
-<div class="outline-text-2" id="text-orgheadline2">
+<div id="outline-container-orgheadline4" class="outline-2">
+<h2 id="orgheadline4">push to github</h2>
+<div class="outline-text-2" id="text-orgheadline4">
+<p>
+下面看如何用 github 来管理这些 dotfiles
+</p>
+
 <p>
 强烈推荐先安装 <a href="http://hub.github.com/">hub</a>
 </p>
@@ -235,9 +259,9 @@ git push origin master
 </div>
 </div>
 
-<div id="outline-container-orgheadline3" class="outline-2">
-<h2 id="orgheadline3">submodule vs subtree</h2>
-<div class="outline-text-2" id="text-orgheadline3">
+<div id="outline-container-orgheadline5" class="outline-2">
+<h2 id="orgheadline5">submodule vs subtree</h2>
+<div class="outline-text-2" id="text-orgheadline5">
 <p>
 但是我有些配置文件其实在另外一个 repo 上，这时候我怎么能跟这个 <code>dotfiles</code> repo 合到一起呢？
 </p>
@@ -295,6 +319,76 @@ git subtree push --prefix emacs/.emacs.d emacs master
 <li>先把 emacs 的 repo 加到我的 remote 里，给个名字 emacs</li>
 <li>用 subtree push 直接 push 到 remote emacs，branch master</li>
 </ol>
+</div>
+</div>
+
+
+<div id="outline-container-orgheadline6" class="outline-2">
+<h2 id="orgheadline6">㊙ Sensitive dotfiles</h2>
+<div class="outline-text-2" id="text-orgheadline6">
+<p>
+有些 dotfiles  中可能涉及一些 token 或者密码，如果把他们 push 到 public 的 github 上， <del>有可能</del> 肯定会对你个人或者公司造成巨大的损失（最近公司就开始扫描个人 github 账户了🙀 好紧张）。于是我们需要对这些敏感的 dotfiles 做加密。
+</p>
+
+<p>
+比如 <code>~/.config/hub</code> 里面，有我和公司的 github 的 token，我可不像这玩意被弄到 github 上。
+</p>
+
+<p>
+目前最广泛使用的加密手段是 Gnupg，简称 gpg，一样使用 brew 装就好了
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">brew install gnupg
+</pre>
+</div>
+
+<p>
+安装完之后需要生成一个 keypair
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">gpg --gen-key
+</pre>
+</div>
+
+<p>
+输入名字，邮箱，密码之后，就 ok 了
+</p>
+
+<p>
+然后呢，我并不希望手动的每次加密完再push 到我的私有 git 上（对，即使是私有 git，安全考虑我还是需要加密，绝对不能明文存储，就是这么任性）。
+</p>
+
+<p>
+那么到底去哪弄一个私有 git 呢？如果没有，dropbox 就可以，然后现在的问题是如何在 push 的时候自动的 gpg 加密。
+</p>
+
+<p>
+现在 git remote crypt  大法就该登场了，到这里 <a href="https://github.com/joeyh/git-remote-gcrypt">https://github.com/joeyh/git-remote-gcrypt</a>  把 repo 下下来执行 <code>./install.sh</code>, 之后就应该有 <code>git-remote-gcrypt</code> 这样一个命令，先别跑
+</p>
+
+<p>
+关键在于见 remote 的时候。当我在 home 目录建了一个 <code>dotfiles-private</code> 的文件夹，stow 完各种敏感 dotfiles 之后
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">git init
+git add .
+git commit -m <span style="color: #8b0000;">"some private dotfiles"</span>
+git remote add dropbox gcrypt::rsync:///Users/jcouyang/Dropbox/dotfiles-private.git
+git push
+</pre>
+</div>
+
+<p>
+你会被问到刚才创建 gpg keypair 时输入的密码，然后&#x2026;
+</p>
+
+<p>
+看，两坨 gpg 加密过的文件
+<img src="https://www.evernote.com/l/ABezPtVV1YxHFrYpAsVE_G_oc5-O0bmzqYMB/image.png" alt="image.png">
+</p>
 
 <p>
 <b>LLAP 🖖</b>
@@ -303,10 +397,12 @@ git subtree push --prefix emacs/.emacs.d emacs master
 </div>
 </div>
 <div id="postamble" class="status">
-<p>Author: 欧阳继超</p>
+<p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
 <p>Modified: 2015-10-29 Thu 23:13</p>
-<p><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.2)</p>
-<p>&lt;&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+<p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.2)</p>
+<p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
+
 <p><a href="/index.xml">RSS</a> | <a href="/archive.html">ARCHIVE</a> | <a href="/theindex.html">INDEX</a> | <a href="#" id="edit-in-github">EDIT</a></p>
 
 <script>
@@ -328,6 +424,7 @@ git subtree push --prefix emacs/.emacs.d emacs master
   ga('send', 'pageview');
 
 </script>
+<script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
 <!-- Disqus -->
 <div id="disqus_thread"></div>
 <script type="text/javascript">
