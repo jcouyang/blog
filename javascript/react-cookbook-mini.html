@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- 2015-11-12 Thu 21:46 -->
+<meta  charset="utf-8">
+<meta  name="viewport" content="width=device-width, initial-scale=1">
+<title>A Compact React Cookbook</title>
+<meta  name="generator" content="Org-mode">
+<meta  name="author" content="Jichao Ouyang">
+<link rel="apple-touch-icon" sizes="57x57" href="/assets/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/assets/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/assets/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/assets/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/assets/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/assets/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/assets/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/assets/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="/assets/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+<link rel="manifest" href="/assets/manifest.json">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="/assets/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/style/pixyll.css"/>
+<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="http://blog.oyanglul.us/index.xml"/>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="/index.html"> UP </a>
+ |
+ <a accesskey="H" href="/~jichao.ouyang.html"> HOME </a>
+</div><div id="content">
+<header>
+<h1 class="title">A Compact React Cookbook</h1>
+</header><nav id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgheadline5">1. Why not 2 way binding/为毛不用双向绑定</a>
+<ul>
+<li><a href="#orgheadline1">1.1. 双向绑定</a></li>
+<li><a href="#orgheadline2">1.2. 单向绑定</a></li>
+<li><a href="#orgheadline3">1.3. 双向有什么不好</a></li>
+<li><a href="#orgheadline4">1.4. 单向有什么好</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline8">2. What's Virtual DOM, why should we care / 为毛要用 Vitual Dom</a>
+<ul>
+<li><a href="#orgheadline6">2.1. 以前是如何操作 DOM 的 （Mutable）</a></li>
+<li><a href="#orgheadline7">2.2. Virtual DOM （Immutable）</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline15">3. Why Immutable</a>
+<ul>
+<li><a href="#orgheadline9">3.1. 状态</a></li>
+<li><a href="#orgheadline10">3.2. Class</a></li>
+<li><a href="#orgheadline14">3.3. 让你的数据结构 immutable 的工具们</a>
+<ul>
+<li><a href="#orgheadline11">Immutablility helper</a></li>
+<li><a href="#orgheadline12">mori</a></li>
+<li><a href="#orgheadline13">Immutable.js</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orgheadline19">4. How to do Unit test React project</a>
+<ul>
+<li><a href="#orgheadline16">4.1. Jest</a></li>
+<li><a href="#orgheadline17">4.2. jasmine</a></li>
+<li><a href="#orgheadline18">4.3. mocha</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline20">5. Modular and Components</a></li>
+<li><a href="#orgheadline21">6. How should I thinking in react way</a></li>
+<li><a href="#orgheadline22">7. What about Data Fetching</a></li>
+<li><a href="#orgheadline23">8. What about Router</a></li>
+<li><a href="#orgheadline24">9. How to communicate between two components that don't have a parent-child relationship</a></li>
+<li><a href="#orgheadline25">10. When should I use "key"</a></li>
+<li><a href="#orgheadline26">11. What's these Warnings</a></li>
+<li><a href="#orgheadline27">12. How to Profile Component Perfomance</a></li>
+</ul>
+</div>
+</nav>
+
+<div id="outline-container-orgheadline5" class="outline-2">
+<h2 id="orgheadline5"><span class="section-number-2">1</span> Why not 2 way binding/为毛不用双向绑定</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+解释这个问题我们需要先看什么是双向绑定，什么是单向绑定
+</p>
+</div>
+
+<div id="outline-container-orgheadline1" class="outline-3">
+<h3 id="orgheadline1"><span class="section-number-3">1.1</span> 双向绑定</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+也就是dom 上的 value 与 controller 或者 view controller 上的绑定，值保持一致。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-3">
+<h3 id="orgheadline2"><span class="section-number-3">1.2</span> 单向绑定</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+dom 上的值来源于 controller，但是 dom 上的值改变不会改变 controller 上的值。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-3">
+<h3 id="orgheadline3"><span class="section-number-3">1.3</span> 双向有什么不好<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup></h3>
+<div class="outline-text-3" id="text-1-3">
+<ul class="org-ul">
+<li>perfomance</li>
+<li>我们真的需要吗？实际上有多少值是真的需要双向绑的</li>
+<li>到底谁动了我的值？too many sources of truth</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-3">
+<h3 id="orgheadline4"><span class="section-number-3">1.4</span> 单向有什么好</h3>
+<div class="outline-text-3" id="text-1-4">
+<ul class="org-ul">
+<li>只有一个 source of truth,  代码好 reason about</li>
+<li>更快</li>
+<li>需要的时候自己绑一把，也并不是多麻烦的事</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">TwoWayBindingInput</span> = React.createClass({
+  <span style="color: #6a5acd;">getInitialState</span>: <span style="color: #00008b;">function</span>() {
+    <span style="color: #00008b;">return</span> {message: <span style="color: #8b0000;">'Hello!'</span>};
+  },
+  <span style="color: #6a5acd;">handleChange</span>: <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">event</span>) {
+<span id="coderef-setstate" class="coderef-off">    <span style="color: #6b8e23;">this</span>.setState({message: event.target.value}); <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;=</span> (setstate)</span>
+  },
+  <span style="color: #6a5acd;">render</span>: <span style="color: #00008b;">function</span>() {
+    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">message</span> = <span style="color: #6b8e23;">this</span>.state.message;
+<span id="coderef-value" class="coderef-off">    <span style="color: #00008b;">return</span> &lt;input type=<span style="color: #8b0000;">"text"</span> value={message} onChange={<span style="color: #6b8e23;">this</span>.handleChange} /&gt;; <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;=</span> (value)</span>
+  }
+});
+</pre>
+</div>
+
+<p>
+注意看这个双向绑定，<a href="#coderef-value"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-value');" onmouseout="CodeHighlightOff(this, 'coderef-value');">第value行</a> 是单向绑定值 <code>message</code> 到 <code>input</code> 元素上，<a href="#coderef-setstate"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-setstate');" onmouseout="CodeHighlightOff(this, 'coderef-setstate');">第setstate行</a> 是把 <code>input</code> 元素的值绑定回来，但是 <b>注意看</b> 这里绑定回来需要通过 <code>setState</code> 来完成，这就保证了 React Component 的 source of truth 还是只有 state。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline8" class="outline-2">
+<h2 id="orgheadline8"><span class="section-number-2">2</span> What's Virtual DOM, why should we care / 为毛要用 Vitual Dom</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-orgheadline6" class="outline-3">
+<h3 id="orgheadline6"><span class="section-number-3">2.1</span> 以前是如何操作 DOM 的 （Mutable）</h3>
+<div class="outline-text-3" id="text-2-1">
+<ol class="org-ol">
+<li>query 到 DOM 上一个元素</li>
+<li>改吧改吧</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-orgheadline7" class="outline-3">
+<h3 id="orgheadline7"><span class="section-number-3">2.2</span> Virtual DOM （Immutable）</h3>
+<div class="outline-text-3" id="text-2-2">
+<ol class="org-ol">
+<li>想好要往 DOM 上放什么东西</li>
+<li>把它给 Virtual DOM</li>
+<li><p>
+Virtual DOM 决定哪些应该修改 DOM 哪些不用
+</p>
+
+<p>
+为什么说前者是 Mutable 后者是 Immutable，这是相对你的业务逻辑来说的。
+</p></li>
+</ol>
+<p>
+DOM 本身是 Mutable 的东西，把它柔和到你的业务上给你的逻辑加上了不少 mutable 的因素，而 Virtual DOM 成功的屏蔽掉了 mutable 的 DOM，每次 render 的 Component 其实都是新的，并不是以前 Component 的修改。
+</p>
+
+<p>
+所以使用 Virutal DOM
+</p>
+<ul class="org-ul">
+<li>容易 reason about， 因为 immutable</li>
+<li>快</li>
+<li>把紧耦合编程了高内聚</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline15" class="outline-2">
+<h2 id="orgheadline15"><span class="section-number-2">3</span> Why Immutable</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Immutable 是函数式的概念之一，一旦创建出来之后，就不能再改变。因此，当你想对其做修改，就得弄一个新的。
+</p>
+
+<p>
+好奇的同学要问了，但是 React 看起来是面向对象的啊。 <code>createClass</code> ， <code>state</code> ，函数式有状态和 class 吗？
+</p>
+
+<blockquote>
+<p>
+If a tree falls in a forest and no one is around to hear it, does it make a sound? <sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup>
+</p>
+</blockquote>
+
+<p>
+首先，函数式和面向对象并不冲突，两种编程范式分别有各自的方式解决问题。
+</p>
+
+<p>
+其次：
+</p>
+</div>
+<div id="outline-container-orgheadline9" class="outline-3">
+<h3 id="orgheadline9"><span class="section-number-3">3.1</span> 状态</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+如果状态只存在于 Component 中又并没有影响任何人，它还是状态吗？
+</p>
+
+<p>
+ClojureScript 的 React 库 om，只有一个 app 级别的 state。因此所有的 component，其实并无状态。
+</p>
+
+<p>
+<a href="https://youtu.be/5yHFTN-_mOo">https://youtu.be/5yHFTN-_mOo</a>
+</p>
+</div>
+</div>
+<div id="outline-container-orgheadline10" class="outline-3">
+<h3 id="orgheadline10"><span class="section-number-3">3.2</span> Class</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+想象一下使用一个 React Component 的时候
+</p>
+<div class="org-src-container">
+
+<pre class="src src-js">&lt;AFancyHelloWord message=<span style="color: #8b0000;">"Good News Everyone!"</span>/&gt;
+</pre>
+</div>
+<p>
+来想象一下
+</p>
+<ol class="org-ol">
+<li>尖括号 <code>&lt;</code> 往右移</li>
+<li>尖括号变成圆括号</li>
+<li>里面再加个大括号</li>
+<li>等号变冒号</li>
+</ol>
+<div class="org-src-container">
+
+<pre class="src src-js">AFancyHelloWord({message:<span style="color: #8b0000;">"Good News Everyone!"</span>})
+</pre>
+</div>
+
+<p>
+ok, 如果把每个 Component 看成一个函数，为了我们的代码更好 reason about 而且更 loose couple，我们应该尽量要 <b>消除</b> 每一个 Component 的状态。
+ 这样在 Component 的树中，我们可以随意切换 Component
+</p>
+
+<figure>
+<p><img src="images/react-tree.png" alt="react-tree.png">
+</p>
+</figure>
+
+<p>
+当 Anakin 编程 Darth Vader，光剑的颜色变红时：
+</p>
+
+
+<figure>
+<p><img src="images/react-tree-swap.png" alt="react-tree-swap.png">
+</p>
+</figure>
+</div>
+</div>
+
+<div id="outline-container-orgheadline14" class="outline-3">
+<h3 id="orgheadline14"><span class="section-number-3">3.3</span> 让你的数据结构 immutable 的工具们</h3>
+<div class="outline-text-3" id="text-3-3">
+</div><div id="outline-container-orgheadline11" class="outline-4">
+<h4 id="orgheadline11"><a href="http://facebook.github.io/react/docs/update.html">Immutablility helper</a></h4>
+<div class="outline-text-4" id="text-orgheadline11">
+<p>
+这是 react addon 中自带的工具，如果你并不想完整的 Immutable 数据结构，这个工具可以帮助 copy 一份来做改动
+</p>
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">update</span> = require(<span style="color: #8b0000;">'react-addons-update'</span>);
+<span style="color: #00008b;">var</span> <span style="color: #b8860b;">inc</span> = x=&gt;x+1
+<span style="color: #00008b;">var</span> <span style="color: #b8860b;">fancyPropsForChild</span>=update(<span style="color: #6b8e23;">this</span>.state, {
+    x: {y: {z: {$set: 7}}},
+    a: {b: {$push: [9]}},
+    h: {$merge: {i: <span style="color: #8b0000;">"j"</span>}},
+    e: {$apply: inc}
+});
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline12" class="outline-4">
+<h4 id="orgheadline12"><a href="https://github.com/swannodette/mori">mori</a></h4>
+<div class="outline-text-4" id="text-orgheadline12">
+<p>
+更为彻底的选择是，使用 ClojureScript 的 Immutable 数据结构。benchmark 要比 facebook 的 Immutable.js 好上许多，但是使用上跟 ClojureScript 一致， 用惯JavaScript的人可能不太能习惯，alternative 是使用我 fork 的 mori 版本<a href="http://github.com/jcouyang/conjs">conjs</a>。
+</p>
+</div>
+</div>
+<div id="outline-container-orgheadline13" class="outline-4">
+<h4 id="orgheadline13"><a href="https://facebook.github.io/immutable-js/">Immutable.js</a></h4>
+<div class="outline-text-4" id="text-orgheadline13">
+<p>
+facebook 实现的 immutable 数据结构，使用上比较符合 JavaScript 习惯一些， 不过跑分低一些。
+</p>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgheadline19" class="outline-2">
+<h2 id="orgheadline19"><span class="section-number-2">4</span> How to do Unit test React project</h2>
+<div class="outline-text-2" id="text-4">
+</div><div id="outline-container-orgheadline16" class="outline-3">
+<h3 id="orgheadline16"><span class="section-number-3">4.1</span> <a href="http://facebook.github.io/jest/">Jest</a></h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+总的来说，jest 的测试理念解决了非常多的前端测试的棘手问题，我做过一个关于 jest 的 session， 文章在 <a href="https://gistdeck.github.com/jcouyang/34686f695cd28309759e">这里</a>。 文章可能写得有点早，非常知道高兴的是终于支持<a href="https://github.com/facebook/jest/blob/master/package.json#L34">最新的 nodejs 了</a>，而且 重要的是 facebook 使用 jest 测试 react，有一些非常方便的 mock component 的方法。
+</p>
+
+<p>
+recap 一下主要是
+</p>
+<ul class="org-ul">
+<li>automock/ manual mock</li>
+<li>jsdom</li>
+<li>并行测试</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline17" class="outline-3">
+<h3 id="orgheadline17"><span class="section-number-3">4.2</span> jasmine</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+jasmine  只是一个引擎，jest 也是用 jasmine 作为引擎。但是如果由于某种原因你不想用 jest 的话，可能你需要花更多的 effort 在：
+</p>
+<ul class="org-ul">
+<li>mock （rewire.js）</li>
+<li>runner (karma)</li>
+<li>headless browser for ci(phantomjs)</li>
+</ul>
+
+<p>
+所以并不推荐花这么大 effort 去撘一个 jasmine 的测试环境，关键还会有一系列的问题
+</p>
+<ul class="org-ul">
+<li>phantomjs 怪怪的 issue</li>
+<li>karma 复杂的配置</li>
+<li>rewire 也有一些坑</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline18" class="outline-3">
+<h3 id="orgheadline18"><span class="section-number-3">4.3</span> mocha</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+没试过用来测 React，不过 mocha 比 jasmine 好的一点是本身就可以跑在 node 上，使用 sinon（mock） 和 should.js（assert） 是个非常强大的一套测试工具。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline20" class="outline-2">
+<h2 id="orgheadline20"><span class="section-number-2">5</span> Modular and Components</h2>
+<div class="outline-text-2" id="text-5">
+<ul class="org-ul">
+<li>browserify
+简单的 modular  bundler，推荐</li>
+<li>webpack
+以 grunt 的方式 browserify 你的代码，非常强大的 bundler。但是个人并不喜欢 grunt，karma，webpack 这种基于配置的货。</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline21" class="outline-2">
+<h2 id="orgheadline21"><span class="section-number-2">6</span> How should I thinking in react way</h2>
+<div class="outline-text-2" id="text-6">
+<ul class="org-ul">
+<li><a href="http://facebook.github.io/react/docs/thinking-in-react.html">http://facebook.github.io/react/docs/thinking-in-react.html</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline22" class="outline-2">
+<h2 id="orgheadline22"><span class="section-number-2">7</span> What about Data Fetching</h2>
+<div class="outline-text-2" id="text-7">
+<ul class="org-ul">
+<li>just <a href="https://github.com/cujojs/rest">rest</a></li>
+<li>relay/graphql
+官方 data fetching 解决方案</li>
+<li><a href="https://github.com/netflix/falcor">falcor</a>
+ netflix 的简单版的 graphql可以参考我的 <a href="https://github.com/jcouyang/react-falcor">todo falcor</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline23" class="outline-2">
+<h2 id="orgheadline23"><span class="section-number-2">8</span> What about Router</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+isomorphic router
+</p>
+<ul class="org-ul">
+<li><a href="https://github.com/flatiron/director">direactor</a></li>
+<li><a href="https://github.com/rackt/react-router">react router</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline24" class="outline-2">
+<h2 id="orgheadline24"><span class="section-number-2">9</span> How to communicate between two components that don't have a parent-child relationship<sup><a id="fnr.3" class="footref" href="#fn.3">3</a></sup></h2>
+<div class="outline-text-2" id="text-9">
+<p>
+你可能需要一个全局的一些东西
+</p>
+<ul class="org-ul">
+<li>event</li>
+<li>flux</li>
+<li>router</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orgheadline25" class="outline-2">
+<h2 id="orgheadline25"><span class="section-number-2">10</span> When should I use "key"</h2>
+</div>
+
+<div id="outline-container-orgheadline26" class="outline-2">
+<h2 id="orgheadline26"><span class="section-number-2">11</span> What's these Warnings</h2>
+</div>
+
+<div id="outline-container-orgheadline27" class="outline-2">
+<h2 id="orgheadline27"><span class="section-number-2">12</span> How to Profile Component Perfomance</h2>
+<div class="outline-text-2" id="text-12">
+<ul class="org-ul">
+<li>react profile</li>
+</ul>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://www.quora.com/Why-is-the-two-way-data-binding-being-dropped-in-Angular-2">https://www.quora.com/Why-is-the-two-way-data-binding-being-dropped-in-Angular-2</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://en.wikipedia.org/wiki/If_a_tree_falls_in_a_forest">https://en.wikipedia.org/wiki/If_a_tree_falls_in_a_forest</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+<a href="http://facebook.github.io/react/tips/communicate-between-components.html">http://facebook.github.io/react/tips/communicate-between-components.html</a>
+</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
+<p>Modified: 2015-11-12 Thu 21:43</p>
+<p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.2)</p>
+<p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
+
+<p><a href="/index.xml">RSS</a> | <a href="/archive.html">ARCHIVE</a> | <a href="/theindex.html">INDEX</a> | <a href="#" id="edit-in-github">EDIT</a></p>
+
+<script>
+ (function(){
+   document.getElementById('edit-in-github').addEventListener("click",function(){
+     var pathname = window.location.pathname;
+     window.location.href = "https://github.com/jcouyang/blog/edit/master/org"+pathname.replace(".html",".org");
+   })
+ })()
+</script>
+<!-- Google Analystics -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-32314154-10', 'auto');
+  ga('send', 'pageview');
+
+</script>
+<script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+<!-- Disqus -->
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+ var disqus_shortname = 'orgblog';
+ var href = window.location.href;
+ href.replace(/^https/, 'http');
+ var disqus_url = href;
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<!-- Swiftype Search -->
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v1/st.js','_st');
+
+  _st('install','eGLqWnAM75a66SiXKVW3');
+</script>
+</div>
+</body>
+</html>
