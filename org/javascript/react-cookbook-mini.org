@@ -1,0 +1,221 @@
+#+title: A Compact React Cookbook
+#+author: Jichao Ouyang
+#+date: <2015-11-08 Sun>
+#+options: num:2
+
+* COMMENT imports
+#+BEGIN_SRC emacs-lisp
+(require 'ob-dot)
+#+END_SRC
+
+#+RESULTS:
+: ob-dot
+
+* Why not 2 way binding/为毛不用双向绑定
+解释这个问题我们需要先看什么是双向绑定，什么是单向绑定
+
+** 双向绑定
+也就是dom 上的 value 与 controller 或者 view controller 上的绑定，值保持一致。
+
+** 单向绑定
+dom 上的值来源于 controller，但是 dom 上的值改变不会改变 controller 上的值。
+
+** 双向有什么不好[fn:1]
+- perfomance
+- 我们真的需要吗？实际上有多少值是真的需要双向绑的
+- 到底谁动了我的值？too many sources of truth
+
+** 单向有什么好
+- 只有一个 source of truth,  代码好 reason about
+- 更快
+- 需要的时候自己绑一把，也并不是多麻烦的事
+
+#+BEGIN_SRC js
+var TwoWayBindingInput = React.createClass({
+  getInitialState: function() {
+    return {message: 'Hello!'};
+  },
+  handleChange: function(event) {
+    this.setState({message: event.target.value}); // <= (ref:setstate)
+  },
+  render: function() {
+    var message = this.state.message;
+    return <input type="text" value={message} onChange={this.handleChange} />; // <= (ref:value)
+  }
+});
+#+END_SRC
+
+注意看这个双向绑定，[[(value)][第(value)行]] 是单向绑定值 =message= 到 =input= 元素上，[[(setstate)][第(setstate)行]] 是把 =input= 元素的值绑定回来，但是 *注意看* 这里绑定回来需要通过 =setState= 来完成，这就保证了 React Component 的 source of truth 还是只有 state。
+
+* What's Virtual DOM, why should we care / 为毛要用 Vitual Dom
+
+** 以前是如何操作 DOM 的 （Mutable）
+1. query 到 DOM 上一个元素
+2. 改吧改吧
+
+** Virtual DOM （Immutable）
+1. 想好要往 DOM 上放什么东西
+2. 把它给 Virtual DOM
+3. Virtual DOM 决定哪些应该修改 DOM 哪些不用
+
+ 为什么说前者是 Mutable 后者是 Immutable，这是相对你的业务逻辑来说的。
+DOM 本身是 Mutable 的东西，把它柔和到你的业务上给你的逻辑加上了不少 mutable 的因素，而 Virtual DOM 成功的屏蔽掉了 mutable 的 DOM，每次 render 的 Component 其实都是新的，并不是以前 Component 的修改。
+
+所以使用 Virutal DOM
+- 容易 reason about， 因为 immutable
+- 快
+- 把紧耦合编程了高内聚
+
+* Why Immutable	
+ Immutable 是函数式的概念之一，一旦创建出来之后，就不能再改变。因此，当你想对其做修改，就得弄一个新的。
+
+好奇的同学要问了，但是 React 看起来是面向对象的啊。 =createClass= ， =state= ，函数式有状态和 class 吗？
+
+#+BEGIN_QUOTE
+If a tree falls in a forest and no one is around to hear it, does it make a sound? [fn:2]
+#+END_QUOTE 
+
+首先，函数式和面向对象并不冲突，两种编程范式分别有各自的方式解决问题。
+
+其次：
+** 状态
+如果状态只存在于 Component 中又并没有影响任何人，它还是状态吗？
+
+ClojureScript 的 React 库 om，只有一个 app 级别的 state。因此所有的 component，其实并无状态。
+
+https://youtu.be/5yHFTN-_mOo
+** Class
+想象一下使用一个 React Component 的时候
+#+BEGIN_SRC js
+<AFancyHelloWord message="Good News Everyone!"/>
+#+END_SRC
+来想象一下
+1. 尖括号 =<= 往右移
+2. 尖括号变成圆括号
+3. 里面再加个大括号
+4. 等号变冒号
+#+BEGIN_SRC js
+AFancyHelloWord({message:"Good News Everyone!"})
+#+END_SRC
+
+ok, 如果把每个 Component 看成一个函数，为了我们的代码更好 reason about 而且更 loose couple，我们应该尽量要 *消除* 每一个 Component 的状态。
+#+BEGIN_SRC ditaa :file ? :exports results
+#+END_SRC
+
+ 这样在 Component 的树中，我们可以随意切换 Component
+#+BEGIN_SRC dot :file images/react-tree.png :exports results
+    digraph component {
+    Luke [label="Luke Skywalker"]
+    Anakin [label="Anakin Skywalker"]
+    Darth [label="Darth Vader", color=gray]
+  
+  Lightsaber [label="Lightsaber"]
+    Anakin -> Luke
+    Anakin -> Lightsaber
+    }
+#+END_SRC
+
+#+RESULTS:
+[[file:images/react-tree.png]]
+
+当 Anakin 编程 Darth Vader，光剑的颜色变红时：
+
+#+BEGIN_SRC dot :file images/react-tree-swap.png :exports results
+    digraph component {
+    Luke [label="Luke Skywalker"]
+    Anakin [label="Anakin Skywalker", color=gray]
+    Darth [label="Darth Vader"]
+
+  Lightsaber [label="Red Lightsaber", color=red]
+    Darth -> Luke [xlabel="im your father!"]
+    Darth -> Lightsaber
+    }
+#+END_SRC
+
+#+RESULTS:
+[[file:images/react-tree-swap.png]]
+
+** 让你的数据结构 immutable 的工具们
+*** [[http://facebook.github.io/react/docs/update.html][Immutablility helper]]
+这是 react addon 中自带的工具，如果你并不想完整的 Immutable 数据结构，这个工具可以帮助 copy 一份来做改动
+#+BEGIN_SRC js
+  var update = require('react-addons-update');
+  var inc = x=>x+1
+  var fancyPropsForChild=update(this.state, {
+      x: {y: {z: {$set: 7}}},
+      a: {b: {$push: [9]}},
+      h: {$merge: {i: "j"}},
+      e: {$apply: inc}
+  });
+#+END_SRC
+
+*** [[https://github.com/swannodette/mori][mori]]
+更为彻底的选择是，使用 ClojureScript 的 Immutable 数据结构。benchmark 要比 facebook 的 Immutable.js 好上许多，但是使用上跟 ClojureScript 一致， 用惯JavaScript的人可能不太能习惯，alternative 是使用我 fork 的 mori 版本[[http://github.com/jcouyang/conjs][conjs]]。
+*** [[https://facebook.github.io/immutable-js/][Immutable.js]]
+facebook 实现的 immutable 数据结构，使用上比较符合 JavaScript 习惯一些， 不过跑分低一些。
+
+
+* How to do Unit test React project	
+** [[http://facebook.github.io/jest/][Jest]]
+总的来说，jest 的测试理念解决了非常多的前端测试的棘手问题，我做过一个关于 jest 的 session， 文章在 [[https://gistdeck.github.com/jcouyang/34686f695cd28309759e][这里]]。 文章可能写得有点早，非常知道高兴的是终于支持[[https://github.com/facebook/jest/blob/master/package.json#L34][最新的 nodejs 了]]，而且 重要的是 facebook 使用 jest 测试 react，有一些非常方便的 mock component 的方法。
+
+recap 一下主要是
+- automock/ manual mock
+- jsdom
+- 并行测试
+
+** jasmine
+ jasmine  只是一个引擎，jest 也是用 jasmine 作为引擎。但是如果由于某种原因你不想用 jest 的话，可能你需要花更多的 effort 在：
+- mock （rewire.js）
+- runner (karma)
+- headless browser for ci(phantomjs)
+
+所以并不推荐花这么大 effort 去撘一个 jasmine 的测试环境，关键还会有一系列的问题
+- phantomjs 怪怪的 issue
+- karma 复杂的配置
+- rewire 也有一些坑
+
+** mocha
+没试过用来测 React，不过 mocha 比 jasmine 好的一点是本身就可以跑在 node 上，使用 sinon（mock） 和 should.js（assert） 是个非常强大的一套测试工具。
+
+* Modular and Components
+- browserify
+ 简单的 modular  bundler，推荐
+- webpack
+ 以 grunt 的方式 browserify 你的代码，非常强大的 bundler。但是个人并不喜欢 grunt，karma，webpack 这种基于配置的货。
+
+* How should I thinking in react way
+- http://facebook.github.io/react/docs/thinking-in-react.html
+
+* What about Data Fetching
+- just [[https://github.com/cujojs/rest][rest]]
+- relay/graphql
+ 官方 data fetching 解决方案
+- [[https://github.com/netflix/falcor][falcor]]
+ netflix 的简单版的 graphql可以参考我的 [[https://github.com/jcouyang/react-falcor][todo falcor]]
+
+* What about Router
+isomorphic router
+- [[https://github.com/flatiron/director][direactor]]
+- [[https://github.com/rackt/react-router][react router]]
+
+* How to communicate between two components that don't have a parent-child relationship[fn:3]
+你可能需要一个全局的一些东西
+- event
+- flux
+- router
+
+
+* When should I use "key"
+
+* What's these Warnings
+
+* How to Profile Component Perfomance
+- react profile
+
+* Footnotes
+[fn:3] http://facebook.github.io/react/tips/communicate-between-components.html
+
+[fn:1] https://www.quora.com/Why-is-the-two-way-data-binding-being-dropped-in-Angular-2
+
+[fn:2] https://en.wikipedia.org/wiki/If_a_tree_falls_in_a_forest
