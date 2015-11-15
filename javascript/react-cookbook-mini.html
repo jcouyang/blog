@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- 2015-11-12 Thu 21:46 -->
+<!-- 2015-11-16 Mon 00:39 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
 <title>A Compact React Cookbook</title>
@@ -101,7 +101,7 @@ for the JavaScript code in this tag.
 <li><a href="#orgheadline7">2.2. Virtual DOM （Immutable）</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline15">3. Why Immutable</a>
+<li><a href="#orgheadline15">3. Why Immutable        / 为毛要不可变</a>
 <ul>
 <li><a href="#orgheadline9">3.1. 状态</a></li>
 <li><a href="#orgheadline10">3.2. Class</a></li>
@@ -114,24 +114,66 @@ for the JavaScript code in this tag.
 </li>
 </ul>
 </li>
-<li><a href="#orgheadline19">4. How to do Unit test React project</a>
+<li><a href="#orgheadline19">4. How to do Unit test React project        /  如何单元测试</a>
 <ul>
 <li><a href="#orgheadline16">4.1. Jest</a></li>
 <li><a href="#orgheadline17">4.2. jasmine</a></li>
 <li><a href="#orgheadline18">4.3. mocha</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline20">5. Modular and Components</a></li>
-<li><a href="#orgheadline21">6. How should I thinking in react way</a></li>
-<li><a href="#orgheadline22">7. What about Data Fetching</a></li>
-<li><a href="#orgheadline23">8. What about Router</a></li>
-<li><a href="#orgheadline24">9. How to communicate between two components that don't have a parent-child relationship</a></li>
-<li><a href="#orgheadline25">10. When should I use "key"</a></li>
-<li><a href="#orgheadline26">11. What's these Warnings</a></li>
-<li><a href="#orgheadline27">12. How to Profile Component Perfomance</a></li>
+<li><a href="#orgheadline22">5. Modular and Components</a>
+<ul>
+<li><a href="#orgheadline20">5.1. browserify</a></li>
+<li><a href="#orgheadline21">5.2. webpack</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline23">6. How should I thinking in react way / 如何以 React 的方式解决问题</a></li>
+<li><a href="#orgheadline27">7. What about Data Fetching / 只有 V 的话，数据 M 呢</a>
+<ul>
+<li><a href="#orgheadline24">7.1. just rest</a></li>
+<li><a href="#orgheadline25">7.2. relay/graphql</a></li>
+<li><a href="#orgheadline26">7.3. falcor</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline32">8. What about Router / router 怎么办</a>
+<ul>
+<li><a href="#orgheadline30">8.1. direactor</a>
+<ul>
+<li><a href="#orgheadline28">client side</a></li>
+<li><a href="#orgheadline29">server side</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline31">8.2. react router</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline39">9. How to communicate between two components that don't have a parent-child relationship/ 不是父子关系的 component 怎么交互</a>
+<ul>
+<li><a href="#orgheadline33">9.1. event</a></li>
+<li><a href="#orgheadline36">9.2. flux</a>
+<ul>
+<li><a href="#orgheadline34">dispatcher</a></li>
+<li><a href="#orgheadline35">store</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline37">9.3. router</a></li>
+<li><a href="#orgheadline38">9.4. 应用级别 state</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline40">10. When should I use "key" / 什么时候该用 key</a></li>
+<li><a href="#orgheadline41">11. What's these Warnings / 这些黄黄的是神马</a></li>
+<li><a href="#orgheadline45">12. How to Profile Component Perfomance / 如何提升效率</a>
+<ul>
+<li><a href="#orgheadline42">12.1. react profile</a></li>
+<li><a href="#orgheadline43">12.2. PureRenderMixin</a></li>
+<li><a href="#orgheadline44">12.3. shouldComponentUpdate</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </nav>
+<p>
+这是一本非常 campact 的 React 煮书，收集了在实践 React 时的一些问题和解决方法。
+</p>
 
 <div id="outline-container-orgheadline5" class="outline-2">
 <h2 id="orgheadline5"><span class="section-number-2">1</span> Why not 2 way binding/为毛不用双向绑定</h2>
@@ -139,6 +181,12 @@ for the JavaScript code in this tag.
 <p>
 解释这个问题我们需要先看什么是双向绑定，什么是单向绑定
 </p>
+
+
+<figure>
+<p><img src="./images/multi-recur.gif" alt="multi-recur.gif">
+</p>
+</figure>
 </div>
 
 <div id="outline-container-orgheadline1" class="outline-3">
@@ -247,11 +295,17 @@ DOM 本身是 Mutable 的东西，把它柔和到你的业务上给你的逻辑�
 </div>
 
 <div id="outline-container-orgheadline15" class="outline-2">
-<h2 id="orgheadline15"><span class="section-number-2">3</span> Why Immutable</h2>
+<h2 id="orgheadline15"><span class="section-number-2">3</span> Why Immutable        / 为毛要不可变</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Immutable 是函数式的概念之一，一旦创建出来之后，就不能再改变。因此，当你想对其做修改，就得弄一个新的。
 </p>
+
+
+<figure>
+<p><img src="./images/zoidberg-die.gif" alt="zoidberg-die.gif">
+</p>
+</figure>
 
 <p>
 好奇的同学要问了，但是 React 看起来是面向对象的啊。 <code>createClass</code> ， <code>state</code> ，函数式有状态和 class 吗？
@@ -314,9 +368,11 @@ ClojureScript 的 React 库 om，只有一个 app 级别的 state。因此所有
 </div>
 
 <p>
+<a href="./images/futurama_August_26__2015_at_0617AM.gif ">./images/futurama_August_26__2015_at_0617AM.gif </a>
 ok, 如果把每个 Component 看成一个函数，为了我们的代码更好 reason about 而且更 loose couple，我们应该尽量要 <b>消除</b> 每一个 Component 的状态。
- 这样在 Component 的树中，我们可以随意切换 Component
+ 这样在 Component 的树中，我们可以随意切换 Component，以 Star Wars 为例，Anakin 有两样东西，Luke 和光剑：
 </p>
+
 
 <figure>
 <p><img src="images/react-tree.png" alt="react-tree.png">
@@ -324,7 +380,7 @@ ok, 如果把每个 Component 看成一个函数，为了我们的代码更好 r
 </figure>
 
 <p>
-当 Anakin 编程 Darth Vader，光剑的颜色变红时：
+当 Anakin 变成 Darth Vader，光剑的颜色变红时，Darth Vadar 有 Luke 和 红色光剑。
 </p>
 
 
@@ -332,6 +388,10 @@ ok, 如果把每个 Component 看成一个函数，为了我们的代码更好 r
 <p><img src="images/react-tree-swap.png" alt="react-tree-swap.png">
 </p>
 </figure>
+
+<p>
+实际上我们需要尽量减少 Component 中的状态，而且对着少数的状态，由于他们是我们的 source  of truth，并不希望他是 mutable 的，这样我很难知道谁动了我的 source of truth。
+</p>
 </div>
 </div>
 
@@ -380,7 +440,7 @@ facebook 实现的 immutable 数据结构，使用上比较符合 JavaScript 习
 
 
 <div id="outline-container-orgheadline19" class="outline-2">
-<h2 id="orgheadline19"><span class="section-number-2">4</span> How to do Unit test React project</h2>
+<h2 id="orgheadline19"><span class="section-number-2">4</span> How to do Unit test React project        /  如何单元测试</h2>
 <div class="outline-text-2" id="text-4">
 </div><div id="outline-container-orgheadline16" class="outline-3">
 <h3 id="orgheadline16"><span class="section-number-3">4.1</span> <a href="http://facebook.github.io/jest/">Jest</a></h3>
@@ -433,82 +493,385 @@ jasmine  只是一个引擎，jest 也是用 jasmine 作为引擎。但是如果
 </div>
 </div>
 
-<div id="outline-container-orgheadline20" class="outline-2">
-<h2 id="orgheadline20"><span class="section-number-2">5</span> Modular and Components</h2>
-<div class="outline-text-2" id="text-5">
-<ul class="org-ul">
-<li>browserify
-简单的 modular  bundler，推荐</li>
-<li>webpack
-以 grunt 的方式 browserify 你的代码，非常强大的 bundler。但是个人并不喜欢 grunt，karma，webpack 这种基于配置的货。</li>
-</ul>
-</div>
-</div>
-
-<div id="outline-container-orgheadline21" class="outline-2">
-<h2 id="orgheadline21"><span class="section-number-2">6</span> How should I thinking in react way</h2>
-<div class="outline-text-2" id="text-6">
-<ul class="org-ul">
-<li><a href="http://facebook.github.io/react/docs/thinking-in-react.html">http://facebook.github.io/react/docs/thinking-in-react.html</a></li>
-</ul>
-</div>
-</div>
-
 <div id="outline-container-orgheadline22" class="outline-2">
-<h2 id="orgheadline22"><span class="section-number-2">7</span> What about Data Fetching</h2>
-<div class="outline-text-2" id="text-7">
+<h2 id="orgheadline22"><span class="section-number-2">5</span> Modular and Components</h2>
+<div class="outline-text-2" id="text-5">
+</div><div id="outline-container-orgheadline20" class="outline-3">
+<h3 id="orgheadline20"><span class="section-number-3">5.1</span> browserify</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+简单的 modular  bundler， <b>推荐</b> ， 因为职责单一的工具更不容易遇到奇怪的问题。
+</p>
+
+<p>
+使用 browserify 使用 <a href="https://babeljs.io/docs/setup/#browserify">babel transformer</a> 就可以把所有的 component 以 node 的方式模块化的组织，最后 bundle 成一个 js 文件。
+</p>
+
 <ul class="org-ul">
-<li>just <a href="https://github.com/cujojs/rest">rest</a></li>
-<li>relay/graphql
-官方 data fetching 解决方案</li>
-<li><a href="https://github.com/netflix/falcor">falcor</a>
- netflix 的简单版的 graphql可以参考我的 <a href="https://github.com/jcouyang/react-falcor">todo falcor</a></li>
+<li><a href="https://babeljs.io/docs/setup/#browserify">babel 官网</a>就说明了如何使用 browserify <i>babelify</i> 你的模块们</li>
+<li>如果使用 <i>gulp</i> ，需要参考 gulp <a href="https://github.com/gulpjs/gulp/blob/master/docs/recipes/browserify-uglify-sourcemap.md">这篇文档</a></li>
+<li><i>grunt</i> 用户请使用 grunt-browserify 插件(非官方)</li>
+<li><i>broccoli</i> 用户插件在 <a href="https://github.com/babel/broccoli-babel-transpiler">这里</a></li>
 </ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline21" class="outline-3">
+<h3 id="orgheadline21"><span class="section-number-3">5.2</span> webpack</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+以 grunt 的方式 browserify 你的代码，非常强大的 bundler。但是个人并不喜欢 grunt，karma，webpack 这种基于配置的工具，原因很简单，配置不是代码！配置不是代码！配置不是代码！ 配对了当然简单，但是配错了怎么办，没法 debug。
+</p>
+
+<p>
+虽然不喜欢，我还是要告诉你怎么用，就这么一行配置就好了
+</p>
+<div class="org-src-container">
+
+<pre class="src src-js">module: {
+  loaders: [
+    { test: <span style="color: #8b0000;">/\.jsx?$/</span>, exclude: <span style="color: #8b0000;">/node_modules/</span>, loader: <span style="color: #8b0000;">"babel-loader"</span>}
+  ]
+}
+</pre>
+</div>
+</div>
 </div>
 </div>
 
 <div id="outline-container-orgheadline23" class="outline-2">
-<h2 id="orgheadline23"><span class="section-number-2">8</span> What about Router</h2>
-<div class="outline-text-2" id="text-8">
+<h2 id="orgheadline23"><span class="section-number-2">6</span> How should I thinking in react way / 如何以 React 的方式解决问题</h2>
+<div class="outline-text-2" id="text-6">
 <p>
-isomorphic router
+要以 react 的方式思考，其实跟思考 HTML 差不多
+ <a href="http://facebook.github.io/react/docs/thinking-in-react.html">http://facebook.github.io/react/docs/thinking-in-react.html</a>
 </p>
-<ul class="org-ul">
-<li><a href="https://github.com/flatiron/director">direactor</a></li>
-<li><a href="https://github.com/rackt/react-router">react router</a></li>
-</ul>
 </div>
-</div>
-
-<div id="outline-container-orgheadline24" class="outline-2">
-<h2 id="orgheadline24"><span class="section-number-2">9</span> How to communicate between two components that don't have a parent-child relationship<sup><a id="fnr.3" class="footref" href="#fn.3">3</a></sup></h2>
-<div class="outline-text-2" id="text-9">
-<p>
-你可能需要一个全局的一些东西
-</p>
-<ul class="org-ul">
-<li>event</li>
-<li>flux</li>
-<li>router</li>
-</ul>
-</div>
-</div>
-
-
-<div id="outline-container-orgheadline25" class="outline-2">
-<h2 id="orgheadline25"><span class="section-number-2">10</span> When should I use "key"</h2>
-</div>
-
-<div id="outline-container-orgheadline26" class="outline-2">
-<h2 id="orgheadline26"><span class="section-number-2">11</span> What's these Warnings</h2>
 </div>
 
 <div id="outline-container-orgheadline27" class="outline-2">
-<h2 id="orgheadline27"><span class="section-number-2">12</span> How to Profile Component Perfomance</h2>
-<div class="outline-text-2" id="text-12">
+<h2 id="orgheadline27"><span class="section-number-2">7</span> What about Data Fetching / 只有 V 的话，数据 M 呢</h2>
+<div class="outline-text-2" id="text-7">
+</div><div id="outline-container-orgheadline24" class="outline-3">
+<h3 id="orgheadline24"><span class="section-number-3">7.1</span> just <a href="https://github.com/cujojs/rest">rest</a></h3>
+<div class="outline-text-3" id="text-7-1">
+<p>
+简单，rest 请求回来一个 Promise，你还可以用 <a href="https://github.com/cujojs/when">when</a>  获得更多的 promise 和 monad 用法。
+</p>
+
+<p>
+无需 model 在 componentDidMount 发出 rest 请求，then 直接扔给 setState。最多 setState 前加些 map filter 把数据改改格式。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline25" class="outline-3">
+<h3 id="orgheadline25"><span class="section-number-3">7.2</span> <a href="https://facebook.github.io/relay/">relay/graphql</a></h3>
+<div class="outline-text-3" id="text-7-2">
+<p>
+官方 data fetching 解决方案。
+</p>
+
+<p>
+比起由 component 去发请求，再转换数据格式。relay/graphql 的思想是有 component 定义数据形状，由 relay 去发请求，有 graphql server 跟去根据定义返回相应形状的数据。
+</p>
+
+<p>
+所以，对，会多一层 server layer。
+</p>
+
+<p>
+view 层简单了，graphql 要做的事情却不少。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline26" class="outline-3">
+<h3 id="orgheadline26"><span class="section-number-3">7.3</span> <a href="https://github.com/netflix/falcor">falcor</a></h3>
+<div class="outline-text-3" id="text-7-3">
+<p>
+netflix 的简单版的 graphql可以参考我的 <a href="https://github.com/jcouyang/react-falcor">todo falcor</a>
+思想大致相似，但是更为简单一些，没有什么 QL，schema 之类的
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline32" class="outline-2">
+<h2 id="orgheadline32"><span class="section-number-2">8</span> What about Router / router 怎么办</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+建议使用 isomorphic router，就是 browser 与 node 都可以用的 router
+</p>
+</div>
+<div id="outline-container-orgheadline30" class="outline-3">
+<h3 id="orgheadline30"><span class="section-number-3">8.1</span> <a href="https://github.com/flatiron/director">direactor</a></h3>
+<div class="outline-text-3" id="text-8-1">
+<p>
+非常轻量级的通用 router，并不是专门为 react 准备的，但是 router 而已，为毛要跟 component 耦合。
+</p>
+</div>
+<div id="outline-container-orgheadline28" class="outline-4">
+<h4 id="orgheadline28">client side</h4>
+<div class="outline-text-4" id="text-orgheadline28">
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">routes</span> = {
+  <span style="color: #8b0000;">'/author'</span>: ()=&gt;React.render(&lt;Author/&gt;, domNode),
+  <span style="color: #8b0000;">'/author/:id'</span>: (id)=&gt;React.render(&lt;Auther id={id}/&gt;, domNode)
+};
+<span style="color: #00008b;">var</span> <span style="color: #b8860b;">router</span> = Router(routes);
+router.init();
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgheadline29" class="outline-4">
+<h4 id="orgheadline29">server side</h4>
+<div class="outline-text-4" id="text-orgheadline29">
+<p>
+只需要调用 router.dispatch 就好了, 而且 server 端的 react 需要 <code>renderToString</code>
+</p>
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">router</span> = <span style="color: #00008b;">new</span> <span style="color: #36648b;">director.http.Router</span>({
+  <span style="color: #8b0000;">'/author'</span>: {
+    <span style="color: #6a5acd;">get</span>: <span style="color: #00008b;">function</span>(){
+      <span style="color: #6b8e23;">this</span>.res.end(React.renderToString(&lt;Author/&gt;))
+    }
+  }
+});
+<span style="color: #00008b;">var</span> <span style="color: #b8860b;">server</span> = http.createServer(<span style="color: #00008b;">function</span> (<span style="color: #b8860b;">req</span>, <span style="color: #b8860b;">res</span>) {
+  router.dispatch(req, res, <span style="color: #00008b;">function</span> (<span style="color: #b8860b;">err</span>) {
+    res.writeHead(200, { <span style="color: #8b0000;">'Content-Type'</span>: <span style="color: #8b0000;">'text/html'</span> })
+    <span style="color: #00008b;">if</span> (err) {
+      res.writeHead(404);
+      res.end();
+    }
+  });
+});
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline31" class="outline-3">
+<h3 id="orgheadline31"><span class="section-number-3">8.2</span> <a href="https://github.com/rackt/react-router">react router</a></h3>
+<div class="outline-text-3" id="text-8-2">
+<p>
+非常 <b>非轻量级</b> 的 router，而且只能给 react component用。
+</p>
+
+<p>
+概念上就是使用 Route 把你的 Component 包起来，让 router 决定到底哪个 componet 上
+</p>
+<div class="org-src-container">
+
+<pre class="src src-js">render((
+  &lt;Router&gt;
+    &lt;Route path=<span style="color: #8b0000;">"/"</span> component={App}&gt;
+      &lt;Route path=<span style="color: #8b0000;">"about"</span> component={About}/&gt;
+      &lt;Route path=<span style="color: #8b0000;">"users"</span> component={Users}&gt;
+        &lt;Route path=<span style="color: #8b0000;">"/user/:userId"</span> component={User}/&gt;
+      &lt;/Route&gt;
+      &lt;Route path=<span style="color: #8b0000;">"*"</span> component={NoMatch}/&gt;
+    &lt;/Route&gt;
+  &lt;/Router&gt;
+), document.body)
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgheadline39" class="outline-2">
+<h2 id="orgheadline39"><span class="section-number-2">9</span> How to communicate between two components that don't have a parent-child relationship<sup><a id="fnr.3" class="footref" href="#fn.3">3</a></sup> / 不是父子关系的 component 怎么交互</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+对于这个问题，我的问题是
+</p>
+<blockquote>
+<p>
+如果不是父子关系或者兄弟或者伯父侄女，真的需要交互吗？
+</p>
+</blockquote>
+<p>
+如果是在同一颗树上，那么一定能找到一个共同的 parent，把 parent 的回调传进来就好了
+</p>
+
+<p>
+如果不在同一颗树上，你可能需要一个全局的一些东西
+</p>
+</div>
+<div id="outline-container-orgheadline33" class="outline-3">
+<h3 id="orgheadline33"><span class="section-number-3">9.1</span> event</h3>
+<div class="outline-text-3" id="text-9-1">
+<p>
+ 使用随便一种 event emitter，比如 <a href="https://www.npmjs.com/package/backbone-events-standalone">backbon events</a>。
+在一个 componnet 中 trigger，另一个 component subscribe
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline36" class="outline-3">
+<h3 id="orgheadline36"><span class="section-number-3">9.2</span> flux</h3>
+<div class="outline-text-3" id="text-9-2">
+<p>
+flux 只是一个架构思想，你可以用任何自己喜欢的方式实现
+其实跟 event emitter 差不多，只是针对和管理 state
+</p>
+</div>
+
+<div id="outline-container-orgheadline34" class="outline-4">
+<h4 id="orgheadline34">dispatcher</h4>
+<div class="outline-text-4" id="text-orgheadline34">
+<p>
+作为action 的分发工作，决定哪些 action 引起哪些 store 的变化
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline35" class="outline-4">
+<h4 id="orgheadline35">store</h4>
+<div class="outline-text-4" id="text-orgheadline35">
+<p>
+状态与逻辑
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline37" class="outline-3">
+<h3 id="orgheadline37"><span class="section-number-3">9.3</span> router</h3>
+<div class="outline-text-3" id="text-9-3">
+<p>
+使用 router 传递信息也是可以的
+</p>
+</div>
+</div>
+<div id="outline-container-orgheadline38" class="outline-3">
+<h3 id="orgheadline38"><span class="section-number-3">9.4</span> 应用级别 state</h3>
+<div class="outline-text-3" id="text-9-4">
+<p>
+跟 om 一样，全局应用级别 state
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline40" class="outline-2">
+<h2 id="orgheadline40"><span class="section-number-2">10</span> When should I use "key" / 什么时候该用 key</h2>
+<div class="outline-text-2" id="text-10">
+<p>
+<b>只有当出现一串一样的元素的时候</b> ，这个时候 Virtual DOM 去 reconciliate（搞） DOM 的时候会傻傻分不清楚。
+</p>
+
+<blockquote>
+<p>
+别的时候不要用 key，key 已经出现在 virtual dom diff/reconciliation 的阶段，效率要更低于 shouldComponentUpdate，所以尽量通过 shouldComponentUpdate 来决定是否要 render component。
+</p>
+</blockquote>
+
+
+<figure>
+<p><img src="./images/came-out.gif" alt="came-out.gif">
+</p>
+</figure>
+
+<p>
+官网文档的这个例子
+</p>
+<div class="org-src-container">
+
+<pre class="src src-js">renderA: &lt;div&gt;&lt;span&gt;first&lt;/span&gt;&lt;/div&gt;
+renderB: &lt;div&gt;&lt;span&gt;second&lt;/span&gt;&lt;span&gt;first&lt;/span&gt;&lt;/div&gt;
+=&gt; [replaceAttribute textContent <span style="color: #8b0000;">'second'</span>], [insertNode &lt;span&gt;first&lt;/span&gt;]
+</pre>
+</div>
+<p>
+其实是往第一个位置插入了一个 span，但是会被 diff 成
+</p>
 <ul class="org-ul">
-<li>react profile</li>
+<li>替换内容 first 到 second</li>
+<li><p>
+插入内容为 first 的 span
+</p>
+
+<p>
+不光是这样会更慢的问题，如果你在 first 上绑有事件的话，重新 render 后因为是 replace 了内容，因此这是原来的事件会变成 second 的事件，这样就 <b>完全错乱</b> 了。
+</p></li>
 </ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline41" class="outline-2">
+<h2 id="orgheadline41"><span class="section-number-2">11</span> What's these Warnings / 这些黄黄的是神马</h2>
+<div class="outline-text-2" id="text-11">
+<blockquote>
+<p>
+黄黄的东西(除了小黄人)请一定要除掉！
+</p>
+</blockquote>
+<p>
+所有 react 的 warning 描述都非常详细，请一定 <b>务必</b> 要除掉。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline45" class="outline-2">
+<h2 id="orgheadline45"><span class="section-number-2">12</span> How to Profile Component Perfomance / 如何提升效率</h2>
+<div class="outline-text-2" id="text-12">
+<p>
+当然不是咖啡!
+</p>
+
+
+<figure>
+<p><img src="./images/coffee.gif" alt="coffee.gif">
+</p>
+</figure>
+</div>
+
+<div id="outline-container-orgheadline42" class="outline-3">
+<h3 id="orgheadline42"><span class="section-number-3">12.1</span> <a href="https://facebook.github.io/react/docs/perf.html">react profile</a></h3>
+</div>
+
+<div id="outline-container-orgheadline43" class="outline-3">
+<h3 id="orgheadline43"><span class="section-number-3">12.2</span> PureRenderMixin</h3>
+<div class="outline-text-3" id="text-12-2">
+<p>
+当你的 props 和 state 都是 immutable 的时候&#x2026;
+</p>
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">PureRenderMixin</span> = require(<span style="color: #8b0000;">'react-addons-pure-render-mixin'</span>);
+React.createClass({
+  mixins: [PureRenderMixin],
+  <span style="color: #6a5acd;">render</span>: <span style="color: #00008b;">function</span>() {
+    <span style="color: #00008b;">return</span> &lt;div className={<span style="color: #6b8e23;">this</span>.props.className}&gt;foo&lt;/div&gt;;
+  }
+});
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline44" class="outline-3">
+<h3 id="orgheadline44"><span class="section-number-3">12.3</span> <a href="https://facebook.github.io/react/docs/advanced-performance.html#shouldcomponentupdate-in-action">shouldComponentUpdate</a></h3>
+<div class="outline-text-3" id="text-12-3">
+<p>
+可以通过这个方法对于 component 到底什么情况下应该重新 render 调优
+</p>
+
+
+<blockquote>
+<p>
+所有图片来源于 giphy.com, copyright @<a href="http://www.cc.com/shows/futurama">Futurama</a>
+</p>
+</blockquote>
+</div>
 </div>
 </div>
 <div id="footnotes">
@@ -532,7 +895,7 @@ isomorphic router
 </div></div>
 <div id="postamble" class="status">
 <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-<p>Modified: 2015-11-12 Thu 21:43</p>
+<p>Modified: 2015-11-16 Mon 00:39</p>
 <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.2)</p>
 <p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
