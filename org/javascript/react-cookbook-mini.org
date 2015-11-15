@@ -3,6 +3,8 @@
 #+date: <2015-11-08 Sun>
 #+options: num:2
 
+这是一本非常 campact 的 React 煮书，收集了在实践 React 时的一些问题和解决方法。
+
 * COMMENT imports
 #+BEGIN_SRC emacs-lisp
 (require 'ob-dot)
@@ -13,6 +15,8 @@
 
 * Why not 2 way binding/为毛不用双向绑定
 解释这个问题我们需要先看什么是双向绑定，什么是单向绑定
+
+[[./images/multi-recur.gif]]
 
 ** 双向绑定
 也就是dom 上的 value 与 controller 或者 view controller 上的绑定，值保持一致。
@@ -66,8 +70,10 @@ DOM 本身是 Mutable 的东西，把它柔和到你的业务上给你的逻辑�
 - 快
 - 把紧耦合编程了高内聚
 
-* Why Immutable	
+* Why Immutable	/ 为毛要不可变
  Immutable 是函数式的概念之一，一旦创建出来之后，就不能再改变。因此，当你想对其做修改，就得弄一个新的。
+
+[[./images/zoidberg-die.gif]]
 
 好奇的同学要问了，但是 React 看起来是面向对象的啊。 =createClass= ， =state= ，函数式有状态和 class 吗？
 
@@ -98,11 +104,14 @@ https://youtu.be/5yHFTN-_mOo
 AFancyHelloWord({message:"Good News Everyone!"})
 #+END_SRC
 
+[[./images/futurama_August_26__2015_at_0617AM.gif
+]]
 ok, 如果把每个 Component 看成一个函数，为了我们的代码更好 reason about 而且更 loose couple，我们应该尽量要 *消除* 每一个 Component 的状态。
 #+BEGIN_SRC ditaa :file ? :exports results
 #+END_SRC
 
- 这样在 Component 的树中，我们可以随意切换 Component
+ 这样在 Component 的树中，我们可以随意切换 Component，以 Star Wars 为例，Anakin 有两样东西，Luke 和光剑：
+
 #+BEGIN_SRC dot :file images/react-tree.png :exports results
     digraph component {
     Luke [label="Luke Skywalker"]
@@ -118,7 +127,7 @@ ok, 如果把每个 Component 看成一个函数，为了我们的代码更好 r
 #+RESULTS:
 [[file:images/react-tree.png]]
 
-当 Anakin 编程 Darth Vader，光剑的颜色变红时：
+当 Anakin 变成 Darth Vader，光剑的颜色变红时，Darth Vadar 有 Luke 和 红色光剑。
 
 #+BEGIN_SRC dot :file images/react-tree-swap.png :exports results
     digraph component {
@@ -127,13 +136,15 @@ ok, 如果把每个 Component 看成一个函数，为了我们的代码更好 r
     Darth [label="Darth Vader"]
 
   Lightsaber [label="Red Lightsaber", color=red]
-    Darth -> Luke [xlabel="im your father!"]
+    Darth -> Luke [xlabel="i’m your father!"]
     Darth -> Lightsaber
     }
 #+END_SRC
 
 #+RESULTS:
 [[file:images/react-tree-swap.png]]
+
+实际上我们需要尽量减少 Component 中的状态，而且对着少数的状态，由于他们是我们的 source  of truth，并不希望他是 mutable 的，这样我很难知道谁动了我的 source of truth。
 
 ** 让你的数据结构 immutable 的工具们
 *** [[http://facebook.github.io/react/docs/update.html][Immutablility helper]]
@@ -155,7 +166,7 @@ ok, 如果把每个 Component 看成一个函数，为了我们的代码更好 r
 facebook 实现的 immutable 数据结构，使用上比较符合 JavaScript 习惯一些， 不过跑分低一些。
 
 
-* How to do Unit test React project	
+* How to do Unit test React project	/  如何单元测试
 ** [[http://facebook.github.io/jest/][Jest]]
 总的来说，jest 的测试理念解决了非常多的前端测试的棘手问题，我做过一个关于 jest 的 session， 文章在 [[https://gistdeck.github.com/jcouyang/34686f695cd28309759e][这里]]。 文章可能写得有点早，非常知道高兴的是终于支持[[https://github.com/facebook/jest/blob/master/package.json#L34][最新的 nodejs 了]]，而且 重要的是 facebook 使用 jest 测试 react，有一些非常方便的 mock component 的方法。
 
@@ -179,39 +190,185 @@ recap 一下主要是
 没试过用来测 React，不过 mocha 比 jasmine 好的一点是本身就可以跑在 node 上，使用 sinon（mock） 和 should.js（assert） 是个非常强大的一套测试工具。
 
 * Modular and Components
-- browserify
- 简单的 modular  bundler，推荐
-- webpack
- 以 grunt 的方式 browserify 你的代码，非常强大的 bundler。但是个人并不喜欢 grunt，karma，webpack 这种基于配置的货。
+** browserify
+简单的 modular  bundler， *推荐* ， 因为职责单一的工具更不容易遇到奇怪的问题。
 
-* How should I thinking in react way
-- http://facebook.github.io/react/docs/thinking-in-react.html
+使用 browserify 使用 [[https://babeljs.io/docs/setup/#browserify][babel transformer]] 就可以把所有的 component 以 node 的方式模块化的组织，最后 bundle 成一个 js 文件。
 
-* What about Data Fetching
-- just [[https://github.com/cujojs/rest][rest]]
-- relay/graphql
- 官方 data fetching 解决方案
-- [[https://github.com/netflix/falcor][falcor]]
- netflix 的简单版的 graphql可以参考我的 [[https://github.com/jcouyang/react-falcor][todo falcor]]
+- [[https://babeljs.io/docs/setup/#browserify][babel 官网]]就说明了如何使用 browserify /babelify/ 你的模块们
+- 如果使用 /gulp/ ，需要参考 gulp [[https://github.com/gulpjs/gulp/blob/master/docs/recipes/browserify-uglify-sourcemap.md][这篇文档]]
+- /grunt/ 用户请使用 grunt-browserify 插件(非官方)
+- /broccoli/ 用户插件在 [[https://github.com/babel/broccoli-babel-transpiler][这里]]
 
-* What about Router
-isomorphic router
-- [[https://github.com/flatiron/director][direactor]]
-- [[https://github.com/rackt/react-router][react router]]
+** webpack
+ 以 grunt 的方式 browserify 你的代码，非常强大的 bundler。但是个人并不喜欢 grunt，karma，webpack 这种基于配置的工具，原因很简单，配置不是代码！配置不是代码！配置不是代码！ 配对了当然简单，但是配错了怎么办，没法 debug。
 
-* How to communicate between two components that don't have a parent-child relationship[fn:3]
-你可能需要一个全局的一些东西
-- event
-- flux
-- router
+ 虽然不喜欢，我还是要告诉你怎么用，就这么一行配置就好了
+#+BEGIN_SRC js
+module: {
+  loaders: [
+    { test: /\.jsx?$/, exclude: /node_modules/, loader: "babel-loader"}
+  ]
+}
+#+END_SRC
+
+* How should I thinking in react way / 如何以 React 的方式解决问题
+要以 react 的方式思考，其实跟思考 HTML 差不多
+ http://facebook.github.io/react/docs/thinking-in-react.html
+
+* What about Data Fetching / 只有 V 的话，数据 M 呢
+** just [[https://github.com/cujojs/rest][rest]]
+简单，rest 请求回来一个 Promise，你还可以用 [[https://github.com/cujojs/when][when]]  获得更多的 promise 和 monad 用法。
+
+无需 model 在 componentDidMount 发出 rest 请求，then 直接扔给 setState。最多 setState 前加些 map filter 把数据改改格式。
+
+** [[https://facebook.github.io/relay/][relay/graphql]]
+官方 data fetching 解决方案。
+
+比起由 component 去发请求，再转换数据格式。relay/graphql 的思想是有 component 定义数据形状，由 relay 去发请求，有 graphql server 跟去根据定义返回相应形状的数据。
+
+所以，对，会多一层 server layer。
+
+view 层简单了，graphql 要做的事情却不少。
+
+** [[https://github.com/netflix/falcor][falcor]]
+netflix 的简单版的 graphql可以参考我的 [[https://github.com/jcouyang/react-falcor][todo falcor]]
+思想大致相似，但是更为简单一些，没有什么 QL，schema 之类的
+
+* What about Router / router 怎么办
+建议使用 isomorphic router，就是 browser 与 node 都可以用的 router
+** [[https://github.com/flatiron/director][direactor]]
+非常轻量级的通用 router，并不是专门为 react 准备的，但是 router 而已，为毛要跟 component 耦合。
+*** client side
+#+BEGIN_SRC js
+  var routes = {
+    '/author': ()=>React.render(<Author/>, domNode),
+    '/author/:id': (id)=>React.render(<Auther id={id}/>, domNode)
+  };
+  var router = Router(routes);
+  router.init();
+#+END_SRC
+***  server side
+  只需要调用 router.dispatch 就好了, 而且 server 端的 react 需要 =renderToString=
+#+BEGIN_SRC js
+  var router = new director.http.Router({
+    '/author': {
+      get: function(){
+        this.res.end(React.renderToString(<Author/>))
+      }
+    }
+  });
+  var server = http.createServer(function (req, res) {
+    router.dispatch(req, res, function (err) {
+      res.writeHead(200, { 'Content-Type': 'text/html' })
+      if (err) {
+        res.writeHead(404);
+        res.end();
+      }
+    });
+  });
+#+END_SRC
+
+** [[https://github.com/rackt/react-router][react router]]
+非常 *非轻量级* 的 router，而且只能给 react component用。
+
+ 概念上就是使用 Route 把你的 Component 包起来，让 router 决定到底哪个 componet 上
+#+BEGIN_SRC js
+render((
+  <Router>
+    <Route path="/" component={App}>
+      <Route path="about" component={About}/>
+      <Route path="users" component={Users}>
+        <Route path="/user/:userId" component={User}/>
+      </Route>
+      <Route path="*" component={NoMatch}/>
+    </Route>
+  </Router>
+), document.body)
+#+END_SRC
 
 
-* When should I use "key"
+* How to communicate between two components that don't have a parent-child relationship[fn:3] / 不是父子关系的 component 怎么交互
+ 对于这个问题，我的问题是
+ #+BEGIN_QUOTE
+  如果不是父子关系或者兄弟或者伯父侄女，真的需要交互吗？
+ #+END_QUOTE
+如果是在同一颗树上，那么一定能找到一个共同的 parent，把 parent 的回调传进来就好了
 
-* What's these Warnings
+如果不在同一颗树上，你可能需要一个全局的一些东西
+** event
+ 使用随便一种 event emitter，比如 [[https://www.npmjs.com/package/backbone-events-standalone][backbon events]]。
+在一个 componnet 中 trigger，另一个 component subscribe
 
-* How to Profile Component Perfomance
-- react profile
+** flux
+flux 只是一个架构思想，你可以用任何自己喜欢的方式实现
+其实跟 event emitter 差不多，只是针对和管理 state
+
+*** dispatcher
+作为action 的分发工作，决定哪些 action 引起哪些 store 的变化
+
+*** store
+ 状态与逻辑
+
+** router
+使用 router 传递信息也是可以的
+** 应用级别 state
+跟 om 一样，全局应用级别 state
+
+* When should I use "key" / 什么时候该用 key
+ *只有当出现一串一样的元素的时候* ，这个时候 Virtual DOM 去 reconciliate（搞） DOM 的时候会傻傻分不清楚。
+
+#+BEGIN_QUOTE
+ 别的时候不要用 key，key 已经出现在 virtual dom diff/reconciliation 的阶段，效率要更低于 shouldComponentUpdate，所以尽量通过 shouldComponentUpdate 来决定是否要 render component。
+
+#+END_QUOTE
+
+[[./images/came-out.gif]]
+
+ 官网文档的这个例子
+#+BEGIN_SRC js
+renderA: <div><span>first</span></div>
+renderB: <div><span>second</span><span>first</span></div>
+=> [replaceAttribute textContent 'second'], [insertNode <span>first</span>]
+#+END_SRC
+ 其实是往第一个位置插入了一个 span，但是会被 diff 成
+- 替换内容 first 到 second
+- 插入内容为 first 的 span
+
+ 不光是这样会更慢的问题，如果你在 first 上绑有事件的话，重新 render 后因为是 replace 了内容，因此这是原来的事件会变成 second 的事件，这样就 *完全错乱* 了。
+
+* What's these Warnings / 这些黄黄的是神马
+#+BEGIN_QUOTE
+ 黄黄的东西(除了小黄人)请一定要除掉！
+#+END_QUOTE
+所有 react 的 warning 描述都非常详细，请一定 *务必* 要除掉。
+
+* How to Profile Component Perfomance / 如何提升效率
+ 当然不是咖啡!
+
+[[./images/coffee.gif]]
+
+** [[https://facebook.github.io/react/docs/perf.html][react profile]]
+
+** PureRenderMixin
+ 当你的 props 和 state 都是 immutable 的时候...
+#+BEGIN_SRC js
+var PureRenderMixin = require('react-addons-pure-render-mixin');
+React.createClass({
+  mixins: [PureRenderMixin],
+  render: function() {
+    return <div className={this.props.className}>foo</div>;
+  }
+});
+#+END_SRC
+
+** [[https://facebook.github.io/react/docs/advanced-performance.html#shouldcomponentupdate-in-action][shouldComponentUpdate]]
+可以通过这个方法对于 component 到底什么情况下应该重新 render 调优
+
+
+#+BEGIN_QUOTE
+所有图片来源于 giphy.com, copyright @[[http://www.cc.com/shows/futurama][Futurama]]
+#+END_QUOTE
 
 * Footnotes
 [fn:3] http://facebook.github.io/react/tips/communicate-between-components.html
@@ -219,3 +376,8 @@ isomorphic router
 [fn:1] https://www.quora.com/Why-is-the-two-way-data-binding-being-dropped-in-Angular-2
 
 [fn:2] https://en.wikipedia.org/wiki/If_a_tree_falls_in_a_forest
+
+ 
+
+
+
