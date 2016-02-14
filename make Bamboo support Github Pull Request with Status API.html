@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>make Bamboo support Github Pull Request with Status API</title>
-<!-- 2015-08-16 Sun 14:18 -->
+<!-- 2016-02-14 Sun 14:41 -->
 <meta  charset="utf-8">
+<meta  name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
 <meta  name="generator" content="Org-mode">
 <meta  name="author" content="Jichao Ouyang">
 <meta  name="description" content="bamboo does not come with native support of github commit status api, but we can still hack it to do the similar thing for our pull request"
@@ -83,29 +84,28 @@ for the JavaScript code in this tag.
  |
  <a accesskey="H" href="/~jichao.ouyang.html"> HOME </a>
 </div><div id="content">
-<h1 class="title">make Bamboo support Github Pull Request with Status API</h1>
 <nav id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#sec-1">what's wrong with Bamboo</a></li>
-<li><a href="#sec-2">bamboo magic</a></li>
-<li><a href="#sec-3">github webhook</a></li>
-<li><a href="#sec-4">but what about the custom variables</a></li>
-<li><a href="#sec-5">config Bamboo plan</a>
+<li><a href="#orgheadline1">what's wrong with Bamboo</a></li>
+<li><a href="#orgheadline2">bamboo magic</a></li>
+<li><a href="#orgheadline3">github webhook</a></li>
+<li><a href="#orgheadline4">but what about the custom variables</a></li>
+<li><a href="#orgheadline5">config Bamboo plan</a>
 <ul>
-<li><a href="#sec-5-1">checkout PR code</a></li>
-<li><a href="#sec-5-2">notify github status</a></li>
-<li><a href="#sec-5-3">stop build if PR</a></li>
+<li><a href="#orgheadline6">checkout PR code</a></li>
+<li><a href="#orgheadline7">notify github status</a></li>
+<li><a href="#orgheadline8">stop build if PR</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </nav>
 
-<div id="outline-container-sec-1" class="outline-2">
-<h2 id="sec-1">what's wrong with Bamboo</h2>
-<div class="outline-text-2" id="text-1">
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1">what's wrong with Bamboo</h2>
+<div class="outline-text-2" id="text-orgheadline1">
 <p>
 if you used <i>travis-ci</i> on github, you may familiar with this thing when sending pull request
 </p>
@@ -130,9 +130,9 @@ but here's some hack you can do to achieve similar thing travis does.
 </div>
 </div>
 
-<div id="outline-container-sec-2" class="outline-2">
-<h2 id="sec-2">bamboo magic</h2>
-<div class="outline-text-2" id="text-2">
+<div id="outline-container-orgheadline2" class="outline-2">
+<h2 id="orgheadline2">bamboo magic</h2>
+<div class="outline-text-2" id="text-orgheadline2">
 <p>
 there's thing in <i>bamboo</i> called <code>custom build</code>, which mean you can custom variable in bamboo's build.
 </p>
@@ -172,9 +172,9 @@ and your build will also display a little bit different such as
 </div>
 </div>
 
-<div id="outline-container-sec-3" class="outline-2">
-<h2 id="sec-3">github webhook</h2>
-<div class="outline-text-2" id="text-3">
+<div id="outline-container-orgheadline3" class="outline-2">
+<h2 id="orgheadline3">github webhook</h2>
+<div class="outline-text-2" id="text-orgheadline3">
 <p>
 now we can config github webhook say, ok, I'd like bamboo to be trigger whenever a pull request is opened.
 </p>
@@ -184,7 +184,7 @@ with the hubot endpoint and variable we need
 </p>
 
 <p>
-<a href="http://your.hubot.com/trigger-bamboo?bamboo=http://your.bamboo.com&buildKey=planBuildKey&room=optional-slack-channel">http://your.hubot.com/trigger-bamboo?bamboo=http://your.bamboo.com&buildKey=planBuildKey&room=optional-slack-channel</a>
+<a href="http://your.hubot.com/trigger-bamboo?bamboo=http://your.bamboo.com&amp;buildKey=planBuildKey&amp;room=optional-slack-channel">http://your.hubot.com/trigger-bamboo?bamboo=http://your.bamboo.com&buildKey=planBuildKey&room=optional-slack-channel</a>
 </p>
 
 
@@ -196,15 +196,15 @@ with the hubot endpoint and variable we need
 </div>
 
 
-<div id="outline-container-sec-4" class="outline-2">
-<h2 id="sec-4">but what about the custom variables</h2>
-<div class="outline-text-2" id="text-4">
+<div id="outline-container-orgheadline4" class="outline-2">
+<h2 id="orgheadline4">but what about the custom variables</h2>
+<div class="outline-text-2" id="text-orgheadline4">
 <p>
 bamboo need special form of variables, so we need something middleware to convert webhook payload from github&#x2026; 
 </p>
 
 <p>
-I simply create a <a href="https://hubot.github.com">hubot</a> and a very simple script<sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup> to achieve that.
+I simply create a <a href="https://hubot.github.com/">hubot</a> and a very simple script<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup> to achieve that.
 </p>
 
 <div class="org-src-container">
@@ -254,9 +254,9 @@ then point your github hook to hubot.
 </div>
 </div>
 
-<div id="outline-container-sec-5" class="outline-2">
-<h2 id="sec-5">config Bamboo plan</h2>
-<div class="outline-text-2" id="text-5">
+<div id="outline-container-orgheadline5" class="outline-2">
+<h2 id="orgheadline5">config Bamboo plan</h2>
+<div class="outline-text-2" id="text-orgheadline5">
 <p>
 We'd like only run the PR only in testing, and stop build after testing. 
 imaging if your build originally looks like this:
@@ -264,20 +264,13 @@ imaging if your build originally looks like this:
 <ul class="org-ul">
 <li>testing
 <ul class="org-ul">
-<li>checkout code
-</li>
-<li>run test
-</li>
-</ul>
-</li>
-<li>tagging
-</li>
-<li>publish
-</li>
-<li>deploy to Staging
-</li>
-<li>deploy to Production
-</li>
+<li>checkout code</li>
+<li>run test</li>
+</ul></li>
+<li>tagging</li>
+<li>publish</li>
+<li>deploy to Staging</li>
+<li>deploy to Production</li>
 </ul>
 
 <p>
@@ -286,26 +279,16 @@ so here're things a PR build should look like:
 <ul class="org-ul">
 <li>testing
 <ul class="org-ul">
-<li>checkout code
-</li>
-<li>checkout pull request code
-</li>
-<li>run test
-</li>
-<li>notify github status api
-</li>
-</ul>
-</li>
-<li>stop build when it's a PR build
-</li>
-<li>tagging
-</li>
-<li>publish
-</li>
-<li>deploy to Staging
-</li>
-<li>deploy to Production
-</li>
+<li>checkout code</li>
+<li>checkout pull request code</li>
+<li>run test</li>
+<li>notify github status api</li>
+</ul></li>
+<li>stop build when it's a PR build</li>
+<li>tagging</li>
+<li>publish</li>
+<li>deploy to Staging</li>
+<li>deploy to Production</li>
 </ul>
 
 <p>
@@ -324,8 +307,7 @@ some credentials you may need
 </p>
 
 <ul class="org-ul">
-<li><code>$bamboo_GITHUB_STATUS_API_password</code>
-</li>
+<li><code>$bamboo_GITHUB_STATUS_API_password</code></li>
 </ul>
 <p>
 you need github status api token <a href="#coderef-githubapi1"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-githubapi1');" onmouseout="CodeHighlightOff(this, 'coderef-githubapi1');">here</a> <a href="#coderef-githubapi2"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-githubapi2');" onmouseout="CodeHighlightOff(this, 'coderef-githubapi2');">there</a> and <del>everywhere</del>
@@ -340,17 +322,16 @@ tick only <code>repo:status</code> for <i>Status API</i> purpose only and much m
 </p>
 
 <ul class="org-ul">
-<li><code>$bamboo_BAMBOO_password</code>
-</li>
+<li><code>$bamboo_BAMBOO_password</code></li>
 </ul>
 <p>
 you need <i>bamboo password</i> for stoping build, just create a share user with less permission
 </p>
 </div>
 
-<div id="outline-container-sec-5-1" class="outline-3">
-<h3 id="sec-5-1">checkout PR code</h3>
-<div class="outline-text-3" id="text-5-1">
+<div id="outline-container-orgheadline6" class="outline-3">
+<h3 id="orgheadline6">checkout PR code</h3>
+<div class="outline-text-3" id="text-orgheadline6">
 <div class="org-src-container">
 
 <pre class="src src-sh"><span style="color: #8c8c8c; font-style: italic;">#</span><span style="color: #8c8c8c; font-style: italic;">!/bin/</span><span style="color: #00008b;">bash</span>
@@ -368,9 +349,9 @@ you need <i>bamboo password</i> for stoping build, just create a share user with
 </div>
 </div>
 
-<div id="outline-container-sec-5-2" class="outline-3">
-<h3 id="sec-5-2">notify github status</h3>
-<div class="outline-text-3" id="text-5-2">
+<div id="outline-container-orgheadline7" class="outline-3">
+<h3 id="orgheadline7">notify github status</h3>
+<div class="outline-text-3" id="text-orgheadline7">
 <div class="org-src-container">
 
 <pre class="src src-sh"><span class="linenr"> 1: </span><span style="color: #8c8c8c; font-style: italic;">#</span><span style="color: #8c8c8c; font-style: italic;">!/bin/</span><span style="color: #00008b;">bash</span>
@@ -399,9 +380,9 @@ place <code>checkout PR</code> and <code>notify github status</code> script in t
 </div>
 </div>
 
-<div id="outline-container-sec-5-3" class="outline-3">
-<h3 id="sec-5-3">stop build if PR</h3>
-<div class="outline-text-3" id="text-5-3">
+<div id="outline-container-orgheadline8" class="outline-3">
+<h3 id="orgheadline8">stop build if PR</h3>
+<div class="outline-text-3" id="text-orgheadline8">
 <p>
 create new <i>stage</i> for <span class="underline">stop build</span> task
 </p>
@@ -421,18 +402,20 @@ create new <i>stage</i> for <span class="underline">stop build</span> task
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
 checkout completed source code here <a href="https://gist.github.com/jcouyang/0201a80d4657b000cec7">https://gist.github.com/jcouyang/0201a80d4657b000cec7</a>
-</p></div>
+</p></div></div>
 
 
 </div>
 </div></div>
 <div id="postamble" class="status">
-<p>Author: Jichao Ouyang</p>
-<p>Modified: 2015-08-16 Sun 13:47</p>
-<p><a href="https://travis-ci.org/jcouyang/blog"><img src="https://travis-ci.org/jcouyang/blog.svg?branch=master"></a> with <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
-<p>&lt;&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+<p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
+<p>Modified: 2015-12-25 Fri 10:14</p>
+<p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.2)</p>
+<p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
+
 <p><a href="/index.xml">RSS</a> | <a href="/archive.html">ARCHIVE</a> | <a href="/theindex.html">INDEX</a> | <a href="#" id="edit-in-github">EDIT</a></p>
 
 <script>
@@ -454,6 +437,7 @@ checkout completed source code here <a href="https://gist.github.com/jcouyang/02
   ga('send', 'pageview');
 
 </script>
+<script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
 <!-- Disqus -->
 <div id="disqus_thread"></div>
 <script type="text/javascript">
