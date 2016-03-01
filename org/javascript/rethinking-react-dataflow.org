@@ -1,0 +1,145 @@
+#+title: Rethinking React Dataflow
+#+date: <2016-03-01 Tue>
+
+#+BEGIN_QUOTE
+ 所谓 redux，就是将动作(action) 变换成 state 转换函数(reducer)，然后放到一个统一的地方(store)来 setState 而已。
+#+END_QUOTE
+
+Redux 现在红的一塌糊涂，写这篇文章并不是专门来踢馆的，因为已经[[http://staltz.com/why-react-redux-is-an-inferior-paradigm.html][有人踢过了]]， [[https://www.zhihu.com/question/38591713][过了]]， [[http://blog.dev/javascript/react-transdux-the-clojure-approach-of-flux.html][了]]。
+我用过裸的 React，确实代码 scale 了会很难过，也用过 redux，predictable 不是吹的，但是这不该归功于 redux，而应该是纯函数，一个函数式编程顺带的最基本的好处。所以，撇开 redux 不聊，来看看除了纯函数，让我们来重新思考下函数式的其他一些奇技淫巧如何能帮助我们提升状态的可预测性。
+
+* Reactive
+相对于命令式的在各个地方 setState，setState 的顺序非常难确定， 就跟可变变量赋值一样，谁先谁后对结果影响巨大。这也是函数式要消灭的赋值。但是话说回来，我特么为什么要去推测状态呢？你永远无法列举完用户交互的操作顺序，即使可以也太头疼了。
+
+比起推测整个状态，我们不如只关心数据流的一部分，而后组合这些数据流编程一颗大数据流。跟纯函数一样，只要保证每一个函数都是纯函数，组合出来的函数也是纯函数。
+
+https://raw.githubusercontent.com/jcouyang/react-most/master/docs/images/flow.dot.png
+
+ 所以我们把问题分解成一个个数据流，数据流又有可能有更小的数据流组成。数据流接收用户的输入，返回一个从旧状态到新状态的映射。
+
+现在，真正 setState 的时序并不重要，也不需要关心，只需要关系数据流的逻辑，爱什么时候 set 什么时候 setState。
+
+* Monadic
+不用纠结于 Monad 到底是什么，只要会用 flatmap 就好。例如 redux 非常头疼的问题，Async Action 怎么办？
+
+有了 flatmap，还怕 async 吗？通通 flat 掉。
+
+* ������
+
+要不直接看效果，怕是干讲连 flatmap 都讲不明白。
+
+#+BEGIN_CENTER
+例子源码在 👉  [[https://github.com/jcouyang/react-most/tree/master/examples/type-n-search][这里]]
+#+END_CENTER
+
+
+下面，我们来实现一个非常常见但有可能使用其他库实现比较复杂的功能。在输入的同时搜索并将结果更新到页面上。这么一个功能需要完成：
+
+1. 响应用户（键盘输入）事件，
+2. 但是又不能每次变动都响应，这样频繁请求会给服务器过大压力。我们设置在 500ms 响应一次。
+3. 500ms 后异步的发送到搜索的服务器（假设是 github api）
+4. 数据返回后显示对应搜索结果的 repository 名字，作者名字，以及收藏数量。
+
+完成后的效果应该是这样的：
+
+https://raw.githubusercontent.com/jcouyang/clojure-flavored-javascript/master/book/images/Type_N_Search.png
+
+** 一个简单的 Pure Component
+React 什么的不是本书的重点，我们快快的过一遍就好，使用 React 创建一个 Component
+#+BEGIN_SRC js
+  const TypeNsearch = (props)=>{
+      let {search} = props.actions
+      return <div>
+          <input onChange={e=>search(e.target.value)}></input>
+          <ul>
+          {
+              props.results&&props.results.map(item=>{
+                  return <li key={item.id}><a href={item.html_url}>{item.full_name} ({item.stargazers_count})</a></li>
+              })
+          }
+          </ul>
+      </div>
+  }
+#+END_SRC
+
+return 的地方就是 Virtual DOM 了，一个输入框 =input= ，底下是一堆 =li= 。当输入框内容发生改变，会调用 =search= 函数，该函数将输入框的值加入到一个叫 /Intent Stream/ 的流中。
+
+好了，关于 React要做的事情我们只需要了解这么多就好了。下面我看看到底怎么 reactive。
+
+** Debounce
+
+一旦把用户事件的值发送到 Intent Stream，响应事件的工作就算已经做完了。接下来实现第二步， 至少间隔 500ms 才发送 API 请求。这意味着我们可以开始构建数据流了，让数据流中的类型为 =search= 的值 debounce 500ms 就好。
+
+#+BEGIN_SRC js
+    function(intent$){
+      let updateSink$ = intent$.filter(i=>i.type=='search')
+                           .debounce(500)
+      ...
+#+END_SRC
+
+=debounce= 会把一个流转换成一个值间的间隔至少在给定时间的流。
+#+BEGIN_SRC js
+    --冷-冷笑--冷笑话-->
+
+    --------冷笑话-->
+#+END_SRC
+
+** 发送 API 请求
+
+ 接下来的事情就简单的，流上的值之间一定是间隔 500ms 以上，我们可以放心的直接通过这些值构造响应的 API 地址并发送请求。
+  #+BEGIN_SRC js
+    ...
+    .map(intent=>intent.value)
+    .filter(query=>query.length > 0)
+    .map(query=>GITHUB_SEARCH_API + query)
+    .map(rest)
+    ...
+  #+END_SRC
+
+rest 是一个 Isomophic 的 JavaScript Restful 客户端。在拼好地址后可以简单的利用 rest 来发送请求，得到一个 Promise。
+
+** 继续 flatMap 结果到流上
+
+精彩的地方来了，当我们获得一个 Promise 后，如何将 Promise 内的一个异步的结果在作为流输出呢？这时候就可以派上我们的 Monad， monadic 的连接 promise 和 Intent Stream。
+
+#+BEGIN_SRC js
+    .flatMap(request=>most.fromPromise(
+                             request.then(resp=>({
+                               type: 'dataUpdate',
+                               value: resp.entity
+                             }))))
+#+END_SRC
+
+ 其中的 =request= 是上一步 rest 返回的 Promise，在简单的格式转换后，使用 =most.fromPromise= 将其也转换成流。
+当得到 API 的返回组成的流之后，使用 =flatMap= 连到 Intent Stream 上。下面是 =flatMap= 两个API 结果流的示意图，以防读者忘了上一节的 =flatMap= 例子。
+#+BEGIN_EXAMPLE
+    intentStream --urlA---urlB--->
+    rest(urlA)   -------respA---->
+    rest(urlB)   ---------respB-->
+    flatMap(rest)-------respA--respB--->
+#+END_EXAMPLE
+
+** Model
+
+ 在得到一个里面都是 API 返回值的流之后，可以简单的 model 话一下这条流的数据：
+#+BEGIN_SRC js
+    .filter(i=>i.type=='dataUpdate')
+    .map(data=>JSON.parse(data.value).items)
+    .map(items=>items.slice(0,10))
+#+END_SRC
+
+ 只取前 10 个结果作为例子。
+
+ 最后，把结果映射成为 state 到新 state 的映射函数：
+#+BEGIN_SRC js
+    .map(items=>state=>({results: items}))
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+modleStream ---mA---mB--->
+stateStream ---state=>({results:mA})---state=>({results:mB})--->
+#+END_EXAMPLE
+
+ 接下来，react-most 会利用输出的 state 流中的函数调用 React 的 =setState= 方法。
+
+到这里，我们利用 Monadic Reactive Programming 的方式，Declarative 的构造出了一整条从输入（用户事件），到该事件所产生的结果的数据流。其中没有一个变量与赋值操作，也没有任何状态和全局依赖，这样的数据流就跟纯函数一样，更易于推理和预测结果。而且由于 Promise 也是时间相关的容器，也轻松的可以转换成 Stream，因此无需关心异步编程，只需要掌控好数据流向与变换就好了。
