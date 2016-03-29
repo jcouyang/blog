@@ -1,14 +1,15 @@
+machine:
+  services:
+    - docker
 dependencies:
   cache_directories:
-    - pandoc-1.13.2-1-amd64.deb
     - .cask
-    - emacs-24.5/src/emacs
   pre:
-    - if [[ ! -e emacs-24.5/src/emacs ]]; then wget http://gnu.opencube.ca/emacs/emacs-24.5.tar.xz && tar xf emacs-24.5.tar.xz && cd emacs-24.5 && ./configure && make && sudo make install && cd ..; fi
-    - sudo rm /usr/bin/emacs && sudo ln -s  /usr/local/bin/emacs /usr/bin/emacs
-    - if [[ ! -e pandoc-1.13.2-1-amd64.deb ]]; then wget https://github.com/jgm/pandoc/releases/download/1.13.2/pandoc-1.13.2-1-amd64.deb;fi
-    - sudo dpkg -i pandoc-1.13.2-1-amd64.deb && curl -fsSL https://raw.githubusercontent.com/cask/cask/master/go | python && export PATH="$HOME/.cask/bin:$PATH"
-    - cask install
+    - sudo add-apt-repository -y ppa:cassou/emacs
+    - sudo add-apt-repository -y ppa:ubuntu-elisp/ppa
+    - sudo apt-get update -qq
+    - sudo apt-get install -qq emacs24-nox emacs-snapshot-nox
+    - curl -fsSkL "https://raw.github.com/cask/cask/master/go" | python
 test:
   pre:
     - ./preserve_timestamp.sh
