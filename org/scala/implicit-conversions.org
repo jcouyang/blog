@@ -1,0 +1,175 @@
+#+TITLE: Implicit, to be or not to be
+
+#+BEGIN_SRC emacs-lisp
+(require 'ob-scala)
+#+END_SRC
+
+#+RESULTS:
+: ob-scala
+
+* 隐式转换是什么鬼
+
+有时候，一加一等于 11，比如 JavaScript
+#+BEGIN_SRC js
+1+"1"
+#+END_SRC
+
+#+RESULTS:
+"11"
+
+当两个类型不一样的东西加在一起，JavaScript选择把数组转成字符，原因也能理解，数组肯定能转成字符，而反过来则不一定，或者会有信息的丢失。
+
+这就是隐式转换，没有人显式的把数字类型转成字符类型，一切都默默的发生了。
+
+奇怪的是 scala 是强类型语言，1+"1" 编译器居然也是过的
+
+#+BEGIN_SRC scala
+1 + "1"
+#+END_SRC
+
+#+RESULTS:
+: 11
+
+怎么做到的？
+
+* 隐式转换接受者
+
+如果你用的IntelliJ，光标在 =+= 号上，按 =cmd= + =b= ，就会跳转到这样一坨代码：
+#+BEGIN_SRC scala
+  implicit final class any2stringadd[A](private val self: A) extends AnyVal {
+    def +(other: String): String = String.valueOf(self) + other
+  }
+#+END_SRC
+
+=implicit= 关键字代表后面这个 =class= 是隐式的，这样编译器在寻找隐式转换的时候就能找到它。
+
+这个 =any2stringadd= 只有一个方法 =+(other:String)= 。当编译器尝试编译 =1+”1“= 时，本身 Int 并没有 =+(other:String)= 方法，编译器在放弃之前，还会寻找所有隐式转换，当发现 =any2stringadd= 有这样一个方法是，就会尝试把 =Int= 转成 =any2stringadd[Int]= 类型。
+
+** 语法糖
+隐式转换接收对象的类型还可以轻松弄一些语法糖DSL，比如 Map
+#+BEGIN_SRC scala
+Map(1 -> "one", 2 -> "two", 3 -> "three")
+#+END_SRC
+
+1 -> "one" 其实是 tuple =(1, 2)= ，隐式转换帮我们实现这个箭头DSL
+
+#+BEGIN_SRC scala
+ implicit final class ArrowAssoc[A](private val self: A) extends AnyVal {
+    @inline def -> [B](y: B): Tuple2[A, B] = Tuple2(self, y)
+    def →[B](y: B): Tuple2[A, B] = ->(y)
+  }
+#+END_SRC
+
+同样的道理，当编译器去寻找 1 的 =->= 方法时，发现没有，但是隐式转换成 ArrowAssoc 就会具备 =->= 方法。
+
+这种模式很容易识别，当某个方法并不属于该类型时，那么就会隐式转换到具备该方法的类型上。
+
+* 隐式转换参数
+除了可以隐式转换接收者，隐式转换还可以应用到参数上[fn:1]：
+
+#+BEGIN_SRC scala :exports both :results output 
+  class PreferredPrompt(val preference: String)
+  class PreferredDrink(val preference: String)
+
+  object Greeter {
+    def greet(name: String)(implicit prompt: PreferredPrompt,
+      drink: PreferredDrink) {
+
+      println("Welcome, "+ name +". The system is ready.")
+      print("But while you work, ")
+      println("why not enjoy a cup of "+ drink.preference +"?")
+      println(prompt.preference)
+    }
+  }
+  implicit val prompt = new PreferredPrompt("Yes, master> ")
+  implicit val drink = new PreferredDrink("tea")
+  Greeter.greet("Joe")
+#+END_SRC
+
+#+RESULTS:
+: Welcome, Joe. The system is ready.
+: But while you work, why not enjoy a cup of tea?
+: Yes, master> 
+
+这里的 "tea" 和 "Yes, master" 都是从隐式转换参数 prompt 和 drink 来的，当声明两个隐式参数时，编译器会找到 implicit 定义的相同类型的 val 注入到函数中，所以调用 =greet= 时只需要给第一个参数就足够了。
+
+** 类型类 Type Class
+隐式转换参数最常用的还是类型类[fn:2]
+
+#+BEGIN_SRC scala :exports both :results output 
+trait Show[A] {
+  def show(f: A): String
+}
+def log[A](a: A)(implicit s: Show[A]) = println(s.show(a))
+implicit val stringShow = new Show[String] {
+  def show(s: String) = s
+}
+log("a string")
+#+END_SRC
+
+#+RESULTS:
+: a string
+: Some(Some(hello))
+
+我们来看看怎么实现类型类 =Show= 的一个实例 =Show[String]=
+
+- 类型类对应到scala中就是一个高阶 trait，这里既是 =Show[A]=
+- 所以 =stringShow= 就是类型类 =Show= 的 =String= 实例。
+- 当编译器看到 =log("a string")= 时，确定参数的类型 =A= 为 =String=
+- 这样隐式参数的类型 =Show[A]= 也被定位到 =Show[String]=
+- 编译器找到隐式转换 =Show[String]= 类型的 =stringShow= 并将其注入为 =s=
+
+要继续实现别的类型的 Show 实例，只需要继续添加隐式转换，例如 Option 的 Show 实例
+#+BEGIN_SRC scala :exports both :results output 
+trait Show[A] {
+  def show(f: A): String
+}
+def log[A](a: A)(implicit s: Show[A]) = println(s.show(a))
+implicit val stringShow = new Show[String] {
+  def show(s: String) = s
+}
+implicit def optionShow[A](implicit sa: Show[A]) = new Show[Option[A]] {
+  def show(oa: Option[A]): String = oa match {
+    case None => "None"
+    case Some(a) => "Some("+ sa.show(a) + ")"
+  }
+}
+log(Option(Option("hello")))
+#+END_SRC
+
+#+RESULTS:
+: Some(Some(hello))
+
+- 同样的 =log(Option(Option("hello")))= 首先确定 =A= 类型为 =Option[Option[String]]=
+- =Show[Option[Option[String]]]= 的实例可以找到 =optionShow= ，确定 =A= 这时为 =Option[String]=
+- 递归的，编译器又会找到 =optionShow=, 这次 =A= 为 =String= ， =sa= 被 =stringShow= 注入
+
+#+BEGIN_QUOTE
+另一种签名也同样适用
+#+BEGIN_SRC scala
+def log[A: Show](a: A) = println(implicitly[Show[A]].show(a))
+#+END_SRC
+- =A:Show= 约束 =A= 是 =Show= 的一个实例
+- =implicitly[Show[A]]= 会去寻找类型为 =Show[A]= 隐式转换
+
+这是更类似于 Haskell 的签名
+#+BEGIN_SRC haskell
+log::(Show a) => a -> String
+#+END_SRC
+
+只是 Haskell 会更聪明一些，直接写 =show= 就好，无需声明 implicitly 寻找类型。
+#+END_QUOTE
+
+* To Be 
+- 难以衔接的第三方库
+- DSL
+
+* or Not To Be
+- 用得太多会影响可读性
+- 如果继承，组合，重载能解决，最好别用隐式转换，但如果代码恶心又啰嗦，可以尝试使用隐式转换
+
+* Footnotes
+
+[fn:2] http://typelevel.org/cats/typeclasses.html
+
+[fn:1] http://www.artima.com/pins1ed/implicit-conversions-and-parameters.html#21.5
