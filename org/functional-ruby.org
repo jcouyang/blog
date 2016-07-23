@@ -1,0 +1,416 @@
+#+TITLE: Functional Ruby
+#+DATE: <2016-07-14 Thu>
+#+AUTHOR: 欧阳继超
+#+PROPERTY: header-args :results pp :exports both
+
+说到 ruby 都会觉得是纯面向对象语言，所有东西都是对象。但是，函数式与面向对象并无冲突（你看看Scala）。最近一个项目用 ruby 写了一个非常常用的 feeder，一不小心写得函数式了些，让我们看看fancy的ruby到底能干些什么fancy的函数式。
+
+* COMMENT
+#+BEGIN_SRC emacs-lisp
+(require 'ob-ruby)
+#+END_SRC
+
+#+RESULTS:
+: ob-ruby
+
+* lambda
+不出所料，函数式一定要先有 lambda，跟所有的 ruby 对象一样，lambda 也就是一个正常的对象
+#+BEGIN_SRC ruby 
+plus1 = ->(x) { x + 1 }
+#+END_SRC
+
+#+RESULTS:
+: #<Proc:0x007fbaea988030@-:3 (lambda)>
+
+明显，lambda 构造出一个 Proc 的实例，如果我们调用这个 lambda，效果跟 method 没有什么区别：
+
+#+BEGIN_SRC ruby 
+plus1 = ->(x) { x + 1 }
+plus1.(3)
+#+END_SRC
+
+#+RESULTS:
+: 4
+
+好玩的是，method 不能高阶
+#+BEGIN_SRC ruby  :results pp
+  def plus1 x
+    x + 1
+  end
+  [1,2,3,4].map &plus1
+#+END_SRC
+
+: `plus1': wrong number of arguments (0 for 1) (ArgumentError)
+
+因为 plus1 在引用时就已经调用了，解释器在调用 =plus1= 时发现并没有传参数，于是抛出参数不匹配错误。由于method 引用即invoke，你永远无法写出高阶函数的效果。
+
+而 lambda 就可以：
+
+#+BEGIN_SRC ruby  :results pp
+plus1 = ->(x) { x + 1 }
+[1,2,3,4].map &plus1
+#+END_SRC
+
+#+RESULTS:
+: [2, 3, 4, 5]
+
+* 神奇的 =&=
+
+这里的 magic 是 =&= 把 =plus1= 变成 Block 发给数组了，Block 也就是我们常见的 ={}= ，等价于：
+#+BEGIN_SRC ruby
+[1,2,3,4].map {|x| x + 1}
+#+END_SRC
+
+也等价于：
+#+BEGIN_SRC ruby
+[1,2,3,4].map &Proc.new{|x| x + 1 }
+#+END_SRC
+
+注意如果没有 =&= ，解释器无法分辨到底在调用 =map= 时，把 Proc 当成正常参数，而不是 block
+
+当得知 =&= 的魔法之后，我们很容易解释 =&:symbol= 这个语法糖
+#+BEGIN_SRC ruby  :results pp
+%w(ouyang jichao).map &:capitalize 
+#+END_SRC
+
+#+RESULTS:
+: ["Ouyang", "Jichao"]
+
+desuger 完其实就是
+#+BEGIN_SRC ruby
+  %w(ouyang jichao).map &Proc.new(|x| x.send(:capitalize))
+#+END_SRC
+
+为什么可以产生这样的语法糖，是 Symbol 类型有 =to_proc= 方法，当 =&= 尝试将后面的东西变成 Proc 类型后传给 map 当 Block， =to_proc= 就是用来转换成 proc 的方法。
+
+所以就是：
+#+BEGIN_SRC ruby  :results pp
+  %w(ouyang jichao).map &:capitalize.to_proc
+#+END_SRC
+
+#+RESULTS:
+: ["Ouyang", "Jichao"]
+
+* 为什么 lambda 是 proc
+话说回来，既然 lambda 也返回 Proc 实例， =Proc.new= 也返回 Proc 实例，为何要设计这两种匿名函数呢？
+
+简单来说， Proc 只是一段代码块，你可以想象引用的地方会变成这块代码块，而 lambda 不仅是一块代码块，表现得更像一个函数。具体来讲，就是 return 与参数检查：
+** return
+来看个诡异的，下面这段代码我们可能会期望是返回一个数组，只是 =jichao= 会变成 =lulu= 而已
+
+#+BEGIN_SRC ruby  :results pp
+%w(ouyang jichao).map { |x| return 'lulu' if x == 'jichao'; x}
+#+END_SRC
+
+#+RESULTS:
+: "lulu"
+
+显然 return 之后的代码就再也走不到了，整个map会直接返回
+
+但是如果你用 lambda 而不是普通 Proc，你会发现
+#+BEGIN_SRC ruby  :results pp
+%w(ouyang jichao).map &->(x){ return 'lulu' if x == 'jichao'; x}
+#+END_SRC
+
+#+RESULTS:
+: ["ouyang", "lulu"]
+
+嗒哒，输出我们的期望了，lambda 的表现跟一个普通函数是一样的，函数的 return 当然不会导致调用者的返回。
+
+** 参数检查
+确切的说是参数元数 arity 的检查，比如随便定义一个method，如果你给的参数元数不匹配，会得到一个异常
+#+BEGIN_SRC ruby 
+def heheda who
+  "heheda #{who}"
+end
+heheda
+#+END_SRC
+
+: `heheda': wrong number of arguments (0 for 1) (ArgumentError)
+
+因为定义的是一元的函数，调用时并没有给任何参数，就挂了
+
+但是 Proc 是不会管这个的
+#+BEGIN_SRC ruby  :results pp
+heheda = Proc.new{|who| p "heheda #{who}"}
+heheda.()
+#+END_SRC
+
+#+RESULTS:
+: "heheda "
+
+Proc 完全不会理会参数，如果binding能找到，就用了，如果没有，也继续运行。
+
+lambda，则更像一个method
+#+BEGIN_SRC ruby 
+heheda = lambda {|who| p "heheda #{who}"}
+heheda.()
+#+END_SRC
+
+: `block in main': wrong number of arguments (0 for 1) (ArgumentError)
+
+* 闭包
+通常面向对象的捕捉一个绑定通常会通过 =@=
+#+BEGIN_SRC ruby
+class HeHe
+def initialize who
+  @who = who
+end
+def heheda
+  "heheda #{@who}"
+end
+end
+#+END_SRC
+
+=HeHe= 对 who 进行了封装，如果需要访问 =who= 需要通过 =heheda= 方法。
+
+同样的东西，在函数式叫闭包，通过闭包我们依然能找到闭包内的绑定
+#+BEGIN_SRC ruby 
+who = 'jichao'
+heheda = ->(){ "heheda #{who}" }
+def hehedaToOuyang &heheda
+  who = 'ouyang'
+  heheda.()
+end
+hehedaToOuyang &heheda
+#+END_SRC
+
+#+RESULTS:
+: "heheda jichao"
+
+注意看 heheda 找到的绑定不是离他调用最近的 =who=, 而是当初定义的 ~who=jichao~
+
+所以跟面向对象一样， =heheda= 完美的封装了 =who= ,调用者即无法直接获取到他绑定的 =who= , 也无法重新给他新的绑定
+
+* pattern matching
+ruby 支持简单的几种模式匹配
+
+** destructure
+#+BEGIN_SRC ruby
+first, *middle_and_last = ['Phillip', 'Jay', 'Fry']
+p first, middle_and_last
+#+END_SRC
+
+#+RESULTS:
+| Phillip | (Jay Fry) |
+
+destructuring 一个数组如此简单，但是hash就不这么容易，好在，方法的参数会自带 destructure的功能：
+#+BEGIN_SRC ruby
+  fry = {first: 'Phillip', middle: 'Jay', last: 'Fry'}
+  def printFirstName first:, **rest
+    p first, rest
+  end
+printFirstName fry
+#+END_SRC
+
+#+RESULTS:
+| Phillip | (:middle=> Jay :last=> Fry) |
+
+这玩意 ruby 叫它 keyword arguments, =first:= 会匹配 =fry= 中的 =first= 并将值绑定到 =first= ， =**rest= 绑定剩下的所有东西。
+
+数组也可以这样搞：
+
+#+BEGIN_SRC ruby -r -n
+fry = ['Phillip', 'Jay', 'Fry']
+def printFirstName first, *rest
+p first, rest
+end
+printFirstName *fry (ref:star)
+#+END_SRC
+
+#+RESULTS:
+| Phillip | (Jay Fry) |
+
+要注意第[[(star)]]行, 调用时记得给数组加 =*=, 这样解释器才知道不是把整个 fry 扔给 =printFirstName= 当参数，而是把 fry 的内容扔过去当参数。
+
+** case when
+ruby 中的 case[fn:1] 可以搞定四种模式匹配
+
+*** 值
+这个很简单，应该都有用过
+#+BEGIN_SRC ruby
+  me = 'ouyang'
+  case me
+  when 'ouyang' 
+    "hehe #{me}"
+  else 'hehe jichao'
+  end
+#+END_SRC
+
+#+RESULTS:
+: hehe ouyang
+
+*** 类型
+#+BEGIN_SRC ruby
+  class Me
+    def initialize name
+      @name = name
+    end
+
+    def heheda
+      "heheda #{@name}"
+    end
+  end
+
+  me = Me.new 'ouyang'
+
+  case me
+  when Me
+    me.heheda
+  else
+    'hehedale'
+  end
+#+END_SRC
+
+: "heheda ouyang"
+
+*** 表达式
+跟 =if else= 一样用
+#+BEGIN_SRC ruby
+require 'ostruct'
+  me = OpenStruct.new(name: 'jichao', first_name: 'ouyang')
+  case
+  when me.name == 'jichao'
+    "hehe #{me}"
+  else 'gewuen'
+  end
+#+END_SRC
+
+#+RESULTS:
+: hehe #<OpenStruct name="jichao", first_name="ouyang">
+
+*** lambda （aka guard）
+#+BEGIN_SRC ruby
+require 'ostruct'
+  me = OpenStruct.new(name: 'jichao', first_name: 'ouyang')
+  case me
+  when ->(who){who.name=='jichao'}
+    "hehe #{me}"
+  end
+#+END_SRC
+
+#+RESULTS:
+: hehe #<OpenStruct name="jichao", first_name="ouyang">
+
+*** /正则/
+#+BEGIN_SRC ruby
+case 'jichao ouyang'
+when /ouyang/
+"heheda"
+end
+#+END_SRC
+
+#+RESULTS:
+: heheda
+
+*** 其实只是个简单的语法糖
+case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的正则
+#+BEGIN_SRC ruby
+  if(/ouyang/ === 'jichao')
+    "heheda"
+  end
+#+END_SRC
+
+所以 magic 则是所有 when 的对象都实现了 ~===~ 方法而已
+- 值： ~object.===~ 会代理到 ~==~
+- 类型： ~Module.===~ 会看是否是其 instance
+- 正则： ~regex.===~ 如果匹配返回 true
+- 表达式：取决于表达式返回的值的 ~===~ 方法
+- lambda： ~proc.===~ 会运行 lambda 或者 proc
+
+这样，我们可以随意给任何类加上 ~===~ 方法, 不仅如此，实现一个抽象数据类型（ADT）会变得是分简单
+
+* 一个简单的例子
+一个简单的 feeder 流程大概是，从一个或多个数据源获取数据并 feed 到一个地方（DB, S3, ElasticSearch之类)。通常是一个定期的任务，比如没多久就 feed 那么一次。
+
+作为定期跑的任务，我们需要监控两个方面
+- feed 失败了多少
+- feeder 跑了没
+
+不管是什么形式，监控都不应该跟我们的业务搞到一起去，比如
+** 一个简单的 Either Monad[fn:2]
+创建一个刚好够用的 Either 非常简单
+#+BEGIN_SRC ruby
+module Either
+  def initialize v
+    @v = v
+  end
+
+  def map
+    case self
+    when Right
+      Right.new(yield @v)
+    when Left
+      self
+    end
+  end
+  
+  def bimap lfn, rfn
+    case self
+      when Right
+        Right.new(rfn.(@v))
+      when Left
+        Left.new(lfn.(@v))
+    end
+  end
+end
+class Left
+  include Either
+  def initialize v=nil
+    @v=v
+  end
+end
+
+class Right 
+  include Either
+end
+#+END_SRC
+
+用 Either 做控制流
+#+BEGIN_SRC ruby
+  def run
+    fetch_ids.fmap do |ids|
+      ids.map do |id|
+        fetch_details(id).chain &save
+      end
+    end
+  end
+#+END_SRC
+
+1. =fetch_id= 会是一个IO，要么返回 =Left= 要么 =Right=, 不过我们只关心它是 =Either= 里面可能会有一个含有 id 的数组
+2. =fmap= =fetch_details= 到可能拿到的 =ids= 上， =fetch_details= 返回的依然是 =Either=
+3. =save= 也返回 Either, 于是可以继续 =chain= 上去
+4. 最终返回含有 Either 的数组，每个Either 可能是
+
+那么我们的业务逻辑的流程走完了，该负责监控的逻辑了，注意现在 run 的返回值类型是 =Either[Error, [Either[Error, Data]]]=
+
+#+BEGIN_SRC ruby
+  run.bimap(->(error){ logger.error("fetching ids failure #{error.message}") },
+            ->(processed) do
+              failures, successed = processed.partition {|p| Left === p}
+              logger.error("processing failure:\n#{failures.map(&:message).join("\n")}")
+              logger.info("processing success:\n#{success.map(&:id).join("\n")}")
+            end)
+#+END_SRC
+
+* actor model 多线程
+当你的数据处理都是函数式的之后，或者说 immutable，应用多线程将是十分简单而且安全的事情, 下面也是一个简单的例子，使用 [[https://github.com/celluloid/celluloid][Celluloid]] 把我们的 feeder 改成多线程
+
+** pmap
+#+BEGIN_SRC ruby
+require "celluloid/autostart"
+module Enumerable
+  def pmap(&block)
+    futures = map { |elem| Celluloid::Future.new(elem, &block) }
+    futures.map(&:value)
+  end
+end
+#+END_SRC
+
+你懂的，把我们feeder的 =map= 都换成 =pmap= ,多线程就这么简单
+
+* Footnotes
+
+[fn:2] http://hackage.haskell.org/package/base-4.8.2.0/docs/src/Data.Either.html#Either
+
+[fn:1] http://docs.ruby-lang.org/en/2.2.0/syntax/control_expressions_rdoc.html#label-case+Expression
