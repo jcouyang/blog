@@ -6,6 +6,8 @@
 (clojure-font-lock-setup)
 (require 'org)
 (require 'org-blog)
+(require 'ob-sh)
+(require 'ob-ruby)
 (require 'htmlize)
 (setq make-backup-files nil)
 (setq debug-on-error t)
