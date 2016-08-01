@@ -1,0 +1,81 @@
+#+TITLE: Project Euler
+
+闲来无事， +七周+ 七语言撸一把 [[https://projecteuler.net/][*爱撸者计划* （ProjectEuler）]]
+* COMMENT require
+#+BEGIN_SRC emacs-lisp
+  (require 'ob-clojure)
+  ;; (cider-jack-in)
+  (require 'ob-ruby)
+  (require 'ob-javascript)
+  (require 'ob-haskell)
+  (require 'ob-scala)
+  (require 'ob-python)
+#+END_SRC
+
+#+RESULTS:
+: ob-scala
+
+* Multiples of 3 and 5
+#+PROPERTY: header-args :results value pp :exports both
+
+求可被3或5整除的数字之和，比如0-100内的可被3或5整除的整数和为2318
+** Clojure
+
+1. 直白解法
+#+BEGIN_SRC clojure :results value pp
+  (def num-divby-3-5
+    (filter (fn [n]
+              (let [by3 (mod n 3) by5 (mod n 5)]
+                (or (= 0 by3) (= 0 by5))
+                ))))
+  (defn sum-of-div-3-5 [n]
+    (transduce num-divby-3-5 + (range n)))
+  (sum-of-div-3-5 100)
+#+END_SRC
+
+#+RESULTS:
+: 2318
+
+2. 数学一点点
+#+BEGIN_SRC clojure :results value pp
+  (def by-3 (range 0 100 3))
+  (def by-5 (range 0 100 5))
+  (def by-15 (range 0 100 15))
+  (- (+ (reduce + by-3) (reduce + by-5)) (reduce + by-15))
+#+END_SRC
+
+#+RESULTS:
+: 2318
+
+3. 高效纯数学
+#+BEGIN_SRC clojure
+  (defn sum-divby [num n]
+    (let [end (quot num n)]
+      (* n (quot (* end (inc end)) 2))))
+  (- (+ (sum-divby 100 3) (sum-divby 100 5)) (sum-divby 100 15))
+#+END_SRC
+
+#+RESULTS:
+: #'user/sum-divby2418
+
+** Ruby
+#+BEGIN_SRC ruby
+(1..99).select{|x| x % 3 == 0 or x % 5 == 0}.reduce :+
+#+END_SRC
+
+#+RESULTS:
+: 2318
+
+** Scala
+#+BEGIN_SRC scala
+val by3 = 0 until 100 by 3
+val by5 = 0 until 100 by 5
+val by15 = 0 until 100 by 15
+by3.sum + by5.sum - by15.sum
+#+END_SRC
+
+#+RESULTS:
+: 2318
+
+
+* To be continue ...
