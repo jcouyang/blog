@@ -4,7 +4,7 @@
 <!-- 2016-08-01 Mon 16:17 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
-<title>Index</title>
+<title>Project Euler</title>
 <meta  name="generator" content="Org-mode">
 <meta  name="author" content="Jichao Ouyang">
 <link rel="apple-touch-icon" sizes="114x114" href="/assets/apple-icon-114x114.png">
@@ -75,118 +75,131 @@ for the JavaScript code in this tag.
  <a accesskey="H" href="/~jichao.ouyang.html"> HOME </a>
 </div><div id="content">
 <header>
-<h1 class="title">Index</h1>
+<h1 class="title">Project Euler</h1>
 </header><nav id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">A</a></li>
-<li><a href="#orgheadline2">B</a></li>
-<li><a href="#orgheadline3">C</a></li>
-<li><a href="#orgheadline4">D</a></li>
-<li><a href="#orgheadline5">G</a></li>
-<li><a href="#orgheadline6">L</a></li>
-<li><a href="#orgheadline7">R</a></li>
-<li><a href="#orgheadline8">T</a></li>
-<li><a href="#orgheadline9">X</a></li>
-<li><a href="#orgheadline10">柯</a></li>
+<li><a href="#orgheadline1">Multiples of 3 and 5</a>
+<ul>
+<li><a href="#orgheadline2">Clojure</a></li>
+<li><a href="#orgheadline3">Ruby</a></li>
+<li><a href="#orgheadline4">Scala</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline5">To be continue &#x2026;</a></li>
 </ul>
 </div>
 </nav>
-
+<p>
+闲来无事， <del>七周</del> 七语言撸一把 <a href="https://projecteuler.net/"><b>爱撸者计划</b> （ProjectEuler）</a>
+</p>
 <div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1">A</h2>
+<h2 id="orgheadline1">Multiples of 3 and 5</h2>
 <div class="outline-text-2" id="text-orgheadline1">
-<ul class="org-ul">
-<li><a href="javascript/essential-ecmascript6.html#orgheadline2">Arrow Function</a></li>
-</ul>
+<p>
+求可被3或5整除的数字之和，比如0-100内的可被3或5整除的整数和为2318
+</p>
+</div>
+<div id="outline-container-orgheadline2" class="outline-3">
+<h3 id="orgheadline2">Clojure</h3>
+<div class="outline-text-3" id="text-orgheadline2">
+<ol class="org-ol">
+<li>直白解法</li>
+</ol>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00008b;">def</span> <span style="color: #b8860b;">num-divby-3-5</span>
+  (filter (<span style="color: #00008b;">fn</span> [n]
+            (<span style="color: #00008b;">let</span> [by3 (mod n 3) by5 (mod n 5)]
+              (<span style="color: #00008b;">or</span> (= 0 by3) (= 0 by5))
+              ))))
+(<span style="color: #00008b;">defn</span> <span style="color: #6a5acd;">sum-of-div-3-5</span> [n]
+  (transduce num-divby-3-5 + (range n)))
+(sum-of-div-3-5 100)
+</pre>
+</div>
+
+<pre class="example">
+2318
+</pre>
+
+<ol class="org-ol">
+<li>数学一点点</li>
+</ol>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00008b;">def</span> <span style="color: #b8860b;">by-3</span> (range 0 100 3))
+(<span style="color: #00008b;">def</span> <span style="color: #b8860b;">by-5</span> (range 0 100 5))
+(<span style="color: #00008b;">def</span> <span style="color: #b8860b;">by-15</span> (range 0 100 15))
+(- (+ (reduce + by-3) (reduce + by-5)) (reduce + by-15))
+</pre>
+</div>
+
+<pre class="example">
+2318
+</pre>
+
+<ol class="org-ol">
+<li>高效纯数学</li>
+</ol>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00008b;">defn</span> <span style="color: #6a5acd;">sum-divby</span> [num n]
+  (<span style="color: #00008b;">let</span> [end (quot num n)]
+    (* n (quot (* end (inc end)) 2))))
+(- (+ (sum-divby 100 3) (sum-divby 100 5)) (sum-divby 100 15))
+</pre>
+</div>
+
+<pre class="example">
+#'user/sum-divby2418
+</pre>
 </div>
 </div>
-<div id="outline-container-orgheadline2" class="outline-2">
-<h2 id="orgheadline2">B</h2>
-<div class="outline-text-2" id="text-orgheadline2">
-<ul class="org-ul">
-<li><a href="make Bamboo support Github Pull Request with Status API.html#orgheadline1">bamboo</a></li>
-</ul>
+
+<div id="outline-container-orgheadline3" class="outline-3">
+<h3 id="orgheadline3">Ruby</h3>
+<div class="outline-text-3" id="text-orgheadline3">
+<div class="org-src-container">
+
+<pre class="src src-ruby">(1..99).select{|x| x % 3 == 0 <span style="color: #00008b;">or</span> x % 5 == 0}.reduce <span style="color: #6b8e23;">:+</span>
+</pre>
+</div>
+
+<pre class="example">
+2318
+</pre>
 </div>
 </div>
-<div id="outline-container-orgheadline3" class="outline-2">
-<h2 id="orgheadline3">C</h2>
-<div class="outline-text-2" id="text-orgheadline3">
-<ul class="org-ul">
-<li><a href="javascript/functional-javascript.html#orgheadline23">currying</a></li>
-</ul>
+
+<div id="outline-container-orgheadline4" class="outline-3">
+<h3 id="orgheadline4">Scala</h3>
+<div class="outline-text-3" id="text-orgheadline4">
+<div class="org-src-container">
+
+<pre class="src src-scala">val by3 = 0 until 100 by 3
+val by5 = 0 until 100 by 5
+val by15 = 0 until 100 by 15
+by3.sum + by5.sum - by15.sum
+</pre>
+</div>
+
+<pre class="example">
+2318
+</pre>
 </div>
 </div>
-<div id="outline-container-orgheadline4" class="outline-2">
-<h2 id="orgheadline4">D</h2>
-<div class="outline-text-2" id="text-orgheadline4">
-<ul class="org-ul">
-<li><a href="javascript/essential-ecmascript6.html#orgheadline5">Destructuring</a></li>
-</ul>
 </div>
-</div>
+
+
 <div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5">G</h2>
-<div class="outline-text-2" id="text-orgheadline5">
-<ul class="org-ul">
-<li>github
-<ul class="org-ul">
-<li><a href="make Bamboo support Github Pull Request with Status API.html#orgheadline3">webhook</a></li>
-</ul></li>
-</ul>
-</div>
-</div>
-<div id="outline-container-orgheadline6" class="outline-2">
-<h2 id="orgheadline6">L</h2>
-<div class="outline-text-2" id="text-orgheadline6">
-<ul class="org-ul">
-<li><a href="javascript/essential-ecmascript6.html#orgheadline2">lambda</a></li>
-</ul>
-</div>
-</div>
-<div id="outline-container-orgheadline7" class="outline-2">
-<h2 id="orgheadline7">R</h2>
-<div class="outline-text-2" id="text-orgheadline7">
-<ul class="org-ul">
-<li><a href="javascript/clojure-essence-in-javascript-transducer.html#orgheadline1">reducer</a></li>
-<li><a href="javascript/functional-javascript.html#orgheadline27">reducer</a></li>
-<li><a href="javascript/clojure-essence-in-javascript-transducer.html#orgheadline4">reducible</a></li>
-<li><a href="javascript/functional-javascript.html#orgheadline25">reducible</a></li>
-</ul>
-</div>
-</div>
-<div id="outline-container-orgheadline8" class="outline-2">
-<h2 id="orgheadline8">T</h2>
-<div class="outline-text-2" id="text-orgheadline8">
-<ul class="org-ul">
-<li><a href="javascript/essential-ecmascript6.html#orgheadline1">tail recursive</a></li>
-<li><a href="javascript/clojure-essence-in-javascript-transducer.html#orgheadline5">transducer</a></li>
-<li><a href="javascript/functional-javascript.html#orgheadline28">transducer</a></li>
-</ul>
-</div>
-</div>
-<div id="outline-container-orgheadline9" class="outline-2">
-<h2 id="orgheadline9">X</h2>
-<div class="outline-text-2" id="text-orgheadline9">
-<ul class="org-ul">
-<li><a href="javascript/clojure-essence-in-javascript-transducer.html#orgheadline2">xform</a></li>
-<li><a href="javascript/functional-javascript.html#orgheadline24">xform</a></li>
-</ul>
-</div>
-</div>
-<div id="outline-container-orgheadline10" class="outline-2">
-<h2 id="orgheadline10">柯</h2>
-<div class="outline-text-2" id="text-orgheadline10">
-<ul class="org-ul">
-<li><a href="javascript/functional-javascript.html#orgheadline23">柯里化</a></li>
-</ul>
-</div>
+<h2 id="orgheadline5">To be continue &#x2026;</h2>
 </div>
 </div>
 <div id="postamble" class="status">
 <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-<p>Modified: 2016-08-01 Mon 16:17</p>
+<p>Modified: 2016-08-01 Mon 16:15</p>
 <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.3.1 (<a href="http://orgmode.org">Org</a> mode 8.3.5)</p>
 <p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
