@@ -7,5 +7,5 @@
 (depends-on "dash")
 (depends-on "color-theme")
 (depends-on "clojure-mode")
+(depends-on "scala-mode")
 (depends-on "org-blog" :git "https://github.com/jcouyang/org-blog.git")
-
