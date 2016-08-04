@@ -4,6 +4,7 @@
 (color-theme-gtk-ide)
 (require 'clojure-mode)
 (require 'scala-mode)
+(require 'haskell-mode)
 (require 'ob-sh)
 (require 'ob-ruby)
 (clojure-font-lock-setup)
