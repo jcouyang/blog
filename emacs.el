@@ -22,6 +22,9 @@
 (setq postamble (with-temp-buffer
                   (insert-file-contents "html/postamble.html")
                   (buffer-string)))
+(setq preamble (with-temp-buffer
+                  (insert-file-contents "html/preamble.html")
+                  (buffer-string)))
 (setq header (with-temp-buffer
                   (insert-file-contents "html/header.html")
                   (buffer-string)))
@@ -36,6 +39,7 @@
         :html-doctype "html5"
         :html-head ,header
         :html-html5-fancy t
+        :html-preamble ,preamble
         :html-postamble ,postamble
         ;; HTML directory
         :publishing-directory "public"
@@ -44,9 +48,7 @@
         :headline-levels 4
         :with-sub-superscript nil
         :section-numbers nil
-        :html-link-up "/index.html"
-        :html-link-home ,config-home-link
-        :auto-preamble t
+        :auto-preamble nil
         :auto-sitemap t
         :sitemap-filename "index.org"
         :exclude "\!.*\.org"
