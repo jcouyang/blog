@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 export NAME='Jichao Ouyang'
 export PATH="/home/ubuntu/.cask/bin:$PATH"
 git clone git@github.com:jcouyang/blog.git -b gh-pages public
