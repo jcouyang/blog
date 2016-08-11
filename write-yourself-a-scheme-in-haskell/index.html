@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- 2016-08-09 Tue 14:04 -->
+<!-- 2016-08-11 Thu 01:45 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
 <title>用Haskell48小时写你个Scheme</title>
@@ -162,7 +162,21 @@ for the JavaScript code in this tag.
 <li><a href="#orgheadline5">练习</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline6">待续&#x2026;</a></li>
+<li><a href="#orgheadline6">语法分析</a>
+<ul>
+<li><a href="#orgheadline7">写个简单的parser</a>
+<ul>
+<li><a href="#orgheadline8">定义 parser</a></li>
+<li><a href="#orgheadline9">Parse</a></li>
+<li><a href="#orgheadline10">Either</a></li>
+<li><a href="#orgheadline11">pattern matching</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline12">空白符</a></li>
+<li><a href="#orgheadline13"><span class="todo TODO">TODO</span> 返回</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline14">待续&#x2026;</a></li>
 </ul>
 </div>
 </nav>
@@ -411,10 +425,211 @@ Hello, jichao
 </div>
 
 <div id="outline-container-orgheadline6" class="outline-2">
-<h2 id="orgheadline6">待续&#x2026;</h2>
+<h2 id="orgheadline6">语法分析</h2>
 <div class="outline-text-2" id="text-orgheadline6">
+
+<figure>
+<p><img src="../images/robot-what.gif" alt="robot-what.gif">
+</p>
+</figure>
+</div>
+
+<div id="outline-container-orgheadline7" class="outline-3">
+<h3 id="orgheadline7">写个简单的parser</h3>
+<div class="outline-text-3" id="text-orgheadline7">
+<p>
+语法分析，需要引入著名的Parsec库, 当然,在这之前得先安装 Parsec
+</p>
+<pre class="example">
+cabal install parsec
+</pre>
+
+<p>
+如果没有 cabal 都没装, 请 <code>brew install cabal</code>, 非mac用户对不住了,我也不知道怎么装,自行google吧.
+</p>
+</div>
+<div id="outline-container-orgheadline8" class="outline-4">
+<h4 id="orgheadline8">定义 parser</h4>
+<div class="outline-text-4" id="text-orgheadline8">
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">import</span> <span style="color: #36648b;">Text.ParserCombinators.Parsec</span> <span style="color: #00008b;">hiding</span> (spaces)
+<span style="color: #00008b;">import</span> <span style="color: #36648b;">System.Environment</span>
+</pre>
+</div>
+
+<p>
+然后实现一个简单的可以解析一些 scheme 符号的 parser
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">symbol</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">Char</span>
+<span style="color: #6a5acd;">symbol</span> <span style="color: #b8860b;">=</span> oneOf <span style="color: #8b0000;">"!#$%&amp;|*+-/:&lt;=&gt;?@^_~"</span>
+</pre>
+</div>
+
+<p>
+symbol 等于 <code>oneOf blahblah</code>, 返回一个 Parser Monad， 里面是 Char 类型
+</p>
+</div>
+</div>
+<div id="outline-container-orgheadline9" class="outline-4">
+<h4 id="orgheadline9">Parse</h4>
+<div class="outline-text-4" id="text-orgheadline9">
+<p>
+下面我们用这个 parser 试试 parse 一下
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">readExpr</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
+<span style="color: #6a5acd;">readExpr</span> input <span style="color: #b8860b;">=</span> <span style="color: #00008b;">case</span> parse symbol <span style="color: #8b0000;">"lisp"</span> input <span style="color: #00008b;">of</span>
+    <span style="color: #36648b;">Left</span> err <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"No match: "</span> <span style="color: #b8860b;">++</span> show err
+    <span style="color: #36648b;">Right</span> val <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"Found value"</span>
+</pre>
+</div>
+
+<p>
+tadah， 这时出现了 <code>case</code>, 如果用 scala 的童鞋就毫不陌生了,没用过 pattern matching的童鞋看过来
+</p>
+
+<p>
+这一大坨 <code>parse symbol "lisp" input</code> 是一个表达式, 调用 <code>parse</code> 函数, 传入 3 个参数 <code>symbol</code>, ="lisp"=, <code>input</code>. 其中, <code>input</code> 是 readExpr 的参数.
+</p>
+
+<p>
+我们来看下 <a href="http://hackage.haskell.org/package/parsec-3.1.6/docs/Text-Parsec-Prim.html#v:parse">parse</a> 的类型签名, 可能更清楚一点 <del>才怪</del>
+</p>
+
+<pre class="example">
+&gt; :t parse
+parse
+  :: Text.Parsec.Prim.Stream s Data.Functor.Identity.Identity t =&gt;
+     Text.Parsec.Prim.Parsec s () a
+     -&gt; SourceName -&gt; s -&gt; Either ParseError a
+</pre>
+
+<p>
+好吧,先忽略掉中间那一大坨,来看看 <code>-&gt;</code> 最右边的类型是个 <code>Either ParseError a</code>, 读出来就是 Either ParserError or a, 这就是 <code>parse</code> 函数的 <i>返回值</i> 类型了, 这个类型总之是个 Either, 里面要么是 ParserError 要么是个 a, 而 a 就是前面 <code>Text.Parsec.Prim.Parsec s () a</code> 里的 a
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline10" class="outline-4">
+<h4 id="orgheadline10">Either</h4>
+<div class="outline-text-4" id="text-orgheadline10">
+<p>
+先不管细节,大体上来说, parse 接收 一个 Parsec 类型, 一个描述, 一个 Stream 类型, 返回一个 Either
+</p>
+
+<p>
+先看 readExpr 什么效果:
+</p>
+<pre class="example">
+&gt; readExpr "a"
+"No match: \"lisp\" (line 1, column 1):\nunexpected \"a\""
+</pre>
+
+<p>
+这时明显走的是 <code>Left err -&gt; "No match: " ++ show err</code> 这个分支, 而
+</p>
+<pre class="example">
+&gt; readExpr "*"
+"Found value"
+</pre>
+
+<p>
+走的是 <code>Right</code> 分支.
+</p>
+
+<p>
+所以在我们来解释 case, 根据代换原则, case 的就是 parse 的返回值 Either, Either 是一个 ADT, union type, scala里面是 trait + case class. 所以 Either 其实就是几种类型的 union. 当 case 一个 Either 的时候, 我们可以 match 两个类型, Left 或者 Right. 而通常来说 Right 里面永远会放 right 的东西, 所以 Left 就是不 right 的咯.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline11" class="outline-4">
+<h4 id="orgheadline11">pattern matching</h4>
+<div class="outline-text-4" id="text-orgheadline11">
+<p>
+下来是 of 后面的 <code>blah -&gt; blah blah</code>
+</p>
+
+<p>
+如果是 <code>Left err</code> Left 的内容就会绑定到 <code>err</code>, <code>-&gt;</code> 右边的表达式就可以用到绑定 <code>err</code> 了.
+</p>
+
+<p>
+同理, 也可以拿到 Right 的内容并绑定到 <code>val</code>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline12" class="outline-3">
+<h3 id="orgheadline12">空白符</h3>
+<div class="outline-text-3" id="text-orgheadline12">
+<p>
+现在我们能拿到 scheme 的 symbol 了, 作为一个 parser 还需要过滤掉一些没用的空白符, 比如说空格先:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">spaces</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">()</span>
+<span style="color: #6a5acd;">spaces</span> <span style="color: #b8860b;">=</span> skipMany1 space
+</pre>
+</div>
+
+<p>
+这里我们定义了 <code>spaces</code> 函数, 这也是为什么要在之前的 <code>import</code> 的时候 <code>hiding</code> 掉 <code>Parsec</code> 里的 <code>spaces</code>
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">readExpr</span> input <span style="color: #b8860b;">=</span> <span style="color: #00008b;">case</span> parse (spaces <span style="color: #b8860b;">&gt;&gt;</span> symbol) <span style="color: #8b0000;">"lisp"</span> input <span style="color: #00008b;">of</span>
+    <span style="color: #36648b;">Left</span> err <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"No match: "</span> <span style="color: #b8860b;">++</span> show err
+    <span style="color: #36648b;">Right</span> val <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"Found value"</span>
+</pre>
+</div>
+
+<p>
+这里将 <code>spaces</code> 用 <code>&gt;&gt;</code> 拼到 <code>symbol</code> 前面, <code>&gt;&gt;</code> 读 bind, 在不同的 monad 中, <code>&gt;&gt;</code> 的行为也不一样, 这里作为 Parsec Monad, <code>&gt;&gt;</code> 意思是用 spaces 去 parse, 结果丢弃掉, 然后再用 symbol 去 parse.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline13" class="outline-3">
+<h3 id="orgheadline13"><span class="todo TODO">TODO</span> 返回</h3>
+<div class="outline-text-3" id="text-orgheadline13">
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">data</span> <span style="color: #36648b;">LispVal</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Atom</span> <span style="color: #36648b;">String</span>
+             <span style="color: #b8860b;">|</span> <span style="color: #36648b;">List</span> [<span style="color: #36648b;">LispVal</span>]
+             <span style="color: #b8860b;">|</span> <span style="color: #36648b;">DottedList</span> [<span style="color: #36648b;">LispVal</span>] <span style="color: #36648b;">LispVal</span>
+             <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Number</span> <span style="color: #36648b;">Integer</span>
+             <span style="color: #b8860b;">|</span> <span style="color: #36648b;">String</span> <span style="color: #36648b;">String</span>
+             <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Bool</span> <span style="color: #36648b;">Bool</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">parseString</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
+<span style="color: #6a5acd;">parseString</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
+                char <span style="color: #8b0000;">'"'</span>
+                x <span style="color: #b8860b;">&lt;-</span> many (noneOf <span style="color: #8b0000;">"\""</span>)
+                char <span style="color: #8b0000;">'"'</span>
+                return <span style="color: #b8860b;">$</span> <span style="color: #36648b;">String</span> x
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline14" class="outline-2">
+<h2 id="orgheadline14">待续&#x2026;</h2>
+<div class="outline-text-2" id="text-orgheadline14">
 <ul class="org-ul">
-<li>语法分析</li>
 <li>求值，第一部分</li>
 <li>错误处理及异常</li>
 <li>求值，第二部分</li>
@@ -431,7 +646,7 @@ Hello, jichao
 <div id="postamble" class="status">
 <footer>
 <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-<p>Modified: 2016-08-09 Tue 14:01</p>
+<p>Modified: 2016-08-11 Thu 01:42</p>
 <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.3.1 (<a href="http://orgmode.org">Org</a> mode 8.3.5)</p>
 <p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
