@@ -3,6 +3,10 @@
 #+AUTHOR: 欧阳继超
 #+PROPERTY: header-args :results pp :exports both
 
+#+BEGIN_CENTER
+话题已入选 [[http://rubyconfchina2016.sxl.cn/][Rubyconf 2016]], 没看懂的同学 +不服来战+ 我们成都见 😉
+#+END_CENTER
+
 [[./images/data-port.gif]]
 
 说到 ruby 都会觉得是纯面向对象语言，所有东西都是对象。但是，函数式与面向对象并无冲突（你看看Scala）。最近一个项目用 ruby 写了一个非常常用的 feeder，一不小心写得函数式了些，让我们看看fancy的ruby到底能干些什么fancy的函数式。
@@ -332,74 +336,116 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
 不管是什么形式，监控都不应该跟我们的业务搞到一起去，比如
 ** 一个简单的 Either Monad[fn:2]
 创建一个刚好够用的 Either 非常简单
-#+BEGIN_SRC ruby
-module Either
-  def initialize v
-    @v = v
-  end
+*** Functor
+#+BEGIN_SRC ruby :eval no
+    module Either
+      def initialize v
+        @v = v
+      end
 
-  def map
+      def map
+        case self
+        when Right
+          Right.new(yield @v)
+        else
+          self
+        end
+      end
+      alias :fmap :map
+#+END_SRC
+*** Monad
+#+BEGIN_SRC ruby :eval no
+  def bind
     case self
     when Right
-      Right.new(yield @v)
-    when Left
+      yield @v
+    else
       self
     end
   end
-  
-  def bimap lfn, rfn
-    case self
-      when Right
-        Right.new(rfn.(@v))
+
+  alias :chain :bind
+  alias :flat_map :bind
+#+END_SRC
+*** 一个好看的 inspect
+#+BEGIN_SRC ruby :eval no
+    def inspect
+      case self
       when Left
-        Left.new(lfn.(@v))
+        "#<Left value=#{@v}>"
+      else
+        "#<Right value=#{@v}>"
+      end
     end
   end
-end
-class Left
-  include Either
-  def initialize v=nil
-    @v=v
-  end
-end
-
-class Right 
-  include Either
-end
 #+END_SRC
+*** 联合类型 Left | Right
+在实现了 Either 接口之后,我们可以很容易的实现  Left | Right
+#+BEGIN_SRC ruby :eval no
+  class Left
+    include Either
+    def initialize v=nil
+      @v=v
+    end
+  
+    def == other
+      case other
+      when Left
+        other.left_map { |v| return v == @v }
+      else
+        false
+      end
+    end
+  end
 
-用 Either 做控制流
-#+BEGIN_SRC ruby
-  def run
-    fetch_ids.fmap do |ids|
-      ids.map do |id|
-        fetch_details(id).chain &save
+  class Right
+    include Either
+    def == other
+      case other
+      when Right
+        other.map { |v| return v == @v }
+      else
+        false
       end
     end
   end
 #+END_SRC
 
-1. =fetch_id= 会是一个IO，要么返回 =Left= 要么 =Right=, 不过我们只关心它是 =Either= 里面可能会有一个含有 id 的数组
-2. =fmap= =fetch_details= 到可能拿到的 =ids= 上， =fetch_details= 返回的依然是 =Either=
-3. =save= 也返回 Either, 于是可以继续 =chain= 上去
-4. 最终返回含有 Either 的数组，每个Either 可能是
+** 用 Either 做控制流
+#+BEGIN_SRC ruby -n -r :eval no 
+  def run
+    list_of_error_or_detail =
+      listof_error_or_id.map do |error_or_id| # <- (ref:listof_error_or_id)
+      error_or_id.flat_map do |id| # <- (ref:error_or_id)
+        error_or_detail_of(id) # <- (ref:error_or_detail)
+      end
+    end
+    list_of_error_or_detail.map { |error_or_detail| error_or_saved error_or_detail} # <- (ref:error_or_saved)
+  end
+#+END_SRC
+
+1. [[(listof_error_or_id)][=listof_error_or_id=]] 是一个 IO, 去某个地方拿一串 id, 或者返回一串错误, 所以类型是 =[Either error id]=
+2. 所以 [[(error_or_id)][=error_or_id=]] 的类型是 =Either error id=, =flat_map= 可以把 =id= 取出来, 如果有的话
+3. 取出来的 =id= 交给 [[(error_or_detail)][=error_or_detail_of=]], 该函数也是 IO, 复杂获得对应 id 的 详细信息, 是IO就有可能会有错误, 所以返回值类型也是 =Either error detail=
+4. 这时, 如果是用 =fmap= 转换完成后会变成一个 =Either error (Either error detail)=. 但显然我们不需要嵌套这么多层, =flat= 一些会变成 =Either error detail=
+5. 后面的 save 函数也是类似的 IO 操作, 返回 =Either error saved=
 
 那么我们的业务逻辑的流程走完了，该负责监控的逻辑了，注意现在 run 的返回值类型是 =Either[Error, [Either[Error, Data]]]=
 
-#+BEGIN_SRC ruby
-  run.bimap(->(error){ logger.error("fetching ids failure #{error.message}") },
-            ->(processed) do
-              failures, successed = processed.partition {|p| Left === p}
-              logger.error("processing failure:\n#{failures.map(&:message).join("\n")}")
-              logger.info("processing success:\n#{success.map(&:id).join("\n")}")
-            end)
+#+BEGIN_SRC ruby :eval no
+  failures, success = run.partition {|lr| !lr.is_a? Right}
+  error_msg = failures.map do |failure|
+    failure.left_map &:message
+  end.join "\n"
+  logger.error "processing failure #{failues.length}:\n#{error_msg}" unless error_msg.blank?
+  logger.info "processing success #{success.length}: #{success}"
 #+END_SRC
 
 * actor model 多线程
 当你的数据处理都是函数式的之后，或者说 immutable，应用多线程将是十分简单而且安全的事情, 下面也是一个简单的例子，使用 [[https://github.com/celluloid/celluloid][Celluloid]] 把我们的 feeder 改成多线程
 
 ** pmap
-#+BEGIN_SRC ruby
+#+BEGIN_SRC ruby :eval no
 require "celluloid/autostart"
 module Enumerable
   def pmap(&block)
