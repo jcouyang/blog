@@ -7,6 +7,7 @@
 (require 'haskell)
 (require 'ob-sh)
 (require 'ob-ruby)
+
 (clojure-font-lock-setup)
 (require 'org)
 (require 'org-blog)
@@ -16,6 +17,10 @@
 (setq blog-path (expand-file-name "org"))
 (setq org-html-validation-link nil)
 (setq org-confirm-babel-evaluate nil)
+
+(require 'ox-deck)
+(setq slide-path (expand-file-name "slides"))
+(setq org-deck-base-url "http://imakewebthings.com/deck.js/")
 (custom-set-variables
   '(org-publish-timestamp-directory
      (convert-standard-filename "public/.org-timestamps/")))
@@ -61,6 +66,13 @@
         :html-head-include-default-style nil
         )
 
+      ("slides"
+         :base-directory ,slide-path
+         :base-extension "org"
+         :publishing-directory "public/slides"
+         :recursive t
+         :publishing-function org-deck-publish-to-html
+       )
        ;; where static files (images, pdfs) are stored
        ("blog-static"
          :base-directory ,blog-path
@@ -81,6 +93,6 @@
          :exclude ".*"            ;; To exclude all files...
          :include ("index.org")   ;; ... except index.org.
          :table-of-contents nil)
-       ("blog" :components ("blog-notes" "blog-static" "rss"))
+       ("blog" :components ("blog-notes" "slides" "blog-static" "rss"))
        )))
 (set-org-publish-project-alist)
