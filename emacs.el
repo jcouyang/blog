@@ -20,7 +20,7 @@
 
 (require 'ox-deck)
 (setq slide-path (expand-file-name "slides"))
-(setq org-deck-base-url "http://imakewebthings.com/deck.js/")
+(setq org-deck-base-url "https://blog.oyanglul.us/assets/deck.js")
 (custom-set-variables
   '(org-publish-timestamp-directory
      (convert-standard-filename "public/.org-timestamps/")))
