@@ -13,7 +13,7 @@
 #+RESULTS:
 : ob-ruby
 
-* 我是...
+* COMMENT 我是...
 [[https://gist.github.com.ru/jcouyang/6336168ecbbf4fbdc46e.png?username=jcouyang&amp;width=400&amp;height=53;.png]]
 [[https://img3.doubanio.com/mpic/s25996532.jpg]]
 [[https://img1.doubanio.com/mpic/s28861278.jpg]]
@@ -23,7 +23,14 @@
 - 一本书作者
 - 两本书译者
 
-* 
+
+
+* Agenda
+- 什么是函数式编程
+- ruby 的一些函数式特性
+- 使用 Monad 纯化控制流
+
+* COMMENT
 https://cloud.githubusercontent.com/assets/1235045/17973424/00e33c72-6b15-11e6-8bdf-a1a58a3631b4.jpg
 
 #+BEGIN_QUOTE
@@ -62,10 +69,10 @@ https://imgs.xkcd.com/comics/haskell.png
 - 好组合 composible
 - 好推理 easy to reason about
 - 多线程友好 Multi-thread
-- +高逼格+ high bigger
+- +高逼格 high bigger+
 - 好玩 fun
 
-* Ruby 函数式 101
+* 你可能不知道的Ruby
 https://cloud.githubusercontent.com/assets/1235045/17936038/020c3f88-6a50-11e6-88bd-6c6ad6815495.png
 
 * lambda
@@ -88,15 +95,16 @@ plus1 = ->(x) { x + 1 }
 
 如果给这个lambda一个引用,我们可以跟用method一样用
 #+BEGIN_SRC ruby 
-plus1 = ->(x) { x + 1 }
-plus1.(3)
-plus1[3]
+  plus1 = ->(x) { x + 1 }
+  plus1.call(3)
+  plus1.(3)
+  plus1[3]
 #+END_SRC
 
 #+RESULTS:
 : 4
 
-* 二等公民 method
+* 二等公民 Method
 #+BEGIN_SRC ruby  :results pp
   def plus1 x
     x + 1
@@ -106,7 +114,7 @@ plus1[3]
 
 : `plus1': wrong number of arguments (0 for 1) (ArgumentError)
 
-* 一等公民 proc
+* 一等公民 Proc
 
 #+BEGIN_SRC ruby  :results pp
 plus1 = ->(x) { x + 1 }
@@ -156,7 +164,7 @@ method(:plus1)
 
 * 来 🍬 Desugar =&=
 
-#+BEGIN_SRC ruby  :results pp
+#+BEGIN_SRC ruby
   %w(ouyang jichao).map &:capitalize.to_proc
 #+END_SRC
 
@@ -173,10 +181,11 @@ https://i.giphy.com/3o6MbdPcxvF7Hb5G3S.gif
 * destructure - 数组
 #+BEGIN_SRC ruby :results pp
 first, *middle_and_last = ['Phillip', 'Jay', 'Fry']
+"first: #{first}, middle_and_last: #{middle_and_last}"
 #+END_SRC
 
 #+RESULTS:
-: ["Phillip", "Jay", "Fry"]
+: "first: Phillip, middle_and_last: [\"Jay\", \"Fry\"]"
 
 * destructure - 哈希
 方法的参数会自带 destructure 哈希的功能 aka =keyword arguments=:
@@ -192,7 +201,12 @@ first, *middle_and_last = ['Phillip', 'Jay', 'Fry']
 : ["Phillip", {:middle=>"Jay", :last=>"Fry"}]
 
 * case when
-ruby 中的 case 可以搞定四种模式匹配
+ruby 中的 case 可以搞定这几种模式匹配
+- 值
+- 类型
+- 表达式
+- Proc
+- 正则
 
 * 值
 这个很简单，应该都有用过
@@ -249,7 +263,7 @@ require 'ostruct'
 
 * lambda （aka guard）
 #+BEGIN_SRC ruby
-require 'ostruct'
+  require 'ostruct'
   me = OpenStruct.new(name: 'jichao', first_name: 'ouyang')
   case me
   when ->(who){who.name=='jichao'}
@@ -288,7 +302,16 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
 
 这样，我们可以随意给任何类加上 ~===~ 方法, 不仅如此，实现一个抽象数据类型（ADT）会变得是分简单
 
-* Ruby 函数式 101 THE END
+* 
+#+BEGIN_SRC ruby
+  require 'ostruct'
+  me = OpenStruct.new(name: 'jichao', first_name: 'ouyang')
+  case me
+  when OpenStruct(:s)
+    _.s
+  end
+#+END_SRC
+* 
 https://i.giphy.com/55xWvUIMb51mw.gif
 #+BEGIN_QUOTE
 说了这么些奇技淫巧, +逼格还是不够高呀+ 除了花式一些有什么用呢?

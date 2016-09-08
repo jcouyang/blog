@@ -94,7 +94,10 @@ readExpr input = case parse (spaces >> symbol) "lisp" input of
 
 这里将 =spaces= 用 =>>= 拼到 =symbol= 前面, =>>= 读 bind, 在不同的 monad 中, =>>= 的行为也不一样, 这里作为 Parsec Monad, =>>= 意思是用 spaces 去 parse, 结果丢弃掉, 然后再用 symbol 去 parse.
 
-* TODO 返回
+* 返回值
+到现在为止我们的parser也只能说打印是否找到合法的输入, 但是还不能真正的将输入字符parse成为数据结构.
+
+所以假设我们先来实现将读入的字符转换成值, scheme 的值有这么几种
 #+BEGIN_SRC haskell
 data LispVal = Atom String
              | List [LispVal]
@@ -104,6 +107,22 @@ data LispVal = Atom String
              | Bool Bool
 #+END_SRC
 
+如果你还记得之前提到的 Either 是 ADT, 那么现在这个 =LispVal= 就是一个 ADT, 在 haskell 定义一个 ADT 特别简单, 关键字 =data= 声明 =LispVal= 是一个ADT, 等号右边是构造器, 比如
+
+- =Atom String= 表示可以通过 =Atom "blah"= 就创建出来一个 LispVal data, 里面包含一个 Haskell String 类型的值
+- =List [LispVal]= 表示 List 里有一个 LispVal 类型的数组, 比如 =List [Atom "blah"]=
+- =DottedList [LispVal] LispVal= 构造器接收两个参数, 一个是 LispVal 类型的数组,一个是 LispVal
+
+所以这么定义下来, 说明 scheme 的值类型有这么6种
+- Atom 即名字什么的 =(foo bar)=
+- List 数组 =(1 2 3)=
+- DottedList 带点数组 =(1 2 . 3)=
+- Number 数字
+- String 字符
+- Bool 布尔
+
+有了这个抽象数据类型 ADT,我们就可以将parse的内容转换成 scheme 的 ADT, 首先,试试 parse 个 String
+
 #+BEGIN_SRC haskell
 parseString :: Parser LispVal
 parseString = do
@@ -112,3 +131,12 @@ parseString = do
                 char '"'
                 return $ String x
 #+END_SRC
+
+首先, =parseString= 返回类型 =Parser LispVal=, 实现中把 char, many和 char 都链起来, 意思是先 parse 一个双引号字符, 再 parse many 个不是双引号字符的字符, 返回的 Parser 的内容放入 x, 继续 parse 一个双引号. 最后用我们刚构造的 ADT 构造一个 String 出来.
+
+其中 =$= 是上一章说过的将左结合表达式转换成右结合, 等价于 return =(String x)=. 好处是尽量少些括号是代码更可读.
+
+另外一点就是 =return=, 如果不是用 return, 返回值会是 LispVal 类型, 但是期望的是 =Parser=. 因此在 do 这个 context 中, 所有的 monad 都是 Parser, 比如 =char=, =many=, 都是返回 =Parser= 类型. 那么到最后一个表达式, 可以简单的用 =return= 根据上下文把 =LispVal= 包到 =Parser= monad 中.
+
+
+
