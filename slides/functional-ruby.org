@@ -202,9 +202,8 @@ first, *middle_and_last = ['Phillip', 'Jay', 'Fry']
 
 * case when
 ruby 中的 case 可以搞定这几种模式匹配
-- 值
+- 值/表达式
 - 类型
-- 表达式
 - Proc
 - 正则
 
@@ -245,21 +244,6 @@ ruby 中的 case 可以搞定这几种模式匹配
 #+END_SRC
 
 : "heheda ouyang"
-
-* 表达式
-跟 =if else= 一样用
-#+BEGIN_SRC ruby
-require 'ostruct'
-  me = OpenStruct.new(name: 'jichao', first_name: 'ouyang')
-  case
-  when me.name == 'jichao'
-    "hehe #{me}"
-  else 'gewuen'
-  end
-#+END_SRC
-
-#+RESULTS:
-: hehe #<OpenStruct name="jichao", first_name="ouyang">
 
 * lambda （aka guard）
 #+BEGIN_SRC ruby
@@ -352,15 +336,23 @@ https://www.evernote.com/l/ABeEwMnpRdVB7pup8Sw-KV3Iq02sI7fSe90B/image.png
   end
 #+END_SRC
 
-* 或者极端的抛异常
+* 或者用更极端的抛异常方式
 #+BEGIN_SRC ruby
   begin
     close(put_elephent_in open_fridge)
-  rescue
+  rescue A=>e
+   ...
+  rescue B=>e
+   ...
+  rescue C=>e
    ...
   end
 #+END_SRC
 * 让我们用一个简单的 [[https://github.com/jcouyang/cats.rb#dataeither][Either Monad]]
+#+BEGIN_EXAMPLE
+gem install data.either
+#+END_EXAMPLE
+
 #+BEGIN_SRC ruby
 require 'data.either'
 Right.new(1).flat_map do |x| 
@@ -375,18 +367,21 @@ end
 #+END_SRC
 
 * 来简化控制流
-
 #+BEGIN_SRC ruby
-  open_fridge.flat_map do |fridge|
-    put_elephent_in fridge
+  open_fridge.flat_map do |fridge|  # <= 1
+    put_elephent_in fridge          # <= 2
   end.flat_map do |fridge|
-    close fridge
+    close fridge                    # <= 3
   end
 #+END_SRC
+
+这样可以专心构造控制逻辑,而不需要关心上一步如果错误该怎么办
 
 * 怎么做到的
 https://i.giphy.com/12dBjCf9NclhBe.gif
 
+* 自函子范畴上的含幺半群
 
+* TODO cat
 * 一个很实际的 🌰
 
