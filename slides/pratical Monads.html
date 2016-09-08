@@ -1,0 +1,754 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--[if lt IE 7]> <html class='no-js ie6' lang='en' xmlns='http://www.w3.org/1999/xhtml'> <![endif]-->
+<!--[if IE 7]> <html class='no-js ie7' lang='en' xmlns='http://www.w3.org/1999/xhtml'> <![endif]-->
+<!--[if IE 8]> <html class='no-js ie8' lang='en' xmlns='http://www.w3.org/1999/xhtml'> <![endif]-->
+<!--[if gt IE 8]><!--> <html  lang='en' xmlns='http://www.w3.org/1999/xhtml'> <!--<![endif]-->
+<head>
+<title>Practical Monads</title>
+<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+<meta name='generator' content='Org-mode'/>
+<meta name='author' content='<a href="https://github.com/jcouyang">https://github.com/jcouyang</a>'/>
+
+<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/core/deck.core.css' type='text/css' />
+<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/extensions/goto/deck.goto.css' type='text/css' />
+<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/extensions/menu/deck.menu.css' type='text/css' />
+<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/extensions/navigation/deck.navigation.css' type='text/css' />
+<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/extensions/scale/deck.scale.css' type='text/css' />
+<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/extensions/status/deck.status.css' type='text/css' />
+<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/themes/style/swiss.css' type='text/css' />
+<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/themes/transition/fade.css' type='text/css' />
+<script src='https://blog.oyanglul.us/deck.js/jquery.min.js' type='text/javascript'></script>
+<script src='https://blog.oyanglul.us/deck.js/core/deck.core.js' type='text/javascript'></script>
+<script src='https://blog.oyanglul.us/deck.js/modernizr.custom.js' type='text/javascript'></script>
+<script src='https://blog.oyanglul.us/deck.js/extensions/goto/deck.goto.js' type='text/javascript'></script>
+<script src='https://blog.oyanglul.us/deck.js/extensions/menu/deck.menu.js' type='text/javascript'></script>
+<script src='https://blog.oyanglul.us/deck.js/extensions/navigation/deck.navigation.js' type='text/javascript'></script>
+<script src='https://blog.oyanglul.us/deck.js/extensions/scale/deck.scale.js' type='text/javascript'></script>
+<script src='https://blog.oyanglul.us/deck.js/extensions/status/deck.status.js' type='text/javascript'></script>
+
+<script type='text/javascript'>
+  $(document).ready(function () { $.deck('.slide'); });
+</script>
+
+<style type='text/css'>
+#table-of-contents a {color: inherit;}
+#table-of-contents ul {margin-bottom: 0;}
+#table-of-contents li {padding: 0;}
+#table-of-contents ul li {list-style-type: none;}
+#preamble, #postamble {left: 5px; width: 100%;}
+#preamble {position: absolute; top: 10px;}
+#postamble {}
+
+#title-slide h1 {
+    position: static; padding: 0;
+    margin-top: 10%;
+    -webkit-transform: none;
+    -moz-transform: none;
+    -ms-transform: none;
+    -o-transform: none;
+    transform: none;
+}
+#title-slide h2 {
+    text-align: center;
+    border:none;
+    padding: 0;
+    margin: 0;
+}
+</style>
+</head>
+<body>
+<div id='content' class='deck-container'>
+
+<div id='title-slide' class='slide'>
+<h1>Practical Monads</h1>
+<h2></h2>
+<h2><a href="https://github.com/jcouyang">https://github.com/jcouyang</a></h2>
+<h2><a href="mailto:ubuntu@box803">ubuntu@box803</a></h2>
+<h2></h2>
+</div>
+<div id='table-of-contents' class='slide'>
+<h2>Table of Contents</h2>
+
+<ul>
+<li><a href='#outline-container-sec-1'>1. ToC</a></li>
+<li><a href='#outline-container-sec-2'>2. Monad</a></li>
+<li><a href='#outline-container-sec-3'>3. A monad is just a monoid in the category of endofunctors, what's the problem?</a></li>
+<li><a href='#outline-container-sec-4'>4. </a></li>
+<li><a href='#outline-container-sec-5'>5. Before Monad</a>
+<ul>
+<li>5.1. ES6 101</li>
+<li>5.2. Haskell 101</li>
+<li>5.3. Functional 101</li>
+</ul>
+</li>
+<li><a href='#outline-container-sec-6'>6. Functional 102</a></li>
+<li><a href='#outline-container-sec-7'>7. </a>
+<ul>
+<li>7.1. Some instances of Functor, Monoid</li>
+<li>7.2. a Array Functor</li>
+<li>7.3. a String Monoid</li>
+<li>7.4. </li>
+</ul>
+</li>
+<li><a href='#outline-container-sec-8'>8. Substitution</a></li>
+<li><a href='#outline-container-sec-9'>9. </a>
+<ul>
+<li>9.1. Concatable in Type</li>
+<li>9.2. concat</li>
+<li>9.3. u -&gt; concat</li>
+<li>9.4. pure</li>
+<li>9.5. n -&gt; pure</li>
+<li>9.6. </li>
+</ul>
+</li>
+<li><a href='#outline-container-sec-10'>10. </a>
+<ul>
+<li>10.1. <b>Promise</b></li>
+<li>10.2. lift</li>
+<li>10.3. try</li>
+<li>10.4. fold</li>
+<li>10.5. callback hell</li>
+<li>10.6. flatMap</li>
+<li>10.7. </li>
+</ul>
+</li>
+<li><a href='#outline-container-sec-11'>11. Observable</a></li>
+<li><a href='#outline-container-sec-12'>12. </a>
+<ul>
+<li>12.1. Space</li>
+<li>12.2. </li>
+<li>12.3. Space -&gt; Time</li>
+<li>12.4. FRP(Functional Reactive Programming)</li>
+<li>12.5. ReactiveX</li>
+<li>12.6. </li>
+<li>12.7. fold</li>
+<li>12.8. flatMap</li>
+<li>12.9. fromEvent</li>
+</ul>
+</li>
+<li><a href='#outline-container-sec-13'>13. Demo</a></li>
+<li><a href='#outline-container-sec-14'>14. Fin</a></li>
+<li><a href='#outline-container-sec-15'>15. One more thing</a></li>
+</ul>
+</div>
+
+
+<div id="outline-container-orgheadline1" class="outline-2  slide">
+<h2 id="orgheadline1"><span class="section-number-2">1</span> ToC</h2>
+<div class="outline-text-2" id="text-1">
+<ul class="org-ul">
+<li>Monad</li>
+<li>Promise</li>
+<li>Observable</li>
+<li>Demo</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgheadline2" class="outline-2  slide">
+<h2 id="orgheadline2"><span class="section-number-2">2</span> Monad</h2>
+<div class="outline-text-2" id="text-2">
+
+<div class="figure">
+<p><img src="https://blog.oyanglul.us/javascript/images/summarize%20in%20one%20word.gif" alt="summarize%20in%20one%20word.gif" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-2  slide">
+<h2 id="orgheadline3"><span class="section-number-2">3</span> <a href="http://stackoverflow.com/questions/3870088/a-monad-is-just-a-monoid-in-the-category-of-endofunctors-whats-the-issue/3870310#3870310">A monad is just a monoid in the category of endofunctors, what's the problem?</a></h2>
+</div>
+<div id="outline-container-orgheadline4" class="outline-2  slide">
+<h2 id="orgheadline4"><span class="section-number-2">4</span> </h2>
+<div class="outline-text-2" id="text-4">
+
+<div class="figure">
+<p><img src="https://blog.oyanglul.us/javascript/images/what.gif" alt="what.gif" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline8" class="outline-2  slide">
+<h2 id="orgheadline8"><span class="section-number-2">5</span> Before Monad</h2>
+<div class="outline-text-2" id="text-5">
+</div><div id="outline-container-orgheadline5" class="outline-3">
+<h3 id="orgheadline5"><span class="section-number-3">5.1</span> ES6 101</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+EcmaScript5
+</p>
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #00008b;">function</span>(<span style="color: #b8860b;">x</span>){<span style="color: #00008b;">return</span> x+1}
+</pre>
+</div>
+
+<p>
+EcmaScript6
+</p>
+<div class="org-src-container">
+
+<pre class="src src-js">x=&gt;x+1
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline6" class="outline-3">
+<h3 id="orgheadline6"><span class="section-number-3">5.2</span> Haskell 101</h3>
+<div class="outline-text-3" id="text-5-2">
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #8c8c8c; font-style: italic;">--  </span><span style="color: #8c8c8c; font-style: italic;">HM(Hindley-Milner) type signature</span>
+<span style="color: #6a5acd;">liftM</span> <span style="color: #b8860b;">::</span> (<span style="color: #36648b;">Monad</span> m) <span style="color: #b8860b;">=&gt;</span> (a <span style="color: #b8860b;">-&gt;</span> b) <span style="color: #b8860b;">-&gt;</span> m a <span style="color: #b8860b;">-&gt;</span> m b 
+<span style="color: #8c8c8c; font-style: italic;">--        </span><span style="color: #8c8c8c; font-style: italic;">^type restrict ^function    ^  ^return</span>
+<span style="color: #8c8c8c; font-style: italic;">--                              </span><span style="color: #8c8c8c; font-style: italic;">^curry^</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline7" class="outline-3">
+<h3 id="orgheadline7"><span class="section-number-3">5.3</span> Functional 101</h3>
+<div class="outline-text-3" id="text-5-3">
+<div class="org-src-container">
+
+<pre class="src src-js">[1,2,3].map(x=&gt;x+1)
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; [2,3,4]</span>
+[1,2,3].filter(x=&gt;x/2==0)
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; [2]</span>
+[1,2,3].reduce((acc,n)=&gt;acc+n)
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; 6</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgheadline9" class="outline-2  slide">
+<h2 id="orgheadline9"><span class="section-number-2">6</span> Functional 102</h2>
+<div class="outline-text-2" id="text-6">
+<ol class="org-ol">
+<li>Method -&gt; Function</li>
+<li>First Class Function</li>
+</ol>
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #00008b;">let</span> <span style="color: #b8860b;">toUpperCase</span> = x =&gt; x.toUpperCase()  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;- 1</span>
+<span style="color: #00008b;">let</span> <span style="color: #b8860b;">map</span> = (f, col) =&gt; col.map(f) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;- 1</span>
+map(toUpperCase, [<span style="color: #8b0000;">"hello"</span>, <span style="color: #8b0000;">"world"</span>])
+<span style="color: #8c8c8c; font-style: italic;">//    </span><span style="color: #8c8c8c; font-style: italic;">^2</span>
+<span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; ["HELLO", "WORLD"]</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline14" class="outline-2  slide">
+<h2 id="orgheadline14"><span class="section-number-2">7</span> </h2>
+<div class="outline-text-2" id="text-7">
+</div><div id="outline-container-orgheadline10" class="outline-3">
+<h3 id="orgheadline10"><span class="section-number-3">7.1</span> Some instances of Functor, Monoid</h3>
+</div>
+
+<div id="outline-container-orgheadline11" class="outline-3">
+<h3 id="orgheadline11"><span class="section-number-3">7.2</span> a Array Functor</h3>
+<div class="outline-text-3" id="text-7-2">
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">map:: (String s) =&gt; (s -&gt; s) -&gt; [s] -&gt; [s]</span>
+map(toUpperCase, [<span style="color: #8b0000;">"hello"</span>, <span style="color: #8b0000;">"world"</span>])
+</pre>
+</div>
+
+<p>
+functor is mapable!
+</p>
+</div>
+</div>
+<div id="outline-container-orgheadline12" class="outline-3">
+<h3 id="orgheadline12"><span class="section-number-3">7.3</span> a String Monoid</h3>
+<div class="outline-text-3" id="text-7-3">
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #8b0000;">"hello"</span> + <span style="color: #8b0000;">"world"</span> <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-- concat</span>
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; "helloworld"</span>
+<span style="color: #8b0000;">"hello"</span> + <span style="color: #8b0000;">""</span>   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;--  identity</span>
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; "hello"</span>
+(<span style="color: #8b0000;">"hello"</span> + <span style="color: #8b0000;">"world"</span>) + <span style="color: #8b0000;">"!"</span> == <span style="color: #8b0000;">"hello"</span> + (<span style="color: #8b0000;">"world"</span> + <span style="color: #8b0000;">"!"</span>) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-- associative</span>
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; true</span>
+</pre>
+</div>
+
+<p>
+Monoid is concatable!
+</p>
+</div>
+</div>
+<div id="outline-container-orgheadline13" class="outline-3">
+<h3 id="orgheadline13"><span class="section-number-3">7.4</span> </h3>
+<div class="outline-text-3" id="text-7-4">
+<ul class="org-ul">
+<li>Functor is mapable!</li>
+<li>Monoid is concatable!</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline15" class="outline-2  slide">
+<h2 id="orgheadline15"><span class="section-number-2">8</span> Substitution</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+A monad is just a <b>monoid</b> in the <b>category</b> of <b>endofunctors</b>, what's the problem?
+</p>
+
+<ul class="org-ul">
+<li>Catergory -&gt; "Type"</li>
+<li>Functor -&gt; "Mapable"</li>
+<li>Monoid -&gt; "Concatable"</li>
+</ul>
+
+<p>
+"A monad is just a <span class="underline">concatable</span> in <b>Type</b> of <span class="underline">mapable</span>, what's the problem?"
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline22" class="outline-2  slide">
+<h2 id="orgheadline22"><span class="section-number-2">9</span> </h2>
+<div class="outline-text-2" id="text-9">
+</div><div id="outline-container-orgheadline16" class="outline-3">
+<h3 id="orgheadline16"><span class="section-number-3">9.1</span> Concatable in Type</h3>
+</div>
+
+<div id="outline-container-orgheadline17" class="outline-3">
+<h3 id="orgheadline17"><span class="section-number-3">9.2</span> concat</h3>
+<div class="outline-text-3" id="text-9-2">
+<div class="org-src-container">
+
+<pre class="src src-scala"><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">concat :: (Monad m) =&gt; m m x -&gt; m x</span>
+[<span style="color: #6b8e23;">1</span>].concat([<span style="color: #6b8e23;">2</span>]) -&gt; [<span style="color: #6b8e23;">1</span>,<span style="color: #6b8e23;">2</span>]
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">concat Array Array -&gt; Array</span>
+<span style="color: #6b8e23;">T</span> concat <span style="color: #6b8e23;">T</span> -&gt; <span style="color: #6b8e23;">T</span>
+<span style="color: #00008b;">type</span> <span style="color: #6b8e23;">G</span>[<span style="color: #6b8e23;">X</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">X</span>]]
+<span style="color: #6b8e23;">G</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">T</span> compose <span style="color: #6b8e23;">T</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">T</span>.<span style="color: #6b8e23;">T</span>
+<span style="color: #6b8e23;">T</span>.<span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">X</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">G</span>[<span style="color: #6b8e23;">X</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">X</span>]]
+concat(<span style="color: #6b8e23;">T</span>.<span style="color: #6b8e23;">T</span>).<span style="color: #6b8e23;">T</span> == <span style="color: #6b8e23;">T</span>.concat(<span style="color: #6b8e23;">T</span>.<span style="color: #6b8e23;">T</span>)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline18" class="outline-3">
+<h3 id="orgheadline18"><span class="section-number-3">9.3</span> u -&gt; concat</h3>
+<div class="outline-text-3" id="text-9-3">
+<ul class="org-ul">
+<li>u -&gt; concat</li>
+<li>T(u) -&gt; lift(flat)</li>
+</ul>
+
+<div class="figure">
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Monad_multiplication_explicit.svg/600px-Monad_multiplication_explicit.svg.png" alt="600px-Monad_multiplication_explicit.svg.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline19" class="outline-3">
+<h3 id="orgheadline19"><span class="section-number-3">9.4</span> pure</h3>
+<div class="outline-text-3" id="text-9-4">
+
+<div class="figure">
+<p><img src="https://blog.oyanglul.us/javascript/images/zoidberg-die.gif" alt="zoidberg-die.gif" />
+</p>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-js">pure(T[X]) == T[T[X]]
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline20" class="outline-3">
+<h3 id="orgheadline20"><span class="section-number-3">9.5</span> n -&gt; pure</h3>
+<div class="outline-text-3" id="text-9-5">
+<ul class="org-ul">
+<li>n -&gt; pure</li>
+<li>T(n) -&gt; lift(pure)</li>
+</ul>
+
+
+<div class="figure">
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Monad_unit_explicit.svg/568px-Monad_unit_explicit.svg.png" alt="568px-Monad_unit_explicit.svg.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline21" class="outline-3">
+<h3 id="orgheadline21"><span class="section-number-3">9.6</span> </h3>
+<div class="outline-text-3" id="text-9-6">
+
+<div class="figure">
+<p><img src="https://drboolean.gitbooks.io/mostly-adequate-guide/content/images/onion.png" alt="onion.png" />
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgheadline30" class="outline-2  slide">
+<h2 id="orgheadline30"><span class="section-number-2">10</span> </h2>
+<div class="outline-text-2" id="text-10">
+</div><div id="outline-container-orgheadline23" class="outline-3">
+<h3 id="orgheadline23"><span class="section-number-3">10.1</span> <b>Promise</b></h3>
+</div>
+
+<div id="outline-container-orgheadline24" class="outline-3">
+<h3 id="orgheadline24"><span class="section-number-3">10.2</span> lift</h3>
+<div class="outline-text-3" id="text-10-2">
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">liftM</span> <span style="color: #b8860b;">::</span> (<span style="color: #36648b;">Monad</span> m) <span style="color: #b8860b;">=&gt;</span> (a <span style="color: #b8860b;">-&gt;</span> b) <span style="color: #b8860b;">-&gt;</span> m a <span style="color: #b8860b;">-&gt;</span> m b
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #00008b;">const</span> <span style="color: #b8860b;">when</span> = require(<span style="color: #8b0000;">'when'</span>)
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">readJSON :: (Promise p, String s, Object o) =&gt; (s -&gt; o) -&gt; p s-&gt; p o</span>
+<span style="color: #00008b;">let</span> <span style="color: #b8860b;">readJSON</span> = when.lift(JSON.parse)
+readJSON(when(<span style="color: #8b0000;">'{hello: "world"}'</span>))
+    .then(x=&gt;console.log(x))
+    .<span style="color: #00008b;">catch</span>(e=&gt;console.error(e.message));
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; Unexpected token h in JSON at position 1</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline25" class="outline-3">
+<h3 id="orgheadline25"><span class="section-number-3">10.3</span> try</h3>
+<div class="outline-text-3" id="text-10-3">
+
+<div class="figure">
+<p><img src="https://blog.oyanglul.us/javascript/images/came-out.gif" alt="came-out.gif" />
+</p>
+</div>
+
+<p>
+or simply try something and wrap result in Promise
+</p>
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #00008b;">try</span>(JSON.parse, <span style="color: #8b0000;">'{hello: "world"}'</span>)
+      .then(x=&gt;console.log(x))
+      .<span style="color: #00008b;">catch</span>(e=&gt;console.error(e.message));
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; Unexpected token h in JSON at position 1</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline26" class="outline-3">
+<h3 id="orgheadline26"><span class="section-number-3">10.4</span> fold</h3>
+<div class="outline-text-3" id="text-10-4">
+
+<div class="figure">
+<p><img src="https://blog.oyanglul.us/javascript/images/method-stack.gif" alt="method-stack.gif" />
+</p>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">foldM</span> <span style="color: #b8860b;">::</span> (<span style="color: #36648b;">Monad</span> m) <span style="color: #b8860b;">=&gt;</span> (a <span style="color: #b8860b;">-&gt;</span> b <span style="color: #b8860b;">-&gt;</span> m a) <span style="color: #b8860b;">-&gt;</span> a <span style="color: #b8860b;">-&gt;</span> [b] <span style="color: #b8860b;">-&gt;</span> m a
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">reduce :: (Promise p, Number n, Object o) =&gt; [n] -&gt; (o -&gt; n -&gt; p o) -&gt; o -&gt; p o</span>
+when.reduce([1,2,3], (acc, n) =&gt; rest(URL + n).then(o=&gt;merge(acc, o)), 0)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline27" class="outline-3">
+<h3 id="orgheadline27"><span class="section-number-3">10.5</span> callback hell</h3>
+<div class="outline-text-3" id="text-10-5">
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">allRes</span> = {}
+$.get(<span style="color: #8b0000;">'url1'</span>, (res1) =&gt;
+      $.get(<span style="color: #8b0000;">'url2'</span>, (res2) =&gt;
+            $.get(<span style="color: #8b0000;">'url3'</span>, (res3) =&gt;
+                  allRes = merge(res1, res2, res3))
+           )
+     )
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline28" class="outline-3">
+<h3 id="orgheadline28"><span class="section-number-3">10.6</span> flatMap</h3>
+<div class="outline-text-3" id="text-10-6">
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #00008b;">let</span> <span style="color: #b8860b;">futureWorld</span> = <span style="color: #00008b;">new</span> <span style="color: #36648b;">Promise</span>(resolve=&gt;{
+    setTimeout(()=&gt;resolve(<span style="color: #8b0000;">"world"</span>), 1000)
+})
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline29" class="outline-3">
+<h3 id="orgheadline29"><span class="section-number-3">10.7</span> </h3>
+<div class="outline-text-3" id="text-10-7">
+<div class="org-src-container">
+
+<pre class="src src-js">futureWorld
+    .then(world=&gt;<span style="color: #00008b;">new</span> <span style="color: #36648b;">Promise</span>(resolve=&gt;{
+        setTimeout(()=&gt;resolve(<span style="color: #8b0000;">"hello"</span>+world), 1000)
+    }))
+    .then(x=&gt;console.log(x))
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">2secs later =&gt; helloworld</span>
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>first <code>then</code> is <code>flatMap</code></li>
+<li>second <code>then</code> is <code>map</code></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgheadline31" class="outline-2  slide">
+<h2 id="orgheadline31"><span class="section-number-2">11</span> Observable</h2>
+<div class="outline-text-2" id="text-11">
+
+<div class="figure">
+<p><img src="https://blog.oyanglul.us/javascript/images/shit-bricks.gif" alt="shit-bricks.gif" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline41" class="outline-2  slide">
+<h2 id="orgheadline41"><span class="section-number-2">12</span> </h2>
+<div class="outline-text-2" id="text-12">
+</div><div id="outline-container-orgheadline32" class="outline-3">
+<h3 id="orgheadline32"><span class="section-number-3">12.1</span> Space</h3>
+<div class="outline-text-3" id="text-12-1">
+<p>
+imperative
+</p>
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">acc</span> = 0
+<span style="color: #00008b;">for</span>(<span style="color: #00008b;">var</span> <span style="color: #b8860b;">n</span> of [1,2,3,4]) {
+    acc +=n
+}
+</pre>
+</div>
+
+<p>
+functional
+</p>
+<div class="org-src-container">
+
+<pre class="src src-js">[1,2,3,4].reduce((acc,x)=&gt;acc+x)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline33" class="outline-3">
+<h3 id="orgheadline33"><span class="section-number-3">12.2</span> </h3>
+<div class="outline-text-3" id="text-12-2">
+<p>
+imperative accumulate value on time
+</p>
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">acc</span> = 0;
+$(<span style="color: #8b0000;">'input'</span>).onChange(_=&gt;acc+=_)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline34" class="outline-3">
+<h3 id="orgheadline34"><span class="section-number-3">12.3</span> Space -&gt; Time</h3>
+<div class="outline-text-3" id="text-12-3">
+
+<div class="figure">
+<p><img src="https://blog.oyanglul.us/javascript/images/interstellar.png" alt="interstellar.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline35" class="outline-3">
+<h3 id="orgheadline35"><span class="section-number-3">12.4</span> FRP(Functional Reactive Programming)</h3>
+<div class="outline-text-3" id="text-12-4">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">&#xa0;</th>
+<th scope="col" class="org-left">Single Item</th>
+<th scope="col" class="org-left">Multiple Items</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">synchronous</td>
+<td class="org-left">getData():T</td>
+<td class="org-left">getData():List[T]</td>
+</tr>
+
+<tr>
+<td class="org-left">asynchronous</td>
+<td class="org-left">getData():Future[T]</td>
+<td class="org-left">getData():Observable[T]</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+<div id="outline-container-orgheadline36" class="outline-3">
+<h3 id="orgheadline36"><span class="section-number-3">12.5</span> <a href="http://reactivex.io/">ReactiveX</a></h3>
+<div class="outline-text-3" id="text-12-5">
+
+<div class="figure">
+<p><img src="http://reactivex.io/assets/operators/legend.png" alt="legend.png" />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgheadline37" class="outline-3">
+<h3 id="orgheadline37"><span class="section-number-3">12.6</span> </h3>
+<div class="outline-text-3" id="text-12-6">
+
+<div class="figure">
+<p><img src="http://reactivex.io/documentation/operators/images/just.c.png" alt="just.c.png" />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgheadline38" class="outline-3">
+<h3 id="orgheadline38"><span class="section-number-3">12.7</span> fold</h3>
+<div class="outline-text-3" id="text-12-7">
+
+<div class="figure">
+<p><img src="http://reactivex.io/documentation/operators/images/reduceSeed.png" alt="reduceSeed.png" />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgheadline39" class="outline-3">
+<h3 id="orgheadline39"><span class="section-number-3">12.8</span> flatMap</h3>
+<div class="outline-text-3" id="text-12-8">
+
+<div class="figure">
+<p><img src="http://reactivex.io/documentation/operators/images/flatMap.c.png" alt="flatMap.c.png" />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgheadline40" class="outline-3">
+<h3 id="orgheadline40"><span class="section-number-3">12.9</span> fromEvent</h3>
+<div class="outline-text-3" id="text-12-9">
+
+<div class="figure">
+<p><img src="http://reactivex.io/documentation/operators/images/fromEvent.png" alt="fromEvent.png" />
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline42" class="outline-2  slide">
+<h2 id="orgheadline42"><span class="section-number-2">13</span> <a href="http://jsbin.com/qazuju/edit?js,output">Demo</a></h2>
+<div class="outline-text-2" id="text-13">
+
+<div class="figure">
+<p><img src="https://blog.oyanglul.us/javascript/images/neat.gif" alt="neat.gif" />
+</p>
+</div>
+<a class="jsbin-embed" href="http://jsbin.com/qazuju/embed?js,output">JS Bin on jsbin.com</a><script src="http://static.jsbin.com/js/embed.min.js?3.35.12"></script>
+</div>
+</div>
+<div id="outline-container-orgheadline43" class="outline-2  slide">
+<h2 id="orgheadline43"><span class="section-number-2">14</span> Fin</h2>
+<div class="outline-text-2" id="text-14">
+
+<div class="figure">
+<p><img src="https://blog.oyanglul.us/javascript/images/applause.jpg" alt="applause.jpg" />
+</p>
+</div>
+
+<p>
+Thanks
+</p>
+</div>
+</div>
+<div id="outline-container-orgheadline44" class="outline-2  slide">
+<h2 id="orgheadline44"><span class="section-number-2">15</span> One more thing</h2>
+<div class="outline-text-2" id="text-15">
+<p>
+We are hiring
+</p>
+
+<p>
+<a href="http://weibo.com/milhouse">@MilhouseVanHouten</a>
+</p>
+</div>
+</div>
+
+
+<!-- Place the following snippet at the bottom of the deck container. -->
+<p class="deck-status" aria-role="status">
+  <span class="deck-status-current"></span>
+  /
+  <span class="deck-status-total"></span>
+</p>
+
+<!-- Place the following snippet at the bottom of the deck container. -->
+<div aria-role="navigation">
+  <a href="#" class="deck-prev-link" title="Previous">&#8592;</a>
+  <a href="#" class="deck-next-link" title="Next">&#8594;</a>
+</div>
+
+<!-- Place the following snippet at the bottom of the deck container. -->
+<form action="." method="get" class="goto-form">
+  <label for="goto-slide">Go to slide:</label>
+  <input type="text" name="slidenum" id="goto-slide" list="goto-datalist">
+  <datalist id="goto-datalist"></datalist>
+  <input type="submit" value="Go">
+</form>
+<div id="postamble" class="deck-status">
+<h1><a href="https://github.com/jcouyang">https://github.com/jcouyang</a> - Practical Monads</h1>
+</div>
+
+</div>
+</body>
+</html>

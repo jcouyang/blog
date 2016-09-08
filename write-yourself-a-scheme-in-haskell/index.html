@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- 2016-08-11 Thu 01:45 -->
+<!-- 2016-09-08 Thu 08:17 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
 <title>用Haskell48小时写你个Scheme</title>
 <meta  name="generator" content="Org-mode">
 <meta  name="author" content="Jichao Ouyang">
-<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
-<link rel="manifest" href="/assets/manifest.json">
+<link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -173,7 +172,7 @@ for the JavaScript code in this tag.
 </ul>
 </li>
 <li><a href="#orgheadline12">空白符</a></li>
-<li><a href="#orgheadline13"><span class="todo TODO">TODO</span> 返回</a></li>
+<li><a href="#orgheadline13">返回值</a></li>
 </ul>
 </li>
 <li><a href="#orgheadline14">待续&#x2026;</a></li>
@@ -599,8 +598,15 @@ parse
 </div>
 
 <div id="outline-container-orgheadline13" class="outline-3">
-<h3 id="orgheadline13"><span class="todo TODO">TODO</span> 返回</h3>
+<h3 id="orgheadline13">返回值</h3>
 <div class="outline-text-3" id="text-orgheadline13">
+<p>
+到现在为止我们的parser也只能说打印是否找到合法的输入, 但是还不能真正的将输入字符parse成为数据结构.
+</p>
+
+<p>
+所以假设我们先来实现将读入的字符转换成值, scheme 的值有这么几种
+</p>
 <div class="org-src-container">
 
 <pre class="src src-haskell"><span style="color: #00008b;">data</span> <span style="color: #36648b;">LispVal</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Atom</span> <span style="color: #36648b;">String</span>
@@ -612,6 +618,32 @@ parse
 </pre>
 </div>
 
+<p>
+如果你还记得之前提到的 Either 是 ADT, 那么现在这个 <code>LispVal</code> 就是一个 ADT, 在 haskell 定义一个 ADT 特别简单, 关键字 <code>data</code> 声明 <code>LispVal</code> 是一个ADT, 等号右边是构造器, 比如
+</p>
+
+<ul class="org-ul">
+<li><code>Atom String</code> 表示可以通过 =Atom "blah"= 就创建出来一个 LispVal data, 里面包含一个 Haskell String 类型的值</li>
+<li><code>List [LispVal]</code> 表示 List 里有一个 LispVal 类型的数组, 比如 <code>List [Atom "blah"]</code></li>
+<li><code>DottedList [LispVal] LispVal</code> 构造器接收两个参数, 一个是 LispVal 类型的数组,一个是 LispVal</li>
+</ul>
+
+<p>
+所以这么定义下来, 说明 scheme 的值类型有这么6种
+</p>
+<ul class="org-ul">
+<li>Atom 即名字什么的 <code>(foo bar)</code></li>
+<li>List 数组 <code>(1 2 3)</code></li>
+<li>DottedList 带点数组 <code>(1 2 . 3)</code></li>
+<li>Number 数字</li>
+<li>String 字符</li>
+<li>Bool 布尔</li>
+</ul>
+
+<p>
+有了这个抽象数据类型 ADT,我们就可以将parse的内容转换成 scheme 的 ADT, 首先,试试 parse 个 String
+</p>
+
 <div class="org-src-container">
 
 <pre class="src src-haskell"><span style="color: #6a5acd;">parseString</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
@@ -622,6 +654,18 @@ parse
                 return <span style="color: #b8860b;">$</span> <span style="color: #36648b;">String</span> x
 </pre>
 </div>
+
+<p>
+首先, <code>parseString</code> 返回类型 <code>Parser LispVal</code>, 实现中把 char, many和 char 都链起来, 意思是先 parse 一个双引号字符, 再 parse many 个不是双引号字符的字符, 返回的 Parser 的内容放入 x, 继续 parse 一个双引号. 最后用我们刚构造的 ADT 构造一个 String 出来.
+</p>
+
+<p>
+其中 <code>$</code> 是上一章说过的将左结合表达式转换成右结合, 等价于 return <code>(String x)</code>. 好处是尽量少些括号是代码更可读.
+</p>
+
+<p>
+另外一点就是 <code>return</code>, 如果不是用 return, 返回值会是 LispVal 类型, 但是期望的是 <code>Parser</code>. 因此在 do 这个 context 中, 所有的 monad 都是 Parser, 比如 <code>char</code>, <code>many</code>, 都是返回 <code>Parser</code> 类型. 那么到最后一个表达式, 可以简单的用 <code>return</code> 根据上下文把 <code>LispVal</code> 包到 <code>Parser</code> monad 中.
+</p>
 </div>
 </div>
 </div>
