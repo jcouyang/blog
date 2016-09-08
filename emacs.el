@@ -15,12 +15,13 @@
 (setq make-backup-files nil)
 (setq debug-on-error t)
 (setq blog-path (expand-file-name "org"))
+(setq assets-path (expand-file-name "assets"))
 (setq org-html-validation-link nil)
 (setq org-confirm-babel-evaluate nil)
 
 (require 'ox-deck)
 (setq slide-path (expand-file-name "slides"))
-(setq org-deck-base-url "https://blog.oyanglul.us/assets/deck.js")
+(setq org-deck-base-url "https://blog.oyanglul.us/deck.js")
 (custom-set-variables
   '(org-publish-timestamp-directory
      (convert-standard-filename "public/.org-timestamps/")))
@@ -76,7 +77,14 @@
        ;; where static files (images, pdfs) are stored
        ("blog-static"
          :base-directory ,blog-path
-         :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|woff2\\|woff"
+         :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|woff2\\|woff"
+         :publishing-directory "public"
+         :recursive t
+         :publishing-function org-publish-attachment
+         )
+       ("assets"
+         :base-directory ,assets-path
+         :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|woff2\\|woff\\|html\\|md\\|ico"
          :publishing-directory "public"
          :recursive t
          :publishing-function org-publish-attachment
@@ -93,6 +101,6 @@
          :exclude ".*"            ;; To exclude all files...
          :include ("index.org")   ;; ... except index.org.
          :table-of-contents nil)
-       ("blog" :components ("blog-notes" "slides" "blog-static" "rss"))
+       ("blog" :components ("blog-notes" "slides" "blog-static" "assets" "rss"))
        )))
 (set-org-publish-project-alist)
