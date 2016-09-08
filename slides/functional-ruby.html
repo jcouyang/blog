@@ -90,7 +90,6 @@
 <li><a href='#outline-container-sec-'>case when</a></li>
 <li><a href='#outline-container-sec-'>值</a></li>
 <li><a href='#outline-container-sec-'>类型</a></li>
-<li><a href='#outline-container-sec-'>表达式</a></li>
 <li><a href='#outline-container-sec-'>lambda （aka guard）</a></li>
 <li><a href='#outline-container-sec-'><i>正则</i></a></li>
 <li><a href='#outline-container-sec-'>但其实只是个简单的语法糖</a></li>
@@ -99,10 +98,12 @@
 <li><a href='#outline-container-sec-'>Category Theory</a></li>
 <li><a href='#outline-container-sec-'>一个简单 🌰</a></li>
 <li><a href='#outline-container-sec-'>命令式放大象</a></li>
-<li><a href='#outline-container-sec-'>或者极端的抛异常</a></li>
+<li><a href='#outline-container-sec-'>或者用更极端的抛异常方式</a></li>
 <li><a href='#outline-container-sec-'>让我们用一个简单的 Either Monad</a></li>
 <li><a href='#outline-container-sec-'>来简化控制流</a></li>
 <li><a href='#outline-container-sec-'>怎么做到的</a></li>
+<li><a href='#outline-container-sec-'>自函子范畴上的含幺半群</a></li>
+<li><a href='#outline-container-sec-'>cat</a></li>
 <li><a href='#outline-container-sec-'>一个很实际的 🌰</a></li>
 </ul>
 </div>
@@ -401,9 +402,8 @@ printFirstName fry
 ruby 中的 case 可以搞定这几种模式匹配
 </p>
 <ul class="org-ul">
-<li>值</li>
+<li>值/表达式</li>
 <li>类型</li>
-<li>表达式</li>
 <li>Proc</li>
 <li>正则</li>
 </ul>
@@ -466,28 +466,8 @@ me = <span style="color: #36648b;">Me</span>.new <span style="color: #8b0000;">'
 </div>
 
 <div id="outline-container-orgheadline20" class="outline-2  slide">
-<h2 id="orgheadline20">表达式</h2>
+<h2 id="orgheadline20">lambda （aka guard）</h2>
 <div class="outline-text-2" id="text-orgheadline20">
-<p>
-跟 <code>if else</code> 一样用
-</p>
-<div class="org-src-container">
-
-<pre class="src src-ruby">require <span style="color: #8b0000;">'ostruct'</span>
-  me = <span style="color: #36648b;">OpenStruct</span>.new(<span style="color: #6b8e23;">name</span>: <span style="color: #8b0000;">'jichao'</span>, <span style="color: #6b8e23;">first_name</span>: <span style="color: #8b0000;">'ouyang'</span>)
-  <span style="color: #00008b;">case</span>
-  <span style="color: #00008b;">when</span> me.name == <span style="color: #8b0000;">'jichao'</span>
-    <span style="color: #8b0000;">"hehe</span><span style="color: #b8860b;"> #{me}</span><span style="color: #8b0000;">"</span>
-  <span style="color: #00008b;">else</span> <span style="color: #8b0000;">'gewuen'</span>
-  <span style="color: #00008b;">end</span>
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-orgheadline21" class="outline-2  slide">
-<h2 id="orgheadline21">lambda （aka guard）</h2>
-<div class="outline-text-2" id="text-orgheadline21">
 <div class="org-src-container">
 
 <pre class="src src-ruby">require <span style="color: #8b0000;">'ostruct'</span>
@@ -501,9 +481,9 @@ me = <span style="color: #36648b;">OpenStruct</span>.new(<span style="color: #6b
 </div>
 </div>
 
-<div id="outline-container-orgheadline22" class="outline-2  slide">
-<h2 id="orgheadline22"><i>正则</i></h2>
-<div class="outline-text-2" id="text-orgheadline22">
+<div id="outline-container-orgheadline21" class="outline-2  slide">
+<h2 id="orgheadline21"><i>正则</i></h2>
+<div class="outline-text-2" id="text-orgheadline21">
 <div class="org-src-container">
 
 <pre class="src src-ruby"><span style="color: #00008b;">case</span> <span style="color: #8b0000;">'jichao ouyang'</span>
@@ -519,9 +499,9 @@ me = <span style="color: #36648b;">OpenStruct</span>.new(<span style="color: #6b
 </div>
 </div>
 
-<div id="outline-container-orgheadline23" class="outline-2  slide">
-<h2 id="orgheadline23">但其实只是个简单的语法糖</h2>
-<div class="outline-text-2" id="text-orgheadline23">
+<div id="outline-container-orgheadline22" class="outline-2  slide">
+<h2 id="orgheadline22">但其实只是个简单的语法糖</h2>
+<div class="outline-text-2" id="text-orgheadline22">
 <p>
 case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的正则
 </p>
@@ -554,9 +534,9 @@ nil
 </div>
 </div>
 
-<div id="outline-container-orgheadline24" class="outline-2  slide">
-<h2 id="orgheadline24"></h2>
-<div class="outline-text-2" id="text-orgheadline24">
+<div id="outline-container-orgheadline23" class="outline-2  slide">
+<h2 id="orgheadline23"></h2>
+<div class="outline-text-2" id="text-orgheadline23">
 <div class="org-src-container">
 
 <pre class="src src-ruby">require <span style="color: #8b0000;">'ostruct'</span>
@@ -570,9 +550,9 @@ me = <span style="color: #36648b;">OpenStruct</span>.new(<span style="color: #6b
 </div>
 </div>
 
-<div id="outline-container-orgheadline25" class="outline-2  slide">
-<h2 id="orgheadline25"></h2>
-<div class="outline-text-2" id="text-orgheadline25">
+<div id="outline-container-orgheadline24" class="outline-2  slide">
+<h2 id="orgheadline24"></h2>
+<div class="outline-text-2" id="text-orgheadline24">
 
 <div class="figure">
 <p><img src="https://i.giphy.com/55xWvUIMb51mw.gif" alt="55xWvUIMb51mw.gif" />
@@ -592,9 +572,9 @@ bigger not go
 </div>
 </div>
 
-<div id="outline-container-orgheadline26" class="outline-2  slide">
-<h2 id="orgheadline26">Category Theory</h2>
-<div class="outline-text-2" id="text-orgheadline26">
+<div id="outline-container-orgheadline25" class="outline-2  slide">
+<h2 id="orgheadline25">Category Theory</h2>
+<div class="outline-text-2" id="text-orgheadline25">
 <blockquote>
 <p>
 Monad
@@ -603,9 +583,9 @@ Monad
 </div>
 </div>
 
-<div id="outline-container-orgheadline27" class="outline-2  slide">
-<h2 id="orgheadline27">一个简单 🌰</h2>
-<div class="outline-text-2" id="text-orgheadline27">
+<div id="outline-container-orgheadline26" class="outline-2  slide">
+<h2 id="orgheadline26">一个简单 🌰</h2>
+<div class="outline-text-2" id="text-orgheadline26">
 <blockquote>
 <p>
 把大象放冰箱里需要几步
@@ -619,9 +599,9 @@ Monad
 </div>
 </div>
 
-<div id="outline-container-orgheadline28" class="outline-2  slide">
-<h2 id="orgheadline28">命令式放大象</h2>
-<div class="outline-text-2" id="text-orgheadline28">
+<div id="outline-container-orgheadline27" class="outline-2  slide">
+<h2 id="orgheadline27">命令式放大象</h2>
+<div class="outline-text-2" id="text-orgheadline27">
 <div class="org-src-container">
 
 <pre class="src src-ruby">opened_fridge = open_fridge
@@ -645,14 +625,18 @@ Monad
 </div>
 </div>
 
-<div id="outline-container-orgheadline29" class="outline-2  slide">
-<h2 id="orgheadline29">或者极端的抛异常</h2>
-<div class="outline-text-2" id="text-orgheadline29">
+<div id="outline-container-orgheadline28" class="outline-2  slide">
+<h2 id="orgheadline28">或者用更极端的抛异常方式</h2>
+<div class="outline-text-2" id="text-orgheadline28">
 <div class="org-src-container">
 
 <pre class="src src-ruby"><span style="color: #00008b;">begin</span>
   close(put_elephent_in open_fridge)
-<span style="color: #00008b;">rescue</span>
+<span style="color: #00008b;">rescue</span> <span style="color: #36648b;">A</span>=&gt;e
+ ...
+<span style="color: #00008b;">rescue</span> <span style="color: #36648b;">B</span>=&gt;e
+ ...
+<span style="color: #00008b;">rescue</span> <span style="color: #36648b;">C</span>=&gt;e
  ...
 <span style="color: #00008b;">end</span>
 </pre>
@@ -660,9 +644,13 @@ Monad
 </div>
 </div>
 
-<div id="outline-container-orgheadline30" class="outline-2  slide">
-<h2 id="orgheadline30">让我们用一个简单的 <a href="https://github.com/jcouyang/cats.rb#dataeither">Either Monad</a></h2>
-<div class="outline-text-2" id="text-orgheadline30">
+<div id="outline-container-orgheadline29" class="outline-2  slide">
+<h2 id="orgheadline29">让我们用一个简单的 <a href="https://github.com/jcouyang/cats.rb#dataeither">Either Monad</a></h2>
+<div class="outline-text-2" id="text-orgheadline29">
+<pre class="example">
+gem install data.either
+</pre>
+
 <div class="org-src-container">
 
 <pre class="src src-ruby">require <span style="color: #8b0000;">'data.either'</span>
@@ -679,24 +667,28 @@ Monad
 </div>
 </div>
 
-<div id="outline-container-orgheadline31" class="outline-2  slide">
-<h2 id="orgheadline31">来简化控制流</h2>
-<div class="outline-text-2" id="text-orgheadline31">
+<div id="outline-container-orgheadline30" class="outline-2  slide">
+<h2 id="orgheadline30">来简化控制流</h2>
+<div class="outline-text-2" id="text-orgheadline30">
 <div class="org-src-container">
 
-<pre class="src src-ruby">open_fridge.flat_map <span style="color: #00008b;">do</span> |fridge|
-  put_elephent_in fridge
+<pre class="src src-ruby">open_fridge.flat_map <span style="color: #00008b;">do</span> |fridge|  <span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">&lt;= 1</span>
+  put_elephent_in fridge          <span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">&lt;= 2</span>
 <span style="color: #00008b;">end</span>.flat_map <span style="color: #00008b;">do</span> |fridge|
-  close fridge
+  close fridge                    <span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">&lt;= 3</span>
 <span style="color: #00008b;">end</span>
 </pre>
 </div>
+
+<p>
+这样可以专心构造控制逻辑,而不需要关心上一步如果错误该怎么办
+</p>
 </div>
 </div>
 
-<div id="outline-container-orgheadline32" class="outline-2  slide">
-<h2 id="orgheadline32">怎么做到的</h2>
-<div class="outline-text-2" id="text-orgheadline32">
+<div id="outline-container-orgheadline31" class="outline-2  slide">
+<h2 id="orgheadline31">怎么做到的</h2>
+<div class="outline-text-2" id="text-orgheadline31">
 
 <div class="figure">
 <p><img src="https://i.giphy.com/12dBjCf9NclhBe.gif" alt="12dBjCf9NclhBe.gif" />
@@ -705,9 +697,15 @@ Monad
 </div>
 </div>
 
+<div id="outline-container-orgheadline32" class="outline-2  slide">
+<h2 id="orgheadline32">自函子范畴上的含幺半群</h2>
+</div>
 
 <div id="outline-container-orgheadline33" class="outline-2  slide">
-<h2 id="orgheadline33">一个很实际的 🌰</h2>
+<h2 id="orgheadline33"><span class="todo TODO">TODO</span> cat</h2>
+</div>
+<div id="outline-container-orgheadline34" class="outline-2  slide">
+<h2 id="orgheadline34">一个很实际的 🌰</h2>
 </div>
 
 
