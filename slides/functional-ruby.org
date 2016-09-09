@@ -64,7 +64,6 @@ https://blog.oyanglul.us/images/data-port.gif
 
 
 * 好处呢?
-https://imgs.xkcd.com/comics/haskell.png
 
 - 好组合 composible
 - 好推理 easy to reason about
@@ -307,7 +306,7 @@ bigger not go
 
 * Category Theory
 #+BEGIN_QUOTE
-Monad
+Monad - 自函子范畴上的含幺半群
 #+END_QUOTE
 
 * 一个简单 🌰
@@ -380,8 +379,60 @@ end
 * 怎么做到的
 https://i.giphy.com/12dBjCf9NclhBe.gif
 
-* 自函子范畴上的含幺半群
-
-* TODO cat
 * 一个很实际的 🌰
+用 microservices 组合成新的 service
 
+https://www.evernote.com/l/ABd47442ZCNJHbYn1sfcZhZtV2jFjftPdRwB/image.png
+
+* 上图有几次 IO
+- 总共4个IO, 每一步骤都可能出错
+- 但程序猿不希望漏掉任何错误信息
+- 但是又不能为了监控,影响了这个简单的工作流吧
+
+* 控制流不关心失败
+#+BEGIN_EXAMPLE
+fetch a >> fetch b >> fetch c >> put d
+#+END_EXAMPLE
+
+* IO自挂东南枝
+https://www.evernote.com/l/ABeIbzxUeghNkZMGpgZljl8K0P6JNasFga4B/image.jpg
+
+* 
+#+BEGIN_SRC ruby :exports code
+def fetch(endpoint, decoder)
+        response = self.class.get(endpoint, format: :json)
+        case response.code
+          when 410
+            Left.new(Exceptions::DataFailure.new("Resource #{endpoint} was deleted"))
+          when 404
+            Left.new(Exceptions::DataFailure.new("Resource #{endpoint} not exist"))
+          when 200
+            Right.new decoder.from_json(response.body)
+          else
+            Left.new(Exceptions::RepositoryError.new("Fetching #{endpoint} with Error:\n#{endpoint}, response code: #{response.code}"))
+        end
+      end
+#+END_SRC
+
+#+BEGIN_SRC ruby :exports code
+  failure_processed, success_processed = Either.partition Mapinator.run
+  Monitoring.send_processed success_processed.length
+  Monitoring.logger.info("Processed successful #{success_processed.length} listings: #{success_processed}")
+  Monitoring.logger.error("Processed FAILURE #{failure_processed.length} with Exceptions:") unless failure_processed.empty?
+  ...
+#+END_SRC
+
+* 还可不可以在纯一些
+https://imgs.xkcd.com/comics/haskell.png
+
+* Free Monad
+https://blog.oyanglul.us/javascript/images/shut-up-and-take-my-money.gif
+
+* 多谢
+- https://github.com/jcouyang/cats.rb
+- https://github.com/typelevel/cats
+- http://hackage.haskell.org/package/base-4.8.1.0/docs/src/Data.Either.html
+- https://wiki.haskell.org/Free_structure
+- https://www.coursera.org/learn/progfun2
+- https://www.amazon.com/Well-Grounded-Rubyist-David-Black/dp/1933988657
+- https://mitpress.mit.edu/sicp
