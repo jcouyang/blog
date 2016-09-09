@@ -16,7 +16,7 @@
 <link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/extensions/navigation/deck.navigation.css' type='text/css' />
 <link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/extensions/scale/deck.scale.css' type='text/css' />
 <link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/extensions/status/deck.status.css' type='text/css' />
-<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/themes/style/swiss.css' type='text/css' />
+<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/themes/style/web-2.0.css' type='text/css' />
 <link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/themes/transition/fade.css' type='text/css' />
 <script src='https://blog.oyanglul.us/deck.js/jquery.min.js' type='text/javascript'></script>
 <script src='https://blog.oyanglul.us/deck.js/core/deck.core.js' type='text/javascript'></script>
@@ -102,9 +102,14 @@
 <li><a href='#outline-container-sec-'>让我们用一个简单的 Either Monad</a></li>
 <li><a href='#outline-container-sec-'>来简化控制流</a></li>
 <li><a href='#outline-container-sec-'>怎么做到的</a></li>
-<li><a href='#outline-container-sec-'>自函子范畴上的含幺半群</a></li>
-<li><a href='#outline-container-sec-'>cat</a></li>
 <li><a href='#outline-container-sec-'>一个很实际的 🌰</a></li>
+<li><a href='#outline-container-sec-'>上图有几次 IO</a></li>
+<li><a href='#outline-container-sec-'>控制流不关心失败</a></li>
+<li><a href='#outline-container-sec-'>IO自挂东南枝</a></li>
+<li><a href='#outline-container-sec-'></a></li>
+<li><a href='#outline-container-sec-'>还可不可以在纯一些</a></li>
+<li><a href='#outline-container-sec-'>Free Monad</a></li>
+<li><a href='#outline-container-sec-'>多谢</a></li>
 </ul>
 </div>
 
@@ -169,12 +174,6 @@ You might be surprised to see Ruby in the list of functional languages because t
 <div id="outline-container-orgheadline4" class="outline-2  slide">
 <h2 id="orgheadline4">好处呢?</h2>
 <div class="outline-text-2" id="text-orgheadline4">
-
-<div class="figure">
-<p><img src="https://imgs.xkcd.com/comics/haskell.png" alt="haskell.png" />
-</p>
-</div>
-
 <ul class="org-ul">
 <li>好组合 composible</li>
 <li>好推理 easy to reason about</li>
@@ -577,7 +576,7 @@ bigger not go
 <div class="outline-text-2" id="text-orgheadline25">
 <blockquote>
 <p>
-Monad
+Monad - 自函子范畴上的含幺半群
 </p>
 </blockquote>
 </div>
@@ -698,14 +697,119 @@ gem install data.either
 </div>
 
 <div id="outline-container-orgheadline32" class="outline-2  slide">
-<h2 id="orgheadline32">自函子范畴上的含幺半群</h2>
+<h2 id="orgheadline32">一个很实际的 🌰</h2>
+<div class="outline-text-2" id="text-orgheadline32">
+<p>
+用 microservices 组合成新的 service
+</p>
+
+
+<div class="figure">
+<p><img src="https://www.evernote.com/l/ABd47442ZCNJHbYn1sfcZhZtV2jFjftPdRwB/image.png" alt="image.png" />
+</p>
+</div>
+</div>
 </div>
 
 <div id="outline-container-orgheadline33" class="outline-2  slide">
-<h2 id="orgheadline33"><span class="todo TODO">TODO</span> cat</h2>
+<h2 id="orgheadline33">上图有几次 IO</h2>
+<div class="outline-text-2" id="text-orgheadline33">
+<ul class="org-ul">
+<li>总共4个IO, 每一步骤都可能出错</li>
+<li>但程序猿不希望漏掉任何错误信息</li>
+<li>但是又不能为了监控,影响了这个简单的工作流吧</li>
+</ul>
 </div>
+</div>
+
 <div id="outline-container-orgheadline34" class="outline-2  slide">
-<h2 id="orgheadline34">一个很实际的 🌰</h2>
+<h2 id="orgheadline34">控制流不关心失败</h2>
+<div class="outline-text-2" id="text-orgheadline34">
+<pre class="example">
+fetch a &gt;&gt; fetch b &gt;&gt; fetch c &gt;&gt; put d
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline35" class="outline-2  slide">
+<h2 id="orgheadline35">IO自挂东南枝</h2>
+<div class="outline-text-2" id="text-orgheadline35">
+
+<div class="figure">
+<p><img src="https://www.evernote.com/l/ABeIbzxUeghNkZMGpgZljl8K0P6JNasFga4B/image.jpg" alt="image.jpg" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline36" class="outline-2  slide">
+<h2 id="orgheadline36"></h2>
+<div class="outline-text-2" id="text-orgheadline36">
+<div class="org-src-container">
+
+<pre class="src src-ruby"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fetch</span>(endpoint, decoder)
+        response = <span style="color: #b8860b;">self</span>.class.get(endpoint, <span style="color: #6b8e23;">format</span>: <span style="color: #6b8e23;">:json</span>)
+        <span style="color: #00008b;">case</span> response.code
+          <span style="color: #00008b;">when</span> 410
+            <span style="color: #36648b;">Left</span>.new(<span style="color: #36648b;">Exceptions</span>::<span style="color: #36648b;">DataFailure</span>.new(<span style="color: #8b0000;">"Resource</span><span style="color: #b8860b;"> #{endpoint}</span><span style="color: #8b0000;"> was deleted"</span>))
+          <span style="color: #00008b;">when</span> 404
+            <span style="color: #36648b;">Left</span>.new(<span style="color: #36648b;">Exceptions</span>::<span style="color: #36648b;">DataFailure</span>.new(<span style="color: #8b0000;">"Resource</span><span style="color: #b8860b;"> #{endpoint}</span><span style="color: #8b0000;"> not exist"</span>))
+          <span style="color: #00008b;">when</span> 200
+            <span style="color: #36648b;">Right</span>.new decoder.from_json(response.body)
+          <span style="color: #00008b;">else</span>
+            <span style="color: #36648b;">Left</span>.new(<span style="color: #36648b;">Exceptions</span>::<span style="color: #36648b;">RepositoryError</span>.new(<span style="color: #8b0000;">"Fetching</span><span style="color: #b8860b;"> #{endpoint}</span><span style="color: #8b0000;"> with Error:\</span><span style="color: #b8860b;">n#{endpoint}</span><span style="color: #8b0000;">, response code:</span><span style="color: #b8860b;"> #{response.code}</span><span style="color: #8b0000;">"</span>))
+        <span style="color: #00008b;">end</span>
+      <span style="color: #00008b;">end</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-ruby">failure_processed, success_processed = <span style="color: #36648b;">Either</span>.partition <span style="color: #36648b;">Mapinator</span>.run
+<span style="color: #36648b;">Monitoring</span>.send_processed success_processed.length
+<span style="color: #36648b;">Monitoring</span>.logger.info(<span style="color: #8b0000;">"Processed successful</span><span style="color: #b8860b;"> #{success_processed.length}</span><span style="color: #8b0000;"> listings:</span><span style="color: #b8860b;"> #{success_processed}</span><span style="color: #8b0000;">"</span>)
+<span style="color: #36648b;">Monitoring</span>.logger.error(<span style="color: #8b0000;">"Processed FAILURE</span><span style="color: #b8860b;"> #{failure_processed.length}</span><span style="color: #8b0000;"> with Exceptions:"</span>) <span style="color: #00008b;">unless</span> failure_processed.empty?
+...
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline37" class="outline-2  slide">
+<h2 id="orgheadline37">还可不可以在纯一些</h2>
+<div class="outline-text-2" id="text-orgheadline37">
+
+<div class="figure">
+<p><img src="https://imgs.xkcd.com/comics/haskell.png" alt="haskell.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline38" class="outline-2  slide">
+<h2 id="orgheadline38">Free Monad</h2>
+<div class="outline-text-2" id="text-orgheadline38">
+
+<div class="figure">
+<p><img src="https://blog.oyanglul.us/javascript/images/shut-up-and-take-my-money.gif" alt="shut-up-and-take-my-money.gif" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline39" class="outline-2  slide">
+<h2 id="orgheadline39">多谢</h2>
+<div class="outline-text-2" id="text-orgheadline39">
+<ul class="org-ul">
+<li><a href="https://github.com/jcouyang/cats.rb">https://github.com/jcouyang/cats.rb</a></li>
+<li><a href="https://github.com/typelevel/cats">https://github.com/typelevel/cats</a></li>
+<li><a href="http://hackage.haskell.org/package/base-4.8.1.0/docs/src/Data.Either.html">http://hackage.haskell.org/package/base-4.8.1.0/docs/src/Data.Either.html</a></li>
+<li><a href="https://wiki.haskell.org/Free_structure">https://wiki.haskell.org/Free_structure</a></li>
+<li><a href="https://www.coursera.org/learn/progfun2">https://www.coursera.org/learn/progfun2</a></li>
+<li><a href="https://www.amazon.com/Well-Grounded-Rubyist-David-Black/dp/1933988657">https://www.amazon.com/Well-Grounded-Rubyist-David-Black/dp/1933988657</a></li>
+<li><a href="https://mitpress.mit.edu/sicp">https://mitpress.mit.edu/sicp</a></li>
+</ul>
+</div>
 </div>
 
 
