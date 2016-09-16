@@ -119,8 +119,9 @@ data LispVal = Atom String
 - DottedList 带点数组 =(1 2 . 3)=
 - Number 数字
 - String 字符
-- Bool 布尔
+- Bool 布尔 
 
+** ParseString
 有了这个抽象数据类型 ADT,我们就可以将parse的内容转换成 scheme 的 ADT, 首先,试试 parse 个 String
 
 #+BEGIN_SRC haskell
@@ -138,5 +139,60 @@ parseString = do
 
 另外一点就是 =return=, 如果不是用 return, 返回值会是 LispVal 类型, 但是期望的是 =Parser=. 因此在 do 这个 context 中, 所有的 monad 都是 Parser, 比如 =char=, =many=, 都是返回 =Parser= 类型. 那么到最后一个表达式, 可以简单的用 =return= 根据上下文把 =LispVal= 包到 =Parser= monad 中.
 
+** parseAtom
+atom 的parser 也比较直接, 正常的 atom 
+- 第一个字母可以是符号
+- 剩下的部分可以是多个符号数字或者字符
+- =#t= 是 True, =#f= 是 False
 
+#+BEGIN_SRC haskell
+parseAtom :: Parser LispVal
+parseAtom = do 
+              first <- letter <|> symbol
+              rest <- many (letter <|> digit <|> symbol)
+              let atom = first:rest
+              return $ case atom of 
+                         "#t" -> Bool True
+                         "#f" -> Bool False
+                         _    -> Atom atom
+#+END_SRC
 
+这里出现了另外一个Parsec的组合子 =<|>=, 其实是 Parser monad 的或, 也就是如果前面的成功, 就不会继续尝试后面的 Parser.
+
+另一个新东西是 =let=, 它定义了新的绑定 =atom=, 到 =first:rest= 上.
+
+=_= 匹配所有剩下的 case
+
+** parseNumber
+
+#+BEGIN_SRC haskell
+parseNumber :: Parser LispVal
+parseNumber = liftM (Number . read) $ many1 digit
+#+END_SRC
+
+=many1 digit= 匹配一个或多个数字, 返回一个 =Parser String=
+
+=(Number . read)= 就是 Number compose read, 也就是先 apply read, 返回的结果 apply 给 Number. 
+
+组合好的函数还是不能处理 =many1 digit= 返回的 =Parser String=, 因为 read 期待一个 =String= 类型.
+
+所以我们使用 =LiftM= 将组合好的函数, lift 成 Monad(确切的说是 Applicative), 在这个context, Monad 就是 =Parser=
+
+** 最后
+有了这几个 parser, 可以用我们刚见过的 =<|>= 把它们拼起来
+
+#+BEGIN_SRC haskell
+parseExpr :: Parser LispVal
+parseExpr = parseAtom
+         <|> parseString
+         <|> parseNumber
+#+END_SRC
+
+用我们的新 parser 放到 =readExpr= 中:
+
+#+BEGIN_SRC haskell
+readExpr :: String -> String
+readExpr input = case parse parseExpr "lisp" input of
+    Left err -> "No match: " ++ show err
+    Right _ -> "Found value"
+#+END_SRC
