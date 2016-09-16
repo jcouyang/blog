@@ -1,0 +1,43 @@
+* to String
+在真的开始 eval 之前, 我们先把打印的部分实现, 比如之前能 parse 的 =List= 打印成 scheme 的话应该是 =()=
+
+简单的实现 premitive 类型
+#+BEGIN_SRC haskell -n
+showVal :: LispVal -> String
+showVal (String contents) = "\"" ++ contents ++ "\""
+showVal (Atom name) = name
+showVal (Number contents) = show contents
+showVal (Bool True) = "#t"
+showVal (Bool False) = "#f"
+#+END_SRC
+
+注意看 2,3,4 行, 还记得之前说过的 /模式匹配/ 吗? 这里是定义带模式匹配的函数,也就是说函数 =showVal= 会根据匹配参数 =LispVal= 来找到对应真正要使用的函数. 更重要的是, 模式匹配可以 destructure 数据, 比如 =(String contents)= 就会匹配 String 类型的数据, 并将内容绑定到 =contents= 上. 这样, 后面就可以使用 =contents= 了.
+
+处理完这些 premitive 类型, 接下来看看如何打印稍微复杂一些的 =List= 和 =DottedList= 吧.
+
+#+BEGIN_SRC haskell
+showVal (List contents) = "(" ++ unwordsList contents ++ ")"
+showVal (DottedList head tail) = "(" ++ unwordsList head ++ " . " ++ showVal tail ++ ")"
+#+END_SRC
+
+scheme 的 List 用括号括起来, 内容则是用空格分开的一个个元素, 例如 =(1 2 3 4)=. DottedList 则跟名字一样, 是 head 和 tail 中间都了一个点 =.=
+
+其中的 =unwordsList= 会将内容的元素的 showVal 值用空格连接起来.
+
+#+BEGIN_SRC haskell
+unwordsList :: [LispVal] -> String
+unwordsList = unwords . map showVal
+#+END_SRC
+
+利用的是 Haskell 的 unwords 函数, 类似于其他语言的 =join(' ')=
+* 实现 show 类型类
+
+上节的 =showVal= 实现中, 不知道有没有注意到 Number 的实现使用了 =show contents=. 我们知道 =contents= 的类型是 Haskell 的 =Integer=, 之所以可以 =show=, 是 =Integer= 实现了类型类 =Show=.
+
+同样的我们可以实现让 =LispVal= 类型实现类型类 =Show=
+
+#+BEGIN_SRC haskell
+instance Show LispVal where show = showVal
+#+END_SRC
+
+同时实现类型类 =Show= 中的函数 =show=, 恩,这有些像 Interface
