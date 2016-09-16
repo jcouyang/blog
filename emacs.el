@@ -23,6 +23,8 @@
 (setq slide-path (expand-file-name "slides"))
 (setq org-deck-base-url "https://blog.oyanglul.us/deck.js")
 (setq org-deck-theme "web-2.0.css")
+(setq org-deck-transition "horizontal-slide.css")
+(setq org-deck-postamble "<p>%t - %a</p>")
 
 (custom-set-variables
   '(org-publish-timestamp-directory
