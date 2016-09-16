@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- 2016-09-09 Fri 13:31 -->
+<!-- 2016-09-16 Fri 16:11 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
 <title>用Haskell48小时写你个Scheme</title>
@@ -172,10 +172,23 @@ for the JavaScript code in this tag.
 </ul>
 </li>
 <li><a href="#orgheadline12">空白符</a></li>
-<li><a href="#orgheadline13">返回值</a></li>
+<li><a href="#orgheadline13">返回值</a>
+<ul>
+<li><a href="#orgheadline14">ParseString</a></li>
+<li><a href="#orgheadline15">parseAtom</a></li>
+<li><a href="#orgheadline16">parseNumber</a></li>
+<li><a href="#orgheadline17">最后</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline14">待续&#x2026;</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline20">求值，第一部分</a>
+<ul>
+<li><a href="#orgheadline18">to String</a></li>
+<li><a href="#orgheadline19">实现 show 类型类</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline21">待续&#x2026;</a></li>
 </ul>
 </div>
 </nav>
@@ -639,7 +652,11 @@ parse
 <li>String 字符</li>
 <li>Bool 布尔</li>
 </ul>
+</div>
 
+<div id="outline-container-orgheadline14" class="outline-4">
+<h4 id="orgheadline14">ParseString</h4>
+<div class="outline-text-4" id="text-orgheadline14">
 <p>
 有了这个抽象数据类型 ADT,我们就可以将parse的内容转换成 scheme 的 ADT, 首先,试试 parse 个 String
 </p>
@@ -668,13 +685,195 @@ parse
 </p>
 </div>
 </div>
+
+<div id="outline-container-orgheadline15" class="outline-4">
+<h4 id="orgheadline15">parseAtom</h4>
+<div class="outline-text-4" id="text-orgheadline15">
+<p>
+atom 的parser 也比较直接, 正常的 atom 
+</p>
+<ul class="org-ul">
+<li>第一个字母可以是符号</li>
+<li>剩下的部分可以是多个符号数字或者字符</li>
+<li><code>#t</code> 是 True, <code>#f</code> 是 False</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">parseAtom</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
+<span style="color: #6a5acd;">parseAtom</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span> 
+              first <span style="color: #b8860b;">&lt;-</span> letter <span style="color: #b8860b;">&lt;|&gt;</span> symbol
+              rest <span style="color: #b8860b;">&lt;-</span> many (letter <span style="color: #b8860b;">&lt;|&gt;</span> digit <span style="color: #b8860b;">&lt;|&gt;</span> symbol)
+              <span style="color: #00008b;">let</span> atom <span style="color: #b8860b;">=</span> first<span style="color: #36648b;">:</span>rest
+              return <span style="color: #b8860b;">$</span> <span style="color: #00008b;">case</span> atom <span style="color: #00008b;">of</span> 
+                         <span style="color: #8b0000;">"#t"</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Bool</span> <span style="color: #36648b;">True</span>
+                         <span style="color: #8b0000;">"#f"</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Bool</span> <span style="color: #36648b;">False</span>
+                         <span style="color: #00008b;">_</span>    <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Atom</span> atom
+</pre>
 </div>
 
-<div id="outline-container-orgheadline14" class="outline-2">
-<h2 id="orgheadline14">待续&#x2026;</h2>
-<div class="outline-text-2" id="text-orgheadline14">
+<p>
+这里出现了另外一个Parsec的组合子 <code>&lt;|&gt;</code>, 其实是 Parser monad 的或, 也就是如果前面的成功, 就不会继续尝试后面的 Parser.
+</p>
+
+<p>
+另一个新东西是 <code>let</code>, 它定义了新的绑定 <code>atom</code>, 到 <code>first:rest</code> 上.
+</p>
+
+<p>
+<code>_</code> 匹配所有剩下的 case
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline16" class="outline-4">
+<h4 id="orgheadline16">parseNumber</h4>
+<div class="outline-text-4" id="text-orgheadline16">
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">parseNumber</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
+<span style="color: #6a5acd;">parseNumber</span> <span style="color: #b8860b;">=</span> liftM (<span style="color: #36648b;">Number</span> <span style="color: #b8860b;">.</span> read) <span style="color: #b8860b;">$</span> many1 digit
+</pre>
+</div>
+
+<p>
+<code>many1 digit</code> 匹配一个或多个数字, 返回一个 <code>Parser String</code>
+</p>
+
+<p>
+<code>(Number . read)</code> 就是 Number compose read, 也就是先 apply read, 返回的结果 apply 给 Number. 
+</p>
+
+<p>
+组合好的函数还是不能处理 <code>many1 digit</code> 返回的 <code>Parser String</code>, 因为 read 期待一个 <code>String</code> 类型.
+</p>
+
+<p>
+所以我们使用 <code>LiftM</code> 将组合好的函数, lift 成 Monad(确切的说是 Applicative), 在这个context, Monad 就是 <code>Parser</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline17" class="outline-4">
+<h4 id="orgheadline17">最后</h4>
+<div class="outline-text-4" id="text-orgheadline17">
+<p>
+有了这几个 parser, 可以用我们刚见过的 <code>&lt;|&gt;</code> 把它们拼起来
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">parseExpr</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
+<span style="color: #6a5acd;">parseExpr</span> <span style="color: #b8860b;">=</span> parseAtom
+         <span style="color: #b8860b;">&lt;|&gt;</span> parseString
+         <span style="color: #b8860b;">&lt;|&gt;</span> parseNumber
+</pre>
+</div>
+
+<p>
+用我们的新 parser 放到 <code>readExpr</code> 中:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">readExpr</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
+<span style="color: #6a5acd;">readExpr</span> input <span style="color: #b8860b;">=</span> <span style="color: #00008b;">case</span> parse parseExpr <span style="color: #8b0000;">"lisp"</span> input <span style="color: #00008b;">of</span>
+    <span style="color: #36648b;">Left</span> err <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"No match: "</span> <span style="color: #b8860b;">++</span> show err
+    <span style="color: #36648b;">Right</span> <span style="color: #00008b;">_</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"Found value"</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline20" class="outline-2">
+<h2 id="orgheadline20">求值，第一部分</h2>
+<div class="outline-text-2" id="text-orgheadline20">
+</div><div id="outline-container-orgheadline18" class="outline-3">
+<h3 id="orgheadline18">to String</h3>
+<div class="outline-text-3" id="text-orgheadline18">
+<p>
+在真的开始 eval 之前, 我们先把打印的部分实现, 比如之前能 parse 的 <code>List</code> 打印成 scheme 的话应该是 <code>()</code>
+</p>
+
+<p>
+简单的实现 premitive 类型
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span class="linenr">1: </span><span style="color: #6a5acd;">showVal</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">LispVal</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
+<span class="linenr">2: </span><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">String</span> contents) <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"\""</span> <span style="color: #b8860b;">++</span> contents <span style="color: #b8860b;">++</span> <span style="color: #8b0000;">"\""</span>
+<span class="linenr">3: </span><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">Atom</span> name) <span style="color: #b8860b;">=</span> name
+<span class="linenr">4: </span><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">Number</span> contents) <span style="color: #b8860b;">=</span> show contents
+<span class="linenr">5: </span><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">Bool</span> <span style="color: #36648b;">True</span>) <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"#t"</span>
+<span class="linenr">6: </span><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">Bool</span> <span style="color: #36648b;">False</span>) <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"#f"</span>
+</pre>
+</div>
+
+<p>
+注意看 2,3,4 行, 还记得之前说过的 <i>模式匹配</i> 吗? 这里是定义带模式匹配的函数,也就是说函数 <code>showVal</code> 会根据匹配参数 <code>LispVal</code> 来找到对应真正要使用的函数. 更重要的是, 模式匹配可以 destructure 数据, 比如 <code>(String contents)</code> 就会匹配 String 类型的数据, 并将内容绑定到 <code>contents</code> 上. 这样, 后面就可以使用 <code>contents</code> 了.
+</p>
+
+<p>
+处理完这些 premitive 类型, 接下来看看如何打印稍微复杂一些的 <code>List</code> 和 <code>DottedList</code> 吧.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">List</span> contents) <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"("</span> <span style="color: #b8860b;">++</span> unwordsList contents <span style="color: #b8860b;">++</span> <span style="color: #8b0000;">")"</span>
+<span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">DottedList</span> head tail) <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"("</span> <span style="color: #b8860b;">++</span> unwordsList head <span style="color: #b8860b;">++</span> <span style="color: #8b0000;">" . "</span> <span style="color: #b8860b;">++</span> showVal tail <span style="color: #b8860b;">++</span> <span style="color: #8b0000;">")"</span>
+</pre>
+</div>
+
+<p>
+scheme 的 List 用括号括起来, 内容则是用空格分开的一个个元素, 例如 <code>(1 2 3 4)</code>. DottedList 则跟名字一样, 是 head 和 tail 中间都了一个点 <code>.</code>
+</p>
+
+<p>
+其中的 <code>unwordsList</code> 会将内容的元素的 showVal 值用空格连接起来.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">unwordsList</span> <span style="color: #b8860b;">::</span> [<span style="color: #36648b;">LispVal</span>] <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
+<span style="color: #6a5acd;">unwordsList</span> <span style="color: #b8860b;">=</span> unwords <span style="color: #b8860b;">.</span> map showVal
+</pre>
+</div>
+
+<p>
+利用的是 Haskell 的 unwords 函数, 类似于其他语言的 <code>join(' ')</code>
+</p>
+</div>
+</div>
+<div id="outline-container-orgheadline19" class="outline-3">
+<h3 id="orgheadline19">实现 show 类型类</h3>
+<div class="outline-text-3" id="text-orgheadline19">
+<p>
+上节的 <code>showVal</code> 实现中, 不知道有没有注意到 Number 的实现使用了 <code>show contents</code>. 我们知道 <code>contents</code> 的类型是 Haskell 的 <code>Integer</code>, 之所以可以 <code>show</code>, 是 <code>Integer</code> 实现了类型类 <code>Show</code>.
+</p>
+
+<p>
+同样的我们可以实现让 <code>LispVal</code> 类型实现类型类 <code>Show</code>
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Show</span> <span style="color: #36648b;">LispVal</span> <span style="color: #00008b;">where</span> show <span style="color: #b8860b;">=</span> showVal
+</pre>
+</div>
+
+<p>
+同时实现类型类 <code>Show</code> 中的函数 <code>show</code>, 恩,这有些像 Interface
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline21" class="outline-2">
+<h2 id="orgheadline21">待续&#x2026;</h2>
+<div class="outline-text-2" id="text-orgheadline21">
 <ul class="org-ul">
-<li>求值，第一部分</li>
 <li>错误处理及异常</li>
 <li>求值，第二部分</li>
 <li>来造个REPL</li>
@@ -690,7 +889,7 @@ parse
 <div id="postamble" class="status">
 <footer>
 <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-<p>Modified: 2016-08-11 Thu 01:42</p>
+<p>Modified: 2016-09-16 Fri 16:06</p>
 <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.3.1 (<a href="http://orgmode.org">Org</a> mode 8.3.5)</p>
 <p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
