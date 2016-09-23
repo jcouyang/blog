@@ -7,13 +7,17 @@
 * COMMENT
 #+BEGIN_SRC emacs-lisp
 (require 'ox-deck)
-(require 'ob-ruby)
 #+END_SRC
 
 #+RESULTS:
 : ob-ruby
 
-* COMMENT 我是...
+* FBI Warning
+** [[https://git.io/fprb][git.io/fprb]]
+https://www.evernote.com/l/ABez7zSM2ZZG5YG6GhxmiTEvKESOfGEyn3cB/image.png
+
+* TODO 我是...
+
 [[https://gist.github.com.ru/jcouyang/6336168ecbbf4fbdc46e.png?username=jcouyang&amp;width=400&amp;height=53;.png]]
 [[https://img3.doubanio.com/mpic/s25996532.jpg]]
 [[https://img1.doubanio.com/mpic/s28861278.jpg]]
@@ -23,24 +27,18 @@
 - 一本书作者
 - 两本书译者
 
+* 
+https://cloud.githubusercontent.com/assets/1235045/17973424/00e33c72-6b15-11e6-8bdf-a1a58a3631b4.jpg
+
+#+BEGIN_QUOTE
+所以是...一个会Scala的JavaScript程序员来教你写Ruby
+#+END_QUOTE
 
 
 * Agenda
 - 什么是函数式编程
 - ruby 的一些函数式特性
-- 使用 Monad 纯化控制流
-
-
-* FBI Warning
-** [[https://git.io/fprb][git.io/fprb]]
-https://www.evernote.com/l/ABez7zSM2ZZG5YG6GhxmiTEvKESOfGEyn3cB/image.png
-
-* COMMENT
-https://cloud.githubusercontent.com/assets/1235045/17973424/00e33c72-6b15-11e6-8bdf-a1a58a3631b4.jpg
-
-#+BEGIN_QUOTE
-所以是...一个会Scala的JavaScript程序员来教你写Ruby?
-#+END_QUOTE
+- 使用 Monad 纯化/简化控制流
 
 * Ruby 函数式 ?
 
@@ -65,7 +63,8 @@ https://blog.oyanglul.us/images/data-port.gif
 - 无副作用 side effectless
 - 不可变 immutability
 - 持久化数据结构 persistent data structures
-- ...
+
+...然后纯到一定程度可能就需要
 - 范畴论 Catergory Theory
 
 
@@ -75,8 +74,8 @@ https://blog.oyanglul.us/images/data-port.gif
 - 好推理 easy to reason about
 - 好测试 easy to test
 - 好多线程 Multi-thread
-- 好玩 fun
-- +高逼格 high bigger+
+- 好玩 fu
+- +高逼格 high bigger+ elegant
 
 * 你可能不知道的Ruby
 https://cloud.githubusercontent.com/assets/1235045/17936038/020c3f88-6a50-11e6-88bd-6c6ad6815495.png
@@ -84,7 +83,7 @@ https://cloud.githubusercontent.com/assets/1235045/17936038/020c3f88-6a50-11e6-8
 * lambda
 [多选题] 请选出所有的 lambda
 #+BEGIN_SRC ruby
-A: {}
+A: {}/do end # such as =[1,2,3].map{|x| x+1 }=
 B: plus1 = lambda {|x| x + 1 }
 C: plus1 = -> (x) { x + 1 }
 D: plus1 = Proc.new { |x| x + 1 }
@@ -99,7 +98,7 @@ plus1 = ->(x) { x + 1 }
 #+RESULTS:
 : #<Proc:0x007fbaea988030@-:3 (lambda)>
 
-如果给这个lambda一个引用,我们可以跟用method一样用
+* 如果给这个lambda一个引用,我们可以跟用method一样用
 #+BEGIN_SRC ruby 
   plus1 = ->(x) { x + 1 }
   plus1.call(3)
@@ -110,7 +109,7 @@ plus1 = ->(x) { x + 1 }
 #+RESULTS:
 : 4
 
-* 二等公民 Method
+* 三等公民
 #+BEGIN_SRC ruby  :results pp
   def plus1 x
     x + 1
@@ -122,8 +121,8 @@ plus1 = ->(x) { x + 1 }
 
 * 一等 vs 三等
 https://www.evernote.com/l/ABcXHBGTERhJv5sNDPdAeiseZP0ke-Pd9TYB/image.png
-* 一等公民 Proc
 
+* 一等公民 Proc
 #+BEGIN_SRC ruby  :results pp
 plus1 = ->(x) { x + 1 }
 [1,2,3,4].map &plus1
@@ -371,6 +370,20 @@ https://www.evernote.com/l/ABeEwMnpRdVB7pup8Sw-KV3Iq02sI7fSe90B/image.png
    ...
   end
 #+END_SRC
+
+* 广告时间
+
+#+BEGIN_EXAMPLE
+😹 ➡️ 😼
+⬇️ ↘️ ⬇️
+🙀 ➡️ 😻
+#+END_EXAMPLE
+#+BEGIN_QUOTE
+猫呢?
+
+https://git.io/cats.rb
+#+END_QUOTE
+
 * 让我们用一个简单的 [[https://github.com/jcouyang/cats.rb#dataeither][Either Monad]]
 #+BEGIN_EXAMPLE
 gem install data.either
@@ -386,7 +399,6 @@ Right.new(1).flat_map do |x|
   end
 end
 # => #<Right 2>
-
 #+END_SRC
 
 * 来简化控制流
@@ -427,7 +439,7 @@ https://www.evernote.com/l/ABd47442ZCNJHbYn1sfcZhZtV2jFjftPdRwB/image.png
 * 上图有几次 IO
 - 总共4个IO, 每一步骤都可能出错
 - 但程序猿不希望漏掉任何错误信息
-- 但是又不能为了监控,影响了这个简单的工作流吧
+- 但是又不能为了监控,影响了这个简单的工作流
 
 * 控制流不关心失败和监控
 #+BEGIN_EXAMPLE
