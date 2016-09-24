@@ -12,33 +12,39 @@
 #+RESULTS:
 : ob-ruby
 
+* Agenda
+- 什么是函数式编程
+- Ruby 的一些函数式特性
+- 使用 Monad 纯化/简化控制流
+
 * FBI Warning
-** [[https://git.io/fprb][git.io/fprb]]
+
 https://www.evernote.com/l/ABez7zSM2ZZG5YG6GhxmiTEvKESOfGEyn3cB/image.png
+#+BEGIN_QUOTE
+用 Nokia 的同学请自己手动输入 [[https://git.io/fprb][git.io/fprb]]
+#+END_QUOTE
 
-* TODO 我是...
+* 我是...
+https://www.evernote.com/l/ABcPPnCpE69P3KjZoG_w5zfMmKnkmYMVeVEB/image.png
 
+* 我是...
+https://www.evernote.com/l/ABfuI5J5AQlH1LDGI1d-DdQN1frUg3u0eYoB/image.png
 [[https://gist.github.com.ru/jcouyang/6336168ecbbf4fbdc46e.png?username=jcouyang&amp;width=400&amp;height=53;.png]]
+
+* 我还是
 [[https://img3.doubanio.com/mpic/s25996532.jpg]]
 [[https://img1.doubanio.com/mpic/s28861278.jpg]]
 
-- 活跃开源贡献
-- ThoughtWorks 高阶咨询师
-- 一本书作者
-- 两本书译者
-
-* 
+* 啊?
 https://cloud.githubusercontent.com/assets/1235045/17973424/00e33c72-6b15-11e6-8bdf-a1a58a3631b4.jpg
 
 #+BEGIN_QUOTE
-所以是...一个会Scala的JavaScript程序员来教你写Ruby
+所以是...一个会点 Scala 的 JavaScript 程序员来教 Rubyist 函数式编程?
 #+END_QUOTE
 
+* 我在 JavaScript 社区讲函数式的时候, 观众是这样的...
+https://cloud.githubusercontent.com/assets/1235045/17973424/00e33c72-6b15-11e6-8bdf-a1a58a3631b4.jpg
 
-* Agenda
-- 什么是函数式编程
-- ruby 的一些函数式特性
-- 使用 Monad 纯化/简化控制流
 
 * Ruby 函数式 ?
 
@@ -64,9 +70,8 @@ https://blog.oyanglul.us/images/data-port.gif
 - 不可变 immutability
 - 持久化数据结构 persistent data structures
 
-...然后纯到一定程度可能就需要
+...当纯到一定程度可能就需要
 - 范畴论 Catergory Theory
-
 
 * 好处呢?
 
@@ -74,13 +79,13 @@ https://blog.oyanglul.us/images/data-port.gif
 - 好推理 easy to reason about
 - 好测试 easy to test
 - 好多线程 Multi-thread
-- 好玩 fu
-- +高逼格 high bigger+ elegant
+- 好玩 fun
+- 好 +高逼格 high bigger+ elegant
 
 * 你可能不知道的Ruby
 https://cloud.githubusercontent.com/assets/1235045/17936038/020c3f88-6a50-11e6-88bd-6c6ad6815495.png
 
-* lambda
+* lambda aka 匿名函数
 [多选题] 请选出所有的 lambda
 #+BEGIN_SRC ruby
 A: {}/do end # such as =[1,2,3].map{|x| x+1 }=
@@ -159,7 +164,7 @@ method(:plus1)
   end
 #+END_SRC
 
-* Symbol 魔法
+* 升舱实例2 - Symbol
 #+BEGIN_SRC ruby  :results pp
   %w(ouyang jichao).map &:capitalize 
   # ===
@@ -289,8 +294,6 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
 - 表达式：取决于表达式返回的值的 ~===~ 方法
 - lambda： ~proc.===~ 会运行 lambda 或者 proc
 
-这样，我们可以随意给任何类加上 ~===~ 方法, 不仅如此，实现一个抽象数据类型（ADT）会变得是分简单
-
 * 
 https://i.giphy.com/55xWvUIMb51mw.gif
 #+BEGIN_QUOTE
@@ -298,7 +301,7 @@ https://i.giphy.com/55xWvUIMb51mw.gif
 #+END_QUOTE
 
 #+BEGIN_QUOTE
-bigger not go
+纯 pure
 #+END_QUOTE
 
 * Category Theory
@@ -442,9 +445,12 @@ https://www.evernote.com/l/ABd47442ZCNJHbYn1sfcZhZtV2jFjftPdRwB/image.png
 - 但是又不能为了监控,影响了这个简单的工作流
 
 * 控制流不关心失败和监控
-#+BEGIN_EXAMPLE
-fetch a >> fetch b >> fetch c >> put d
-#+END_EXAMPLE
+#+BEGIN_SRC haskell
+  do
+    a <- fetchA
+    b <- fetchB
+    c <- put $ blah a ++ b
+#+END_SRC
 
 * IO自挂东南枝
 https://www.evernote.com/l/ABeIbzxUeghNkZMGpgZljl8K0P6JNasFga4B/image.jpg
@@ -466,8 +472,10 @@ https://www.evernote.com/l/ABeIbzxUeghNkZMGpgZljl8K0P6JNasFga4B/image.jpg
   end
 #+END_SRC
 
+* 
 #+BEGIN_SRC ruby :eval no
   failure_processed, success_processed = Either.partition Mapinator.run
+
   Monitoring.send_processed success_processed.length
   Monitoring.logger.info("Processed successful #{success_processed.length} listings: #{success_processed}")
   Monitoring.logger.error("Processed FAILURE #{failure_processed.length} with Exceptions:") unless failure_processed.empty?
@@ -477,10 +485,45 @@ https://www.evernote.com/l/ABeIbzxUeghNkZMGpgZljl8K0P6JNasFga4B/image.jpg
 * 还可不可以在纯一些
 https://imgs.xkcd.com/comics/haskell.png
 
-* Free Monad
+* Free Monad aka Interpreter Pattern
 https://www.evernote.com/l/ABe66Nse7nlPpKWTYgGPBFWt1Uv_m-ZFn_cB/image.png
 
-* 多线程 made easy
+* 有些像 Cons
+https://www.evernote.com/l/ABecKErC7s5Mpa6cfyAt3mL7zpTS9v1N85QB/image.png
+
+* 还有...
+- Coyoneda
+- Free Monoid
+- State
+- EitherT
+- MaybeT
+- ...
+
+*
+#+BEGIN_QUOTE
+这些我都不会讲...
+#+END_QUOTE
+
+
+*
+#+BEGIN_QUOTE
+因为我不会讲...
+#+END_QUOTE
+
+希望不久之后可以... 
+#+BEGIN_EXAMPLE
+gem install control.monad.free
+#+END_EXAMPLE
+
+* Q/A
+
+* 性能
+https://www.evernote.com/l/ABdxEUHAmZlMII8QBKAYYtI5xgY4KkO1T7MB/image.png
+#+BEGIN_QUOTE
+你TM都选 Ruby 了还在乎性能?
+#+END_QUOTE
+
+* 并发多线程 made easy
 #+BEGIN_SRC ruby :eval no
 require "celluloid/autostart"
 
@@ -493,10 +536,13 @@ end
 #+END_SRC
 
 * 多谢
+- https://blog.oyanglul.us/functional-ruby.html
 - https://github.com/jcouyang/cats.rb
 - https://github.com/typelevel/cats
 - http://hackage.haskell.org/package/base-4.8.1.0/docs/src/Data.Either.html
 - https://wiki.haskell.org/Free_structure
+- http://underscore.io/blog/posts/2015/04/23/deriving-the-free-monad.html
+- http://underscore.io/blog/posts/2015/04/14/free-monads-are-simple.html
 - https://www.coursera.org/learn/progfun2
 - https://www.amazon.com/Well-Grounded-Rubyist-David-Black/dp/1933988657
 - https://mitpress.mit.edu/sicp
