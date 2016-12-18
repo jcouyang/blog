@@ -1,8 +1,17 @@
+* COMMENT
+#+BEGIN_SRC emacs-lisp
+(require 'ob-sh)
+(require 'ob-haskell)
+#+END_SRC
+
+#+RESULTS:
+: ob-haskell
+
 * to String
 在真的开始 eval 之前, 我们先把打印的部分实现, 比如之前能 parse 的 =List= 打印成 scheme 的话应该是 =()=
 
 简单的实现 premitive 类型
-#+BEGIN_SRC haskell -n
+#+BEGIN_SRC haskell -n :tangle src/listing4.1.hs
 showVal :: LispVal -> String
 showVal (String contents) = "\"" ++ contents ++ "\""
 showVal (Atom name) = name
@@ -11,11 +20,14 @@ showVal (Bool True) = "#t"
 showVal (Bool False) = "#f"
 #+END_SRC
 
+#+RESULTS:
+: <interactive>:20:10: error: Not in scope: data constructor ‘Bool’
+
 注意看 2,3,4 行, 还记得之前说过的 /模式匹配/ 吗? 这里是定义带模式匹配的函数,也就是说函数 =showVal= 会根据匹配参数 =LispVal= 来找到对应真正要使用的函数. 更重要的是, 模式匹配可以 destructure 数据, 比如 =(String contents)= 就会匹配 String 类型的数据, 并将内容绑定到 =contents= 上. 这样, 后面就可以使用 =contents= 了.
 
 处理完这些 premitive 类型, 接下来看看如何打印稍微复杂一些的 =List= 和 =DottedList= 吧.
 
-#+BEGIN_SRC haskell
+#+BEGIN_SRC haskell :tangle src/listing4.1.hs
 showVal (List contents) = "(" ++ unwordsList contents ++ ")"
 showVal (DottedList head tail) = "(" ++ unwordsList head ++ " . " ++ showVal tail ++ ")"
 #+END_SRC
@@ -24,7 +36,7 @@ scheme 的 List 用括号括起来, 内容则是用空格分开的一个个元�
 
 其中的 =unwordsList= 会将内容的元素的 showVal 值用空格连接起来.
 
-#+BEGIN_SRC haskell
+#+BEGIN_SRC haskell :tangle src/listing4.1.hs
 unwordsList :: [LispVal] -> String
 unwordsList = unwords . map showVal
 #+END_SRC
@@ -36,8 +48,25 @@ unwordsList = unwords . map showVal
 
 同样的我们可以实现让 =LispVal= 类型实现类型类 =Show=
 
-#+BEGIN_SRC haskell
+#+BEGIN_SRC haskell :tangle src/listing4.1.hs
 instance Show LispVal where show = showVal
 #+END_SRC
 
 同时实现类型类 =Show= 中的函数 =show=, 恩,这有些像 Interface
+
+下面,我们就可以修改 =readExpr= 函数, 让他打印出 parse 出来的值
+
+#+BEGIN_SRC haskell :tangle src/listing4.1.hs
+readExpr input = case parse parseExpr "lisp" input of
+    Left err -> "No match: " ++ show err
+    Right val -> "Found " ++ show val
+#+END_SRC
+
+输出
+#+BEGIN_SRC sh
+ghc -package parsec -o parser src/listing4.1.hs
+./parser "(1 2 2)"
+#+END_SRC
+
+#+RESULTS:
+
