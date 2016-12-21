@@ -9,12 +9,10 @@ dependencies:
   cache_directories:
     - .cask
   pre:
-    - sudo add-apt-repository -y ppa:cassou/emacs
-    - sudo apt-get update -qq
-    - sudo apt-get install emacs24-nox
-    - curl -fsSkL "https://raw.github.com/cask/cask/master/go" | python
-    - /home/ubuntu/.cask/bin/cask install
+    - git clone git@github.com:jcouyang/blog.git -b gh-pages public
     - ./preserve_timestamp.sh
 test:
   pre:
+    - docker-compose run blog
+  post:
     - ./ci-publish.sh
