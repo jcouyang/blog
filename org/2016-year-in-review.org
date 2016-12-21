@@ -1,0 +1,158 @@
+#+TITLE: 2016 Year in Review
+
+* [[https://github.com/jcouyang/functional-javascript][Functional JavaScript mini Book]]
+
+https://www.evernote.com/l/ABdR33DKHSVPkJu500j-cDnw4pdee1ZgiN8B/image.jpg
+
+去年翻译完 [[https://book.douban.com/subject/26579320/][Functional JavaScript]] 感觉意犹未尽，Fogus 并没有解释到函数式最带感的地方，而只是一些underscore的炫技。于是写了 [[https://github.com/jcouyang/functional-javascript][Functional JavaScript mini Book]] 这本小书，小书内容涵盖了比underscore炫技更多的函数式概念，例如Pattern Matching，Functor，Monad。说是小书，其实只是我的博客合集。
+
+#+BEGIN_QUOTE
+开始在 gitbook 上，后来发现还是更习惯orgmode些，于是还是orgmode到我的博客上 http://blog.oyanglul.us/javascript/functional-javascript.html
+#+END_QUOTE
+* [[https://book.douban.com/subject/26883736/][前端函数式攻城指南]]
+
+https://img3.doubanio.com/lpic/s29070174.jpg
+
+做为 mini book 的延续，介绍了更全面的前端能用到的函数式技巧。包括
+- 持久性数据结构
+- transducer
+- Macro
+- Monadic编程
+- FRP
+- CSP
+
+等等
+* [[https://github.com/jcouyang/conjs][conjs]]
+
+http://cloud.github.com/downloads/swannodette/mori/mori.png
+
+immutable.js 的api设计函数式，更像是给java的尿性，只是immutable的实现。相比起来，从clojurescript移植过来的 [[http://swannodette.github.io/mori/][mori]] 有着更函数式友好的api。但是，clojurescript的作者似乎已经放弃维护了，上一次更新是15年。在slack上问过作者也回复并没有继续维护的计划。因此，如果对mori有兴趣的可以不妨试一下我的fork，我维护的fork 以名字 [[https://github.com/jcouyang/conjs][conjs]] 放在github上，可以通过
+#+BEGIN_SRC sh
+npm install con.js
+#+END_SRC
+安装
+
+这个版本跟mori比起来加入了几个比较大的features，比如
+
+** core.async
+Clojure中非常好用的 core.async,也可以同样应用到JS中
+#+BEGIN_SRC js
+var c = async.chan();
+async.go(function*(){
+  var expected = yield "something in channel"
+  var val = yield c.take();
+  expect(val).toBe(expected);
+  done()
+})
+async.put(c, 'something in channel');
+#+END_SRC
+** 同构的 JS 方法
+mori的这种写法
+#+BEGIN_SRC js
+var a = mori.hashMap(1,2,3,4)
+mori.get(a, 1)
+mori.assoc(a, 1, 6)
+#+END_SRC
+可以写成
+#+BEGIN_SRC js
+var a = mori.hashMap(1,2,3,4)
+a.get(1) // => 2
+a.assoc(1,6) // => {1 6, 3 4}
+#+END_SRC
+使用习惯上让JSer更能适应一些。
+
+* duckling
+又一次hackday我们做了一个语义识别搜索，使用的wit.ai，由此发现wit开源的一个词法分析的parser [[https://github.com/wit-ai/duckling][duckling]]， 重要的是，支持中文哦，不过中文并不是特别的好，我也发过PR试着fix。不过中文的支持的发展，还是要靠更多的说中文的contributors（而且是个体力活），如果感兴趣，不妨来contribute一把吧。贡献起来也非常的简单，只要加规则就好了，比如 https://github.com/wit-ai/duckling/pull/99/files
+
+* [[https://github.com/jcouyang/cat.js][cat.js]]
+
+#+BEGIN_EXAMPLE
+😹 ➡️ 😼
+⬇️ ↘️ ⬇️
+🙀 ➡️ 😻
+#+END_EXAMPLE
+
+由于js不是强类型语言，更没有类型系统的支持，很难找到能跟 scala的cats或者scalaz同等的TypeClass和ADT库。于是简单的自己实现了一部分，一开始试图使用TypeScript，但是类型支持实在有限，又尝试用 union-type 是否能更容易一些 https://github.com/jcouyang/cat.js/pull/1 ，而且是运行时检查。另外一个想法，是可以用[[http://www.purescript.org/][ purescript]] 实现直接compile过来，但是有可能会缺少运行时检查。
+
+WIP 感兴趣的同学可以找我聊聊
+* [[https://github.com/jcouyang/cats.rb][cat.rb]]
+
+同样的，ruby也做了同样的事情，不过是分模块开发，[[https://rubygems.org/gems/data.either][data.either]] 已经在我们产品使用。
+
+* [[http://www.rubyconfchina.org/][RubyConf China]]
+
+https://www.evernote.com/l/ABdpGY6hvl1KWab4WadF1CEeag0qOo7VblsB/image.png
+
+第一次在rubyconf上讲东西，本着安利函数式编程到各个社区的出发点，还是讲了函数式编程。就这刚在产品上用到的data.either,介绍了ruby中能一样用的到的lambda、模式匹配、Monad、Actor 模型。有兴趣但是没能到场的同学，也可以看看这篇博客 https://blog.oyanglul.us/functional-ruby.html
+
+* [[https://github.com/jcouyang/gh-widget][gh-widget]]
+
+我的[[https://blog.oyanglul.us/jichao.ouyang.html][about page]] 中有这么一段，可以展现你在github上的contributions
+
+#+HTML: <div id="github-widget" data-user="jcouyang" data-display="pop_repos,calendar"></div>
+#+HTML: <script src="https://gh-widget.oyanglul.us/index.js"></script>
+
+
+如果你希望在自己的页面上也有这么一个contribution的widget，可以简单的加入这两行代码
+
+#+BEGIN_SRC html
+  <div id="github-widget" data-user="your-github-username" data-display="pop_repos,calendar"></div>
+  <script src="https://gh-widget.oyanglul.us/index.js"></script>
+#+END_SRC
+
+* [[https://github.com/jcouyang/gh-omnibar][gh-omnibar]]
+今年 bitbucket 上线了[[https://developer.atlassian.com/blog/2016/02/6-secret-bitbucket-features/?categories=git#omnibar][这么个叫omnibar的功能]]， 让我好是喜欢，然而最常用的github却没有类似的功能，让我伤心了几天。焦虑过后，不如自己写一个，就叫做 [[https://github.com/jcouyang/gh-omnibar][gh-omnibar]] 好了。刚好试一下当下比较火的ClojureScript+reagent，再生成js打包成Firefox和Chrome插件。欢迎下载使用，丢香蕉点赞
+- Chrome
+  - 👉 webstore
+  - 👉 download
+- Firefox
+  - 👉 download
+* [[https://github.com/jcouyang/dotfiles/][dotfiles]]
+
+https://www.gnu.org/graphics/heckert_gnu.transp.small.png
+
+我们都知道home目录底下有好多好多以 =.= 开头的文件或文件夹，大多都是各种工具的配置文件，他们叫做dotfiles。比如emacs的 =.emacs.d= ,fish
+的 =.config/fish= 
+
+把这些都放到一个文件夹中，易于管理以及版本控制，所以我也将[[https://github.com/jcouyang/dotfiles/][我的dotfiles放到了github上]]
+
+README中还会叫你如何使用 [[http://www.gnu.org/software/stow/][stow]] 更轻松的管理这些dotfiles
+
+* [[https://github.com/jcouyang/union-type][union-type]]
+
+你如果熟悉haskell或是scala，会发现union type/ADT/case class是一个非常有用的技术，虽然typescript也加入了union type，但是 js 的 switch case语句并不能体现到 union type的任何好处。
+
+而 [[https://github.com/paldepind/union-type][union-type]] 这个库带给了js一线希望。我也为其加入了List的支持，欢迎在项目中使用union-type重构所有的switch case语句（看什么看，redux，说的就是你）
+
+* [[https://github.com/reactive-react/transdux][transdux]]
+
+[[http://blog.oyanglul.us/javascript/react-transdux-the-clojure-approach-of-flux.html][某次hackday]] 我们做了个管理react数据流的库，叫做 [[https://github.com/reactive-react/transdux][transdux]]
+
+试着使用clojure的技术，tranducer，和pub，sub来实现reactive的数据流管理。
+
+ClojureScript的方法都使用的我自己的mork fork版 [[https://github.com/jcouyang/conjs][conjs]]
+
+* [[https://github.com/cujojs/most][most]]
+#+BEGIN_EXAMPLE
+________________________________
+___   |/  /_  __ \_  ___/__  __/
+__  /|_/ /_  / / /____ \__  /   
+_  /  / / / /_/ /____/ /_  /    
+/_/  /_/  \____/______/ /_/
+#+END_EXAMPLE
+most 作为js的reactive库，相比起rx.js设计更符合各种规范： [[https://github.com/fantasyland/fantasy-land][fantasyland]]， Promise, ES Observable(虽然还不知道什么时候能成为规范)等等，而且效率更突出。如果需要用到 FRP，非常推荐使用。
+
+如果使用 ES Observable的 =subscribe/unsubscribe= 方法，一定要使用 =1.1.1= 之后的版本，因为在这个版本我刚刚修复了 unsubscribe 的一个bug。
+
+* [[https://github.com/jcouyang/react-most][react-most -⚛->]] 
+
+https://www.evernote.com/l/ABfCihmcImRK5ZX9GxyLo3-xGvtjDtbQOf4B/image.jpg
+
+transdux的效果和idea都不错，唯一是效率有些低，而且由于是clojurescript移植的库，虽然源码没有多少，但是编译出来的js颇为庞大。又一次hackday我决定移植到 most，使用更高效原生的reactive库来解决transdux的一系列问题。于是有了 [[https://github.com/reactive-react/react-most][react-most]]。
+
+react-most使用更简单的方式隐藏了reactive的部分，让初学者容易上手，但有对待stream为一等公民，可以让FRP推向极致。使用FRP可以让redux头疼过的坑变得非常简单。
+
+由于我们在产品上使用react-most，版本也活跃的升级中。喜欢得到FRP和react生态圈两大好处的童鞋欢迎使用，[[https://github.com/reactive-react/react-most/stargazers][打赏点赞]] 或者 [[https://gitter.im/jcouyang/react-most?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge][没事来聊聊天]]
+
+如果不需要react作为virtual dom，也欢迎试试 [[http://cycle.js.org/][cycle.js]], 以大致类似的方式管理数据流，当然还有 most 版的 [[https://github.com/motorcyclejs/core][motocycle]].js 
+
