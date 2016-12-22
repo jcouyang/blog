@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- 2016-09-20 Tue 13:25 -->
+<!-- 2016-12-22 Thu 03:00 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
 <title>Functional Ruby</title>
@@ -128,12 +128,17 @@ for the JavaScript code in this tag.
 </nav>
 <div class="org-center">
 <p>
+
+</p>
+
+<p>
 话题已入选 <a href="http://rubyconfchina2016.sxl.cn/">Rubyconf 2016</a>, 没看懂的同学 <del>不服来战</del> 我们成都见 😉
 </p>
 
 <ul class="org-ul">
 <li>slides 👉 <a href="http://git.io/fprb">http://git.io/fprb</a></li>
 <li>cats.rb <a href="https://github.com/jcouyang/cats.rb">https://github.com/jcouyang/cats.rb</a></li>
+<li>hehe</li>
 </ul>
 </div>
 
@@ -159,6 +164,10 @@ for the JavaScript code in this tag.
 </pre>
 </div>
 
+<pre class="example">
+#&lt;Proc:0x007fbaea988030@-:3 (lambda)&gt;
+</pre>
+
 <p>
 明显，lambda 构造出一个 Proc 的实例，如果我们调用这个 lambda，效果跟 method 没有什么区别：
 </p>
@@ -169,6 +178,10 @@ for the JavaScript code in this tag.
 plus1.(3)
 </pre>
 </div>
+
+<pre class="example">
+4
+</pre>
 
 <p>
 好玩的是，method 不能高阶
@@ -200,6 +213,10 @@ plus1.(3)
 [1,2,3,4].map &amp;plus1
 </pre>
 </div>
+
+<pre class="example">
+[2, 3, 4, 5]
+</pre>
 </div>
 </div>
 
@@ -215,10 +232,6 @@ plus1.(3)
 </pre>
 </div>
 
-<pre class="example">
-[2, 3, 4, 5]
-</pre>
-
 <p>
 也等价于：
 </p>
@@ -227,10 +240,6 @@ plus1.(3)
 <pre class="src src-ruby">[1,2,3,4].map &amp;<span style="color: #36648b;">Proc</span>.new{|x| x + 1 }
 </pre>
 </div>
-
-<pre class="example">
-[2, 3, 4, 5]
-</pre>
 
 <p>
 注意如果没有 <code>&amp;</code> ，解释器无法分辨到底在调用 <code>map</code> 时，把 Proc 当成正常参数，而不是 block
@@ -318,6 +327,10 @@ desuger 完其实就是
 </pre>
 </div>
 
+<pre class="example">
+["ouyang", "lulu"]
+</pre>
+
 <p>
 嗒哒，输出我们的期望了，lambda 的表现跟一个普通函数是一样的，函数的 return 当然不会导致调用者的返回。
 </p>
@@ -333,7 +346,7 @@ desuger 完其实就是
 <div class="org-src-container">
 
 <pre class="src src-ruby"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">heheda</span> who
-  <span style="color: #8b0000;">"heheda</span><span style="color: #b8860b;"> #{who}</span><span style="color: #8b0000;">"</span>
+  <span style="color: #8b0000;">"heheda </span><span style="color: #b8860b;">#{who}</span><span style="color: #8b0000;">"</span>
 <span style="color: #00008b;">end</span>
 heheda
 </pre>
@@ -352,10 +365,14 @@ heheda
 </p>
 <div class="org-src-container">
 
-<pre class="src src-ruby">heheda = <span style="color: #36648b;">Proc</span>.new{|who| p <span style="color: #8b0000;">"heheda</span><span style="color: #b8860b;"> #{who}</span><span style="color: #8b0000;">"</span>}
+<pre class="src src-ruby">heheda = <span style="color: #36648b;">Proc</span>.new{|who| <span style="color: #228b22;">p</span> <span style="color: #8b0000;">"heheda </span><span style="color: #b8860b;">#{who}</span><span style="color: #8b0000;">"</span>}
 heheda.()
 </pre>
 </div>
+
+<pre class="example">
+"heheda "
+</pre>
 
 <p>
 Proc 完全不会理会参数，如果binding能找到，就用了，如果没有，也继续运行。
@@ -366,7 +383,7 @@ lambda，则更像一个method
 </p>
 <div class="org-src-container">
 
-<pre class="src src-ruby">heheda = lambda {|who| p <span style="color: #8b0000;">"heheda</span><span style="color: #b8860b;"> #{who}</span><span style="color: #8b0000;">"</span>}
+<pre class="src src-ruby">heheda = <span style="color: #228b22;">lambda</span> {|who| <span style="color: #228b22;">p</span> <span style="color: #8b0000;">"heheda </span><span style="color: #b8860b;">#{who}</span><span style="color: #8b0000;">"</span>}
 heheda.()
 </pre>
 </div>
@@ -391,7 +408,7 @@ heheda.()
   <span style="color: #b8860b;">@who</span> = who
 <span style="color: #00008b;">end</span>
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">heheda</span>
-  <span style="color: #8b0000;">"heheda</span><span style="color: #b8860b;"> #{@who}</span><span style="color: #8b0000;">"</span>
+  <span style="color: #8b0000;">"heheda </span><span style="color: #b8860b;">#{@who}</span><span style="color: #8b0000;">"</span>
 <span style="color: #00008b;">end</span>
 <span style="color: #00008b;">end</span>
 </pre>
@@ -407,7 +424,7 @@ heheda.()
 <div class="org-src-container">
 
 <pre class="src src-ruby">who = <span style="color: #8b0000;">'jichao'</span>
-heheda = -&gt;(){ <span style="color: #8b0000;">"heheda</span><span style="color: #b8860b;"> #{who}</span><span style="color: #8b0000;">"</span> }
+heheda = -&gt;(){ <span style="color: #8b0000;">"heheda </span><span style="color: #b8860b;">#{who}</span><span style="color: #8b0000;">"</span> }
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">hehedaToOuyang</span> &amp;heheda
   who = <span style="color: #8b0000;">'ouyang'</span>
   heheda.()
@@ -415,6 +432,10 @@ heheda = -&gt;(){ <span style="color: #8b0000;">"heheda</span><span style="color
 hehedaToOuyang &amp;heheda
 </pre>
 </div>
+
+<pre class="example">
+"heheda jichao"
+</pre>
 
 <p>
 注意看 heheda 找到的绑定不是离他调用最近的 <code>who</code>, 而是当初定义的 <code>who=jichao</code>
@@ -440,13 +461,25 @@ ruby 支持简单的几种模式匹配
 <div class="org-src-container">
 
 <pre class="src src-ruby">first, *middle_and_last = [<span style="color: #8b0000;">'Phillip'</span>, <span style="color: #8b0000;">'Jay'</span>, <span style="color: #8b0000;">'Fry'</span>]
-p first, middle_and_last
+<span style="color: #228b22;">p</span> first, middle_and_last
 </pre>
 </div>
 
-<pre class="example">
-nil
-</pre>
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Phillip</td>
+<td class="org-left">(Jay Fry)</td>
+</tr>
+</tbody>
+</table>
 
 <p>
 destructuring 一个数组如此简单，但是hash就不这么容易，好在，方法的参数会自带 destructure的功能：
@@ -455,11 +488,27 @@ destructuring 一个数组如此简单，但是hash就不这么容易，好在�
 
 <pre class="src src-ruby">  fry = {<span style="color: #6b8e23;">first</span>: <span style="color: #8b0000;">'Phillip'</span>, <span style="color: #6b8e23;">middle</span>: <span style="color: #8b0000;">'Jay'</span>, <span style="color: #6b8e23;">last</span>: <span style="color: #8b0000;">'Fry'</span>}
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">printFirstName</span> <span style="color: #6b8e23;">first</span>:, **rest
-    p first, rest
+    <span style="color: #228b22;">p</span> first, rest
   <span style="color: #00008b;">end</span>
 printFirstName fry
 </pre>
 </div>
+
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Phillip</td>
+<td class="org-left">(:middle=&gt; Jay :last=&gt; Fry)</td>
+</tr>
+</tbody>
+</table>
 
 <p>
 这玩意 ruby 叫它 keyword arguments, <code>first:</code> 会匹配 <code>fry</code> 中的 <code>first</code> 并将值绑定到 <code>first</code> ， <code>**rest</code> 绑定剩下的所有东西。
@@ -473,11 +522,27 @@ printFirstName fry
 
 <pre class="src src-ruby"><span class="linenr">1: </span>fry = [<span style="color: #8b0000;">'Phillip'</span>, <span style="color: #8b0000;">'Jay'</span>, <span style="color: #8b0000;">'Fry'</span>]
 <span class="linenr">2: </span><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">printFirstName</span> first, *rest
-<span class="linenr">3: </span>p first, rest
+<span class="linenr">3: </span><span style="color: #228b22;">p</span> first, rest
 <span class="linenr">4: </span><span style="color: #00008b;">end</span>
 <span id="coderef-star" class="coderef-off"><span class="linenr">5: </span>printFirstName *fry</span>
 </pre>
 </div>
+
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Phillip</td>
+<td class="org-left">(Jay Fry)</td>
+</tr>
+</tbody>
+</table>
 
 <p>
 要注意第<a href="#coderef-star"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-star');" onmouseout="CodeHighlightOff(this, 'coderef-star');">5</a>行, 调用时记得给数组加 <code>*</code>, 这样解释器才知道不是把整个 fry 扔给 <code>printFirstName</code> 当参数，而是把 fry 的内容扔过去当参数。
@@ -504,14 +569,14 @@ ruby 中的 case<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup> 可�
 <pre class="src src-ruby">me = <span style="color: #8b0000;">'ouyang'</span>
 <span style="color: #00008b;">case</span> me
 <span style="color: #00008b;">when</span> <span style="color: #8b0000;">'ouyang'</span> 
-  <span style="color: #8b0000;">"hehe</span><span style="color: #b8860b;"> #{me}</span><span style="color: #8b0000;">"</span>
+  <span style="color: #8b0000;">"hehe </span><span style="color: #b8860b;">#{me}</span><span style="color: #8b0000;">"</span>
 <span style="color: #00008b;">else</span> <span style="color: #8b0000;">'hehe jichao'</span>
 <span style="color: #00008b;">end</span>
 </pre>
 </div>
 
 <pre class="example">
-"hehe ouyang"
+hehe ouyang
 </pre>
 </div>
 </div>
@@ -527,7 +592,7 @@ ruby 中的 case<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup> 可�
   <span style="color: #00008b;">end</span>
 
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">heheda</span>
-    <span style="color: #8b0000;">"heheda</span><span style="color: #b8860b;"> #{@name}</span><span style="color: #8b0000;">"</span>
+    <span style="color: #8b0000;">"heheda </span><span style="color: #b8860b;">#{@name}</span><span style="color: #8b0000;">"</span>
   <span style="color: #00008b;">end</span>
 <span style="color: #00008b;">end</span>
 
@@ -556,15 +621,19 @@ me = <span style="color: #36648b;">Me</span>.new <span style="color: #8b0000;">'
 </p>
 <div class="org-src-container">
 
-<pre class="src src-ruby">require <span style="color: #8b0000;">'ostruct'</span>
+<pre class="src src-ruby"><span style="color: #228b22;">require</span> <span style="color: #8b0000;">'ostruct'</span>
   me = <span style="color: #36648b;">OpenStruct</span>.new(<span style="color: #6b8e23;">name</span>: <span style="color: #8b0000;">'jichao'</span>, <span style="color: #6b8e23;">first_name</span>: <span style="color: #8b0000;">'ouyang'</span>)
   <span style="color: #00008b;">case</span>
   <span style="color: #00008b;">when</span> me.name == <span style="color: #8b0000;">'jichao'</span>
-    <span style="color: #8b0000;">"hehe</span><span style="color: #b8860b;"> #{me}</span><span style="color: #8b0000;">"</span>
+    <span style="color: #8b0000;">"hehe </span><span style="color: #b8860b;">#{me}</span><span style="color: #8b0000;">"</span>
   <span style="color: #00008b;">else</span> <span style="color: #8b0000;">'gewuen'</span>
   <span style="color: #00008b;">end</span>
 </pre>
 </div>
+
+<pre class="example">
+hehe #&lt;OpenStruct name="jichao", first_name="ouyang"&gt;
+</pre>
 </div>
 </div>
 
@@ -573,14 +642,18 @@ me = <span style="color: #36648b;">Me</span>.new <span style="color: #8b0000;">'
 <div class="outline-text-4" id="text-orgheadline13">
 <div class="org-src-container">
 
-<pre class="src src-ruby">require <span style="color: #8b0000;">'ostruct'</span>
+<pre class="src src-ruby"><span style="color: #228b22;">require</span> <span style="color: #8b0000;">'ostruct'</span>
   me = <span style="color: #36648b;">OpenStruct</span>.new(<span style="color: #6b8e23;">name</span>: <span style="color: #8b0000;">'jichao'</span>, <span style="color: #6b8e23;">first_name</span>: <span style="color: #8b0000;">'ouyang'</span>)
   <span style="color: #00008b;">case</span> me
   <span style="color: #00008b;">when</span> -&gt;(who){who.name==<span style="color: #8b0000;">'jichao'</span>}
-    <span style="color: #8b0000;">"hehe</span><span style="color: #b8860b;"> #{me}</span><span style="color: #8b0000;">"</span>
+    <span style="color: #8b0000;">"hehe </span><span style="color: #b8860b;">#{me}</span><span style="color: #8b0000;">"</span>
   <span style="color: #00008b;">end</span>
 </pre>
 </div>
+
+<pre class="example">
+hehe #&lt;OpenStruct name="jichao", first_name="ouyang"&gt;
+</pre>
 </div>
 </div>
 
@@ -597,7 +670,7 @@ me = <span style="color: #36648b;">Me</span>.new <span style="color: #8b0000;">'
 </div>
 
 <pre class="example">
-"heheda"
+heheda
 </pre>
 </div>
 </div>
@@ -615,10 +688,6 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
 <span style="color: #00008b;">end</span>
 </pre>
 </div>
-
-<pre class="example">
-nil
-</pre>
 
 <p>
 所以 magic 则是所有 when 的对象都实现了 <code>===</code> 方法而已
@@ -676,11 +745,11 @@ nil
   <span style="color: #00008b;">end</span>
 
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>
-    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">self</span>
+    <span style="color: #00008b;">case</span> <span style="color: #00008b;">self</span>
     <span style="color: #00008b;">when</span> <span style="color: #36648b;">Right</span>
       <span style="color: #36648b;">Right</span>.new(<span style="color: #00008b;">yield</span> <span style="color: #b8860b;">@v</span>)
     <span style="color: #00008b;">else</span>
-      <span style="color: #b8860b;">self</span>
+      <span style="color: #00008b;">self</span>
     <span style="color: #00008b;">end</span>
   <span style="color: #00008b;">end</span>
   <span style="color: #00008b;">alias</span> <span style="color: #6b8e23;">:fmap</span> <span style="color: #6b8e23;">:map</span>
@@ -694,11 +763,11 @@ nil
 <div class="org-src-container">
 
 <pre class="src src-ruby"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">bind</span>
-  <span style="color: #00008b;">case</span> <span style="color: #b8860b;">self</span>
+  <span style="color: #00008b;">case</span> <span style="color: #00008b;">self</span>
   <span style="color: #00008b;">when</span> <span style="color: #36648b;">Right</span>
     <span style="color: #00008b;">yield</span> <span style="color: #b8860b;">@v</span>
   <span style="color: #00008b;">else</span>
-    <span style="color: #b8860b;">self</span>
+    <span style="color: #00008b;">self</span>
   <span style="color: #00008b;">end</span>
 <span style="color: #00008b;">end</span>
 
@@ -714,11 +783,11 @@ nil
 <div class="org-src-container">
 
 <pre class="src src-ruby">  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">inspect</span>
-    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">self</span>
+    <span style="color: #00008b;">case</span> <span style="color: #00008b;">self</span>
     <span style="color: #00008b;">when</span> <span style="color: #36648b;">Left</span>
-      <span style="color: #8b0000;">"#&lt;Left value</span><span style="color: #b8860b;">=#{@v}</span><span style="color: #8b0000;">&gt;"</span>
+      <span style="color: #8b0000;">"#&lt;Left value=</span><span style="color: #b8860b;">#{@v}</span><span style="color: #8b0000;">&gt;"</span>
     <span style="color: #00008b;">else</span>
-      <span style="color: #8b0000;">"#&lt;Right value</span><span style="color: #b8860b;">=#{@v}</span><span style="color: #8b0000;">&gt;"</span>
+      <span style="color: #8b0000;">"#&lt;Right value=</span><span style="color: #b8860b;">#{@v}</span><span style="color: #8b0000;">&gt;"</span>
     <span style="color: #00008b;">end</span>
   <span style="color: #00008b;">end</span>
 <span style="color: #00008b;">end</span>
@@ -735,8 +804,8 @@ nil
 <div class="org-src-container">
 
 <pre class="src src-ruby"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Left</span>
-  include <span style="color: #36648b;">Either</span>
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">initialize</span> v=<span style="color: #b8860b;">nil</span>
+  <span style="color: #228b22;">include</span> <span style="color: #36648b;">Either</span>
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">initialize</span> v=<span style="color: #6b8e23;">nil</span>
     <span style="color: #b8860b;">@v</span>=v
   <span style="color: #00008b;">end</span>
 
@@ -745,19 +814,19 @@ nil
     <span style="color: #00008b;">when</span> <span style="color: #36648b;">Left</span>
       other.left_map { |v| <span style="color: #00008b;">return</span> v == <span style="color: #b8860b;">@v</span> }
     <span style="color: #00008b;">else</span>
-      <span style="color: #b8860b;">false</span>
+      <span style="color: #6b8e23;">false</span>
     <span style="color: #00008b;">end</span>
   <span style="color: #00008b;">end</span>
 <span style="color: #00008b;">end</span>
 
 <span style="color: #00008b;">class</span> <span style="color: #36648b;">Right</span>
-  include <span style="color: #36648b;">Either</span>
+  <span style="color: #228b22;">include</span> <span style="color: #36648b;">Either</span>
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">==</span> other
     <span style="color: #00008b;">case</span> other
     <span style="color: #00008b;">when</span> <span style="color: #36648b;">Right</span>
       other.map { |v| <span style="color: #00008b;">return</span> v == <span style="color: #b8860b;">@v</span> }
     <span style="color: #00008b;">else</span>
-      <span style="color: #b8860b;">false</span>
+      <span style="color: #6b8e23;">false</span>
     <span style="color: #00008b;">end</span>
   <span style="color: #00008b;">end</span>
 <span style="color: #00008b;">end</span>
@@ -806,8 +875,8 @@ nil
 error_msg = failures.map <span style="color: #00008b;">do</span> |failure|
   failure.left_map &amp;<span style="color: #6b8e23;">:message</span>
 <span style="color: #00008b;">end</span>.join <span style="color: #8b0000;">"\n"</span>
-logger.error <span style="color: #8b0000;">"processing failure</span><span style="color: #b8860b;"> #{failues.length}</span><span style="color: #8b0000;">:\</span><span style="color: #b8860b;">n#{error_msg}</span><span style="color: #8b0000;">"</span> <span style="color: #00008b;">unless</span> error_msg.blank?
-logger.info <span style="color: #8b0000;">"processing success</span><span style="color: #b8860b;"> #{success.length}</span><span style="color: #8b0000;">:</span><span style="color: #b8860b;"> #{success}</span><span style="color: #8b0000;">"</span>
+logger.error <span style="color: #8b0000;">"processing failure </span><span style="color: #b8860b;">#{failues.length}</span><span style="color: #8b0000;">:\n</span><span style="color: #b8860b;">#{error_msg}</span><span style="color: #8b0000;">"</span> <span style="color: #00008b;">unless</span> error_msg.blank?
+logger.info <span style="color: #8b0000;">"processing success </span><span style="color: #b8860b;">#{success.length}</span><span style="color: #8b0000;">: </span><span style="color: #b8860b;">#{success}</span><span style="color: #8b0000;">"</span>
 </pre>
 </div>
 </div>
@@ -827,7 +896,7 @@ logger.info <span style="color: #8b0000;">"processing success</span><span style=
 <div class="outline-text-3" id="text-orgheadline24">
 <div class="org-src-container">
 
-<pre class="src src-ruby">require <span style="color: #8b0000;">"celluloid/autostart"</span>
+<pre class="src src-ruby"><span style="color: #228b22;">require</span> <span style="color: #8b0000;">"celluloid/autostart"</span>
 <span style="color: #00008b;">module</span> <span style="color: #36648b;">Enumerable</span>
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">pmap</span>(&amp;block)
     futures = map { |elem| <span style="color: #36648b;">Celluloid</span>::<span style="color: #36648b;">Future</span>.new(elem, &amp;block) }
@@ -861,8 +930,8 @@ logger.info <span style="color: #8b0000;">"processing success</span><span style=
 <div id="postamble" class="status">
 <footer>
 <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-<p>Modified: 2016-09-20 Tue 13:22</p>
-<p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.3.1 (<a href="http://orgmode.org">Org</a> mode 8.3.5)</p>
+<p>Modified: 2016-12-22 Thu 02:58</p>
+<p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6)</p>
 <p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
 <div class="org-center">
