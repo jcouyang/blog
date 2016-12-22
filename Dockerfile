@@ -6,5 +6,6 @@ RUN apt-get install -y python
 RUN apt-get install -y git
 RUN curl -fsSkL "https://raw.github.com/cask/cask/master/go" | python
 ENV PATH "$PATH:/root/.cask/bin"
-ADD .cask /emacs/.cask
+ADD Cask /emacs/Cask
+ADD .cask/24.5 /emacs/.cask/24.5
 WORKDIR /emacs

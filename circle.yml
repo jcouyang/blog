@@ -5,14 +5,11 @@ general:
 machine:
   services:
     - docker
-dependencies:
-  cache_directories:
-    - .cask
-  pre:
+checkout:
+  post:
     - git clone git@github.com:jcouyang/blog.git -b gh-pages public
     - ./preserve_timestamp.sh
 test:
-  pre:
-    - docker-compose run blog
   post:
+    - docker run -it -v $(pwd)/source:/emacs/source:rw -v $(pwd)/public:/emacs/public:rw jcouyang/emacs cask exec emacs --batch -l /emacs/source/emacs.el -f org-publish-all
     - ./ci-publish.sh
