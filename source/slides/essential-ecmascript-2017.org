@@ -6,9 +6,10 @@
 #+OPTIONS: num:nil
 
 * Overview
-大部分浏览器都已经实现 90%+ 的 ES6 feature 了，如果现在还谈论 ES6，会被人以为你是上古时期的。如果想要快速回顾，不妨看看 [[https://blog.oyanglul.us/javascript/essential-ecmascript6.html][Essential EcmaScript 6]].
+大部分浏览器都已经实现 90%+ 的 ES6 features 了，如果现在还在看 [[https://book.douban.com/subject/25966265/][ES6入门]] 
+我呵呵了。若是想快速回顾，不妨看看 [[https://blog.oyanglul.us/javascript/essential-ecmascript6.html][Essential EcmaScript 6]].
 
-下面我们来看看 2017 草稿中到底有些什么新黑科技：
+下面我们来看看 [[https://tc39.github.io/ecma262/][2017 草稿]]中到底有些什么新黑科技：
 
 - Object.values/Object.entries
 - String padding
@@ -16,15 +17,17 @@
 - Trailing commas in function parameter lists and calls
 - Async Functions
 * 
-如果要问这些 proposal 都是哪来的，其实都可以在 tc39 的 [[https://github.com/tc39/proposals/blob/master/finished-proposals.md][这个]] 页面找到
+如果要问这些 proposals 都是哪来的，其实都可以在 tc39 的 [[https://github.com/tc39/proposals/blob/master/finished-proposals.md][这个]] 页面找到
 
 https://www.evernote.com/l/ABerDMRM9gJPdLeEzoX6JA5cVLfVoUffPWcB/image.png
 
-能到达这个页面的都是 stage 4 的 proposals，到达 stage 4 的就会出现在 draft 上 https://tc39.github.io/ecma262/
+能到达这个页面的都是 stage 4 的 proposals
+
+而到达 stage 4 的，就会出现在 draft 上 https://tc39.github.io/ecma262/
 
 * glossary (强行科普)
 ** [[http://www.ecma-international.org/memento/TCs&TGs.htm][tc39]]
-tech commitment 39
+Technical Committees 39
 ** [[http://www.ecma-international.org/publications/standards/Standard.htm][ecma-262]]
 ecma 262 号规范
 ** [[https://tc39.github.io/process-document/][stage]]
@@ -33,6 +36,11 @@ ecma 262 号规范
 - 2 draft
 - 3 candidate
 - 4 finished
+* Fun Facts
+[[https://blog.oyanglul.us/images/busted.gif]]
+#+BEGIN_QUOTE
+有人知道 ECMA-334 和 408 分别是什么语言的规范吗？
+#+END_QUOTE
 
 * ES7 (EcmaScript 2016)
 
@@ -314,7 +322,7 @@ function <name>?<argumentlist>{ return spawn(function*() <body>, this); }
 #+BEGIN_SRC js
 function spawn(genF, self) {
     return new Promise(function(resolve, reject) {
-        var gen = genF.call(self);
+        var gen = genF.callself; // <--
         ...
     });
 }
@@ -327,12 +335,12 @@ function spawn(genF, self) {
     return new Promise(function(resolve, reject) {
         var gen = genF.call(self);
         function step(nextF) {
-            next = nextF();
+            next = nextF();  // <-- 2
             Promise.resolve(next.value).then(function(v) {
-                step(function() { return gen.next(v); });
+                step(function() { return gen.next(v); }); // <-- 3
             });
         }
-        step(function() { return gen.next(undefined); });
+        step(function() { return gen.next(undefined); }); // <-- 1
     });
 }
 #+END_SRC
@@ -349,19 +357,19 @@ function spawn(genF, self) {
                 next = nextF();
             } catch(e) {
                 // finished with failure, reject the promise
-                reject(e);
+                reject(e);  // <--
                 return;
             }
             if(next.done) {
                 // finished with success, resolve the promise
-                resolve(next.value);
+                resolve(next.value);  // <--
                 return;
             }
             // not finished, chain off the yielded promise and `step` again
             Promise.resolve(next.value).then(function(v) {
                 step(function() { return gen.next(v); });
             }, function(e) {
-                step(function() { return gen.throw(e); });
+                step(function() { return gen.throw(e); }); // <--
             });
         }
         step(function() { return gen.next(undefined); });
