@@ -1,0 +1,451 @@
+#+TITLE: 看我们3天 hackday 都干了些什么
+#+author: 欧阳继超
+#+LANGUAGE: zh-CN
+#+date:<2015-11-22 Sun>
+#+keywords: hackday, clojure,clojurescript,javascript,react,flux,redux,transdux
+
+ 好不容易有3天属于 hacker 的日子， 从 idea 到产品，我们到底能做些什么？从 *痛点* 出发，最近的项目被 React 和 React Router 虐的不算轻，很大程度上因为我们是半路接手的。真的算是前人 +瓦🖖肯+ 后人 +植树+ 擦屁股。
+
+#+BEGIN_QUOTE
+  到底干了些什么呢？ 专业剧透 🐶 30年提示您请看 url 👆️ 并点这里 👉 [[https://github.com/jcouyang/transdux]]
+#+END_QUOTE
+* COMMENT require
+#+BEGIN_SRC emacs-lisp
+(require 'ob-dot)
+#+END_SRC
+
+#+RESULTS:
+: ob-dot
+
+* Rationale
+
+鉴于大部分 React 初学者都困惑的问题，我在[[http://blog.oyanglul.us/javascript/react-cookbook-mini.html#orgheadline39][浓缩 React 煮书]]中也讲过
+
+#+BEGIN_QUOTE
+如果两个 Component 不是父子关系或者兄弟或者伯父侄女，该如何交互
+#+END_QUOTE
+
+我当时的回答是
+#+BEGIN_QUOTE
+如果两个 Component 不是父子关系或者兄弟或者伯父侄女，他们真的需要交互吗？
+#+END_QUOTE
+
+所以毫无框架的解决方案就是找到两个 component 的共同父元素，一层一层回调上去，在一层一层 props 传导 另一个 component。
+
+#+BEGIN_SRC dot :file images/share-parent-components.png  :exports results
+digraph {
+ 爷爷的爷爷-> 爷爷的粑粑
+爷爷的粑粑 -> 爷爷的爷爷  [xlabel=我娃的孙被点了一下]
+爷爷的粑粑 ->  爷爷
+爷爷 -> 爷爷的粑粑 [xlabel=我孙点了一下]
+  爷爷 -> 粑粑
+ 粑粑 -> 爷爷 [xlabel=我娃被点了一下]
+粑粑 -> A
+ A -> 粑粑 [xlabel=我被点了一下]
+
+ 爷爷的爷爷-> 爷爷的叔叔
+爷爷的叔叔 ->  爷爷的堂兄
+  爷爷的堂兄 ->  粑粑的叔叔的娃 
+粑粑的叔叔的娃  -> B
+}
+#+END_SRC
+
+#+RESULTS:
+[[file:images/share-parent-components.png]]
+
+
+好吧，如果 component 树的层次太多，那么写 callback 就会跟这个图上忍亲戚一样晕，而且一旦中间谁在往了传这个 callback 就会挂掉。
+
+** flux
+于是，对于复杂 component 交互的情景，facebook 提供了 flux 架构设计（当然也实现了https://github.com/facebook/flux）
+
+#+caption: flux 架构
+[[https://raw.githubusercontent.com/facebook/flux/master/docs/img/flux-diagram-white-background.png]]
+
+这个图估计大家被各种 facebook 的 jsconf 洗过脑了，单向的数据流，中间加了一大堆东西
+
+[[./images/brainwashing-frog.gif]]
+
+- action：要干什么
+- dispatcher：到哪里去
+- store：变什么/如何变
+
+
+基本思想就是把一个 component 想干的事情弄成 action，dispatcher 会为不同的 action 调用不用的 store 中的 reducer，store 真正管理着 component 的状态。 把引起状态变化的每一部都分解出来。恩，大型项目一定要这么分解才算大型，没有什么问题。
+
+原文思想如下，facebook 的表达能力我也是给跪了:
+#+BEGIN_QUOTE
+All data flows through the dispatcher as a central hub. Actions most often originate from user interactions with the views, and action creators are nothing more than a call into the dispatcher. The dispatcher then invokes the callbacks that the stores have registered with it, effectively dispatching the data payload contained in the actions to all stores. Within their registered callbacks, stores determine which actions they are interested in, and respond accordingly. The stores then emit a "change" event to alert the controller-views that a change to the data layer has occurred. Controller-views listen for these events and retrieve data from the stores in an event handler. The controller-views call their own render() method via setState() or forceUpdate(), updating themselves and all of their children.
+#+END_QUOTE
+
+思想是不错，但是看看例子，这个dispacher 是怎么个回事
+#+BEGIN_SRC js
+AppDispatcher.register(function(action) {
+  var text;
+
+  switch(action.actionType) {
+    case TodoConstants.TODO_CREATE:
+      text = action.text.trim();
+      if (text !== '') {
+        create(text);
+        TodoStore.emitChange();
+      }
+      break;
+
+    case TodoConstants.TODO_TOGGLE_COMPLETE_ALL:
+      if (TodoStore.areAllComplete()) {
+        updateAll({complete: false});
+      } else {
+        updateAll({complete: true});
+      }
+      TodoStore.emitChange();
+      break;
+...
+#+END_SRC
+ 我一直以为 dispatcher 应该自动给我 dispatcher 才对，我自己都 dispatcher 完了还要 dispatcher 干什么？
+
+** redux
+于是 redux 出来把 dispatcher 这一步去掉了，然后放到了 reducer 里：
+#+BEGIN_SRC js
+function counter(state = 0, action) {
+  switch (action.type) {
+  case 'INCREMENT':
+    return state + 1
+  case 'DECREMENT':
+    return state - 1
+  default:
+    return state
+  }
+}
+#+END_SRC
+
+
+ 然后就获得了一片好评
+#+BEGIN_QUOTE
+    “Love what you’re doing with Redux”
+    Jing Chen, creator of Flux
+
+    “I asked for comments on Redux in FB's internal JS discussion group, and it was universally praised. Really awesome work.”
+    Bill Fisher, author of Flux documentation
+
+    “It's cool that you are inventing a better Flux by not doing Flux at all.”
+ André Staltz, creator of Cycle
+
+#+END_QUOTE
+
+ 我竟无言以对...
+
+[[./images/wait-your-serious.gif]]
+
+* Clojure Avengers 来相助
+好了，现在的问题很明确，用一堆 *switch case* 来 *dispatch* 不管放到 dispatcher 里还是 store 里都一样的 *难看！难看！难看！* 而且 用户为什么需要做一些跟业务无关的事情，如果你看一下 redux todomvc 的例子：
+
+- 用户需要自己创建一个全局的 store？
+[[https://www.evernote.com/l/ABf1E2CyquRCkZOYQjiSKL5ycV3_OiR1inMB/image.png]]
+
+- 用户需要“连接”带有 action 的 props 和 App Component？
+[[https://www.evernote.com/l/ABeCF0zsoQhPPJnRP4wQK0hxMbkT8zuBsS0B/image.png]]
+
+-  用户需要把 action 当 props 传下去？跟传 callback 一样？
+[[https://www.evernote.com/l/ABccOUGGTZVMxoqeT3GOAsoQNX1-S0b4r4MB/image.png]]
+
+来看看 Clojure 提供了哪些优雅的东西能帮助我们消除这些看起来不顺眼的设计...
+
+** Channels
+Channel 是 CSP[fn:1] 的概念，类似一个队列，一边进，一边出。 不过进和出都是异步的
+
+#+BEGIN_SRC js
+const {chan, take, put} = require('con.js/async').async
+let c = chan()
+take(c).then(_=>console.log(_))
+put(c, 'hehe')
+// "hehe"
+#+END_SRC
+
+** PubSub
+Pub(blication) 可以指定把 Channel 的某一部分发布出去，让 Sub(scribe) 来 订阅。
+
+#+BEGIN_SRC js
+const {chan, take, put, pub, sub} = require('con.js/async').async
+let inputChan = chan()
+let actionPub = pub(inputChan, _=>_.action)
+let outputChan = chan()
+let actionSub = sub(actionPub, 'greeting', outputChan)
+put(inputChan, {action: 'greeting', value: 'Hello Clojure pubsub'})
+put(inputChan, {action: 'party', value: 'wheeeee'})
+take(outputChan).then(_=>console.log(_))
+// {action: 'greeting', value: 'Hello Clojure pubsub'}
+#+END_SRC
+
+ 绑定到 outputChan 的 sub 只会接收 action 为 greeting 的消息
+
+** Transducers
+首先声明：Transducer 不是柯里化，不是柯里化，不是柯里化！
+
+在 Clojure 1.7 之后，当 map，filter之类的函数只接收一个函数时返回 transducer。transducers 是可以重用，组合，应用到各种集合与 Channel 上的特殊函数。[fn:2]
+
+#+BEGIN_SRC js
+const {chan, map, take, put} = require('con.js/async').async
+let xf = map(_=>_*2)
+let c = chan(32, xf)
+put(c, 3)
+take(c, _=>console.log(_))
+// 6
+#+END_SRC
+
+** Atom
+原子这个名字起得好，函数式编程的数据结构都是 immutable 的，如果多线程需要共享资源，那么函数式如何解决？
+
+解决多线程通常我们会加锁，有锁的操作就相当于原子操作，在操作共享资源的时候，不用操心值会突然被别的线程改掉。
+
+但是 atom 使用另外一种方式实现原子操作， atom 类似容器，ref 会指到当前的值到底是哪一个。然后，操作 atom 必须使用原子操作 swap!，swap! 能保障 原子性的原理非常简单，就是尝试将新值放到 atom 中，如果当前 ref 和 换出来的值不一样了，说明另一个线程也在 swap!  这个 atom。swap! 会从头再来一遍。
+
+当我们有很多的 channel 是会并发的操作 state，所以这里我们需要使用 atom 来保证我们的 setState 是原子操作。
+
+/由于是使用 transducer 来替代 redux 的 reducer，我给新框架 +山寨+ 响亮的叫做 Transdux ！/
+
+* Day 0 - Inception
+在解释了一通我们需要用到的 Clojure 数据结构，我们开始试试将他们融合到一起，来管理我们的 Component 的 state。
+
+经过我们一下午（早上是 kickoff和解释上面这一堆数据结构) 激 +情+ 烈的讨论，终于初步有了 transdux 的雏形
+
+#+caption: transdux 原型草稿
+[[https://www.evernote.com/l/ABd31BSoVoxMGJ66lygc0t2mK0cAmW3VQ60B/image.png]]
+
+1. 从 ClojureScript 把 transducer，channel，pub，sub 之类的 export 出来，compile 成 JavaScript。借用 mori，[[https://medium.com/@oyanglulu/i-just-fork-mori-and-add-core-async-to-it-3cea689e9259#.fzwrn6ofm][fork 一下改改完成了]]，我把它叫 [[http://github.com/jcouyang/conjs][conjs]]
+2. 使用 pubsub 来替代 dispatcher，当 sub 了 action 的不同类型之后，自然也自动只接收 subscribe 的消息。所以这里框架会为每一个 action 生成一个 sub
+3. 框架还需要为每一个 sub 准备一个输出 channel，然后使用 transducer 将用户的业务逻辑绑到输出 channel 上。这样每次经过这个输出的 channel 的消息，都会被用户的业务逻辑处理，得出新的 state。
+
+好了，大致就这样了，那么该如何开始做呢？回到我们做这个框架的初心，是为了用户写出更简洁的代码，同时还能获得 [fl|re]dux 的好处。
+
+那么我们就 EDD（Example Driven Development，骚年，别查了，我随便编的词） 一把好了。EDD 的过程是这样的
+1. 去 redux 的 repo 把那个丑丑的 todomvc 例子考过来
+2. 把所有 redux 框架 +污染+ 覆盖的地方都删掉，都删掉，删掉，掉...
+3. 好了，例子在没有 redux 之后肯定会挂掉了，那么现在，用前面解释的拉一大堆 Clojure 的数据结构把 todomvc 在给实现了。
+
+* Day 1 - Hack Hack Hack...
+#+BEGIN_QUOTE
+注意，我已经把要用到的这一堆 Clojure 数据机构都 export 并 compile 成了 javascript。想具体了解的可以看[[https://medium.com/@oyanglulu/i-just-fork-mori-and-add-core-async-to-it-3cea689e9259#.fzwrn6ofm][这篇文章]]和 [[http://github.com/jcouyang/conjs][conjs 源码]]
+#+END_QUOTE
+
+** 初版，只实现一个功能
+来看看我们 EDD 的[[https://github.com/jcouyang/transdux/blob/5da5107cb2de11414c5b3c2659cf19e790264ff9/src/components/MainSection.jsx#L33][第一版实现]]，是多么的简单
+#+BEGIN_SRC js -n -r
+  componentDidMount(){
+    // -------vv code user should write vv------------------
+    function complete(msg){  (ref:complete)
+      return state=>map(todo=>{
+        if(todo.get('id')==msg.id)
+          return updateIn(todo, ['completed'], _=>!_ )
+          return todo
+      }, state)
+    }
+    // ---------------------------------
+
+    // ---------- code should extract to transdux -------------------
+    let tx = map((msg)=>{
+      return toJs(complete(msg)(extra.toClj(this.state.todos)))
+    });
+
+    let completeChan = chan(1, tx);
+    
+    sub(this.props.pub, "Todo.complete", completeChan);
+    
+    function takeloop(chan, action){
+      take(chan).then(action).then(takeloop.bind(null, chan,action))
+    }
+    takeloop(completeChan, (newtodos)=>{
+      this.setState({todos: newtodos})
+    })
+    // ----------
+  }
+#+END_SRC
+
+ 没有错，跟 TDD 一样，先实现，在重构
+目的非常明确，用户只需要定义，我这个 component 能干什么，所以这里第[[(complete)][(complete)]]行，就说我 是 todo 我能 complete
+
+然后华丽的分割线下面是我们框架要做的事情
+1. 一个用用户提供的 action 组成的 transducer
+2. 一个 action channel，用来绑定 transducer
+3. 一个 sub， 只订阅 “todo.complete” 的消息
+4. 一个 loop，不停的去 action channel 那新的 state
+
+那么在使用的地方，只需要发一个 action 为“todo.complete” 的消息即可
+
+** 提取框架
+
+当然我们需要封装这些裸裸的实现，当然提取这一票代码块特别简单，写一个 mixin 让需要用到的 component 自己 mixin 进来就好。
+
+问题是，我们需要知道这个 Component 用到的 input channnel 和 publication 是谁。
+*** 传递 inputChan 和 action 的 publication
+我不会使用 redux 那样笨笨的让用户一层层传下去的方式，有这功夫我可以传 callback，那框架到底为我做了什么？
+
+所以，transdux 提供一个 wrapper component /Transdux/
+#+BEGIN_SRC html
+<Transdux>
+    <App/>
+</Transdux>
+#+END_SRC
+
+ 只需要用 Transdux component 包住你的 component 即可，如果你有两个 App，那么分别 wrap 可以保证他们用的是两套 transdux 的 channel，pubsub而互相不受干扰。
+ #+BEGIN_SRC html
+<div>
+  <Transdux>
+    <App/>
+  </Transdux>
+  <Transdux>
+    <App2/>
+  </Transdux>
+</div> 
+ #+END_SRC
+
+ 具体实现也不难，利用 React 的 child context
+
+#+BEGIN_SRC js
+childContextTypes: {
+    transduxChannel: React.PropTypes.object,
+    transduxPublication: React.PropTypes.object,
+  },
+  getChildContext(){
+    let inputchan = chan();
+    return {
+      transduxChannel: inputchan,
+      transduxPublication: pub(inputchan, _=>_['action']),
+    }
+  },
+#+END_SRC
+
+[[https://facebook.github.io/react/docs/context.html][child context]] 是 React 一个 给子 component 传递 context 是一种方式， 通过这样就无需父 component 一层一层传下去，而在所有的子 component 都随时可以从 =this.context= 中找到父 component =getChildContext=  返回的值。
+
+于是无需任何传递， 所有子 component都能获得 transdux 的 channel 以及 publication。
+
+*** 分辨不同的 ReactClass 
+ 另一个问题是，我们在 dispatch 的时候，如何知道给那个 component 发消息呢？最直接的方式是，把需要接受消息的 component require 进来
+#+BEGIN_QUOTE
+ 你过来，我保证不打你
+#+END_QUOTE
+#+BEGIN_SRC js
+import MainSection from './MainSection'
+let TodoItem = React.createClass({
+    mixins: [TxMixin],
+ ...
+           this.dispatch(MainSection, 'complete',{id:todo.id})
+...
+    }
+})
+#+END_SRC
+
+这样的消息非常清晰，而且永远不可能发错消息，除非 require 错了 component。
+
+那么问题来了，dispatch 必须能根据这个 React Class 分辨？
+
+*transdux* 为每一绑定 actions 的 component 生成一个 uuid
+*** bindActions
+在有了 channel 和 publication 之后，我们可以开始绑定用户的 action 到 action channel 上，并生成相对应的 sub
+ 
+把第一版实现的代码包到 mixin 中，会是这样的：
+#+BEGIN_SRC js -n -r
+  bindActions(actions, imm=id, unimm=id) {
+    let atomState = atom(imm(this.getInitialState()))
+    for(let name in actions){
+      let tx = map((msg)=>{
+        let result = swap(atomState, (state,v)=>actions[name](v,state), msg.value)  (ref:swap)
+        this.setState(unimm(result))
+        return result
+      });
+      let actionChan = chan(32,tx); (ref:actionChan)
+      sub(this.context.transduxPublication, genUuid(this.constructor)+name, actionChan); (ref:sub)
+      observe(actionChan, (newstate)=>{});  (ref:observe)
+    }
+  },
+#+END_SRC
+
+- 还记得之前说的 atom 吗？[[(swap)][这里]] swap 尝试将 =msg.value= 和 =state= 传入 =actions[name]= ，将其返回值换入 atom 内。
+- 第[[(actionChan)][(actionChan)]]行将之前 map 返回的 transducer 放到 actionChan 上，其中的32代表 channel 的长度为32。 *注意什么时候这个 transducer 是 lazy 的，所以只有 take 的时候会应用 action 到 channel 的元素上* 。所以 transducer 真不是柯里化，不是柯里化，柯里化，里化，化...
+- 在第[[(sub)][(sub)]]行把该 class 生成的 uuid 和 action 的名字作为 action 的唯一标识。由于是 mixin，所以直接能获得该 component 上的 publication
+- 最后 observe 一下就好了，其实 observer 什么都没干，其实可以看看我的 [[https://github.com/jcouyang/conjs/blob/master/src/mori/core.async.cljs#L17][observe 实现]]，只是一个简单的 go-loop，不停的 take channel 的消息。不然没人 take 消息会堆积满，就再也 put 不进来了。
+#+BEGIN_SRC clojure
+(defn ^:export observe [chan cb]
+  (go-loop []
+    (let [v (async/<! chan)]
+      (cb v)
+      (recur))))
+#+END_SRC
+
+
+* Day 2 - Show Case
+托了 clojure 的福，我们并没有写多少代码，就轻松实现了一个对用户更友好的 flux like 框架。在核心功能实现后，我们开始进行 opensource project 的 routine
+- 写 [[https://github.com/jcouyang/transdux/blob/master/README.org][readme]]
+- 写例子 [[https://github.com/jcouyang/transdux/tree/master/examples/todomvc][todomvc]]
+- 选个 [[http://choosealicense.com/][license]]
+- [[https://www.npmjs.com/package/transdux][npm publish]]
+- 准备能把大家将懂的 slide
+
+#+caption: 此处应有掌声
+[[./images/applause.jpg]]
+
+* Recap
+
+#+caption: The Big Picture of Transdux
+[[https://www.evernote.com/l/ABe_8eE6o2dGlZMCmNnBap_fXy83GvJe6gcB/image.jpg]]
+
+ 所以，使用 transdux  给 react component 交互，我们只需要为框架提供两件事情
+** 1. 把你的 component 包到 Transdux 里
+#+BEGIN_SRC html
+  <Transdux>
+      <App/>
+  </Transdux>
+#+END_SRC
+** 2. 定义你的 component 能干什么？你的状态能怎么变？
+#+BEGIN_SRC js
+// MainSection.jsx
+import {TxMixin} from 'transdux'
+let actions = {
+  complete(msg, state){
+    return {
+      todos:state.todos.map(todo=>{
+        if(todo.id==msg.id)
+          todo.completed = !todo.completed
+        return todo
+      })
+    }
+  },
+  clear(msg,state){
+    return {
+      todos: state.todos.filter(todo=>todo.completed==false)
+    }
+  }
+}
+let MainSection = React.createClass({
+  mixins: [TxMixin],
+  componentDidMount(){
+    this.bindActions(actions)
+  },
+  ...
+})
+#+END_SRC
+
+然后，就可以开始 *发消息* 了
+#+BEGIN_SRC jsx
+    //TodoItem.jsx
+    import MainSection from './MainSection'
+    let TodoItem = React.createClass({
+        mixins: [TxMixin],
+        ...
+          this.dispatch(MainSection, 'complete',{id:todo.id})
+        ...
+        }
+    })
+#+END_SRC
+
+ 最后，要感谢我们棒棒的 Team member [[https://github.com/SanCoder-Q][@SanCoder-Q]] [[https://github.com/zhangyaxuan][@zhangyaxuan]] [[https://github.com/nihaokid][@nihaokid]] [[https://github.com/xiaoyanzhuzzh][@xiaoyanzhuzzh]] 
+
+#+HTML: 最后，欢迎 <a aria-label="Star jcouyang/transdux on GitHub" data-count-aria-label="# stargazers on GitHub" data-count-api="/repos/jcouyang/transdux#stargazers_count" data-count-href="/jcouyang/transdux/stargazers" data-style="mega" href="https://github.com/jcouyang/transdux" class="github-button">Fork me on Github</a>
+
+/所有图片来源于 giphy.com, copyright/ @[[http://www.cc.com/shows/futurama][Futurama]]
+
+* Footnotes
+
+[fn:2]  专门写过一篇文章介绍过 http://blog.oyanglul.us/javascript/clojure-essence-in-javascript-transducer.html
+
+[fn:1] 具体可以参考我的另一篇文章 http://blog.oyanglul.us/javascript/clojure-core.async-essence-in-native-javascript.html

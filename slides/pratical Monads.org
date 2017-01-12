@@ -1,0 +1,262 @@
+#+TITLE: Practical Monads
+#+AUTHOR: https://github.com/jcouyang
+
+* ToC
+- Monad
+- Promise
+- Observable
+- Demo
+* Monad
+
+[[https://blog.oyanglul.us/javascript/images/summarize%20in%20one%20word.gif]]
+
+* [[http://stackoverflow.com/questions/3870088/a-monad-is-just-a-monoid-in-the-category-of-endofunctors-whats-the-issue/3870310#3870310][A monad is just a monoid in the category of endofunctors, what's the problem?]]
+* 
+[[https://blog.oyanglul.us/javascript/images/what.gif]]
+
+* Before Monad
+** ES6 101
+EcmaScript5
+#+BEGIN_SRC js
+function(x){return x+1}
+#+END_SRC
+
+EcmaScript6
+#+BEGIN_SRC js
+x=>x+1
+#+END_SRC
+
+** Haskell 101
+
+#+BEGIN_SRC haskell
+--  HM(Hindley-Milner) type signature
+liftM :: (Monad m) => (a -> b) -> m a -> m b 
+--        ^type restrict ^function    ^  ^return
+--                              ^curry^   
+#+END_SRC
+
+** Functional 101
+#+BEGIN_SRC js
+[1,2,3].map(x=>x+1)
+// => [2,3,4]
+[1,2,3].filter(x=>x/2==0)
+// => [2]
+[1,2,3].reduce((acc,n)=>acc+n)
+// => 6
+#+END_SRC
+* Functional 102
+1. Method -> Function
+2. First Class Function
+#+BEGIN_SRC js
+let toUpperCase = x => x.toUpperCase()  // <- 1
+let map = (f, col) => col.map(f) // <- 1
+map(toUpperCase, ["hello", "world"])
+//    ^2
+//=> ["HELLO", "WORLD"]
+#+END_SRC
+
+* 
+** Some instances of Functor, Monoid
+
+** a Array Functor
+#+BEGIN_SRC js
+// map:: (String s) => (s -> s) -> [s] -> [s]
+map(toUpperCase, ["hello", "world"])
+#+END_SRC
+
+functor is mapable!
+** a String Monoid
+#+BEGIN_SRC js
+"hello" + "world" // <-- concat
+// => "helloworld"
+"hello" + ""   // <--  identity
+// => "hello"
+("hello" + "world") + "!" == "hello" + ("world" + "!") // <-- associative
+// => true
+#+END_SRC
+
+Monoid is concatable!
+** 
+- Functor is mapable!
+- Monoid is concatable!
+
+* Substitution
+A monad is just a *monoid* in the *category* of *endofunctors*, what's the problem?
+
+- Catergory -> "Type"
+- Functor -> "Mapable"
+- Monoid -> "Concatable"
+
+"A monad is just a _concatable_ in *Type* of _mapable_, what's the problem?"
+
+* 
+
+** Concatable in Type
+
+** concat
+#+BEGIN_SRC scala
+// concat :: (Monad m) => m m x -> m x
+[1].concat([2]) -> [1,2]
+// concat Array Array -> Array
+T concat T -> T
+type G[X] = T[T[X]]
+G = T compose T = T.T
+T.T[X] = G[X] = T[T[X]]
+concat(T.T).T == T.concat(T.T)
+#+END_SRC
+
+** u -> concat
+- u -> concat
+- T(u) -> lift(flat)
+[[https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Monad_multiplication_explicit.svg/600px-Monad_multiplication_explicit.svg.png]]
+
+** pure
+[[https://blog.oyanglul.us/javascript/images/zoidberg-die.gif]]
+
+#+BEGIN_SRC js
+pure(T[X]) == T[T[X]]
+#+END_SRC
+
+** n -> pure
+- n -> pure
+- T(n) -> lift(pure)
+
+[[https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Monad_unit_explicit.svg/568px-Monad_unit_explicit.svg.png]]
+
+** 
+[[https://drboolean.gitbooks.io/mostly-adequate-guide/content/images/onion.png]]
+* 
+** *Promise*
+
+** lift
+#+BEGIN_SRC haskell
+liftM :: (Monad m) => (a -> b) -> m a -> m b 
+#+END_SRC
+
+#+BEGIN_SRC js
+  const when = require('when')
+  // readJSON :: (Promise p, String s, Object o) => (s -> o) -> p s-> p o
+  let readJSON = when.lift(JSON.parse)
+  readJSON(when('{hello: "world"}'))
+      .then(x=>console.log(x))
+      .catch(e=>console.error(e.message));
+  // => Unexpected token h in JSON at position 1
+#+END_SRC
+
+** try
+[[https://blog.oyanglul.us/javascript/images/came-out.gif]]
+
+or simply try something and wrap result in Promise
+#+BEGIN_SRC js
+try(JSON.parse, '{hello: "world"}')
+      .then(x=>console.log(x))
+      .catch(e=>console.error(e.message));
+// => Unexpected token h in JSON at position 1
+#+END_SRC
+
+** fold
+[[https://blog.oyanglul.us/javascript/images/method-stack.gif]]
+
+#+BEGIN_SRC haskell
+foldM :: (Monad m) => (a -> b -> m a) -> a -> [b] -> m a
+#+END_SRC
+
+#+BEGIN_SRC js
+// reduce :: (Promise p, Number n, Object o) => [n] -> (o -> n -> p o) -> o -> p o
+when.reduce([1,2,3], (acc, n) => rest(URL + n).then(o=>merge(acc, o)), 0)
+#+END_SRC
+
+** callback hell
+#+BEGIN_SRC js
+  var allRes = {}
+  $.get('url1', (res1) =>
+        $.get('url2', (res2) =>
+              $.get('url3', (res3) =>
+                    allRes = merge(res1, res2, res3))
+             )
+       )
+#+END_SRC
+
+** flatMap
+#+BEGIN_SRC js
+  let futureWorld = new Promise(resolve=>{
+      setTimeout(()=>resolve("world"), 1000)
+  })
+#+END_SRC
+
+** 
+#+BEGIN_SRC js
+  futureWorld
+      .then(world=>new Promise(resolve=>{
+          setTimeout(()=>resolve("hello"+world), 1000)
+      }))
+      .then(x=>console.log(x))
+  // 2secs later => helloworld
+#+END_SRC
+
+- first =then= is =flatMap=
+- second =then= is =map=
+
+
+* Observable
+[[https://blog.oyanglul.us/javascript/images/shit-bricks.gif]]
+
+* 
+
+** Space
+
+imperative
+#+BEGIN_SRC js
+  var acc = 0
+  for(var n of [1,2,3,4]) {
+      acc +=n
+  }
+#+END_SRC
+
+functional
+#+BEGIN_SRC js
+[1,2,3,4].reduce((acc,x)=>acc+x)
+#+END_SRC
+
+** 
+imperative accumulate value on time
+#+BEGIN_SRC js
+var acc = 0;
+$('input').onChange(_=>acc+=_)
+#+END_SRC
+
+** Space -> Time
+[[https://blog.oyanglul.us/javascript/images/interstellar.png]]
+
+** FRP(Functional Reactive Programming)
+
+|              | Single Item         | Multiple Items          |
+|--------------+---------------------+-------------------------|
+| synchronous  | getData():T         | getData():List[T]       |
+| asynchronous | getData():Future[T] | getData():Observable[T] |
+
+
+** [[http://reactivex.io][ReactiveX]]
+[[http://reactivex.io/assets/operators/legend.png]]
+** 
+[[http://reactivex.io/documentation/operators/images/just.c.png]]
+** fold
+[[http://reactivex.io/documentation/operators/images/reduceSeed.png]]
+** flatMap
+[[http://reactivex.io/documentation/operators/images/flatMap.c.png]]
+** fromEvent
+[[http://reactivex.io/documentation/operators/images/fromEvent.png]]
+
+* [[http://jsbin.com/qazuju/edit?js,output][Demo]]
+[[https://blog.oyanglul.us/javascript/images/neat.gif]]
+#+BEGIN_HTML
+<a class="jsbin-embed" href="http://jsbin.com/qazuju/embed?js,output">JS Bin on jsbin.com</a><script src="http://static.jsbin.com/js/embed.min.js?3.35.12"></script>
+#+END_HTML
+* Fin
+[[https://blog.oyanglul.us/javascript/images/applause.jpg]]
+
+Thanks
+* One more thing
+We are hiring
+
+[[http://weibo.com/milhouse][@MilhouseVanHouten]]

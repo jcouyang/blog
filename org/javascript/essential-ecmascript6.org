@@ -1,0 +1,302 @@
+#+TITLE: Essential EcmaScript 6
+#+DATE: <2015-03-20 Fri>
+#+KEYWORDS: es6, EcmaScript 6, babel, javascript, functional
+#+DESCRIPTION: 新的草案[[http://kangax.github.io/compat-table/es6/][ECMAScript 6]](虽然说是草案,但你可以看到 Firefox 其实已经实现大部分的feature)离我们越来越近了, 而且我们已经可以通过 [[https://babeljs.io/][babel]] 在项目中使用这些新的features. 是时候让我们重新认识一下 JavaScript 了. 下面列出了一部分比较让人兴奋和期待的features. 剧透一下我最激动的还是[[*Tail%20Calling][ Tail Calling]]
+
+
+新的草案[[http://kangax.github.io/compat-table/es6/][ECMAScript 6]]
+(虽然说是草案,但你可以看到 Firefox 其实已经实现大部分的
+feature)离我们越来越近了, 而且我们已经可以通过 [[https://babeljs.io/][babel]] 在项目中使用这些新的features. 是时候让我们
+重新认识一下 JavaScript 了. 下面列出了一部分比较让人兴奋和期待的features. 剧透一下我最激动的还是[[*Tail%20Calling][ Tail Calling]]
+
+* Arrow Function
+:LOGBOOK:  
+- State "DONE"       from "DONE"       [2015-03-20 Fri 14:58]
+:END:      
+#+INDEX: Arrow Function
+#+INDEX: lambda
+
+#+BEGIN_QUOTE
+由于 arrow function 只在Firefox 22以上版本实现,
+这里所有代码都可以在Firefox的Console中调试, 其他chrome 什么的都没有实现(完全)[fn:1].
+另外每节的最后我都会给出完整代码的可执行的 jsbin 链接.
+#+END_QUOTE
+
+你可以用两种方式定义一个箭头函数
+
+#+BEGIN_EXAMPLE
+    ([param] [, param]) => {
+       statements
+    }
+    // or
+    param => expression
+#+END_EXAMPLE
+
+单个表达式可以写成一行, 而多行语句则需要 block ={}= 括起来.
+
+看看旧的匿名函数怎么写一个使数组中数字都乘2的函数.
+
+#+BEGIN_EXAMPLE javascript
+    var a = [1,2,3,4,5];
+    a.map(function(x){ return x*2 });
+#+END_EXAMPLE
+
+用箭头函数会变成
+
+#+BEGIN_EXAMPLE javascript
+    a.map(x => x*2);
+#+END_EXAMPLE
+
+只是少了 =function= 和 =return= 以及 block, 不是吗? 如果觉得差不多,
+因为你看惯了 JavaScript 的匿名函数,
+你的大脑编译器自动的忽略了,因为他们不需要显示的存在.
+
+而 =map(x => x*2)= 要更 make sense,
+因为我们需要的匿名函数只需要做一件事情, 我们需要的是 一个函数 =f=,
+可以将给定 =x=, 映射到 =y=.
+翻译这句话的最简单的方式不就是 =f = (x => x*2)=
+
+* Let
+:LOGBOOK:  
+- State "DONE"       from "TODO"       [2015-03-22 Sun 15:37]
+:END:      
+我喜欢用 =let= 替换了以前的 =var=, 为什么, 以前的var有什么不好.
+
+=var= 的意思是变量, 它自己没有任何的scope,所以的作用范围非常难以推断.
+但是我们通常只想在一个scope里给定一个值,而不影响scope外界的任何绑定.
+
+想想以前 =var= 的scope是什么, =function=
+#+BEGIN_SRC javascript
+  var a = 'first assign'
+  function b (){
+      var a = 'second assign'
+      console.log(a)
+  }
+  console.log(a)
+  b()
+  console.log(a)
+#+END_SRC
+
+来看看 lisp 给了我们很好的模范如何解决绑定这种问题.
+#+BEGIN_SRC emacs-lisp
+  (let ((something 2))
+    (+ something 1)
+    ) ; => 3
+#+END_SRC
+
+es5 的 =let= 完全等价应该是
+#+BEGIN_SRC javascript
+  (function(something){
+      return something +=1
+  }).call(this, 2)
+#+END_SRC
+
+=let= 内的任何操作都不会影响外部绑定. 这样更安全而且容易推断, 这也是很多库用来封装js模块的方式, 比如jquery, 比如coffee会自动
+对每个模块添加类似的function wrapper.
+
+而es6, =let= 给我们带来了scope. 注意看,除了括号成了中括号,好像就是 lisp 那个意思了.
+#+BEGIN_SRC javascript
+  let a = 'first assign'
+  {
+      let a = 'second assign'
+      console.log(a)
+  }
+  console.log(a)
+#+END_SRC
+
+* DONE Proxy
+名字解释了一切, 对, 代理, 就是能帮你做一些事情的东西.
+
+JavaScript是动态语言,也就是说最关心的事情是行为.所以行为也能通過meta programming让其带那么一些行为.
+
+试试把下列代码考到Firefox的Console中
+#+BEGIN_SRC javascript -r
+  let github_api = function(){};
+  github_api.path='https://api.github.com';
+  let restful = function restfulize(api){
+      return new Proxy(api, {
+          get: function(receiver, name){ (ref:get)
+              receiver.path+='/'+name;
+              return restfulize(receiver);
+          },
+          apply: function(receiver, that, args){ (ref:apply)
+              console.log(`sending request to ${receiver.path}`)
+          }
+      })
+  }
+
+  restful(github_api).user.jcouyang() (ref:jcouyang)
+// => "sending request to https://api.github.com/user/jcouyang"
+#+END_SRC
+
+简单的几行代码,我们就自制了一个接口非常流畅的restful api client. 再也不用麻烦的拼接字符串,
+转成代理的方法适当接口更已读且易于重用.
+
+magic到底在哪呢, =proxy= 给目标函数代理了两个方法, 一个 [[(get)][get]], 一个 [[(apply)][apply]],
+- =get= 不管从 =proxy= 中取任何值都会运行 =get=. 
+一直返回新的相同但是path变化了的 =proxy=, 所以不管是 =.user= 还是 =.jcouyang= 
+都是拼接成 =path=, 并返回一个新的以新 =path= 为目标的proxy
+- =apply= 里面是运行这个proxy时要做的事情. 所以当我调用 [[(jcouyang)][jcouyang()]] 的时候, log就打出来了.
+
+* Destructuring
+:LOGBOOK:  
+- State "DONE"       from "IN PROGRESS" [2015-03-22 Sun 00:10]
+:END:      
+#+INDEX: Destructuring
+
+[[http://i.giphy.com/G9hwRUsSFrPpK.gif]]
+
+#+BEGIN_SRC clojure
+  (let [[first & rest] [1 2 3 4 5]]
+       rest
+       ) ; => (2 3 4 5)
+#+END_SRC
+
+终于也可以在 JavaScript 里面这样干了.
+#+BEGIN_SRC javascript
+let [孔连顺, 张全蛋] = ['女神', '男神']
+孔连顺 //=> 男神1
+张全蛋 //=> 男神2
+#+END_SRC
+
+当然可以对Map这样干
+#+BEGIN_SRC javascript
+let {女神, 男神} = {'男神': ['唐马儒', '张全蛋'], '女神': '孔连顺'}
+女神 // => 孔连顺
+男神 // => ['唐马儒', '张全蛋']
+#+END_SRC
+
+
+* Tail Calling
+:LOGBOOK:  
+- State "DONE"       from "IN PROGRESS" [2015-03-22 Sun 10:46]
+- State "IN PROGRESS" from "TODO"       [2015-03-22 Sun 10:16]
+:END:      
+#+INDEX: tail recursive
+
+这可以说是最令人高兴的feature了,在js里写递归实在是容易爆栈的一件事情.
+
+[[./images/tail-recur.gif]]
+
+终于, 终于有了尾递归优化. 虽然大部分浏览器,包括firefox都没有实现, 但其实我们已经可以用中间编译器babel帮我们编译成
+优化过的尾递归.
+
+#+BEGIN_SRC javascript
+function a(b){
+  if(b<0)return "hehe"
+  return a(b-1)
+}
+#+END_SRC
+
+duang的一下就变成了循环. 妈的再也不用担心我的 +菊花+ 栈被爆了.
+
+#+BEGIN_SRC javascript
+function a(_x) {
+  var _again = true;
+
+  _function: while (_again) {
+    _again = false;
+    var b = _x;
+
+    if (b < 0) {
+      return "hehe";
+    }_x = b - 1;
+    _again = true;
+    continue _function;
+  }
+}
+#+END_SRC
+
+* Template Strings
+:LOGBOOK:  
+- State "DONE"       from "TODO"       [2015-03-22 Sun 10:46]
+:END:      
+ruby和coffeescript里面这个很fancy的东西
+#+BEGIN_SRC ruby
+hi='他是'
+puts "#{hi} 你妹妹"
+#+END_SRC
+终于要可以在js里原生使用了
+#+BEGIN_SRC javascript
+  let i = '你们',
+      love = '不能在一起',
+      your = '他是',
+      sister = '你妹妹'
+
+  console.log(`${i} ${love} ${your} ${sister}`)
+  // => "你们 不能在一起 他是 你妹妹"
+#+END_SRC
+
+
+* Class
+:LOGBOOK:  
+- State "DONE"       from "TODO"       [2015-03-27 Fri 16:32]
+:END:      
+虽然只是 syntax sugar, 但是终于不用怪怪的用函数当对象模板了. 木哈哈哈
+
+#+BEGIN_SRC javascript
+  class Duck extends Bird {
+      constructor() {
+          super();
+          this.name = "donald"
+          //...
+      }
+      say() {
+          return this.name + " quack";
+      }
+      static say() {
+          return "quack";
+      }
+  }
+#+END_SRC
+
+* Promises
+虽然已经习惯用更强大的 [[https://github.com/cujojs/when][第三方库]] 干这个事情, 但是原生支持的话也是极好的.
+#+BEGIN_SRC javascript
+  new Promise((resolve, reject) => {
+      console.log('first')
+      setTimeout(resolve, 1000);
+  }).then(() => {
+      console.log('next 1s')
+      throw new Error("hmm");
+  }).catch(err => {
+      console.log('finally error')
+  })
+#+END_SRC
+
+* Generator
+:LOGBOOK:  
+- State "DONE"       from "TODO"       [2015-03-22 Sun 20:36]
+:END:      
+对于python程序员来说, =yield= 这个关键字可能再熟悉不过了, 终于, js 也有 =yield= 了.
+
+[[http://i.giphy.com/XFITRJv9IMhi0.gif]]
+
+#+BEGIN_SRC javascript -r
+var fibonacci = {
+  [Symbol.iterator]: function*() { (ref:iterator)
+    var pre = 0, cur = 1;
+    for (;;) {
+      var temp = pre;
+      pre = cur;
+      cur += temp;
+      yield cur; (ref:yield)
+    }
+  }
+}
+#+END_SRC
+
+这短短几行代码里有三个es6的新feature
+
+- Symbol: es6的新的primitive类型, [[(iterator)][=Symbol.iterator=]] 是一个全局的symbol
+- Iterator: 对象的 [[(iterator)][=iterator=]] 上挂的函数会在被遍历的时候x调用, 如 [[(forof)][=for..of=]]
+#+BEGIN_SRC javascript -r
+for (var n of fibonacci) { (ref:forof)
+  if (n > 100)
+    break;
+  console.log(n);
+}
+#+END_SRC
+- Generator: [[(iterator)][=function*=]] 声明该函数为生成器函数, 在每次被调用的时候返回 [[(yield)][=yield=]] 的值.
+
+[fn:1] Chrome有一个 feature toggle 可以打开部分 es6 功能 =chrome://flags/#enable-javascript-harmony=

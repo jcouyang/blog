@@ -1,0 +1,224 @@
+#+Title: JavaScript玩转Clojure大法之 - Trampoline
+#+date: <2015-05-30 Sat>
+#+author: Jichao Ouyang
+#+keywords: clojure, javascript,js, trampoline, functional, fp, recursive, recur, mutual
+#+description: 在函数式编程中, 递归可以说是最关健甚至唯一的循环手段, Clojure的recur可以保证得到 /尾递归/ 优化, 而相互递归则不能用recur来保证得到优化, 因此, 另一个大法出现了 -- /Trampoline/
+
+#+INCLUDE: "../!ann.org"
+
+- [[./clojure-core.async-essence-in-native-javascript.org][JavaScript玩转Clojure大法之 - 并发编程]]
+- [[./clojure-essence-in-javascript-transducer.org][JavaScript玩转Clojure大法之 - Transducer]]
+- *[[./clojure-essence-in-javascript-trampoline.org][JavaScript玩转Clojure大法之 - Trampoline]]*
+- [[./clojure-essence-in-javascript-macro.org][JavaScript玩转Clojure大法之 - Macro (1)]]
+
+在函数式编程中, 递归可以说是最关健甚至唯一的循环手段
+
+Clojure的recur可以保证得到 /尾递归/ 优化, 而相互递归则不能用recur来保证得到优化, 因此
+另一个大法出现了 -- /Trampoline/
+
+[[./images/multi-recur.gif]]
+
+Trampoline 翻译成中文是蹦床, /蹦~蹦蹦蹦蹦/ (自己脑补intel BGM)
+
+如果你看过老友记这集(Friends: The One with Ross's New Girlfriend), 应该记得这个梗
+
+#+BEGIN_QUOTE
+Ross: you hang up first
+
+Julie: No, you hang up first
+
+Ross: No, you hang up first
+...
+#+END_QUOTE
+
+ok, 这就是相互递归(mutual recursion)
+
+在继续解释trampoline是如何优化相互递归之前, 可能有些同学不太清楚什么是尾递归优化, 当然嫌我啰嗦的可以直接坐
+[[* 相互递归(mutual recursion)][电梯]]直达.
+
+* 尾递归(tail recursion)
+又要拿一个被举烂了的例子 - 求n的阶乘
+
+很容易就可以写出来
+#+BEGIN_SRC js
+  function fact(n){
+      if(n==0)return 1;
+      return n*fact(n-1);
+  }
+#+END_SRC
+
+好吧, 这就是典型的非尾递归, 因为最后一个操作并不是调用自己, 而是 *乘法*
+
+想想最后一行, 先算出 =fact(n-1)=, 然后乘n, 返回
+
+那么怎么才是尾递归, 当然是最后一个操作一定是调用自己.
+
+#+BEGIN_SRC js
+  function fact(n, acc){
+      if(n==0)return acc;
+      return fact(n-1, acc*n)
+  }
+#+END_SRC
+两个地方值得注意
+- 看到 =acc= 了没有, 这就是典型的尾递归最常见的东西, 用来累计每次递归运算结果
+- fact函数的最后一个操作是fact本身
+
+由于tail recur非常容易改写成循环, 编译器容易对其进行优化
+#+BEGIN_SRC javascript
+  function fact(n){
+      var acc=1,i=n
+      while(i!=0){
+          acc=acc*i;
+          i-=1;
+      }
+      return acc
+  }
+#+END_SRC
+
+有没有觉得尾递归和循环非常像, 唯一的区别是
+- 尾递归用参数重新绑定递减的n
+- 尾递归用参数重新绑定叠加值acc
+- 循环直接改变变量i来进行递减
+- 循环叠加变量acc
+
+但思路是一模一样的
+
+#+BEGIN_QUOTE
+在clojure里, 尾递归是用 =recur= 来保证(scalar貌似是@tail annotation), 好处是
+1. 用recur的一定是尾递归, 直接优化
+2. 编译器可以检查recur出现的位置是否为tail
+
+#+END_QUOTE
+* 相互递归(mutual recursion)
+相互递归由于是函数之间的互相调用, 则不能像尾递归一样直接优化成循环就完事.
+** DFA
+举个最简单的例子, 相互递归经常用于状态机的实现, 比如自动贩卖机, 假设这台贩卖机非常简单, 只吃五块,只卖巧克力
+
+那么输入集是 =[五块, 选巧克力, 找零]=, 所以贩卖机正常的process是类似
+
+=5块 -> 巧克力 ->  找2块=
+
+好吧, 我们来实现一把
+#+BEGIN_SRC javascript
+  function eat_money(input_seq){
+      var input = input_seq.shift()
+      if(input== '五块')
+          console.log('收到呢,选个巧克力吧^_^')
+          choose(input_seq)
+      else
+          eat_money(input_seq)
+  }
+
+  function choose(input_seq){
+      var input = input_seq.shift()
+      if(input== '巧克力')
+          console.log('选了巧克力, 按下找零按钮, 我还欠你两块钱哦')
+          changes(input_seq)
+      else
+          choose(input_seq)
+  }
+
+  function changes(input_seq){
+      var input = input_seq.shift()
+      if(input=='找零')
+          console.log('欢迎再次光临')
+          eat_money(input_seq)
+      else
+          changes(input_seq)
+  }
+#+END_SRC
+
+假设我是个怪蜀黍QA,来到这个贩卖机上怒点这样以系列操作, 看我们的贩卖机有没有疯掉
+
+=['巧克力', '巧克力', '找钱', '五块', '找钱', '五块', '巧克力', '五块', '找钱']=
+
+#+HTML: <a class="jsbin-embed" href="http://jsbin.com/zapana/1/embed?js,console">JS Bin</a><script src="http://static.jsbin.com/js/embed.js"></script>
+
+很好
+
+现在问题来了, 如果我的 =input_seq= 非常长, 比如
+#+BEGIN_SRC javascript
+  for(var n=15;n>0;n--){
+    input_seq=input_seq.concat(input_seq)
+  }
+  input_seq.length // => 294912
+#+END_SRC
+现在 =input_seq= 非常大, 再试试(请到node上试)
+
+#+BEGIN_EXAMPLE
+...
+收到呢,选个巧克力吧^_^
+RangeError: Maximum call stack size exceeded
+...
+#+END_EXAMPLE
+
+爆栈了吧
+
+** Trampoline
+Trampoline就是用来解决相互递归爆栈的问题, 等等, 什么是Trampoline
+
+trampoline是一个函数:
+1. 接受一个函数, 一个或多个函数的参数
+2. 调用该函数
+3. 如果返回值是个函数, 继续调用
+4. 如果返回值不是函数, 停止
+
+比如可以把贩卖机简单的改造一下, 让他返回函数, 而不是直接调用其他函数, 注意第[[(trampoline)]]行
+
+#+BEGIN_SRC javascript -n -r
+function eat_money(input_seq){
+  if(input_seq.length==0)return
+  var input = input_seq.shift()
+  if(input== '五块'){
+    console.log('收到呢,选个巧克力吧^_^')
+    return function(){   (ref:trampoline)
+      return choose(input_seq)
+    }
+  }else{
+    return function(){
+      return eat_money(input_seq)
+    }
+  } 
+}
+#+END_SRC
+这样每次调用eat_money其实返回一个闭包, 需要再调用一下才能真的执行 =choose= 函数.
+
+经过这样的改造以后(当然其他函数也要类似的加闭包), 就可以用 =trampoline= 来执行他们了
+#+BEGIN_SRC javascript
+mori.trampoline(eat_money,input_seq)
+#+END_SRC
+
+由于eat_money返回一个闭包,也就是函数, trampoline会继续执行这个返回的闭包,直到返回的不是函数为止
+
+而trampoline优化之前的 =eat_money=, 其实就是把最后调用的函数压到调用栈里, 然后
+压入调用栈的这个函数比如是 =choose= 又调用另一个函数比如 =changes=, 然后一直压压压, 压到最后再从栈里弹出来一个一个执行.
+
+[[./images/stack.gif]]
+#+BEGIN_SRC javascript
+  function eat_money(input_seq){
+      return choose(input_seq){
+          return changes(input_seq){
+              return ...
+          }
+      }
+  }
+#+END_SRC
+
+所以如果压入的函数个数超过栈的容量, 栈 +菊花+ 就被爆了
+而trampoline则是在函数最后返回一个闭包, 闭包内的递归调用并未被调用, 也就是未被压栈, 所以是这样的
+
+[[./images/conga.jpg]]
+
+#+BEGIN_SRC javascript
+  var res = eat_money(input_seq)
+  while(true){
+      if(typeof res =='function')res = res()
+      else
+          break
+  }
+#+END_SRC
+
+优化成循环了不是.
+
+完整代码, 如果uncomment 注释掉的代码浏览器会timeout, 请在node上跑, 反正不会爆栈
+#+HTML: <a class="jsbin-embed" href="http://jsbin.com/cerase/2/embed?js,console">JS Bin</a><script src="http://static.jsbin.com/js/embed.js"></script>
