@@ -1,0 +1,325 @@
+#+title: Clojure 风格的 JavaScript 并发编程
+#+description: 用原生 javascript es6 实现类似clojure core.async 风格的异步任务, 拜拜 callback hell
+#+keywords: javascript, es6, clojure, clojurescript, core.async, ecmascript6, golang, go, callback hell
+#+author: Jichao Ouyang
+#+date: <2015-04-28 Tue>
+
+#+INCLUDE: "../!ann.org"
+- *[[./clojure-core.async-essence-in-native-javascript.org][JavaScript玩转Clojure大法之 - 并发编程]]*
+- [[./clojure-essence-in-javascript-transducer.org][JavaScript玩转Clojure大法之 - Transducer]]
+- [[./clojure-essence-in-javascript-trampoline.org][JavaScript玩转Clojure大法之 - Trampoline]]
+- [[./clojure-essence-in-javascript-macro.org][JavaScript玩转Clojure大法之 - Macro (1)]]
+
+在看到第一行JavaScript代码之前，我要啰嗦一下为什么要用 clojure core.async 的异步风格。
+* TL;DR SLIDES
+#+HTML: <iframe src="http://git.io/js-csp" width="800" height="600" seamless="true"></iframe>
+
+* Communicating Sequential Processes
+通信顺序进程, 是计算机科学中用于一种描述并发系统中交互的形式语言, 简称CSP, 来源于C.A.R Hoare 1978年的论文. 
+没错了, Hoare就是发明 +让我们算法课纠结得快挂科的+ 快排算法的那位大牛. 
+
+CSP最近由于Go语言的兴起突然复活, [[http://talks.golang.org/2012/concurrency.slide#1][Go]]实现了CSP并发编程, 并且起名叫 /goroutines and channels/, 由于实在是太好用了, Clojure 也加入了
+CSP的阵营, 叫做 Core.async.
+
+** 什么是并发
+并发可能很容易和并行混淆, 但是结合我们自己想一想,还是很容易分得清的.
+
+[[./images/typing.gif]]
+
+如果我正在上班写代码,想加个班然后发个短信给老婆说晚点回, 发完以后继续敲代码. 那么发短信和敲代码两个任务就是 *并发*.
+
+但如果我还特别喜欢音乐, 所以我边听音乐边敲代码, 那么交代吗和听音乐两个任务就是并行了.
+
+所以说, 并行与并发的最大区别就是后者任务之间是互相阻塞的, 任务不能同时运行,因此在执行一个任务时就得阻塞另外一个任务.
+
+** 异步与多线程
+说到并发, 大概都会联想到多线程.
+
+继续敲代码这个例子, 我现在fork出来一个手发短信, 但是我还是只有一个脑袋, 在发短信的时候我的脑子还是只能集中在
+如何编制一个理由向老婆请假, 而另外两只手只能放在键盘上什么也改不了, 直到短信发出去, 再继续写代码.
+
+[[./images/octo-leela.gif]]
+
+所以多线程开销还是很大(我得再长一个手...完了还要缩回去...), 而且其他两只手其实是闲置(阻塞)着的.
+
+[[https://www.evernote.com/shard/s23/sh/a65f9743-792e-4f57-8108-ede856b3f464/725cdaf31754164ac80e82f1cbf6f5d6/deep/0/Csp.png]]
+
+因此, 另外一种更省资源的处理并发的方式就出现了--异步. 对了, 就是我们在js里经常发ajax的那个异步.
+
+比如我还是两只手, 我发完短信继续就敲代码了, 这时, 老婆给我回了一条短信, 那我放下手中的活, 拿起手机看看居然说
+同意, 于是放下手机继续敲代码了.
+
+注意这段动作与之前多线程的区别, 多线程的场景是我fork了第三只手, 而那只手在我敲代码是一直握着手机, 等待着老婆的回复.
+于是异步是不是比多线程的情况少用了只胳膊而且利用率更高呢.
+
+** CSP
+那么你就要问了, 你是怎么知道手机响的, 还不是要开一个线程让耳朵监听着. 对的, 但是异步只需要很少的有限个线程就好了, 比如我有十个手机
+要发给十个老婆, 我还是两个线程, 而如果是多线程的话我要fork出来十只手. JS的异步就是这么干的, 一个专门
+的 [[https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/EventLoop][event loop]] 用于挂各种需要执行的任务.
+
+*** Event loop
+Event loop 模式非常简单, 浏览器运行javascript就是从 event loop 里面取任务, 队列中任务的来源为函数调用栈与事件绑定.比如
+- 每写一行 =f()=, 就会加到event loop的队列中, event loop运行该任务直到调用栈
+- 每写一次执行到 =setTimeout(somefunction,0)=, 会立马往队列加入 =somefunction= (如果不是0, 则是n长时间后加入队列)
+
+[[https://www.evernote.com/shard/s23/sh/609488c9-b816-425e-9031-f0a2b1ac72f8/a3b5af41e63435d2b3fef4bff653b790/deep/0/Csp.png]]
+
+#+BEGIN_SRC javascript
+function a(){
+  console.log('a');
+}
+function b(){
+  console.log('b');
+}
+function timeout(){
+  console.log('timeout');
+}
+setTimeout(timeout,0);
+a();
+b();
+// => "a"
+// => "b"
+// => "timeout"
+#+END_SRC
+
+所以这样一行代码的消息队列应该是这样的(处理顺序从左至右)
+
+  +-----------+-----+-----+--------+
+  |setTimeout |a    |b    |timeout |
+  +-----------+-----+-----+--------+
+
+
+现在我们用JS的异步模型来再实现一下前面的例子
+
+#+HTML:  <a class="jsbin-embed" href="http://jsbin.com/jobope/2/embed?js,console">JS Bin</a><script src="http://static.jsbin.com/js/embed.js"></script>
+
+js把判断老婆同不同意的函数挂到了event loop队列中, 就继续执行下一任务, 如果有短信回复的事件触发,那么就执行这个函数,也就是看看短信老婆同不同意.
+
+用event loop这种事件回调的形式看起来还挺高效的, 而且js一直也是这么用的, 但是当事件多了之后就会出现 /Callback hell/,
+为什么说是 callback hell 呢, 仔细看看前面例子中
+
+[[http://seajones.co.uk/content/images/2014/12/callback-hell.png]]
+
+只要有一个函数式callback,那么所有调用他的函数都要变成callback了
+
+于是JS世界又出现了 Promises, 而且很快红火了起来, 因为他能平铺开这些callback函数. 其实就是把函数体内的callback放到了 =then= 里然后 =chain= 起来.
+
+#+BEGIN_QUOTE
+但是callback hell 变成了串联的 callback hell, 原来是一大坨,现在是串起来的一大坨
+#+END_QUOTE
+
+于是CSP及时跑出来把大家从callback hell中拯救出来.
+
+*** CSP, Channel, Goroutines
+
+CSP 的概念非常简单, 想象一下 event loop
+
+1. CSP 把这个event loop的消息队列转换成一个数据队列, 把这个队列叫做 /channel/
+2. 任务等待队列中的数据
+
+[[https://www.evernote.com/shard/s23/sh/8c5eadb4-678b-4aec-b7df-ca03ffc36da5/775db9fd0da008539b45b924d30c1c50/deep/0/Csp.png]]
+
+这样就成功的把任务和异步数据成功从 callback hell 分离开来.
+
+等等, 还是刚才发短信的例子, 我们来用CSP实现一遍
+
+#+BEGIN_SRC clojure -r
+(def working (chan))
+(def texting (chan))
+
+(defn boss-yelling []
+  (go-loop [no 1]
+    (<! (timeout 1000))
+    (>! working (str "bose say: work " no))
+    (recur (+ no 1))))
+
+(defn wife-texting [] (ref:wife)
+  (go-loop []
+    (<! (timeout 4000))
+    (>! texting "wife say: come home!")
+    (recur)))
+
+(defn reading-text [] (ref:reading)
+  (go-loop []
+    (println (<! texting) "me: ignore")
+    (recur)))
+
+(defn work []
+  (go-loop []
+    (println (<! working) " me: working")
+    (recur)))
+
+(boss-yelling)
+(wife-texting)
+(work)
+(reading-text)
+
+#+END_SRC
+#+HTML: <a class="jsbin-embed" href="http://jsbin.com/muliva/2/embed?console">JS Bin</a><script src="http://static.jsbin.com/js/embed.js"></script>
+
+不懂clojure没有关系,我可以解释 +我不听我不听我不听!+ 而且我还会在后面用JS实现一遍
+- 可以看出 boss yelling, wife texting, me working 和 reading text 四个任务是 *并发* 进行的
+- 所有任务都相互没有依赖, 完全没有callback, 没有哪个任务是另一个任务的callback, 他们都只依赖于 =working= 和 =texting= 两个channel
+- 其中的 =go-loop= 神奇的地方是, 它循环获取channel中的数据, 当队列空时,它会 +阻塞+ parking, 因为并没有阻塞线程, 而是保存当前状态, 继续去试另一个 =go= 语句.
+- 拿 =work= 来说, =(<! texting)= 就是从 channel texting 中取数据, 如果texting为空,则parking
+- 而对于任务 =wife-texting=, =(>! texting "wife say: come home!")= 是往 channel texting 中加数据, 如果 channel 已满, 则 parking
+
+
+* CSP in JavaScript[fn:2]
+瞅瞅我们都要实现写什么
+- goroutines
+- timeout
+- take (<!)
+- put (>!)
+当然首先要实现最重要的 goroutines, 但是在这之前, 让我们看看JavaScript一个碉堡的新feature -- /generator/
+
+** Generator
+[[http://blog.dev/javascript/essential-ecmascript6.html#sec-9][ES6 终于支持了Generator]], 目前Firefox与Chrome都已经实现.[fn:1] Generator在每次被调用时放回 =yield= 的值, 并保存状态, 下次调用时继续运行. 
+这种功能听起来刚好符合上例中神奇的 parking 的行为, 因此完全可以用 generator 来实现 CSP.
+
+[[./images/bender-generator.gif]]
+
+
+** Goroutines in JavaScript
+goroutines 其实就是一个状态机, generator为输入
+- 一个函数
+- 他可以接受一个 [[(generator)][generator]]
+- 如果generator没有下一步,则结束
+- 如果该步的返回值状态为 park, [[(parking)][那么就是什么也不做, 过一会再来进入状态机尝试]]
+- 如果为 continue, [[(continue)][这接着generator下一步, 继续循环]]
+#+BEGIN_SRC javascript -r
+function go_(machine, step) {
+  while(!step.done) {
+    var arr   = step.value(),
+        state = arr[0],
+        value = arr[1];
+    switch (state) {
+      case "park":
+        setTimeout(function() { go_(machine, step); },0); (ref:parking)
+        return;
+      case "continue":
+        step = machine.next(value); (ref:continue)
+        break;
+    }
+  }
+}
+
+function go(machine) {
+  var gen = machine(); (ref:generator)
+  go_(gen, gen.next());
+}
+#+END_SRC
+
+** timeout
+一个类似于 thread sleep 的功能, 想让任务能等待个一段时间再执行,
+只需要在 =go_= 中加入一个 timeout 的 =case= 就好了
+#+BEGIN_SRC javascript
+...
+  case 'timeout':
+    setTimeout(function(){ go_(machine, machine.next());}, value);
+    return;
+...
+#+END_SRC
+如果状态是timeout, 那么等待 =value= 那么长的时间再执行generator下一步.
+
+另外还需要一个返回 timeout channel 的函数
+#+BEGIN_SRC javascript
+function timeout(interval){
+  var chan = [interval];
+  chan.name = 'timeout';
+  return chan;
+}
+#+END_SRC
+
+** take <!
+当 generator 从 channel 中 take 数据时
+  - 如果 channel 空, 状态变为 park
+  - 如果 channel 非空, 获得数据, 状态改成 continue
+  - 如果是 timeout channel, 状态置成 timeout
+
+#+BEGIN_SRC javascript
+function take(chan) {
+  return function() {
+    if(chan.name === 'timeout'){
+      return ['timeout', chan.pop()];
+    }else if(chan.length === 0) {
+      return ["park", null];
+    } else {
+      var val = chan.pop();
+      return ["continue", val];
+    }
+  };
+}
+#+END_SRC
+
+** put >!
+当 generator 往 channel 中 put 数据
+  - 如果 channel 空, 状态变为 continue, 放入数据
+  - 如果 channel 非空, parking
+
+#+BEGIN_SRC javascript
+function put(chan, val) {
+  return function() {
+    if(chan.length === 0) {
+      chan.unshift(val);
+      return ["continue", null];
+    } else {
+      return ["park", null];
+    }
+  };
+}
+#+END_SRC
+
+** JavaScript 版本 的 CSP
+现在可以原原本本的将之前的clojure的例子翻译成JavaScript了
+#+BEGIN_SRC javascript
+function boss_yelling(){
+  go(function*(){
+    for(var i=0;;i++){
+      yield take(timeout(1000));
+      yield put(work, "boss say: work "+i);
+    }
+  });
+}
+
+function wife_texting(){
+  go(function*(){
+    for(;;){
+      yield take(timeout(4000));
+      yield put(text, "wife say: come home");
+    }
+  });
+}
+
+function working(){
+  go(function*(){
+    for(;;){
+      var task = yield take(work);
+      console.log(task, "me working");
+    }
+  });
+}
+
+function texting(){
+  go(function*(){
+    for(;;){
+      var read = yield take(text);
+      console.log(read, "me ignoring");
+    }
+  });
+}
+boss_yelling();
+wife_texting();
+working();
+texting();
+#+END_SRC
+
+完整代码
+#+HTML: <a class="jsbin-embed" href="http://jsbin.com/savepe/5/embed?js,console">JS Bin</a><script src="http://static.jsbin.com/js/embed.js"></script>
+
+
+* Footnotes
+
+[fn:1] Chrome有一个 feature toggle 可以打开部分 es6 功能.  打开 =chrome://flags/#enable-javascript-harmony= 设置为 =true=
+
+[fn:2] 里面的go的实现来自 http://swannodette.github.io/2013/08/24/es6-generators-and-csp/

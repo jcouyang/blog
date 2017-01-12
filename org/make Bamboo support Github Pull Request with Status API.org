@@ -1,0 +1,174 @@
+#+DESCRIPTION: bamboo does not come with native support of github commit status api, but we can still hack it to do the similar thing for our pull request
+#+KEYWORDS: bamboo,github,status api,commit,pull request,PR,atlassian
+#+DATE: <2015-02-18 Wed>
+
+* what's wrong with Bamboo
+#+INDEX: bamboo
+if you used /travis-ci/ on github, you may familiar with this thing when sending pull request
+
+[[https://www.evernote.com/shard/s23/sh/02feb345-c27f-4002-8da2-11ccff9ab738/91cb36568f599ac8f0c4c3ad4e37bed8/deep/0/Screen-Shot-2015-02-17-at-4.19.12-PM.png]]
+
+those green things came from github status api.
+
+but /bamboo/ does not come with native support for github status api
+
+but here's some hack you can do to achieve similar thing travis does.
+
+* bamboo magic
+there's thing in /bamboo/ called =custom build=, which mean you can custom variable in bamboo's build.
+
+you can simply trigger a custom build via /GUI/ 
+
+[[https://www.evernote.com/shard/s23/sh/879a97d4-62f3-4964-805b-22c5d9fe3650/776a3754c17edc1ea3593c734347e301/deep/0/Contracts---Condor-AWS--Plan-summary---Atlassian-Bamboo.png]]
+
+or /API/
+#+BEGIN_SRC sh
+curl -XPOST -u name:password http://your.bamboo.domain/rest/api/latest/queue/:build-key?bamboo.variable.blah=blahblah
+#+END_SRC
+
+then the custom varibale is available via =$bamboo_blah=
+
+and your build will also display a little bit different such as
+
+[[https://www.evernote.com/shard/s23/sh/1fa24fdf-224d-472c-8f4f-6ecd97bcc069/26a3a2c92da01e543d761cdacedbfbb3/deep/0/Contracts---Condor-AWS-113--Build-result-summary---Atlassian-Bamboo.png]]
+
+* github webhook
+#+INDEX: github!webhook
+
+now we can config github webhook say, ok, I'd like bamboo to be trigger whenever a pull request is opened.
+
+with the hubot endpoint and variable we need
+
+http://your.hubot.com/trigger-bamboo?bamboo=http://your.bamboo.com&buildKey=planBuildKey&room=optional-slack-channel
+
+[[https://www.evernote.com/shard/s23/sh/311a6aad-132c-447f-9fe6-23abaec16252/3f22258fb8b72fc1fd1a7c2ced0db94d/deep/0/Screen-Shot-2015-02-13-at-11.35.29-AM.png]]
+
+
+* but what about the custom variables
+bamboo need special form of variables, so we need something middleware to convert webhook payload from github... 
+
+I simply create a [[https://hubot.github.com][hubot]] and a very simple script[fn:1] to achieve that.
+
+#+BEGIN_SRC javascript
+robot.router.post "/hubot/trigger-bamboo", (req, res) ->
+    query = querystring.parse(url.parse(req.url).query)
+    bamboo_url = query.bamboo
+    build_key = query.buildKey
+    room = query.room
+    res.end "" if !bamboo_url || !room
+    data = req.body
+    eventType = req.headers["x-github-event"]
+    console.log "Processing event type #{eventType}..."
+ 
+    try
+      if eventType in eventTypes
+        robot.http("#{bamboo_url}/rest/api/latest/queue/#{build_key}?bamboo.variable.pull_sha=#{data.pull_request.head.sha}&bamboo.variable.pull_num=#{data.number}") (ref:post-bamboo-api)
+          .post()
+#+END_SRC
+
+you can easily install the script for you hubot
+
+#+BEGIN_SRC sh
+npm install hubot-bamboo-pr --save
+#+END_SRC
+
+andd add it to =external-scripts.json= file
+#+BEGIN_SRC diff
+  [
+    "hubot-something-else",
+    + "hubot-bamboo-pr"
+  ]
+#+END_SRC
+
+then point your github hook to hubot.
+
+* config Bamboo plan
+We'd like only run the PR only in testing, and stop build after testing. 
+imaging if your build originally looks like this:
+- testing
+  - checkout code
+  - run test
+- tagging
+- publish
+- deploy to Staging
+- deploy to Production
+
+so here're things a PR build should look like:
+- testing
+  - checkout code
+  - checkout pull request code
+  - run test
+  - notify github status api
+- stop build when it's a PR build
+- tagging
+- publish
+- deploy to Staging
+- deploy to Production
+
+so when build trigger by hubot with custom variables, ideally your build should look like:
+
+[[https://www.evernote.com/shard/s23/sh/00c1ee53-b1c3-4238-a83c-a8085e3ee024/b728939aba1996973c1e3879e25cf8d7/deep/0/Screen-Shot-2015-02-26-at-2.48.32-PM.png]]
+
+
+some credentials you may need
+
+- =$bamboo_GITHUB_STATUS_API_password=
+you need github status api token [[(githubapi1)][here]] [[(githubapi2)][there]] and +everywhere+
+
+you can get a status api token from github GUI /Setting > Applications > Generate new token/ 
+
+tick only =repo:status= for /Status API/ purpose only and much more safer.
+
+- =$bamboo_BAMBOO_password=
+you need /bamboo password/ for stoping build, just create a share user with less permission
+
+** checkout PR code
+#+BEGIN_SRC sh
+#!/bin/bash
+GITHUB_API=https://api.github.com
+# if github enterprise https://your.github.domain/api/v3
+if [[ -n ${bamboo_pull_num} ]]; then
+  echo "== send pending status =="
+  curl -H "Authorization: token $bamboo_GITHUB_STATUS_API_password" --request POST -k --data "{\"state\": \"pending\", \"description\": \"building...\", \"target_url\": \"$bamboo_resultsUrl\"}" https://$GITHUB_API/repos/the-money/condor/statuses/$bamboo_pull_sha > /dev/null  
+  echo "git fetch PR $bamboo_pull_num =="
+  git fetch ${bamboo.repository.git.repositoryUrl} +refs/pull/$bamboo_pull_num/merge:
+  git checkout FETCH_HEAD
+fi
+#+END_SRC
+
+** notify github status
+#+BEGIN_SRC sh -n -r
+#!/bin/bash
+STATUS=$?
+if [[ -n ${bamboo_pull_sha} ]]; then
+  if [ $STATUS != 0 ]; then
+    echo 'pull reqeust build failed'
+    curl -k -H "Authorization: token $bamboo_GITHUB_STATUS_API_password" --request POST --data "{\"state\": \"failure\", \"description\": \"failure:(\", \"target_url\": \"${bamboo.buildResultsUrl}\"}" $GITHUB_API/repos/:user/:repo/statuses/$bamboo_pull_sha > /dev/null (ref:githubapi1)
+  else
+    echo 'pull request build success'
+    curl -k -H "Authorization: token $bamboo_GITHUB_STATUS_API_password" --request POST --data "{\"state\": \"success\", \"description\": \"Success:)\", \"target_url\": \"${bamboo.buildResultsUrl}\"}" $GITHUB_API/repos/:user/:repo/statuses/$bamboo_pull_sha > /dev/null (ref:githubapi2)
+  fi
+fi
+#+END_SRC
+
+place =checkout PR= and =notify github status= script in this order
+
+[[https://www.evernote.com/shard/s23/sh/81f23ebb-35cd-412b-8d5a-2f616df42c98/02a59a2fc34af8bca7797b3454d02b9a/deep/0/Contracts---Condor-AWS---Condor-Jasmine-Tests--Edit-job-configuration---Atlassian-Bamboo.png]]
+
+** stop build if PR
+create new /stage/ for _stop build_ task
+#+BEGIN_SRC sh -n -r
+#!/bin/bash 
+if [[ -n ${bamboo_pull_num} ]]; then
+  echo 'stoping bamboo'
+  curl "http://${bamboo_BAMBOO_USER}:${bamboo_BAMBOO_password}@your.bamboo.domain/build/admin/stopPlan.action?${bamboo.planResultKey}-${bamboo.buildNumber}"
+fi
+#+END_SRC
+
+
+* Footnotes
+
+[fn:1] checkout completed source code here [[https://gist.github.com/jcouyang/0201a80d4657b000cec7]]
+
+
+

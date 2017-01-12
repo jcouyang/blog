@@ -1,0 +1,198 @@
+[[../images/robot-what.gif]]
+
+* 写个简单的parser
+#+PROPERTY: header-args :tangle src/parse.hs
+
+语法分析，需要引入著名的Parsec库, 当然,在这之前得先安装 Parsec
+#+BEGIN_EXAMPLE
+cabal install parsec
+#+END_EXAMPLE
+
+如果没有 cabal 都没装, 请 =brew install cabal=, 非mac用户对不住了,我也不知道怎么装,自行google吧.
+** 定义 parser
+#+BEGIN_SRC haskell :tangle src/parse.hs
+import Text.ParserCombinators.Parsec hiding (spaces)
+import System.Environment
+#+END_SRC
+
+然后实现一个简单的可以解析一些 scheme 符号的 parser
+#+BEGIN_SRC haskell :tangle src/parse.hs
+symbol :: Parser Char
+symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
+#+END_SRC
+
+symbol 等于 =oneOf blahblah=, 返回一个 Parser Monad， 里面是 Char 类型
+** Parse
+下面我们用这个 parser 试试 parse 一下
+
+#+BEGIN_SRC haskell
+readExpr :: String -> String
+readExpr input = case parse symbol "lisp" input of
+    Left err -> "No match: " ++ show err
+    Right val -> "Found value"
+#+END_SRC
+
+tadah， 这时出现了 =case=, 如果用 scala 的童鞋就毫不陌生了,没用过 pattern matching的童鞋看过来
+
+这一大坨 =parse symbol "lisp" input= 是一个表达式, 调用 =parse= 函数, 传入 3 个参数 =symbol=, ="lisp"=, =input=. 其中, =input= 是 readExpr 的参数.
+
+我们来看下 [[http://hackage.haskell.org/package/parsec-3.1.6/docs/Text-Parsec-Prim.html#v:parse][parse]] 的类型签名, 可能更清楚一点 +才怪+
+
+#+BEGIN_EXAMPLE
+> :t parse
+parse
+  :: Text.Parsec.Prim.Stream s Data.Functor.Identity.Identity t =>
+     Text.Parsec.Prim.Parsec s () a
+     -> SourceName -> s -> Either ParseError a
+#+END_EXAMPLE
+
+好吧,先忽略掉中间那一大坨,来看看 =->= 最右边的类型是个 =Either ParseError a=, 读出来就是 Either ParserError or a, 这就是 =parse= 函数的 /返回值/ 类型了, 这个类型总之是个 Either, 里面要么是 ParserError 要么是个 a, 而 a 就是前面 =Text.Parsec.Prim.Parsec s () a= 里的 a
+
+** Either
+
+先不管细节,大体上来说, parse 接收 一个 Parsec 类型, 一个描述, 一个 Stream 类型, 返回一个 Either
+
+先看 readExpr 什么效果:
+#+BEGIN_EXAMPLE
+> readExpr "a"
+"No match: \"lisp\" (line 1, column 1):\nunexpected \"a\""
+#+END_EXAMPLE
+
+这时明显走的是 =Left err -> "No match: " ++ show err= 这个分支, 而
+#+BEGIN_EXAMPLE
+> readExpr "*"
+"Found value"
+#+END_EXAMPLE
+
+走的是 =Right= 分支.
+
+所以在我们来解释 case, 根据代换原则, case 的就是 parse 的返回值 Either, Either 是一个 ADT, union type, scala里面是 trait + case class. 所以 Either 其实就是几种类型的 union. 当 case 一个 Either 的时候, 我们可以 match 两个类型, Left 或者 Right. 而通常来说 Right 里面永远会放 right 的东西, 所以 Left 就是不 right 的咯.
+
+** pattern matching
+
+下来是 of 后面的 =blah -> blah blah=
+
+如果是 =Left err= Left 的内容就会绑定到 =err=, =->= 右边的表达式就可以用到绑定 =err= 了.
+
+同理, 也可以拿到 Right 的内容并绑定到 =val=
+
+* 空白符
+现在我们能拿到 scheme 的 symbol 了, 作为一个 parser 还需要过滤掉一些没用的空白符, 比如说空格先:
+
+#+BEGIN_SRC haskell :tangle src/parse.hs
+spaces :: Parser ()
+spaces = skipMany1 space
+#+END_SRC
+
+这里我们定义了 =spaces= 函数, 这也是为什么要在之前的 =import= 的时候 =hiding= 掉 =Parsec= 里的 =spaces=
+
+#+BEGIN_SRC haskell :tangle src/parse.hs
+readExpr input = case parse (spaces >> symbol) "lisp" input of
+    Left err -> "No match: " ++ show err
+    Right val -> "Found value"
+#+END_SRC
+
+这里将 =spaces= 用 =>>= 拼到 =symbol= 前面, =>>= 读 bind, 在不同的 monad 中, =>>= 的行为也不一样, 这里作为 Parsec Monad, =>>= 意思是用 spaces 去 parse, 结果丢弃掉, 然后再用 symbol 去 parse.
+
+* 返回值
+到现在为止我们的parser也只能说打印是否找到合法的输入, 但是还不能真正的将输入字符parse成为数据结构.
+
+所以假设我们先来实现将读入的字符转换成值, scheme 的值有这么几种
+#+BEGIN_SRC haskell
+data LispVal = Atom String
+             | List [LispVal]
+             | DottedList [LispVal] LispVal
+             | Number Integer
+             | String String
+             | Bool Bool
+#+END_SRC
+
+如果你还记得之前提到的 Either 是 ADT, 那么现在这个 =LispVal= 就是一个 ADT, 在 haskell 定义一个 ADT 特别简单, 关键字 =data= 声明 =LispVal= 是一个ADT, 等号右边是构造器, 比如
+
+- =Atom String= 表示可以通过 =Atom "blah"= 就创建出来一个 LispVal data, 里面包含一个 Haskell String 类型的值
+- =List [LispVal]= 表示 List 里有一个 LispVal 类型的数组, 比如 =List [Atom "blah"]=
+- =DottedList [LispVal] LispVal= 构造器接收两个参数, 一个是 LispVal 类型的数组,一个是 LispVal
+
+所以这么定义下来, 说明 scheme 的值类型有这么6种
+- Atom 即名字什么的 =(foo bar)=
+- List 数组 =(1 2 3)=
+- DottedList 带点数组 =(1 2 . 3)=
+- Number 数字
+- String 字符
+- Bool 布尔 
+
+** ParseString
+有了这个抽象数据类型 ADT,我们就可以将parse的内容转换成 scheme 的 ADT, 首先,试试 parse 个 String
+
+#+BEGIN_SRC haskell
+parseString :: Parser LispVal
+parseString = do
+                char '"'
+                x <- many (noneOf "\"")
+                char '"'
+                return $ String x
+#+END_SRC
+
+首先, =parseString= 返回类型 =Parser LispVal=, 实现中把 char, many和 char 都链起来, 意思是先 parse 一个双引号字符, 再 parse many 个不是双引号字符的字符, 返回的 Parser 的内容放入 x, 继续 parse 一个双引号. 最后用我们刚构造的 ADT 构造一个 String 出来.
+
+其中 =$= 是上一章说过的将左结合表达式转换成右结合, 等价于 return =(String x)=. 好处是尽量少些括号是代码更可读.
+
+另外一点就是 =return=, 如果不是用 return, 返回值会是 LispVal 类型, 但是期望的是 =Parser=. 因此在 do 这个 context 中, 所有的 monad 都是 Parser, 比如 =char=, =many=, 都是返回 =Parser= 类型. 那么到最后一个表达式, 可以简单的用 =return= 根据上下文把 =LispVal= 包到 =Parser= monad 中.
+
+** parseAtom
+atom 的parser 也比较直接, 正常的 atom 
+- 第一个字母可以是符号
+- 剩下的部分可以是多个符号数字或者字符
+- =#t= 是 True, =#f= 是 False
+
+#+BEGIN_SRC haskell
+parseAtom :: Parser LispVal
+parseAtom = do 
+              first <- letter <|> symbol
+              rest <- many (letter <|> digit <|> symbol)
+              let atom = first:rest
+              return $ case atom of 
+                         "#t" -> Bool True
+                         "#f" -> Bool False
+                         _    -> Atom atom
+#+END_SRC
+
+这里出现了另外一个Parsec的组合子 =<|>=, 其实是 Parser monad 的或, 也就是如果前面的成功, 就不会继续尝试后面的 Parser.
+
+另一个新东西是 =let=, 它定义了新的绑定 =atom=, 到 =first:rest= 上.
+
+=_= 匹配所有剩下的 case
+
+** parseNumber
+
+#+BEGIN_SRC haskell
+parseNumber :: Parser LispVal
+parseNumber = liftM (Number . read) $ many1 digit
+#+END_SRC
+
+=many1 digit= 匹配一个或多个数字, 返回一个 =Parser String=
+
+=(Number . read)= 就是 Number compose read, 也就是先 apply read, 返回的结果 apply 给 Number. 
+
+组合好的函数还是不能处理 =many1 digit= 返回的 =Parser String=, 因为 read 期待一个 =String= 类型.
+
+所以我们使用 =LiftM= 将组合好的函数, lift 成 Monad(确切的说是 Applicative), 在这个context, Monad 就是 =Parser=
+
+** 最后
+有了这几个 parser, 可以用我们刚见过的 =<|>= 把它们拼起来
+
+#+BEGIN_SRC haskell
+parseExpr :: Parser LispVal
+parseExpr = parseAtom
+         <|> parseString
+         <|> parseNumber
+#+END_SRC
+
+用我们的新 parser 放到 =readExpr= 中:
+
+#+BEGIN_SRC haskell
+readExpr :: String -> String
+readExpr input = case parse parseExpr "lisp" input of
+    Left err -> "No match: " ++ show err
+    Right _ -> "Found value"
+#+END_SRC

@@ -1,0 +1,335 @@
+#+title: 自制语言初试 - 入lang
+#+desciption: 用macro和mori自制更native的ClojureScript
+#+keywords: macro, javascript, clojure, lisp, sweetjs, meta programming
+#+date: <2015-06-22 Mon>
+
+#+HTML: <a aria-label="Star jcouyang/ru on GitHub" data-count-aria-label="# stargazers on GitHub" data-count-api="/repos/jcouyang/ru#stargazers_count" data-count-href="/jcouyang/ru/stargazers" data-style="mega" data-icon="octicon-star" href="https://github.com/jcouyang/ru" class="github-button">Star</a>
+
+#+HTML: <a href="https://news.ycombinator.com/submit" class="hn-button" data-url="http://ru-lang.org" data-count="horizontal">Vote on Hacker News</a><script type="text/javascript">var HN=[];HN.factory=function(e){return function(){HN.push([e].concat(Array.prototype.slice.call(arguments,0)))};},HN.on=HN.factory("on"),HN.once=HN.factory("once"),HN.off=HN.factory("off"),HN.emit=HN.factory("emit"),HN.load=function(){var e="hn-button.js";if(document.getElementById(e))return;var t=document.createElement("script");t.id=e,t.src="//hn-button.herokuapp.com/hn-button.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(t,n)},HN.load();</script>
+
+* Rationale(为毛要整一门语言)
+[[./images/tv-giving-me-reason-to-live.gif]]
+
+** ClojureScript怎么就不好了
+接上篇简单的介绍sweet.js之后, 萌发了特别crazy的idea. 如果CoffeeScript或者LiveScript也算
+语言的话, 其实单单用sweet.js自制一堆macro就能实现类似的语言. 当然, 这两门语言都比较奇特, 一个
+像似ruby和python的熊孩子, 另一个是F#和coffee的熊孩子, 总之, 没有一门是符合我自己的编程习惯.
+
+而如果用Clojure写前端也就是用ClojureScript的话, 由于是完全另一门语言, 跟JS其他库交互会非常麻烦. 而像Coffee则没有
+这个问题, 难道就不能有一种ClojureScript可以完全兼容JavaScript, 又可以用到Clojure的各种
+奇特函数呢.
+
+** ClojureScript的数据结构移植
+ClojureScript的作者David做了一个非常有意思的项目,把ClojureScript的数据结构单独导出来做成类似underscore的库 - [[https://github.com/swannodette/mori][mori]].
+官方的解释是
+#+BEGIN_QUOTE
+A simple bridge to ClojureScript's persistent data structures and supporting APIs for vanilla JavaScrip
+#+END_QUOTE
+恩, 这不正是我想要的吗. 可以直接在JavaScript中使用ClojureScript的数据结构.
+
+但是...
+
+** 那macro呢
+
+David导出了所有的数据结构以及function, 但是像macro却不可能直接导成JavaScript, 因为是编译时
+扩展的.
+
+但是macro却是clojure(或者lisp语言)最吸引人的地方之一. 如果能移植过来讲会开启在用原生JS中使用到
+所有ClojureScript features的无限可能. 比如就可以把 [[./clojure-core.async-essence-in-native-javascript.org][core.async]] 移植过来.
+
+于是为了验证移植macro的可能性, 我用Sweet.js实现了部分macro或者clojure的keyword, 我把这些
+macros和mori的集合叫 [[http://ru-lang.org][ru-lang]] , 这样就可以用类似JavaScript的形式, 使用到所有Clojure的好处.
+
+#+BEGIN_QUOTE
+Hacker News 上的讨论 https://news.ycombinator.com/item?id=9749286
+#+END_QUOTE
+
+* Ru-lang, The First Attampt
+叫做  [[http://ru-lang.org][ru-lang]] 有两层意思
+- "入"长得像 \lambda 的汉字, 所以 "入-lang" 也长得像 Clojure 的 JavaScript
+- "入" 表示一些东西新加入JavaScript
+
+** lambda
+Clojure有一个很cool的macro, =#{}=, 匿名函数的macro, cool的地方是它可以用 =%1=, =%2=
+代表第几个参数. 特别方便比如是在用map的时候
+#+BEGIN_SRC clojure
+(map #(%+3) [1,2,3,4])
+#+END_SRC
+
+移植这个macro还是比较简单的, 虽然真正的 =#= 在clojure中是一个切换reader table的标志, 可能
+要更复杂一下, 但是这里我们只是想要一个简单的带place holder的匿名函数.
+
+由于#算是sweetjs的保留字符, 我把 =#= 换成 =fn= 来代替, =%= 在js里又是运算符, 改用 =$= 代替, 
+那么ru-lang版的匿名函数就变成了
+#+BEGIN_SRC javascript
+map(fn($+3), [1,2,3,4])
+#+END_SRC
+
+很像clojure对不对, 但是又还是保留了js的语法, 是不是有点感觉怪怪的东西悄悄乱入了
+
+实现的思路则非常简单, 使用 [[./clojure-essence-in-javascript-macro.org][上篇]] 提到的 Case macro
+1. 把 =fn= 的参数里面所有的 =$n= token 找到
+2. 把所有token的 =$n= 变成 =arguments[n]=
+3. 用js的匿名函数包上, 返回
+
+#+BEGIN_SRC javascript
+macro fn {
+case {
+  $ctx
+  ($body:expr)
+}=>{
+  function replace_args(stxs){
+    return stxs.map(function(x){
+      if(x.token.inner) {x.token.inner = replace_args(x.token.inner); return x}
+      if(x.token.type==parser.Token.Identifier && x.token.value.match(/^\$(\d?)$/)){
+        var num = x.token.value.match(/^\$(\d?)$/).pop()
+        if(!num) num=1;
+        return makeIdent('arguments['+(num-1)+']',#{$body});
+      }
+      return x;
+    })
+  }
+  var body = replace_args(#{$body})
+  letstx $new_body = body
+  return #{
+    (function(){return $new_body})}
+}
+}
+
+export fn;
+#+END_SRC
+
+注意 =replace_args= 是递归的去替换所有token以及token的inner token
+
+这个太简单了,来个难点的macro吧
+
+** Let
+let 怎么就难了...
+
+当然, clojure的let功能很多的
+- block scope binding
+- 如果是array或者map, 还能destructure
+- 如果是递归的let, 就变成了looprecur
+
+因此我们要实现let需要实现4个东西
+- block scope binding
+- destruture array
+- destructure map
+- looprecur
+
+我们一样一样来
+
+*** block scope binding
+我们都知道js var是function scope, 也就是说可以
+#+BEGIN_SRC javascript
+  var a =1;
+  for(var a=0;a<3;a++){
+    var b = a+1
+  }
+  console.log(a, b)// => 3,3
+#+END_SRC
+
+所有的var会被hoist到函数的顶部, 相当于
+#+BEGIN_SRC javascript
+var a,b;
+a=1
+  for(a=0;a<3;a++){
+    b = a+1
+  }
+#+END_SRC
+
+虽然 [[./essential-ecmascript6.org][es6 支持了 let block scope]] 局部变量的定义, 但还是没有类似clojure的 let 表达式
+
+我喜欢能有这样一个东西
+
+#+BEGIN_SRC javascript
+let(a=1,b=2){a+b} === 3
+#+END_SRC
+
+由于js只有function scope, 所以应该要扩展成
+#+BEGIN_SRC javascript
+  function(a,b){
+    return a+b
+  }(1,2)
+#+END_SRC
+
+
+用macro实现这个再简单不过了
+#+BEGIN_SRC javascript
+  macro let {
+    rule { ($($key:ident=$val:expr) (,)...){$body:expr...$last:expr} } =>{
+      (function($key(,)...){
+        $body...
+          return $last
+      })($val(,)...)
+    }
+  }
+#+END_SRC
+
+so easy, +block scope binding+
+
+*** destruture array
+这个就稍微有那么点难度, 我们先把它分解成小问题
+1. 一个空的binding返回空
+#+BEGIN_SRC javascript
+[]=[1,2,3] -> nothing
+#+END_SRC
+2. 一个正常的binding还是它自己
+#+BEGIN_SRC javascript
+a=[1,2,3] -> a=[1,2,3]
+#+END_SRC
+3. 单个元素的destruct, 等于第一个元素
+#+BEGIN_SRC javascript
+[a] = [1,2,3] -> a=[1,2,3][0]
+#+END_SRC
+4. 多个元素的destruct, 等于用第4部destruct头元素, 用5递归destruct尾部元素
+#+BEGIN_SRC javascript
+[a,b,c] = [1,2,3] -> destruct2(a=1), destruct5([,b,c]=[,2,3])
+#+END_SRC
+5. 尾部的destruct, 同样取第一个元素destruct, 然后自递归
+#+BEGIN_SRC javascript
+[,b,c] = [,2,3] -> destruct2(b=2), destruct5([,c]=[,3])
+#+END_SRC
+6. 最后一个元素的destruct
+#+BEGIN_SRC javascript
+[,c] =[,3] -> c=3
+#+END_SRC
+
+phewww......分解完好像覆盖了所有情况了, 现在用macro实现就太简单了
+#+BEGIN_SRC javascript
+  macro destruct {
+    // 1
+    rule {[]=$val:expr} => {}
+    // 2
+    rule {$id:ident=$val:expr} => {$id=($val)}
+    // 3
+    rule {[$id:ident]=$val:expr} => { $id=($val[0]) }
+    // 6
+    rule { [,$last:ident]=$val:expr}=>{$last=($val[0])}
+    // 5
+    rule {[, $id:ident $tail...]=$val:expr}=> {destruct $id=($val.shift()), destruct [$tail...]=$val.slice(1)}
+    // 4
+    rule {[$id:ident $tail...]=$val:expr} => {destruct $id=($val.shift()), destruct [$tail...]=$val.slice(1)}
+  }
+#+END_SRC
+
+完了吗? 好像还没有, 万一有嵌套呢, 比如这样
+#+BEGIN_SRC javascript
+[a, [b,c]] =[1,[2,3],4]
+#+END_SRC
+
+好吧, 不就是再多一层递归么, 拨开便好了
+#+BEGIN_SRC javascript
+//头部嵌套, 拨开
+rule {[[$id:ident]]=$val:expr} => { destruct [$id]=($val[0]) }
+// 尾部嵌套, 拨开拨开
+rule { [,[$last:ident]]=$val:expr}=>{destruct [$last]=($val[0])}
+#+END_SRC
+
+destructure object 的过程也非常类似, 我就懒得实现了
+*** looprecur
+looprecur其实就是let的尾递归, 很容易变成循环
+#+BEGIN_SRC javascript
+  loop(a=1,b=18){
+    if (a > b)
+      return a
+    recur (a++,b--)
+  }
+#+END_SRC
+其实就是特殊的let, 只是在尾部从新绑定了 a 和 b 的值, 然后在let一下, 虽然是 clojure的东东, 但是这里
+是不是看起来非常的像JS原生呢:)
+
+好了, 我们期待的当然是直接优化成循环了
+#+BEGIN_SRC javascript
+  (fucntion (a,b) {
+    while(true){
+      if(a>b)
+        return a
+      a++;
+      b--;
+    }
+  })(1,18)
+#+END_SRC
+
+let都实现了, 实现这也太容易了
+#+BEGIN_SRC javascript
+macro loop {
+  rule {($params...){$body... recur($binding:expr(,)...)}} => {
+    let($params...){
+      while (true) {
+        $body...;
+          $binding(;)...
+      }
+    }
+  }
+}
+#+END_SRC
+直接调用let就好了, 只要把body循环那么一下, binding放到循环最后.
+** Existential ?
+只移植 clojure 是不是开始有点无聊了, 让我们换换口味. CoffeeScript的判空我一直是非常喜欢, 不如试试也移过来,就可以这样了.
+#+BEGIN_SRC javascript
+a?.b?().c?=1
+#+END_SRC
+
+比起嵌套一大堆if else或者是 Haskell fancy的 maybe monad, 这样的判空操作非常简单而且可读.
+
+[[./images/maybe.gif]]
+
+*** Infix macro
+还记得 [[./clojure-essence-in-javascript-macro.org][上篇]] 提到这次要讲 Infix macro吗, 恩, 要实现 =?= 我们必不可少需要使用Infix macro.
+
+等等, 什么是 Infix macro.
+
+注意前面一堆 macro 的keyword都是在开始的, 比如 let, loop, 都必须以这个关键字开始, macro才知道怎么去扩展.
+
+那么问题来了, =?= 其实是中间的关键字, 我们需要拿到 =?= 前和 =?= 后的 token. 这正是 infix macro 能干的事情.
+
+来思考一下如果拿到 =?= 前后的 token 我们应该要怎么办? 当然是写成 if 判断咯, =?= 前面的是判断对象, 如果为true
+则与后面的token连上(把 =?= 去掉)
+
+#+BEGIN_SRC javascript
+macro (?) {
+  rule infix {$left:expr | $right... } => {
+    (function(){
+      if(typeof $left!=='undefined' && $left!==null){
+        return $left $right...
+      }
+    })()
+  }
+}
+#+END_SRC
+
+注意 infix macro 需要在 rule 后加上 =infix= 的keyword. 当然 infix 不仅可以用于 rule macro, 同样也可以用到
+case macro
+#+BEGIN_SRC javascript
+  macro (?) {
+    case infix {$left:expr |$name $right... } => {
+      return #{
+        (function(){
+          if(typeof $left!=='undefined' && $left!==null){
+            return $left $right...
+          }
+        })()  
+      }
+    }
+  }
+#+END_SRC
+
+稍微不一样的是原来case macro的第一个参数要放到 =|= 后面了
+
+** 在哪里才能买到呢
+[[./images/shut-up-and-take-my-money.gif]]
+
+总之第一次尝试用 sweet.js移植一些macro 或者其他语言的语法糖看似还不错, ru-lang 还在 heavy development 阶段, 虽然
+还不完整, 但是总算可以证实这个想法的可行性, 接下来一块很难啃的骨头应该是移植 core.async.
+
+另外 [[./clojure-essence-in-javascript-macro.org][上篇]] 提到的还说要解释operator, 这里就懒得说了, 如果把 infix macro 的前后都改成 expr, 其实是差不多的,
+只是operator 还会多两个东西, 优先级, 左结合还是有结合. 当然用法跟 infix macro是非常像的, 我就不多说了.
+
+如果对这个项目有兴趣, 不妨接着在hacker news
+#+HTML: <a href="https://news.ycombinator.com/submit" class="hn-button" data-url="http://ru-lang.org" data-count="horizontal">Vote on Hacker News</a><script type="text/javascript">var HN=[];HN.factory=function(e){return function(){HN.push([e].concat(Array.prototype.slice.call(arguments,0)))};},HN.on=HN.factory("on"),HN.once=HN.factory("once"),HN.off=HN.factory("off"),HN.emit=HN.factory("emit"),HN.load=function(){var e="hn-button.js";if(document.getElementById(e))return;var t=document.createElement("script");t.id=e,t.src="//hn-button.herokuapp.com/hn-button.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(t,n)},HN.load();</script>
+上讨论, 或者帮我在github上再加颗星
+#+HTML: <a aria-label="Star jcouyang/ru on GitHub" data-count-aria-label="# stargazers on GitHub" data-count-api="/repos/jcouyang/ru#stargazers_count" data-count-href="/jcouyang/ru/stargazers" data-style="mega" data-icon="octicon-star" href="https://github.com/jcouyang/ru" class="github-button">Star</a><script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+也是极好的.
+
+
