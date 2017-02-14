@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- 2017-02-14 Tue 09:16 -->
+<meta  charset="utf-8">
+<meta  name="viewport" content="width=device-width, initial-scale=1">
+<title>Grokking Monad / 范畴论完全装逼手册</title>
+<meta  name="generator" content="Org-mode">
+<meta  name="author" content="欧阳继超">
+<link rel="icon" href="/favicon.ico">
+<meta name="theme-color" content="#ffffff">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/style/pixyll.css"/>
+<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="http://blog.oyanglul.us/index.xml"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css" />
+<!--[if lt IE 9]>
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.ie.min.css" />
+     <![endif]--> 
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="preamble" class="status">
+<header>
+    <a accesskey="h" href="/index.html"> HOME </a> |
+    <a href="#" id="edit-in-github">EDIT</a> |
+    <a href="/index.xml">RSS</a> |
+    <a href="/archive.html">ARCHIVE</a> |
+    <a href="/theindex.html">INDEX</a> |
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a>
+</header>
+</div>
+<div id="content">
+<header>
+<h1 class="title">Grokking Monad / 范畴论完全装逼手册</h1>
+</header><nav id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgheadline10"><span class="todo TODO">TODO</span> 第一章：Catergory Theory</a>
+<ul>
+<li><a href="#orgheadline1"><i>Category</i></a>
+<ul>
+<li><a href="#orgheadline2"><i>Hask</i></a></li>
+</ul>
+</li>
+<li><a href="#orgheadline3">Functor</a></li>
+<li><a href="#orgheadline4">Natural Transformations / 自然变换</a>
+<ul>
+<li><a href="#orgheadline5">String Diagram</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline6"><span class="todo TODO">TODO</span> <i>Adjunction Functor</i> 伴随函子</a></li>
+<li><a href="#orgheadline7"><span class="todo TODO">TODO</span> Yoneda lemma</a></li>
+<li><a href="#orgheadline8"><i>Monad</i> 单子</a></li>
+<li><a href="#orgheadline9"><i>Kleisli Catergory</i></a></li>
+</ul>
+</li>
+<li><a href="#orgheadline11"><span class="todo TODO">TODO</span> 第二章：Practical Monads</a>
+<ul>
+<li><a href="#orgheadline15">Applicative</a>
+<ul>
+<li><a href="#orgheadline12">Alternative</a></li>
+<li><a href="#orgheadline13">Arrow</a></li>
+<li><a href="#orgheadline14">Bifunctor</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline16">Either</a></li>
+<li><a href="#orgheadline17">Validate</a></li>
+<li><a href="#orgheadline18">Reader</a></li>
+<li><a href="#orgheadline19">Writter</a></li>
+<li><a href="#orgheadline20">State</a></li>
+<li><a href="#orgheadline21">RWS</a></li>
+<li><a href="#orgheadline22">Expection</a></li>
+<li><a href="#orgheadline23">Monad Transform</a></li>
+<li><a href="#orgheadline24">Cont</a></li>
+<li><a href="#orgheadline25">MonadPlus</a></li>
+<li><a href="#orgheadline26">MonadFix</a></li>
+<li><a href="#orgheadline27">ST</a></li>
+<li><a href="#orgheadline28">Free Monad</a></li>
+<li><a href="#orgheadline29">Eff</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav>
+<p>
+很多人都不明白什么是Monad，并不是因为不会用，不知觉可能就在用某种monad。定义和使用起来其实不难，困惑的大多应该是后面的这堆理论&#x2013; <del>饭稠</del> 范畴论。当然，我也没学过范畴论，只是略微看得懂写Haskell罢了。
+</p>
+
+<p>
+我尝试过很多种方式解释，比如为了降低门槛用JS来实现，那Haskell/Scala的人出来喷你们前端这些不懂函数式的人乱搞出来的东西根本就不是monad。比如用图来解释，又会被嫌弃画风不好。但是，作为灵魂画师，我只 <del>是觉得自己萌萌的啊</del> 在乎画的灵魂是否能够给你一点启发。
+</p>
+
+<p>
+好了，安全带系好，我要开车了。为了防止鄙视链顶端的语言用户们喷再嫌弃，我决定就用Haskell好了，其实也不难解释清楚 <del>才怪</del> 。
+</p>
+
+<p>
+这里面很多很装逼的单词(它们都是 <i>斜体</i>)，就算没看懂，把这些词记住也足够装一阵子逼了。
+</p>
+
+<div id="outline-container-orgheadline10" class="outline-2">
+<h2 id="orgheadline10"><span class="todo TODO">TODO</span> 第一章：Catergory Theory</h2>
+<div class="outline-text-2" id="text-orgheadline10">
+</div><div id="outline-container-orgheadline1" class="outline-3">
+<h3 id="orgheadline1"><i>Category</i></h3>
+<div class="outline-text-3" id="text-orgheadline1">
+<p>
+一个 <i>范畴</i> 包含两个玩意
+</p>
+<ul class="org-ul">
+<li>东西 <code>O</code> （Object）</li>
+<li>两个东西的关系，箭头 <code>~&gt;</code> （ <i>Morphism/，书上叫 /态射</i> ）</li>
+</ul>
+
+<p>
+一些属性
+</p>
+<ul class="org-ul">
+<li>一定有一个叫 id 的箭头，也叫做 1</li>
+<li>箭头可以 <i>组合(compose)</i></li>
+</ul>
+
+<p>
+恩，就是这么简单
+</p>
+
+<p>
+这些玩意对应到haskell的typeclass大致就是这样
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Category</span> (c <span style="color: #b8860b;">::</span> <span style="color: #b8860b;">*</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #b8860b;">*</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #b8860b;">*</span>) <span style="color: #00008b;">where</span>
+  id <span style="color: #b8860b;">::</span> c a a
+  (<span style="color: #b8860b;">.</span>) <span style="color: #b8860b;">::</span> c y z <span style="color: #b8860b;">-&gt;</span> c x y <span style="color: #b8860b;">-&gt;</span> c x z
+</pre>
+</div>
+
+<p>
+其中：
+c 是 <i>higher kind</i> ，跟higher order function的定义差不多，它是接收类型，构造新类型的类型。这里的 c 接收一个类型，再接收一个类型，返回个类型。
+</p>
+
+<p>
+对应到定义里是东西 * 通过箭头变另一个 *
+</p>
+
+<p>
+<code>id :: c a a</code> c范畴上的 a 到 a 的箭头
+</p>
+
+<p>
+<code>.</code> 的意思 c 范畴上，接收一个 y到z的箭头，一个 x 到 y 的箭头，返回 x 到 z 的箭头。
+</p>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-4">
+<h4 id="orgheadline2"><i>Hask</i></h4>
+<div class="outline-text-4" id="text-orgheadline2">
+<p>
+Haskell 类型系统范畴叫做 Hask
+</p>
+<p>
+Hask 范畴的：
+</p>
+
+<ul class="org-ul">
+<li>东西是 <code>type</code></li>
+<li>箭头是 <code>-&gt;</code> 也就是函数的箭头</li>
+<li>id 是 a -&gt; a</li>
+<li>compose 当然就是函数组合</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">type</span> <span style="color: #36648b;">Hask</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">(-&gt;)</span>
+<span style="color: #00008b;">instance</span> <span style="color: #36648b;">Category</span> (<span style="color: #36648b;">Hask</span><span style="color: #b8860b;">::</span> <span style="color: #b8860b;">*</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #b8860b;">*</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #b8860b;">*</span>) <span style="color: #00008b;">where</span>
+  (f <span style="color: #b8860b;">.</span> g) x <span style="color: #b8860b;">=</span> f (g x)
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-3">
+<h3 id="orgheadline3">Functor</h3>
+<div class="outline-text-3" id="text-orgheadline3">
+<p>
+两个范畴中间可以用叫Functor的东西来连接起来，简称 T。
+</p>
+<ul class="org-ul">
+<li>范畴间 东西的 Functor 标记为 <code>T(O)</code></li>
+<li>范畴间 箭头的 Functor 标记为 <code>T(~&gt;)</code></li>
+<li>存在一个 T 把所有的 O 和 ~&gt; 都映射到自己，标记为id functor 1_C
+<ul class="org-ul">
+<li>1_C(O) = O</li>
+<li>1_C(~&gt;) = ~&gt;</li>
+</ul></li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> (<span style="color: #36648b;">Category</span> a, <span style="color: #36648b;">Category</span> b) <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Functor</span> a b t <span style="color: #00008b;">where</span>
+  fmap <span style="color: #b8860b;">::</span> c a b <span style="color: #b8860b;">-&gt;</span> d (t a) (t b)
+</pre>
+</div>
+
+<p>
+<code>Functor a b t</code> 这表示从范畴 a 到范畴 b 的一个 Functor t
+</p>
+
+<p>
+如果把范畴 a 和 b 都限制到 Hask 范畴
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Functor</span> <span style="color: #36648b;">(-&gt;)</span> <span style="color: #36648b;">(-&gt;)</span> t <span style="color: #00008b;">where</span>
+  fmap <span style="color: #b8860b;">::</span> <span style="color: #36648b;">(-&gt;)</span> a b <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">(-&gt;)</span> (t a) (t b)
+</pre>
+</div>
+
+<p>
+<code>-&gt;</code> 在 Haskell 中是中缀类型构造器，所以是可以写在中间的
+</p>
+
+<p>
+这样就会变成我们熟悉的 Funtor 的 Typeclass（把Functor 的第一第二个参数去掉的话）
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Functor</span> <span style="color: #36648b;">(-&gt;)</span> <span style="color: #36648b;">(-&gt;)</span> t <span style="color: #00008b;">where</span>
+  fmap <span style="color: #b8860b;">::</span> (a <span style="color: #b8860b;">-&gt;</span> b) <span style="color: #b8860b;">-&gt;</span> (t a <span style="color: #b8860b;">-&gt;</span> t b)
+</pre>
+</div>
+
+<p>
+而 <i>endofunctor</i> 就是这种连接相同范畴的 Functor，因为它从范畴 Hask 到达同样的范畴 Hask
+</p>
+<p>
+这里的 fmap 就是 T(~&gt;)，在 Hask 范畴上，所以是 T(-&gt;), 这个箭头是函数，所以也能表示成 T(f) 如果 <code>f:: a -&gt; b</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-3">
+<h3 id="orgheadline4">Natural Transformations / 自然变换</h3>
+<div class="outline-text-3" id="text-orgheadline4">
+<p>
+Functor 是范畴间的映射，而自然变换，则是Functor间的映射。
+</p>
+
+<p>
+所以范畴 c 上的函子 f 到 g 的自然变化就可以表示成
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">type</span> <span style="color: #36648b;">Nat</span> c f g <span style="color: #b8860b;">=</span> c (f a) (g a)
+</pre>
+</div>
+
+<p>
+Hask 范畴上的自然变化就变成了
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">type</span> <span style="color: #36648b;">NatHask</span> f g <span style="color: #b8860b;">=</span> f a <span style="color: #b8860b;">-&gt;</span> g a
+</pre>
+</div>
+
+<p>
+有趣的是，自然转换满足箭头的概念，又可以当成 functor 范畴上的箭头，所以可以定义出来一个 Functor Catergory
+</p>
+
+<ul class="org-ul">
+<li>东西是函子</li>
+<li>箭头是自然变换</li>
+</ul>
+
+<p>
+要成为范畴，还有两点
+</p>
+<ul class="org-ul">
+<li>id 为 f a 到 f a 的自然变换</li>
+<li>自然变换的组合</li>
+</ul>
+
+<p>
+现在维度越来越高了，已经不能用简单的图来描述了，所以需要引入 String Diagram。
+</p>
+</div>
+
+<div id="outline-container-orgheadline5" class="outline-4">
+<h4 id="orgheadline5">String Diagram</h4>
+<div class="outline-text-4" id="text-orgheadline5">
+<p>
+T1 是 范畴 a 到 b 的functor
+</p>
+
+<p>
+T2 是范畴 b 到 c 的functor
+</p>
+
+<p>
+那么 T2 . T1 就是 a 到 c 的funtor咯
+</p>
+
+<p>
+如果T 是范畴a上的endofunctor
+</p>
+
+<p>
+那么可以 T.T 可以写成 TT 或者 T^2
+</p>
+
+<p>
+那么 compose 完的箭头张什么样呢？
+</p>
+
+<p>
+用 Maybe Functor来说
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">Functor category</span>
+<span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Fun</span> f g a b <span style="color: #b8860b;">=</span> <span style="color: #36648b;">FNat</span> (f a <span style="color: #b8860b;">-&gt;</span> g b)
+
+<span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">Endofunctor category</span>
+<span style="color: #00008b;">type</span> <span style="color: #36648b;">End</span> f <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Fun</span> f f
+
+<span style="color: #00008b;">instance</span> <span style="color: #36648b;">Category</span> (<span style="color: #36648b;">End</span> f) <span style="color: #00008b;">where</span>
+  id <span style="color: #b8860b;">=</span> <span style="color: #36648b;">FNat</span> id
+  (<span style="color: #36648b;">FNat</span> f) <span style="color: #b8860b;">.</span> (<span style="color: #36648b;">FNat</span> g) <span style="color: #b8860b;">=</span> <span style="color: #36648b;">FNat</span> (f <span style="color: #b8860b;">.</span> g)
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline6" class="outline-3">
+<h3 id="orgheadline6"><span class="todo TODO">TODO</span> <i>Adjunction Functor</i> 伴随函子</h3>
+</div>
+
+<div id="outline-container-orgheadline7" class="outline-3">
+<h3 id="orgheadline7"><span class="todo TODO">TODO</span> Yoneda lemma</h3>
+</div>
+<div id="outline-container-orgheadline8" class="outline-3">
+<h3 id="orgheadline8"><i>Monad</i> 单子</h3>
+<div class="outline-text-3" id="text-orgheadline8">
+<p>
+有了 Functor，解释 Monad 就简单了。Monad 的定义比 Functor 再多一些要求
+</p>
+<ul class="org-ul">
+<li>首先，它是一个 endofunctor T</li>
+<li>一个从 i_c 到 T 的自然变化 &eta; (eta)</li>
+<li>一个从 T^2 到 T 的自然变化 &mu; (mu)</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Endofunctor</span> c t <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> c t <span style="color: #00008b;">where</span>
+  eta <span style="color: #b8860b;">::</span> c a (t a)
+  mu  <span style="color: #b8860b;">::</span> c (t (t a)) (t a)
+</pre>
+</div>
+
+<p>
+同样，把 c = Hask 替换进去，就得到更类似我们 Haskell 中 Monad 的定义
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Endofunctor</span> m <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> m <span style="color: #00008b;">where</span>
+  eta <span style="color: #b8860b;">::</span> a <span style="color: #b8860b;">-&gt;</span> (m a)
+  mu <span style="color: #b8860b;">::</span> m m a <span style="color: #b8860b;">-&gt;</span> m a
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgheadline9" class="outline-3">
+<h3 id="orgheadline9"><i>Kleisli Catergory</i></h3>
+<div class="outline-text-3" id="text-orgheadline9">
+<p>
+Functor 的 Catergory 叫做 Functor Catergory，因为有箭头自然变换。Monad 也可以定义出来一个 Catergory（当然由于Monad是 Endofunctor，所以他也可以是 自函子范畴），叫做 Kleisli Catergory，那么 Kleisli 的箭头是什么？
+</p>
+
+<p>
+我们看定义，Kleisli Catergory
+</p>
+<ol class="org-ol">
+<li>箭头是 Kleisli 箭头 <code>a -&gt; T b</code></li>
+<li>东西就是c范畴中的东西. 因为 a 和 b 都是 c 范畴上的， 由于T是自函子，所以 T b 也是 c 范畴的</li>
+</ol>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgheadline11" class="outline-2">
+<h2 id="orgheadline11"><span class="todo TODO">TODO</span> 第二章：Practical Monads</h2>
+<div class="outline-text-2" id="text-orgheadline11">
+<p>
+一些有用的 Monad instances
+</p>
+</div>
+<div id="outline-container-orgheadline15" class="outline-3">
+<h3 id="orgheadline15">Applicative</h3>
+<div class="outline-text-3" id="text-orgheadline15">
+</div><div id="outline-container-orgheadline12" class="outline-4">
+<h4 id="orgheadline12">Alternative</h4>
+</div>
+<div id="outline-container-orgheadline13" class="outline-4">
+<h4 id="orgheadline13">Arrow</h4>
+</div>
+<div id="outline-container-orgheadline14" class="outline-4">
+<h4 id="orgheadline14">Bifunctor</h4>
+</div>
+</div>
+
+<div id="outline-container-orgheadline16" class="outline-3">
+<h3 id="orgheadline16">Either</h3>
+</div>
+<div id="outline-container-orgheadline17" class="outline-3">
+<h3 id="orgheadline17">Validate</h3>
+</div>
+<div id="outline-container-orgheadline18" class="outline-3">
+<h3 id="orgheadline18">Reader</h3>
+</div>
+<div id="outline-container-orgheadline19" class="outline-3">
+<h3 id="orgheadline19">Writter</h3>
+</div>
+<div id="outline-container-orgheadline20" class="outline-3">
+<h3 id="orgheadline20">State</h3>
+</div>
+<div id="outline-container-orgheadline21" class="outline-3">
+<h3 id="orgheadline21">RWS</h3>
+</div>
+<div id="outline-container-orgheadline22" class="outline-3">
+<h3 id="orgheadline22">Expection</h3>
+</div>
+<div id="outline-container-orgheadline23" class="outline-3">
+<h3 id="orgheadline23">Monad Transform</h3>
+</div>
+<div id="outline-container-orgheadline24" class="outline-3">
+<h3 id="orgheadline24">Cont</h3>
+</div>
+<div id="outline-container-orgheadline25" class="outline-3">
+<h3 id="orgheadline25">MonadPlus</h3>
+</div>
+<div id="outline-container-orgheadline26" class="outline-3">
+<h3 id="orgheadline26">MonadFix</h3>
+</div>
+<div id="outline-container-orgheadline27" class="outline-3">
+<h3 id="orgheadline27">ST</h3>
+</div>
+<div id="outline-container-orgheadline28" class="outline-3">
+<h3 id="orgheadline28">Free Monad</h3>
+</div>
+<div id="outline-container-orgheadline29" class="outline-3">
+<h3 id="orgheadline29">Eff</h3>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<footer>
+<p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
+<p>Modified: 2017-02-14 Tue 09:15</p>
+<p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6)</p>
+<p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
+<div class="org-center">
+    <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
+</div>
+<a class="github-fork-ribbon right-bottom fixed" href="https://github.com/jcouyang/blog" title="Fork me on GitHub">Fork me on GitHub</a>
+</footer>
+<script>
+ (function(){
+   document.getElementById('edit-in-github').addEventListener("click",function(){
+     var pathname = window.location.pathname;
+     window.location.href = "https://github.com/jcouyang/blog/edit/master/org"+pathname.replace(".html",".org");
+   })
+ })()
+</script>
+<script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+<!-- Gumroad -->
+<blockquote class="embedly-card" data-card-key="608383ce38a24d51b7c578c57302e7c7" data-card-controls="0" data-card-image="https://static-2.gumroad.com/res/gumroad/1806288866681/asset_previews/d14d1973f09439c18984c9d4595ddbf6/retina/s29070174.jpg" data-card-type="article"><h4><a href="https://gumroad.com/jcouyang">Jichao Ouyang</a></h4><p>Follow me for updates on what I am creating.</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- Google Analystics -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-32314154-10', 'auto');
+  ga('send', 'pageview');
+</script>
+
+<!-- Disqus -->
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+ var disqus_shortname = 'orgblog';
+ var href = window.location.href;
+ href.replace(/^https/, 'http');
+ var disqus_url = href;
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<!-- Swiftype Search -->
+<script type="text/javascript">
+ (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+     (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+     e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+ })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+ 
+ _st('install','eGLqWnAM75a66SiXKVW3','2.0.0');
+</script>
+</div>
+</body>
+</html>
