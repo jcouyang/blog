@@ -1,0 +1,204 @@
+#+TITLE: Grokking Monad / 范畴论完全装逼手册
+#+Date: <2017-02-10 Fri>
+#+AUTHOR: 欧阳继超
+
+很多人都不明白什么是Monad，并不是因为不会用，不知觉可能就在用某种monad。定义和使用起来其实不难，困惑的大多应该是后面的这堆理论-- +饭稠+ 范畴论。当然，我也没学过范畴论，只是略微看得懂写Haskell罢了。
+
+我尝试过很多种方式解释，比如为了降低门槛用JS来实现，那Haskell/Scala的人出来喷你们前端这些不懂函数式的人乱搞出来的东西根本就不是monad。比如用图来解释，又会被嫌弃画风不好。但是，作为灵魂画师，我只 +是觉得自己萌萌的啊+ 在乎画的灵魂是否能够给你一点启发。
+
+好了，安全带系好，我要开车了。为了防止鄙视链顶端的语言用户们喷再嫌弃，我决定就用Haskell好了，其实也不难解释清楚 +才怪+ 。
+
+这里面很多很装逼的单词(它们都是 /斜体/)，就算没看懂，把这些词记住也足够装一阵子逼了。
+
+* TODO 第一章：Catergory Theory
+** /Category/
+#+INDEX: Catergory
+#+INDEX: 范畴
+
+一个 /范畴/ 包含两个玩意
+- 东西 =O= （Object）
+- 两个东西的关系，箭头 =~>= （ /Morphism/，书上叫 /态射/ ）
+
+一些属性
+- 一定有一个叫 id 的箭头，也叫做 1
+- 箭头可以 /组合(compose)/
+
+恩，就是这么简单
+
+这些玩意对应到haskell的typeclass大致就是这样
+#+BEGIN_SRC haskell
+class Category (c :: * -> * -> *) where
+  id :: c a a
+  (.) :: c y z -> c x y -> c x z
+#+END_SRC
+
+其中：
+c 是 /higher kind/ ，跟higher order function的定义差不多，它是接收类型，构造新类型的类型。这里的 c 接收一个类型，再接收一个类型，返回个类型。
+
+对应到定义里是东西 * 通过箭头变另一个 *
+
+=id :: c a a= c范畴上的 a 到 a 的箭头
+
+=.= 的意思 c 范畴上，接收一个 y到z的箭头，一个 x 到 y 的箭头，返回 x 到 z 的箭头。
+
+*** /Hask/
+Haskell 类型系统范畴叫做 Hask
+#+INDEX: Hask
+
+Hask 范畴的：
+
+- 东西是 =type=
+- 箭头是 =->= 也就是函数的箭头
+- id 是 a -> a
+- compose 当然就是函数组合
+
+#+BEGIN_SRC haskell
+type Hask = (->)
+instance Category (Hask:: * -> * -> *) where
+  (f . g) x = f (g x)
+#+END_SRC
+
+** Functor
+#+INDEX: Functor
+#+INDEX: 函子
+两个范畴中间可以用叫Functor的东西来连接起来，简称 T。
+- 范畴间 东西的 Functor 标记为 =T(O)=
+- 范畴间 箭头的 Functor 标记为 =T(~>)=
+- 存在一个 T 把所有的 O 和 ~> 都映射到自己，标记为id functor 1_C
+  - 1_C(O) = O
+  - 1_C(~>) = ~>
+#+BEGIN_SRC haskell
+class (Category a, Category b) => Functor a b t where
+  fmap :: c a b -> d (t a) (t b)
+#+END_SRC
+
+=Functor a b t= 这表示从范畴 a 到范畴 b 的一个 Functor t
+
+如果把范畴 a 和 b 都限制到 Hask 范畴
+
+#+BEGIN_SRC haskell
+class Functor (->) (->) t where
+  fmap :: (->) a b -> (->) (t a) (t b)
+#+END_SRC
+
+=->= 在 Haskell 中是中缀类型构造器，所以是可以写在中间的
+
+这样就会变成我们熟悉的 Funtor 的 Typeclass（把Functor 的第一第二个参数去掉的话）
+#+BEGIN_SRC haskell
+class Functor (->) (->) t where
+  fmap :: (a -> b) -> (t a -> t b)
+#+END_SRC
+
+而 /endofunctor/ 就是这种连接相同范畴的 Functor，因为它从范畴 Hask 到达同样的范畴 Hask
+#+INDEX: endofunctor
+
+这里的 fmap 就是 T(~>)，在 Hask 范畴上，所以是 T(->), 这个箭头是函数，所以也能表示成 T(f) 如果 =f:: a -> b=
+
+** Natural Transformations / 自然变换
+#+INDEX: Natural Transformations
+#+INDEX: 自然变换
+Functor 是范畴间的映射，而自然变换，则是Functor间的映射。
+
+所以范畴 c 上的函子 f 到 g 的自然变化就可以表示成
+#+BEGIN_SRC haskell
+type Nat c f g = c (f a) (g a)
+#+END_SRC
+
+Hask 范畴上的自然变化就变成了
+#+BEGIN_SRC haskell
+type NatHask f g = f a -> g a
+#+END_SRC
+
+有趣的是，自然转换满足箭头的概念，又可以当成 functor 范畴上的箭头，所以可以定义出来一个 Functor Catergory
+
+- 东西是函子
+- 箭头是自然变换
+
+要成为范畴，还有两点
+- id 为 f a 到 f a 的自然变换
+- 自然变换的组合
+
+现在维度越来越高了，已经不能用简单的图来描述了，所以需要引入 String Diagram。
+
+*** String Diagram
+
+T1 是 范畴 a 到 b 的functor
+
+T2 是范畴 b 到 c 的functor
+
+那么 T2 . T1 就是 a 到 c 的funtor咯
+
+如果T 是范畴a上的endofunctor
+
+那么可以 T.T 可以写成 TT 或者 T^2
+
+那么 compose 完的箭头张什么样呢？
+
+用 Maybe Functor来说
+
+#+BEGIN_SRC haskell
+-- Functor category
+newtype Fun f g a b = FNat (f a -> g b)
+
+-- Endofunctor category
+type End f = Fun f f
+
+instance Category (End f) where
+  id = FNat id
+  (FNat f) . (FNat g) = FNat (f . g)
+#+END_SRC
+
+** TODO /Adjunction Functor/ 伴随函子
+
+** TODO Yoneda lemma
+** /Monad/ 单子
+有了 Functor，解释 Monad 就简单了。Monad 的定义比 Functor 再多一些要求
+- 首先，它是一个 endofunctor T
+- 一个从 i_c 到 T 的自然变化 \eta (eta)
+- 一个从 T^2 到 T 的自然变化 \mu (mu)
+#+BEGIN_SRC haskell
+class Endofunctor c t => Monad c t where
+  eta :: c a (t a)
+  mu  :: c (t (t a)) (t a)
+#+END_SRC
+
+同样，把 c = Hask 替换进去，就得到更类似我们 Haskell 中 Monad 的定义
+#+BEGIN_SRC haskell
+class Endofunctor m => Monad m where
+  eta :: a -> (m a)
+  mu :: m m a -> m a
+
+#+END_SRC
+** /Kleisli Catergory/
+#+INDEX: Kleisi Catergory
+Functor 的 Catergory 叫做 Functor Catergory，因为有箭头自然变换。Monad 也可以定义出来一个 Catergory（当然由于Monad是 Endofunctor，所以他也可以是 自函子范畴），叫做 Kleisli Catergory，那么 Kleisli 的箭头是什么？
+
+我们看定义，Kleisli Catergory
+1. 箭头是 Kleisli 箭头 =a -> T b=
+2. 东西就是c范畴中的东西. 因为 a 和 b 都是 c 范畴上的， 由于T是自函子，所以 T b 也是 c 范畴的
+
+
+* TODO 第二章：Practical Monads
+一些有用的 Monad instances
+** Applicative
+*** Alternative
+*** Arrow
+*** Bifunctor
+
+** Either
+** Validate
+** Reader
+** Writter
+** State
+** RWS
+** Expection
+** Monad Transform
+** Cont
+** MonadPlus
+** MonadFix
+** ST
+** Free Monad
+** Eff
+* Footnotes
+http://dev.stephendiehl.com/hask
+https://www.youtube.com/watch?v=ZKmodCApZwk
