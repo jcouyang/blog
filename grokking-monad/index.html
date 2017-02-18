@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- 2017-02-14 Tue 09:16 -->
+<!-- 2017-02-18 Sat 03:16 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
 <title>Grokking Monad / 范畴论完全装逼手册</title>
@@ -82,7 +82,7 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline10"><span class="todo TODO">TODO</span> 第一章：Catergory Theory</a>
+<li><a href="#orgheadline11"><span class="todo TODO">TODO</span> 第一章：Catergory Theory</a>
 <ul>
 <li><a href="#orgheadline1"><i>Category</i></a>
 <ul>
@@ -96,34 +96,38 @@ for the JavaScript code in this tag.
 </ul>
 </li>
 <li><a href="#orgheadline6"><span class="todo TODO">TODO</span> <i>Adjunction Functor</i> 伴随函子</a></li>
-<li><a href="#orgheadline7"><span class="todo TODO">TODO</span> Yoneda lemma</a></li>
-<li><a href="#orgheadline8"><i>Monad</i> 单子</a></li>
-<li><a href="#orgheadline9"><i>Kleisli Catergory</i></a></li>
+<li><a href="#orgheadline7"><span class="todo TODO">TODO</span> Yoneda lemma / 米田引理</a>
+<ul>
+<li><a href="#orgheadline8">Rank N Type</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline11"><span class="todo TODO">TODO</span> 第二章：Practical Monads</a>
-<ul>
-<li><a href="#orgheadline15">Applicative</a>
-<ul>
-<li><a href="#orgheadline12">Alternative</a></li>
-<li><a href="#orgheadline13">Arrow</a></li>
-<li><a href="#orgheadline14">Bifunctor</a></li>
+<li><a href="#orgheadline9"><i>Monad</i> 单子</a></li>
+<li><a href="#orgheadline10"><i>Kleisli Catergory</i></a></li>
 </ul>
 </li>
-<li><a href="#orgheadline16">Either</a></li>
-<li><a href="#orgheadline17">Validate</a></li>
-<li><a href="#orgheadline18">Reader</a></li>
-<li><a href="#orgheadline19">Writter</a></li>
-<li><a href="#orgheadline20">State</a></li>
-<li><a href="#orgheadline21">RWS</a></li>
-<li><a href="#orgheadline22">Expection</a></li>
-<li><a href="#orgheadline23">Monad Transform</a></li>
-<li><a href="#orgheadline24">Cont</a></li>
-<li><a href="#orgheadline25">MonadPlus</a></li>
-<li><a href="#orgheadline26">MonadFix</a></li>
-<li><a href="#orgheadline27">ST</a></li>
-<li><a href="#orgheadline28">Free Monad</a></li>
-<li><a href="#orgheadline29">Eff</a></li>
+<li><a href="#orgheadline12"><span class="todo TODO">TODO</span> 第二章：Practical Monads</a>
+<ul>
+<li><a href="#orgheadline16">Applicative</a>
+<ul>
+<li><a href="#orgheadline13">Alternative</a></li>
+<li><a href="#orgheadline14">Arrow</a></li>
+<li><a href="#orgheadline15">Bifunctor</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline17">Either</a></li>
+<li><a href="#orgheadline18">Validate</a></li>
+<li><a href="#orgheadline19">Reader</a></li>
+<li><a href="#orgheadline20">Writter</a></li>
+<li><a href="#orgheadline21">State</a></li>
+<li><a href="#orgheadline22">RWS</a></li>
+<li><a href="#orgheadline23">Expection</a></li>
+<li><a href="#orgheadline24">Monad Transform</a></li>
+<li><a href="#orgheadline25">Cont</a></li>
+<li><a href="#orgheadline26">MonadPlus</a></li>
+<li><a href="#orgheadline27">MonadFix</a></li>
+<li><a href="#orgheadline28">ST</a></li>
+<li><a href="#orgheadline29">Free Monad</a></li>
+<li><a href="#orgheadline30">Eff</a></li>
 </ul>
 </li>
 </ul>
@@ -145,9 +149,9 @@ for the JavaScript code in this tag.
 这里面很多很装逼的单词(它们都是 <i>斜体</i>)，就算没看懂，把这些词记住也足够装一阵子逼了。
 </p>
 
-<div id="outline-container-orgheadline10" class="outline-2">
-<h2 id="orgheadline10"><span class="todo TODO">TODO</span> 第一章：Catergory Theory</h2>
-<div class="outline-text-2" id="text-orgheadline10">
+<div id="outline-container-orgheadline11" class="outline-2">
+<h2 id="orgheadline11"><span class="todo TODO">TODO</span> 第一章：Catergory Theory</h2>
+<div class="outline-text-2" id="text-orgheadline11">
 </div><div id="outline-container-orgheadline1" class="outline-3">
 <h3 id="orgheadline1"><i>Category</i></h3>
 <div class="outline-text-3" id="text-orgheadline1">
@@ -351,7 +355,7 @@ T2 是范畴 b 到 c 的functor
 </p>
 
 <p>
-如果T 是范畴a上的endofunctor
+如果 T 是范畴a上的endofunctor
 </p>
 
 <p>
@@ -385,14 +389,102 @@ T2 是范畴 b 到 c 的functor
 
 <div id="outline-container-orgheadline6" class="outline-3">
 <h3 id="orgheadline6"><span class="todo TODO">TODO</span> <i>Adjunction Functor</i> 伴随函子</h3>
+<div class="outline-text-3" id="text-orgheadline6">
+<p>
+范畴C和D直接有来有回的函子
+</p>
+</div>
+</div>
+<div id="outline-container-orgheadline7" class="outline-3">
+<h3 id="orgheadline7"><span class="todo TODO">TODO</span> Yoneda lemma / 米田引理</h3>
+<div class="outline-text-3" id="text-orgheadline7">
+<p>
+米田引理是说所有Functor <code>f a</code> 一定存在 embed 和 unembed，使得 <code>f a</code> 和 <code>(a -&gt; b) -&gt; F b</code> isomorphic 同构
+</p>
+<p>
+haskell还要先打开 RankNTypes 的 feature
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #228b22;">{-# LANGUAGE RankNTypes #-}</span>
+
+<span style="color: #6a5acd;">embed</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Functor</span> f <span style="color: #b8860b;">=&gt;</span> f a <span style="color: #b8860b;">-&gt;</span> (forall b <span style="color: #b8860b;">.</span> (a <span style="color: #b8860b;">-&gt;</span> b) <span style="color: #b8860b;">-&gt;</span> f b)
+<span style="color: #6a5acd;">embed</span> x f <span style="color: #b8860b;">=</span> fmap f x
+
+<span style="color: #6a5acd;">unembed</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Functor</span> f <span style="color: #b8860b;">=&gt;</span> (forall b <span style="color: #b8860b;">.</span> (a <span style="color: #b8860b;">-&gt;</span> b) <span style="color: #b8860b;">-&gt;</span> f b) <span style="color: #b8860b;">-&gt;</span> f a
+<span style="color: #6a5acd;">unembed</span> f <span style="color: #b8860b;">=</span> f id
+</pre>
 </div>
 
-<div id="outline-container-orgheadline7" class="outline-3">
-<h3 id="orgheadline7"><span class="todo TODO">TODO</span> Yoneda lemma</h3>
+<p>
+embed 可以把 functor <code>f a</code> 变成 <code>(a -&gt; b) -&gt; f b</code>
+</p>
+
+<p>
+unembed 是反过来， <code>(a -&gt; b) -&gt; f b</code> 变成 <code>f a</code>
+</p>
 </div>
-<div id="outline-container-orgheadline8" class="outline-3">
-<h3 id="orgheadline8"><i>Monad</i> 单子</h3>
-<div class="outline-text-3" id="text-orgheadline8">
+<div id="outline-container-orgheadline8" class="outline-4">
+<h4 id="orgheadline8">Rank N Type</h4>
+<div class="outline-text-4" id="text-orgheadline8">
+<p>
+Monomorphic Rank 0 / 0级单态: t
+Polymorphic Rank 1 / 1级 <del>变</del> 多态: forall a. a -&gt; t
+Polymorphic Rank 2 / 2级多态: (forall a. a -&gt; t) -&gt; t
+Polymorphic Rank 3 / 3级多态: ((forall a. a -&gt; t) -&gt; t) -&gt; t
+</p>
+
+<p>
+看rank几只要数左边 forall 的括号嵌套层数就好了
+</p>
+
+<p>
+一级多态锁定全部类型变化中的类型a
+</p>
+
+<p>
+二级多态可以分别确定 a -&gt; t 这个函数的类型多态
+</p>
+
+<p>
+比如
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">rank2</span> <span style="color: #b8860b;">::</span> (forall a<span style="color: #b8860b;">.</span> a <span style="color: #b8860b;">-&gt;</span> a) <span style="color: #b8860b;">-&gt;</span> (<span style="color: #36648b;">Bool</span>, <span style="color: #36648b;">Char</span>)
+<span style="color: #6a5acd;">rank2</span> f <span style="color: #b8860b;">=</span> (f <span style="color: #36648b;">True</span>, f <span style="color: #8b0000;">'a'</span>)
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>f 在 <code>f True</code> 时类型 <code>Boolean -&gt; Boolean</code> 是符合 <code>forall a. a-&gt;a</code> 的</li>
+<li>在 <code>f 'a'= 时类型是 =Char -&gt; Char</code> 也符合 <code>forall a. a-&gt;a</code></li>
+</ul>
+
+<p>
+但是到rank1就类型系统就懵逼了
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">rank1</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> (a <span style="color: #b8860b;">-&gt;</span> a) <span style="color: #b8860b;">-&gt;</span> (<span style="color: #36648b;">Bool</span>, <span style="color: #36648b;">Char</span>)
+<span style="color: #6a5acd;">rank1</span> f <span style="color: #b8860b;">=</span> (f <span style="color: #36648b;">True</span>, f <span style="color: #8b0000;">'a'</span>)
+</pre>
+</div>
+<p>
+f 在 <code>f True</code> 是确定 a 是 Boolean，在rank1多态是时就确定了 <code>a-&gt;a</code> 的类型一定是 <code>Boolean -&gt; Boolean</code>
+</p>
+
+<p>
+所以到 =f 'a'= 类型就挂了。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline9" class="outline-3">
+<h3 id="orgheadline9"><i>Monad</i> 单子</h3>
+<div class="outline-text-3" id="text-orgheadline9">
 <p>
 有了 Functor，解释 Monad 就简单了。Monad 的定义比 Functor 再多一些要求
 </p>
@@ -421,9 +513,9 @@ T2 是范畴 b 到 c 的functor
 </div>
 </div>
 </div>
-<div id="outline-container-orgheadline9" class="outline-3">
-<h3 id="orgheadline9"><i>Kleisli Catergory</i></h3>
-<div class="outline-text-3" id="text-orgheadline9">
+<div id="outline-container-orgheadline10" class="outline-3">
+<h3 id="orgheadline10"><i>Kleisli Catergory</i></h3>
+<div class="outline-text-3" id="text-orgheadline10">
 <p>
 Functor 的 Catergory 叫做 Functor Catergory，因为有箭头自然变换。Monad 也可以定义出来一个 Catergory（当然由于Monad是 Endofunctor，所以他也可以是 自函子范畴），叫做 Kleisli Catergory，那么 Kleisli 的箭头是什么？
 </p>
@@ -440,75 +532,136 @@ Functor 的 Catergory 叫做 Functor Catergory，因为有箭头自然变换。M
 </div>
 
 
-<div id="outline-container-orgheadline11" class="outline-2">
-<h2 id="orgheadline11"><span class="todo TODO">TODO</span> 第二章：Practical Monads</h2>
-<div class="outline-text-2" id="text-orgheadline11">
+<div id="outline-container-orgheadline12" class="outline-2">
+<h2 id="orgheadline12"><span class="todo TODO">TODO</span> 第二章：Practical Monads</h2>
+<div class="outline-text-2" id="text-orgheadline12">
 <p>
 一些有用的 Monad instances
 </p>
 </div>
-<div id="outline-container-orgheadline15" class="outline-3">
-<h3 id="orgheadline15">Applicative</h3>
-<div class="outline-text-3" id="text-orgheadline15">
-</div><div id="outline-container-orgheadline12" class="outline-4">
-<h4 id="orgheadline12">Alternative</h4>
-</div>
-<div id="outline-container-orgheadline13" class="outline-4">
-<h4 id="orgheadline13">Arrow</h4>
+<div id="outline-container-orgheadline16" class="outline-3">
+<h3 id="orgheadline16">Applicative</h3>
+<div class="outline-text-3" id="text-orgheadline16">
+</div><div id="outline-container-orgheadline13" class="outline-4">
+<h4 id="orgheadline13">Alternative</h4>
 </div>
 <div id="outline-container-orgheadline14" class="outline-4">
-<h4 id="orgheadline14">Bifunctor</h4>
+<h4 id="orgheadline14">Arrow</h4>
+</div>
+<div id="outline-container-orgheadline15" class="outline-4">
+<h4 id="orgheadline15">Bifunctor</h4>
 </div>
 </div>
 
-<div id="outline-container-orgheadline16" class="outline-3">
-<h3 id="orgheadline16">Either</h3>
-</div>
 <div id="outline-container-orgheadline17" class="outline-3">
-<h3 id="orgheadline17">Validate</h3>
+<h3 id="orgheadline17">Either</h3>
 </div>
 <div id="outline-container-orgheadline18" class="outline-3">
-<h3 id="orgheadline18">Reader</h3>
+<h3 id="orgheadline18">Validate</h3>
 </div>
 <div id="outline-container-orgheadline19" class="outline-3">
-<h3 id="orgheadline19">Writter</h3>
+<h3 id="orgheadline19">Reader</h3>
+<div class="outline-text-3" id="text-orgheadline19">
+<p>
+给一个computation喂数据
+输入 r
+asks 可以通过函数 r-&gt;a 得到一个 Reader r a monad
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">asks</span> <span style="color: #b8860b;">::</span> (r <span style="color: #b8860b;">-&gt;</span> a) <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Reader</span> r a
+<span style="color: #6a5acd;">runReader</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Reader</span> r a <span style="color: #b8860b;">-&gt;</span> r <span style="color: #b8860b;">-&gt;</span> a
+
+<span style="color: #00008b;">import</span> <span style="color: #36648b;">Control.Monad.Reader</span>
+
+<span style="color: #00008b;">data</span> <span style="color: #36648b;">MyContext</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">MyContext</span>
+  { foo <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span>
+  , bar <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span>
+  } <span style="color: #00008b;">deriving</span> (<span style="color: #36648b;">Show</span>)
+
+<span style="color: #6a5acd;">computation</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Reader</span> <span style="color: #36648b;">MyContext</span> (<span style="color: #36648b;">Maybe</span> <span style="color: #36648b;">String</span>)
+<span style="color: #6a5acd;">computation</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
+  n <span style="color: #b8860b;">&lt;-</span> asks bar
+  x <span style="color: #b8860b;">&lt;-</span> asks foo
+  <span style="color: #00008b;">if</span> n <span style="color: #b8860b;">&gt;</span> 0
+    <span style="color: #00008b;">then</span> return (<span style="color: #36648b;">Just</span> x)
+    <span style="color: #00008b;">else</span> return <span style="color: #36648b;">Nothing</span>
+
+<span style="color: #6a5acd;">ex1</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Maybe</span> <span style="color: #36648b;">String</span>
+<span style="color: #6a5acd;">ex1</span> <span style="color: #b8860b;">=</span> runReader computation <span style="color: #b8860b;">$</span> <span style="color: #36648b;">MyContext</span> <span style="color: #8b0000;">"hello"</span> 1
+
+<span style="color: #6a5acd;">ex2</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Maybe</span> <span style="color: #36648b;">String</span>
+<span style="color: #6a5acd;">ex2</span> <span style="color: #b8860b;">=</span> runReader computation <span style="color: #b8860b;">$</span> <span style="color: #36648b;">MyContext</span> <span style="color: #8b0000;">"haskell"</span> 0
+</pre>
+</div>
+</div>
 </div>
 <div id="outline-container-orgheadline20" class="outline-3">
-<h3 id="orgheadline20">State</h3>
+<h3 id="orgheadline20">Writter</h3>
+<div class="outline-text-3" id="text-orgheadline20">
+<p>
+除了返回值，computation会写一些额外的数据
+</p>
+
+<p>
+返回值会是一个这样 <code>(result, log)</code> 的 tuple
+</p>
+
+<p>
+限制是 log 的类型必须是个 monoid
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">example</span>  <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
+  tell [1<span style="color: #b8860b;">..</span>3]
+  tell [3<span style="color: #b8860b;">..</span>5]
+  return <span style="color: #8b0000;">"foo"</span>
+
+<span style="color: #6a5acd;">output</span> <span style="color: #b8860b;">::</span> (<span style="color: #36648b;">String</span>, [<span style="color: #36648b;">Int</span>])
+<span style="color: #6a5acd;">output</span> <span style="color: #b8860b;">=</span> runWriter example
+<span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">("foo", [1, 2, 3, 3, 4, 5])</span>
+</pre>
+</div>
+</div>
 </div>
 <div id="outline-container-orgheadline21" class="outline-3">
-<h3 id="orgheadline21">RWS</h3>
+<h3 id="orgheadline21">State</h3>
 </div>
+
 <div id="outline-container-orgheadline22" class="outline-3">
-<h3 id="orgheadline22">Expection</h3>
+<h3 id="orgheadline22">RWS</h3>
 </div>
 <div id="outline-container-orgheadline23" class="outline-3">
-<h3 id="orgheadline23">Monad Transform</h3>
+<h3 id="orgheadline23">Expection</h3>
 </div>
 <div id="outline-container-orgheadline24" class="outline-3">
-<h3 id="orgheadline24">Cont</h3>
+<h3 id="orgheadline24">Monad Transform</h3>
 </div>
 <div id="outline-container-orgheadline25" class="outline-3">
-<h3 id="orgheadline25">MonadPlus</h3>
+<h3 id="orgheadline25">Cont</h3>
 </div>
 <div id="outline-container-orgheadline26" class="outline-3">
-<h3 id="orgheadline26">MonadFix</h3>
+<h3 id="orgheadline26">MonadPlus</h3>
 </div>
 <div id="outline-container-orgheadline27" class="outline-3">
-<h3 id="orgheadline27">ST</h3>
+<h3 id="orgheadline27">MonadFix</h3>
 </div>
 <div id="outline-container-orgheadline28" class="outline-3">
-<h3 id="orgheadline28">Free Monad</h3>
+<h3 id="orgheadline28">ST</h3>
 </div>
 <div id="outline-container-orgheadline29" class="outline-3">
-<h3 id="orgheadline29">Eff</h3>
+<h3 id="orgheadline29">Free Monad</h3>
+</div>
+<div id="outline-container-orgheadline30" class="outline-3">
+<h3 id="orgheadline30">Eff</h3>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <footer>
 <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-<p>Modified: 2017-02-14 Tue 09:15</p>
+<p>Modified: 2017-02-18 Sat 03:14</p>
 <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6)</p>
 <p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
