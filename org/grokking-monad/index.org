@@ -128,7 +128,7 @@ T2 是范畴 b 到 c 的functor
 
 那么 T2 . T1 就是 a 到 c 的funtor咯
 
-如果T 是范畴a上的endofunctor
+如果 T 是范畴a上的endofunctor
 
 那么可以 T.T 可以写成 TT 或者 T^2
 
@@ -149,8 +149,63 @@ instance Category (End f) where
 #+END_SRC
 
 ** TODO /Adjunction Functor/ 伴随函子
+#+INDEX: Adjunction Functor
+范畴C和D直接有来有回的函子
+** TODO Yoneda lemma / 米田引理
+#+INDEX: 米田引理
+#+INDEX: Yoneda Lemma
 
-** TODO Yoneda lemma
+米田引理是说所有Functor =f a= 一定存在 embed 和 unembed，使得 =f a= 和 =(a -> b) -> F b= isomorphic 同构
+#+INDEX: isomorphic
+#+INDEX: 同构
+
+haskell还要先打开 RankNTypes 的 feature
+
+#+BEGIN_SRC haskell
+{-# LANGUAGE RankNTypes #-}
+
+embed :: Functor f => f a -> (forall b . (a -> b) -> f b)
+embed x f = fmap f x
+
+unembed :: Functor f => (forall b . (a -> b) -> f b) -> f a
+unembed f = f id
+#+END_SRC
+
+embed 可以把 functor =f a= 变成 =(a -> b) -> f b=
+
+unembed 是反过来， =(a -> b) -> f b= 变成 =f a=
+*** Rank N Type
+#+INDEX: Arbitrary-rank polymorphism
+#+INDEX: Rank N Type
+Monomorphic Rank 0 / 0级单态: t
+Polymorphic Rank 1 / 1级 +变+ 多态: forall a. a -> t
+Polymorphic Rank 2 / 2级多态: (forall a. a -> t) -> t
+Polymorphic Rank 3 / 3级多态: ((forall a. a -> t) -> t) -> t
+
+看rank几只要数左边 forall 的括号嵌套层数就好了
+
+一级多态锁定全部类型变化中的类型a
+
+二级多态可以分别确定 a -> t 这个函数的类型多态
+
+比如
+#+BEGIN_SRC haskell
+rank2 :: (forall a. a -> a) -> (Bool, Char)
+rank2 f = (f True, f 'a')
+#+END_SRC
+
+- f 在 =f True= 时类型 =Boolean -> Boolean= 是符合 =forall a. a->a= 的
+- 在 =f 'a'= 时类型是 =Char -> Char= 也符合 =forall a. a->a=
+
+但是到rank1就类型系统就懵逼了
+#+BEGIN_SRC haskell
+rank1 :: forall a. (a -> a) -> (Bool, Char)
+rank1 f = (f True, f 'a')
+#+END_SRC
+f 在 =f True= 是确定 a 是 Boolean，在rank1多态是时就确定了 =a->a= 的类型一定是 =Boolean -> Boolean=
+
+所以到 =f 'a'= 类型就挂了。
+
 ** /Monad/ 单子
 有了 Functor，解释 Monad 就简单了。Monad 的定义比 Functor 再多一些要求
 - 首先，它是一个 endofunctor T
@@ -188,8 +243,53 @@ Functor 的 Catergory 叫做 Functor Catergory，因为有箭头自然变换。M
 ** Either
 ** Validate
 ** Reader
+给一个computation喂数据
+输入 r
+asks 可以通过函数 r->a 得到一个 Reader r a monad
+#+BEGIN_SRC haskell
+asks :: (r -> a) -> Reader r a
+runReader :: Reader r a -> r -> a
+
+import Control.Monad.Reader
+
+data MyContext = MyContext
+  { foo :: String
+  , bar :: Int
+  } deriving (Show)
+
+computation :: Reader MyContext (Maybe String)
+computation = do
+  n <- asks bar
+  x <- asks foo
+  if n > 0
+    then return (Just x)
+    else return Nothing
+
+ex1 :: Maybe String
+ex1 = runReader computation $ MyContext "hello" 1
+
+ex2 :: Maybe String
+ex2 = runReader computation $ MyContext "haskell" 0
+#+END_SRC
 ** Writter
+除了返回值，computation会写一些额外的数据
+
+返回值会是一个这样 =(result, log)= 的 tuple
+
+限制是 log 的类型必须是个 monoid
+
+#+BEGIN_SRC haskell
+example  = do
+  tell [1..3]
+  tell [3..5]
+  return "foo"
+
+output :: (String, [Int])
+output = runWriter example
+-- ("foo", [1, 2, 3, 3, 4, 5])
+#+END_SRC
 ** State
+
 ** RWS
 ** Expection
 ** Monad Transform
