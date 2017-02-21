@@ -1,6 +1,7 @@
-#+TITLE: Grokking Monad / 范畴论完全装逼手册
+#+TITLE: 范畴论完全装逼手册 / Grokking Monad
 #+Date: <2017-02-10 Fri>
 #+AUTHOR: 欧阳继超
+#+OPTIONS: ^:t
 
 很多人都不明白什么是Monad，并不是因为不会用，不知觉可能就在用某种monad。定义和使用起来其实不难，困惑的大多应该是后面的这堆理论-- +饭稠+ 范畴论。当然，我也没学过范畴论，只是略微看得懂写Haskell罢了。
 
@@ -17,13 +18,16 @@
 
 一个 /范畴/ 包含两个玩意
 - 东西 =O= （Object）
-- 两个东西的关系，箭头 =~>= （ /Morphism/，书上叫 /态射/ ）
+- 两个东西的关系，箭头 =~>= （ /Morphism/ ，书上叫 /态射/ ）
 
 一些属性
 - 一定有一个叫 id 的箭头，也叫做 1
 - 箭头可以 /组合(compose)/
 
 恩，就是这么简单
+
+#+CAPTION: 在酒店破笔画的，忍一忍看吧，回去用surface补上
+https://www.evernote.com/l/ABdanaXlenVL5oMgKmviXVKaO2fQ_F9P9mQB/image.png
 
 这些玩意对应到haskell的typeclass大致就是这样
 #+BEGIN_SRC haskell
@@ -94,6 +98,8 @@ class Functor (->) (->) t where
 
 这里的 fmap 就是 T(~>)，在 Hask 范畴上，所以是 T(->), 这个箭头是函数，所以也能表示成 T(f) 如果 =f:: a -> b=
 
+https://www.evernote.com/l/ABfSbtcBnthEIp82P0f4ptd-BMNxusJ5jQUB/image.jpg
+
 ** Natural Transformations / 自然变换
 #+INDEX: Natural Transformations
 #+INDEX: 自然变换
@@ -120,7 +126,7 @@ type NatHask f g = f a -> g a
 
 现在维度越来越高了，已经不能用简单的图来描述了，所以需要引入 String Diagram。
 
-*** String Diagram
+*** TODO String Diagram
 
 T1 是 范畴 a 到 b 的functor
 
@@ -151,7 +157,7 @@ instance Category (End f) where
 ** TODO /Adjunction Functor/ 伴随函子
 #+INDEX: Adjunction Functor
 范畴C和D直接有来有回的函子
-** TODO Yoneda lemma / 米田引理
+** TODO Yoneda lemma / +米田共+ 米田引理
 #+INDEX: 米田引理
 #+INDEX: Yoneda Lemma
 
@@ -177,10 +183,10 @@ unembed 是反过来， =(a -> b) -> f b= 变成 =f a=
 *** Rank N Type
 #+INDEX: Arbitrary-rank polymorphism
 #+INDEX: Rank N Type
-Monomorphic Rank 0 / 0级单态: t
-Polymorphic Rank 1 / 1级 +变+ 多态: forall a. a -> t
-Polymorphic Rank 2 / 2级多态: (forall a. a -> t) -> t
-Polymorphic Rank 3 / 3级多态: ((forall a. a -> t) -> t) -> t
+- Monomorphic Rank 0 / 0级单态: t
+- Polymorphic Rank 1 / 1级 +变态+ 多态: forall a. a -> t
+- Polymorphic Rank 2 / 2级多态: (forall a. a -> t) -> t
+- Polymorphic Rank 3 / 3级多态: ((forall a. a -> t) -> t) -> t
 
 看rank几只要数左边 forall 的括号嵌套层数就好了
 
@@ -211,6 +217,7 @@ f 在 =f True= 是确定 a 是 Boolean，在rank1多态是时就确定了 =a->a=
 - 首先，它是一个 endofunctor T
 - 一个从 i_c 到 T 的自然变化 \eta (eta)
 - 一个从 T^2 到 T 的自然变化 \mu (mu)
+
 #+BEGIN_SRC haskell
 class Endofunctor c t => Monad c t where
   eta :: c a (t a)
@@ -226,6 +233,9 @@ class Endofunctor m => Monad m where
 #+END_SRC
 ** /Kleisli Catergory/
 #+INDEX: Kleisi Catergory
+
+https://www.evernote.com/l/ABeNc2skWiZCdLKdJGy4h8L_2GeUo-EDHGsB/image.jpg
+
 Functor 的 Catergory 叫做 Functor Catergory，因为有箭头自然变换。Monad 也可以定义出来一个 Catergory（当然由于Monad是 Endofunctor，所以他也可以是 自函子范畴），叫做 Kleisli Catergory，那么 Kleisli 的箭头是什么？
 
 我们看定义，Kleisli Catergory
