@@ -11,7 +11,7 @@
 
 这里面很多很装逼的单词(它们都是 /斜体/)，就算没看懂，把这些词记住也足够装一阵子逼了。
 
-* TODO 第一章：Catergory Theory
+* 第一章：Catergory Theory
 ** /Category/
 #+INDEX: Catergory
 #+INDEX: 范畴
@@ -37,13 +37,11 @@ class Category (c :: * -> * -> *) where
 #+END_SRC
 
 其中：
-c 是 /higher kind/ ，跟higher order function的定义差不多，它是接收类型，构造新类型的类型。这里的 c 接收一个类型，再接收一个类型，返回个类型。
+c 是 /higher kind/ ，跟higher order function的定义差不多，它是接收类型，构造新类型的类型。这里的 c 接收一个类型，再接收一个类型，就可以返回个类型。
 
-对应到定义里是东西 * 通过箭头变另一个 *
+- =id :: c a a= c范畴上的 a 到 a 的箭头
 
-=id :: c a a= c范畴上的 a 到 a 的箭头
-
-=.= 的意思 c 范畴上，接收一个 y到z的箭头，一个 x 到 y 的箭头，返回 x 到 z 的箭头。
+- =.= 的意思 c 范畴上，如果喂一个 y 到 z 的箭头，再喂一个 x 到 y 的箭头，那么就返回 x 到 z 的箭头。
 
 *** /Hask/
 Haskell 类型系统范畴叫做 Hask
@@ -53,7 +51,7 @@ Hask 范畴的：
 
 - 东西是 =type=
 - 箭头是 =->= 也就是函数的箭头
-- id 是 a -> a
+- id 就是 id 函数的类型 =a -> a=
 - compose 当然就是函数组合
 
 #+BEGIN_SRC haskell
@@ -62,7 +60,7 @@ instance Category (Hask:: * -> * -> *) where
   (f . g) x = f (g x)
 #+END_SRC
 
-** Functor
+** Functor / 函子
 #+INDEX: Functor
 #+INDEX: 函子
 两个范畴中间可以用叫Functor的东西来连接起来，简称 T。
@@ -71,6 +69,7 @@ instance Category (Hask:: * -> * -> *) where
 - 存在一个 T 把所有的 O 和 ~> 都映射到自己，标记为id functor 1_C
   - 1_C(O) = O
   - 1_C(~>) = ~>
+
 #+BEGIN_SRC haskell
 class (Category a, Category b) => Functor a b t where
   fmap :: c a b -> d (t a) (t b)
@@ -89,7 +88,7 @@ class Functor (->) (->) t where
 
 这样就会变成我们熟悉的 Funtor 的 Typeclass（把Functor 的第一第二个参数去掉的话）
 #+BEGIN_SRC haskell
-class Functor (->) (->) t where
+class Functor t where
   fmap :: (a -> b) -> (t a -> t b)
 #+END_SRC
 
@@ -98,12 +97,15 @@ class Functor (->) (->) t where
 
 这里的 fmap 就是 T(~>)，在 Hask 范畴上，所以是 T(->), 这个箭头是函数，所以也能表示成 T(f) 如果 =f:: a -> b=
 
-https://www.evernote.com/l/ABfSbtcBnthEIp82P0f4ptd-BMNxusJ5jQUB/image.jpg
+
 
 ** Natural Transformations / 自然变换
 #+INDEX: Natural Transformations
 #+INDEX: 自然变换
 Functor 是范畴间的映射，而自然变换，则是Functor间的映射。
+
+#+CAPTION: Functor F和G，自然变化 \eta， 以及Functor Category
+https://www.evernote.com/l/ABfSbtcBnthEIp82P0f4ptd-BMNxusJ5jQUB/image.jpg
 
 所以范畴 c 上的函子 f 到 g 的自然变化就可以表示成
 #+BEGIN_SRC haskell
@@ -115,7 +117,7 @@ Hask 范畴上的自然变化就变成了
 type NatHask f g = f a -> g a
 #+END_SRC
 
-有趣的是，自然转换满足箭头的概念，又可以当成 functor 范畴上的箭头，所以可以定义出来一个 Functor Catergory
+有趣的是，自然转换也满足箭头的概念，可以当成 functor 范畴上的箭头，所以又可以定义出来一个 Functor Catergory
 
 - 东西是函子
 - 箭头是自然变换
@@ -234,6 +236,7 @@ class Endofunctor m => Monad m where
 ** /Kleisli Catergory/
 #+INDEX: Kleisi Catergory
 
+#+CAPTION: f和g画翻了 😂 不过逻辑式对的，注意 >>= 和大火箭 <=< 的轨迹
 https://www.evernote.com/l/ABeNc2skWiZCdLKdJGy4h8L_2GeUo-EDHGsB/image.jpg
 
 Functor 的 Catergory 叫做 Functor Catergory，因为有箭头自然变换。Monad 也可以定义出来一个 Catergory（当然由于Monad是 Endofunctor，所以他也可以是 自函子范畴），叫做 Kleisli Catergory，那么 Kleisli 的箭头是什么？
@@ -242,6 +245,20 @@ Functor 的 Catergory 叫做 Functor Catergory，因为有箭头自然变换。M
 1. 箭头是 Kleisli 箭头 =a -> T b=
 2. 东西就是c范畴中的东西. 因为 a 和 b 都是 c 范畴上的， 由于T是自函子，所以 T b 也是 c 范畴的
 
+看到图上的 g' 和 \mu 了没？
+
+- =g':: T b -> T^2 c=
+- =\mu :: T^2 c -> T c=
+
+所以
+- ~(>>=) = \mu . g'~
+- 大火箭 ~(<=<) = \mu . g' . f' = \mu . F g . f' ~
+
+大火箭满足compose
+
+=(y -> T z) <=< (x -> T y) = (x -> T z)=
+
+沿着图上轨迹找找看
 
 * TODO 第二章：Practical Monads
 一些有用的 Monad instances
@@ -309,6 +326,7 @@ output = runWriter example
 ** ST
 ** Free Monad
 ** Eff
-* Footnotes
+
+* References
 http://dev.stephendiehl.com/hask
 https://www.youtube.com/watch?v=ZKmodCApZwk
