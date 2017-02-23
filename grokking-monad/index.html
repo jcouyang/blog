@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- 2017-02-21 Tue 13:17 -->
+<!-- 2017-02-23 Thu 12:29 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
 <title>范畴论完全装逼手册 / Grokking Monad</title>
@@ -82,14 +82,14 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline11"><span class="todo TODO">TODO</span> 第一章：Catergory Theory</a>
+<li><a href="#orgheadline11">第一章：Catergory Theory</a>
 <ul>
 <li><a href="#orgheadline1"><i>Category</i></a>
 <ul>
 <li><a href="#orgheadline2"><i>Hask</i></a></li>
 </ul>
 </li>
-<li><a href="#orgheadline3">Functor</a></li>
+<li><a href="#orgheadline3">Functor / 函子</a></li>
 <li><a href="#orgheadline4">Natural Transformations / 自然变换</a>
 <ul>
 <li><a href="#orgheadline5"><span class="todo TODO">TODO</span> String Diagram</a></li>
@@ -130,6 +130,7 @@ for the JavaScript code in this tag.
 <li><a href="#orgheadline30">Eff</a></li>
 </ul>
 </li>
+<li><a href="#orgheadline31">References</a></li>
 </ul>
 </div>
 </nav>
@@ -150,7 +151,7 @@ for the JavaScript code in this tag.
 </p>
 
 <div id="outline-container-orgheadline11" class="outline-2">
-<h2 id="orgheadline11"><span class="todo TODO">TODO</span> 第一章：Catergory Theory</h2>
+<h2 id="orgheadline11">第一章：Catergory Theory</h2>
 <div class="outline-text-2" id="text-orgheadline11">
 </div><div id="outline-container-orgheadline1" class="outline-3">
 <h3 id="orgheadline1"><i>Category</i></h3>
@@ -195,20 +196,14 @@ for the JavaScript code in this tag.
 
 <p>
 其中：
-c 是 <i>higher kind</i> ，跟higher order function的定义差不多，它是接收类型，构造新类型的类型。这里的 c 接收一个类型，再接收一个类型，返回个类型。
+c 是 <i>higher kind</i> ，跟higher order function的定义差不多，它是接收类型，构造新类型的类型。这里的 c 接收一个类型，再接收一个类型，就可以返回个类型。
 </p>
 
-<p>
-对应到定义里是东西 * 通过箭头变另一个 *
-</p>
+<dl class="org-dl">
+<dt>=id</dt><dd>c a a= c范畴上的 a 到 a 的箭头</dd>
 
-<p>
-<code>id :: c a a</code> c范畴上的 a 到 a 的箭头
-</p>
-
-<p>
-<code>.</code> 的意思 c 范畴上，接收一个 y到z的箭头，一个 x 到 y 的箭头，返回 x 到 z 的箭头。
-</p>
+<dt>(no term)</dt><dd><code>.</code> 的意思 c 范畴上，如果喂一个 y 到 z 的箭头，再喂一个 x 到 y 的箭头，那么就返回 x 到 z 的箭头。</dd>
+</dl>
 </div>
 
 <div id="outline-container-orgheadline2" class="outline-4">
@@ -224,7 +219,7 @@ Hask 范畴的：
 <ul class="org-ul">
 <li>东西是 <code>type</code></li>
 <li>箭头是 <code>-&gt;</code> 也就是函数的箭头</li>
-<li>id 是 a -&gt; a</li>
+<li>id 就是 id 函数的类型 <code>a -&gt; a</code></li>
 <li>compose 当然就是函数组合</li>
 </ul>
 
@@ -240,7 +235,7 @@ Hask 范畴的：
 </div>
 
 <div id="outline-container-orgheadline3" class="outline-3">
-<h3 id="orgheadline3">Functor</h3>
+<h3 id="orgheadline3">Functor / 函子</h3>
 <div class="outline-text-3" id="text-orgheadline3">
 <p>
 两个范畴中间可以用叫Functor的东西来连接起来，简称 T。
@@ -254,6 +249,7 @@ Hask 范畴的：
 <li>1<sub>C</sub>(~&gt;) = ~&gt;</li>
 </ul></li>
 </ul>
+
 <div class="org-src-container">
 
 <pre class="src src-haskell"><span style="color: #00008b;">class</span> (<span style="color: #36648b;">Category</span> a, <span style="color: #36648b;">Category</span> b) <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Functor</span> a b t <span style="color: #00008b;">where</span>
@@ -285,7 +281,7 @@ Hask 范畴的：
 </p>
 <div class="org-src-container">
 
-<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Functor</span> <span style="color: #36648b;">(-&gt;)</span> <span style="color: #36648b;">(-&gt;)</span> t <span style="color: #00008b;">where</span>
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Functor</span> t <span style="color: #00008b;">where</span>
   fmap <span style="color: #b8860b;">::</span> (a <span style="color: #b8860b;">-&gt;</span> b) <span style="color: #b8860b;">-&gt;</span> (t a <span style="color: #b8860b;">-&gt;</span> t b)
 </pre>
 </div>
@@ -296,14 +292,10 @@ Hask 范畴的：
 <p>
 这里的 fmap 就是 T(~&gt;)，在 Hask 范畴上，所以是 T(-&gt;), 这个箭头是函数，所以也能表示成 T(f) 如果 <code>f:: a -&gt; b</code>
 </p>
-
-
-<figure>
-<p><img src="https://www.evernote.com/l/ABfSbtcBnthEIp82P0f4ptd-BMNxusJ5jQUB/image.jpg" alt="image.jpg">
-</p>
-</figure>
 </div>
 </div>
+
+
 
 <div id="outline-container-orgheadline4" class="outline-3">
 <h3 id="orgheadline4">Natural Transformations / 自然变换</h3>
@@ -311,6 +303,13 @@ Hask 范畴的：
 <p>
 Functor 是范畴间的映射，而自然变换，则是Functor间的映射。
 </p>
+
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABfSbtcBnthEIp82P0f4ptd-BMNxusJ5jQUB/image.jpg" alt="image.jpg">
+</p>
+<figcaption><span class="figure-number">Figure 2:</span> Functor F和G，自然变化 &eta;， 以及Functor Category</figcaption>
+</figure>
 
 <p>
 所以范畴 c 上的函子 f 到 g 的自然变化就可以表示成
@@ -331,7 +330,7 @@ Hask 范畴上的自然变化就变成了
 </div>
 
 <p>
-有趣的是，自然转换满足箭头的概念，又可以当成 functor 范畴上的箭头，所以可以定义出来一个 Functor Catergory
+有趣的是，自然转换也满足箭头的概念，可以当成 functor 范畴上的箭头，所以又可以定义出来一个 Functor Catergory
 </p>
 
 <ul class="org-ul">
@@ -534,6 +533,7 @@ f 在 <code>f True</code> 是确定 a 是 Boolean，在rank1多态是时就确�
 <figure>
 <p><img src="https://www.evernote.com/l/ABeNc2skWiZCdLKdJGy4h8L_2GeUo-EDHGsB/image.jpg" alt="image.jpg">
 </p>
+<figcaption><span class="figure-number">Figure 3:</span> f和g画翻了 😂 不过逻辑式对的，注意 &gt;&gt;= 和大火箭 &lt;=&lt; 的轨迹</figcaption>
 </figure>
 
 <p>
@@ -547,10 +547,38 @@ Functor 的 Catergory 叫做 Functor Catergory，因为有箭头自然变换。M
 <li>箭头是 Kleisli 箭头 <code>a -&gt; T b</code></li>
 <li>东西就是c范畴中的东西. 因为 a 和 b 都是 c 范畴上的， 由于T是自函子，所以 T b 也是 c 范畴的</li>
 </ol>
-</div>
-</div>
-</div>
 
+<p>
+看到图上的 g' 和 &mu; 了没？
+</p>
+
+<ul class="org-ul">
+<li><code>g':: T b -&gt; T^2 c</code></li>
+<li id="=&mu;">T<sup>2</sup> c -&gt; T c=</li>
+</ul>
+
+<p>
+所以
+</p>
+<ul class="org-ul">
+<li>~(&gt;&gt;=) = &mu; . g'~</li>
+<li>大火箭 ~(&lt;=&lt;) = &mu; . g' . f' = &mu; . F g . f' ~</li>
+</ul>
+
+<p>
+大火箭满足compose
+</p>
+
+<p>
+<code>(y -&gt; T z) &lt;=&lt; (x -&gt; T y) = (x -&gt; T z)</code>
+</p>
+
+<p>
+沿着图上轨迹找找看
+</p>
+</div>
+</div>
+</div>
 
 <div id="outline-container-orgheadline12" class="outline-2">
 <h2 id="orgheadline12"><span class="todo TODO">TODO</span> 第二章：Practical Monads</h2>
@@ -677,11 +705,21 @@ asks 可以通过函数 r-&gt;a 得到一个 Reader r a monad
 <h3 id="orgheadline30">Eff</h3>
 </div>
 </div>
+
+<div id="outline-container-orgheadline31" class="outline-2">
+<h2 id="orgheadline31">References</h2>
+<div class="outline-text-2" id="text-orgheadline31">
+<p>
+<a href="http://dev.stephendiehl.com/hask">http://dev.stephendiehl.com/hask</a>
+<a href="https://www.youtube.com/watch?v=ZKmodCApZwk">https://www.youtube.com/watch?v=ZKmodCApZwk</a>
+</p>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <footer>
 <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-<p>Modified: 2017-02-21 Tue 13:12</p>
+<p>Modified: 2017-02-23 Thu 12:27</p>
 <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6)</p>
 <p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
