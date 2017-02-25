@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- 2017-02-23 Thu 12:29 -->
+<!-- 2017-02-25 Sat 05:27 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
 <title>范畴论完全装逼手册 / Grokking Monad</title>
@@ -82,86 +82,89 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline11">第一章：Catergory Theory</a>
+<li><a href="#orgheadline12">第一部分：<ruby>范畴论<rt>Catergory Theory</rt></ruby></a>
 <ul>
 <li><a href="#orgheadline1"><i>Category</i></a>
 <ul>
 <li><a href="#orgheadline2"><i>Hask</i></a></li>
 </ul>
 </li>
-<li><a href="#orgheadline3">Functor / 函子</a></li>
-<li><a href="#orgheadline4">Natural Transformations / 自然变换</a>
+<li><a href="#orgheadline3"><i><ruby>函子<rt> Functor</rt></ruby></i></a></li>
+<li><a href="#orgheadline4"><i><ruby>Cat<rt> +猫+</rt></ruby></i></a></li>
+<li><a href="#orgheadline5"><i><ruby>自然变换<rt>Natural Transformations</rt></ruby></i></a></li>
+<li><a href="#orgheadline6"><span class="todo TODO">TODO</span> String Diagram</a></li>
+<li><a href="#orgheadline7"><span class="todo TODO">TODO</span> <i>Adjunction Functor</i> 伴随函子</a></li>
+<li><a href="#orgheadline8"><span class="todo TODO">TODO</span> Yoneda lemma / <del>米田共</del> 米田引理</a>
 <ul>
-<li><a href="#orgheadline5"><span class="todo TODO">TODO</span> String Diagram</a></li>
+<li><a href="#orgheadline9">Rank N Type</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline6"><span class="todo TODO">TODO</span> <i>Adjunction Functor</i> 伴随函子</a></li>
-<li><a href="#orgheadline7"><span class="todo TODO">TODO</span> Yoneda lemma / <del>米田共</del> 米田引理</a>
+<li><a href="#orgheadline10"><i>Monad</i> 单子</a></li>
+<li><a href="#orgheadline11"><i>Kleisli Catergory</i></a></li>
+</ul>
+</li>
+<li><a href="#orgheadline13"><span class="todo TODO">TODO</span> 第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></a>
 <ul>
-<li><a href="#orgheadline8">Rank N Type</a></li>
-</ul>
-</li>
-<li><a href="#orgheadline9"><i>Monad</i> 单子</a></li>
-<li><a href="#orgheadline10"><i>Kleisli Catergory</i></a></li>
-</ul>
-</li>
-<li><a href="#orgheadline12"><span class="todo TODO">TODO</span> 第二章：Practical Monads</a>
+<li><a href="#orgheadline17">Applicative</a>
 <ul>
-<li><a href="#orgheadline16">Applicative</a>
-<ul>
-<li><a href="#orgheadline13">Alternative</a></li>
-<li><a href="#orgheadline14">Arrow</a></li>
-<li><a href="#orgheadline15">Bifunctor</a></li>
+<li><a href="#orgheadline14">Alternative</a></li>
+<li><a href="#orgheadline15">Arrow</a></li>
+<li><a href="#orgheadline16">Bifunctor</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline17">Either</a></li>
-<li><a href="#orgheadline18">Validate</a></li>
-<li><a href="#orgheadline19">Reader</a></li>
-<li><a href="#orgheadline20">Writter</a></li>
-<li><a href="#orgheadline21">State</a></li>
-<li><a href="#orgheadline22">RWS</a></li>
-<li><a href="#orgheadline23">Expection</a></li>
-<li><a href="#orgheadline24">Monad Transform</a></li>
-<li><a href="#orgheadline25">Cont</a></li>
-<li><a href="#orgheadline26">MonadPlus</a></li>
-<li><a href="#orgheadline27">MonadFix</a></li>
-<li><a href="#orgheadline28">ST</a></li>
-<li><a href="#orgheadline29">Free Monad</a></li>
-<li><a href="#orgheadline30">Eff</a></li>
+<li><a href="#orgheadline18">Either</a></li>
+<li><a href="#orgheadline19">Validate</a></li>
+<li><a href="#orgheadline20">Reader</a></li>
+<li><a href="#orgheadline21">Writter</a></li>
+<li><a href="#orgheadline22">State</a></li>
+<li><a href="#orgheadline23">RWS</a></li>
+<li><a href="#orgheadline24">Expection</a></li>
+<li><a href="#orgheadline25">Monad Transform</a></li>
+<li><a href="#orgheadline26">Cont</a></li>
+<li><a href="#orgheadline27">MonadPlus</a></li>
+<li><a href="#orgheadline28">MonadFix</a></li>
+<li><a href="#orgheadline29">ST</a></li>
+<li><a href="#orgheadline30">Free Monad</a></li>
+<li><a href="#orgheadline31">Eff</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline31">References</a></li>
+<li><a href="#orgheadline32">References</a></li>
 </ul>
 </div>
 </nav>
 <p>
-很多人都不明白什么是Monad，并不是因为不会用，不知觉可能就在用某种monad。定义和使用起来其实不难，困惑的大多应该是后面的这堆理论&#x2013; <del>饭稠</del> 范畴论。当然，我也没学过范畴论，只是略微看得懂写Haskell罢了。
+很多人都不明白什么是Monad，并不是因为不会用，不知觉可能就在用某种 monad。<br >
+定义和使用起来其实不难，困惑的大多应该是后面的这堆理论&#x2013; 范畴论。当然，我也没学过范畴论，只是略微看得懂写Haskell罢了。
 </p>
 
 <p>
-我尝试过很多种方式解释，比如为了降低门槛用JS来实现，那Haskell/Scala的人出来喷你们前端这些不懂函数式的人乱搞出来的东西根本就不是monad。比如用图来解释，又会被嫌弃画风不好。但是，作为灵魂画师，我只 <del>是觉得自己萌萌的啊</del> 在乎画的灵魂是否能够给你一点启发。
+我在书中<a href="https://book.douban.com/subject/26883736/">写过一章</a>来解释，某人也尝试过很<a href="http://www.ruanyifeng.com/blog/2017/02/fp-tutorial.html">写博客解释</a>，比如为了降低门槛用JS来，那Haskell/Scala的人出来喷你们前端这些不懂函数式的渣渣乱搞出来的东西根本就不是 monad。
 </p>
 
 <p>
-好了，安全带系好，我要开车了。为了防止鄙视链顶端的语言用户们喷再嫌弃，我决定就用Haskell好了，其实也不难解释清楚 <del>才怪</del> 。
+我也画过一些图来解释，又会被嫌弃画风不好。但是，作为灵魂画师，我只 <del>是觉得自己萌萌的啊</del> 在乎画的灵魂是否能够给你一点启发。好吧，讲这么学术的东西，还是用dot来画吧，看起来好正规呢。
 </p>
 
 <p>
-这里面很多很装逼的单词(它们都是 <i>斜体</i>)，就算没看懂，把这些词记住也足够装一阵子逼了。
+好了，安全带系好，我真的要开车了。为了 <del>防止鄙视链顶端的语言用户们喷再嫌弃</del> 解释的不到位，就用 Haskell 好了（虽然haskell也没到鄙视链顶），其实也不难解释清楚 <del>才怪</del> 。
 </p>
 
-<div id="outline-container-orgheadline11" class="outline-2">
-<h2 id="orgheadline11">第一章：Catergory Theory</h2>
-<div class="outline-text-2" id="text-orgheadline11">
+<p>
+这里面很多很装逼的单词，它们都是 <i>斜体</i> ，就算没看懂，把这些词记住也足够<ruby>装一阵子逼了<rt>买一阵子萌了</rt></ruby>。
+</p>
+
+<div id="outline-container-orgheadline12" class="outline-2">
+<h2 id="orgheadline12">第一部分：<ruby>范畴论<rt>Catergory Theory</rt></ruby></h2>
+<div class="outline-text-2" id="text-orgheadline12">
 </div><div id="outline-container-orgheadline1" class="outline-3">
 <h3 id="orgheadline1"><i>Category</i></h3>
 <div class="outline-text-3" id="text-orgheadline1">
 <p>
-一个 <i>范畴</i> 包含两个玩意
+一个 <i><ruby>范畴<rt>Category</rt></ruby></i> 包含两个玩意
 </p>
 <ul class="org-ul">
 <li>东西 <code>O</code> （Object）</li>
-<li>两个东西的关系，箭头 <code>~&gt;</code> （ <i>Morphism</i> ，书上叫 <i>态射</i> ）</li>
+<li>两个东西的关系，箭头 <code>~&gt;</code> （ <i><ruby>态射<rt>Morphism</rt></ruby></i> ）</li>
 </ul>
 
 <p>
@@ -169,7 +172,7 @@ for the JavaScript code in this tag.
 </p>
 <ul class="org-ul">
 <li>一定有一个叫 id 的箭头，也叫做 1</li>
-<li>箭头可以 <i>组合(compose)</i></li>
+<li>箭头可以 <i><ruby>组合<rt> compose</rt></ruby></i></li>
 </ul>
 
 <p>
@@ -178,13 +181,14 @@ for the JavaScript code in this tag.
 
 
 <figure>
-<p><img src="https://www.evernote.com/l/ABdanaXlenVL5oMgKmviXVKaO2fQ_F9P9mQB/image.png" alt="image.png">
+<p><object type="image/svg+xml" data="images/category.svg" >
+Sorry, your browser does not support SVG.</object>
 </p>
-<figcaption><span class="figure-number">Figure 1:</span> 在酒店破笔画的，忍一忍看吧，回去用surface补上</figcaption>
+<figcaption><span class="figure-number">Figure 1:</span> 有东西 a, b, c 和箭头 f, g 的 Category，其中 f . g 表示 compose f 和 g</figcaption>
 </figure>
 
 <p>
-这些玩意对应到haskell的typeclass大致就是这样
+这些玩意对应到 haskell 的 typeclass 大致就是这样
 </p>
 <div class="org-src-container">
 
@@ -195,15 +199,20 @@ for the JavaScript code in this tag.
 </div>
 
 <p>
-其中：
-c 是 <i>higher kind</i> ，跟higher order function的定义差不多，它是接收类型，构造新类型的类型。这里的 c 接收一个类型，再接收一个类型，就可以返回个类型。
+如果这是你第一次见到 Haskell 代码，没有关系，语法真的很简单 <del>才怪</del>
 </p>
+<ul class="org-ul">
+<li><code>class</code> 定义了一个 TypeClass， <code>Category</code> 是这个 TypeClass 的名字</li>
+<li>Type class 类似于定义类型的规范，规范为 <code>where</code> 后面那一坨</li>
+<li>类型规范的对象是参数 <code>(c:: * -&gt; * -&gt; *)</code> ， <code>::</code> 后面是c的类型</li>
+<li>c 是 <i>higher kind</i> ，跟higher order function的定义差不多，它是接收类型，构造新类型的类型。这里的 c 接收一个类型，再接收一个类型，就可以返回个类型。</li>
+<li><code>id:: c a a</code> 表示 c 范畴上的 a 到 a 的箭头</li>
+<li><code>.</code> 的意思 c 范畴上，如果喂一个 y 到 z 的箭头，再喂一个 x 到 y 的箭头，那么就返回 x 到 z 的箭头。</li>
+</ul>
 
-<dl class="org-dl">
-<dt>=id</dt><dd>c a a= c范畴上的 a 到 a 的箭头</dd>
-
-<dt>(no term)</dt><dd><code>.</code> 的意思 c 范畴上，如果喂一个 y 到 z 的箭头，再喂一个 x 到 y 的箭头，那么就返回 x 到 z 的箭头。</dd>
-</dl>
+<p>
+<ruby>简单吧<rt>hen nan ba</rt></ruby>?还没有高数抽象呢。
+</p>
 </div>
 
 <div id="outline-container-orgheadline2" class="outline-4">
@@ -213,14 +222,14 @@ c 是 <i>higher kind</i> ，跟higher order function的定义差不多，它是�
 Haskell 类型系统范畴叫做 Hask
 </p>
 <p>
-Hask 范畴的：
+在 Hask 范畴上：
 </p>
 
 <ul class="org-ul">
-<li>东西是 <code>type</code></li>
-<li>箭头是 <code>-&gt;</code> 也就是函数的箭头</li>
+<li>东西是类型</li>
+<li>箭头是类型的变换，即 <code>-&gt;</code></li>
 <li>id 就是 id 函数的类型 <code>a -&gt; a</code></li>
-<li>compose 当然就是函数组合</li>
+<li>compose 当然就是函数组合的类型</li>
 </ul>
 
 <div class="org-src-container">
@@ -230,20 +239,58 @@ Hask 范畴的：
   (f <span style="color: #b8860b;">.</span> g) x <span style="color: #b8860b;">=</span> f (g x)
 </pre>
 </div>
+
+<p>
+我们看见新的关键字 <code>instance</code> ，这表示 Hask 是 Type class Category 的实例类型，也就是说我们可以Hask的个构造器去真的构造一个类型
+</p>
+
+<p>
+比如：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #36648b;">(-&gt;)</span> a a
+</pre>
+</div>
+<p>
+就构造了一个从a类型到a类型的的类型
+</p>
+
+<p>
+构造出来的这个类型可以作为 id 函数的类型
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">id</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">(-&gt;)</span> a a
+</pre>
+</div>
 </div>
 </div>
 </div>
 
 <div id="outline-container-orgheadline3" class="outline-3">
-<h3 id="orgheadline3">Functor / 函子</h3>
+<h3 id="orgheadline3"><i><ruby>函子<rt> Functor</rt></ruby></i></h3>
 <div class="outline-text-3" id="text-orgheadline3">
 <p>
-两个范畴中间可以用叫Functor的东西来连接起来，简称 T。
+两个范畴中间可以用叫 Functor 的东西来连接起来，简称 T。
 </p>
+
+
+<figure>
+<p><object type="image/svg+xml" data="images/functor.svg" >
+Sorry, your browser does not support SVG.</object>
+</p>
+<figcaption><span class="figure-number">Figure 2:</span> Functor C D G, 从 C 到 D 范畴的Functor G</figcaption>
+</figure>
+
+<p>
+所以大部分把Functor/Monad比喻成盒子其实在定义上是错的，虽然这样比喻比较容易理解，在使用上问题也不大。但是，Functor只是从一个范畴到另一个范畴的映射关系而已。
+</p>
+
 <ul class="org-ul">
 <li>范畴间 东西的 Functor 标记为 <code>T(O)</code></li>
 <li>范畴间 箭头的 Functor 标记为 <code>T(~&gt;)</code></li>
-<li>存在一个 T 把所有的 O 和 ~&gt; 都映射到自己，标记为id functor 1<sub>C</sub>
+<li>任何范畴C上存在一个 T 把所有的 O 和 ~&gt; 都映射到自己，标记为id functor 1<sub>C</sub>
 <ul class="org-ul">
 <li>1<sub>C</sub>(O) = O</li>
 <li>1<sub>C</sub>(~&gt;) = ~&gt;</li>
@@ -287,7 +334,7 @@ Hask 范畴的：
 </div>
 
 <p>
-而 <i>endofunctor</i> 就是这种连接相同范畴的 Functor，因为它从范畴 Hask 到达同样的范畴 Hask
+而 <i><ruby>自函子<rt>endofunctor</rt></ruby></i> 就是这种连接相同范畴的 Functor，因为它从范畴 Hask 到达同样的范畴 Hask
 </p>
 <p>
 这里的 fmap 就是 T(~&gt;)，在 Hask 范畴上，所以是 T(-&gt;), 这个箭头是函数，所以也能表示成 T(f) 如果 <code>f:: a -&gt; b</code>
@@ -295,20 +342,32 @@ Hask 范畴的：
 </div>
 </div>
 
-
-
 <div id="outline-container-orgheadline4" class="outline-3">
-<h3 id="orgheadline4">Natural Transformations / 自然变换</h3>
+<h3 id="orgheadline4"><i><ruby>Cat<rt> +猫+</rt></ruby></i></h3>
 <div class="outline-text-3" id="text-orgheadline4">
 <p>
-Functor 是范畴间的映射，而自然变换，则是Functor间的映射。
+当我们把一个Category看成一个object，functor看成箭头，那么我们又得到了一个Category，这种object是category的category我们叫它 &#x2013; <i>Cat</i>
+</p>
+
+<p>
+已经没法讲了，看 TODO 图吧
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline5" class="outline-3">
+<h3 id="orgheadline5"><i><ruby>自然变换<rt>Natural Transformations</rt></ruby></i></h3>
+<div class="outline-text-3" id="text-orgheadline5">
+<p>
+Functor 是范畴间的映射，而 Functor 在 Cat 范畴又是个箭头，所以，Functor间的映射，也就是 Cat 范畴上的 Functor，叫做 <i>自然变换</i>
 </p>
 
 
 <figure>
-<p><img src="https://www.evernote.com/l/ABfSbtcBnthEIp82P0f4ptd-BMNxusJ5jQUB/image.jpg" alt="image.jpg">
+<p><object type="image/svg+xml" data="natrual-transformation.svg" >
+Sorry, your browser does not support SVG.</object>
 </p>
-<figcaption><span class="figure-number">Figure 2:</span> Functor F和G，自然变化 &eta;， 以及Functor Category</figcaption>
+<figcaption><span class="figure-number">Figure 3:</span> Functor F和G，以及 F 到 G 的自然变化 &eta;</figcaption>
 </figure>
 
 <p>
@@ -346,14 +405,31 @@ Hask 范畴上的自然变化就变成了
 <li>自然变换的组合</li>
 </ul>
 
+
+<figure>
+<p><object type="image/svg+xml" data="images/functor-category.svg" >
+Sorry, your browser does not support SVG.</object>
+</p>
+</figure>
+
 <p>
-现在维度越来越高了，已经不能用简单的图来描述了，所以需要引入 String Diagram。
+我们来梳理一下，已经不知道升了几个维度了，我们假设类型是第一维度
+</p>
+<ul class="org-ul">
+<li>一维：范畴 Hask，东西是类型，箭头是 -&gt;</li>
+<li>二维：范畴 Cat， 东西是 Hask， 箭头是 Functor</li>
+<li>三维：范畴 Functor， 东西是Functor， 箭头是自然变换</li>
+</ul>
+
+<p>
+感觉到达三维已经是极限了，尼玛还有完没完了，每升一个维度还要起这么多装逼的名字，再升维度就要一脸懵逼了呢。虽然维度不算太高，但是已经不能用简单的图来描述了，所以需要引入 String Diagram。
 </p>
 </div>
+</div>
 
-<div id="outline-container-orgheadline5" class="outline-4">
-<h4 id="orgheadline5"><span class="todo TODO">TODO</span> String Diagram</h4>
-<div class="outline-text-4" id="text-orgheadline5">
+<div id="outline-container-orgheadline6" class="outline-3">
+<h3 id="orgheadline6"><span class="todo TODO">TODO</span> String Diagram</h3>
+<div class="outline-text-3" id="text-orgheadline6">
 <p>
 T1 是 范畴 a 到 b 的functor
 </p>
@@ -397,19 +473,18 @@ T2 是范畴 b 到 c 的functor
 </div>
 </div>
 </div>
-</div>
 
-<div id="outline-container-orgheadline6" class="outline-3">
-<h3 id="orgheadline6"><span class="todo TODO">TODO</span> <i>Adjunction Functor</i> 伴随函子</h3>
-<div class="outline-text-3" id="text-orgheadline6">
+<div id="outline-container-orgheadline7" class="outline-3">
+<h3 id="orgheadline7"><span class="todo TODO">TODO</span> <i>Adjunction Functor</i> 伴随函子</h3>
+<div class="outline-text-3" id="text-orgheadline7">
 <p>
 范畴C和D直接有来有回的函子
 </p>
 </div>
 </div>
-<div id="outline-container-orgheadline7" class="outline-3">
-<h3 id="orgheadline7"><span class="todo TODO">TODO</span> Yoneda lemma / <del>米田共</del> 米田引理</h3>
-<div class="outline-text-3" id="text-orgheadline7">
+<div id="outline-container-orgheadline8" class="outline-3">
+<h3 id="orgheadline8"><span class="todo TODO">TODO</span> Yoneda lemma / <del>米田共</del> 米田引理</h3>
+<div class="outline-text-3" id="text-orgheadline8">
 <p>
 米田引理是说所有Functor <code>f a</code> 一定存在 embed 和 unembed，使得 <code>f a</code> 和 <code>(a -&gt; b) -&gt; F b</code> isomorphic 同构
 </p>
@@ -437,9 +512,9 @@ embed 可以把 functor <code>f a</code> 变成 <code>(a -&gt; b) -&gt; f b</cod
 unembed 是反过来， <code>(a -&gt; b) -&gt; f b</code> 变成 <code>f a</code>
 </p>
 </div>
-<div id="outline-container-orgheadline8" class="outline-4">
-<h4 id="orgheadline8">Rank N Type</h4>
-<div class="outline-text-4" id="text-orgheadline8">
+<div id="outline-container-orgheadline9" class="outline-4">
+<h4 id="orgheadline9">Rank N Type</h4>
+<div class="outline-text-4" id="text-orgheadline9">
 <ul class="org-ul">
 <li>Monomorphic Rank 0 / 0级单态: t</li>
 <li>Polymorphic Rank 1 / 1级 <del>变态</del> 多态: forall a. a -&gt; t</li>
@@ -494,9 +569,9 @@ f 在 <code>f True</code> 是确定 a 是 Boolean，在rank1多态是时就确�
 </div>
 </div>
 
-<div id="outline-container-orgheadline9" class="outline-3">
-<h3 id="orgheadline9"><i>Monad</i> 单子</h3>
-<div class="outline-text-3" id="text-orgheadline9">
+<div id="outline-container-orgheadline10" class="outline-3">
+<h3 id="orgheadline10"><i>Monad</i> 单子</h3>
+<div class="outline-text-3" id="text-orgheadline10">
 <p>
 有了 Functor，解释 Monad 就简单了。Monad 的定义比 Functor 再多一些要求
 </p>
@@ -526,14 +601,14 @@ f 在 <code>f True</code> 是确定 a 是 Boolean，在rank1多态是时就确�
 </div>
 </div>
 </div>
-<div id="outline-container-orgheadline10" class="outline-3">
-<h3 id="orgheadline10"><i>Kleisli Catergory</i></h3>
-<div class="outline-text-3" id="text-orgheadline10">
+<div id="outline-container-orgheadline11" class="outline-3">
+<h3 id="orgheadline11"><i>Kleisli Catergory</i></h3>
+<div class="outline-text-3" id="text-orgheadline11">
 
 <figure>
 <p><img src="https://www.evernote.com/l/ABeNc2skWiZCdLKdJGy4h8L_2GeUo-EDHGsB/image.jpg" alt="image.jpg">
 </p>
-<figcaption><span class="figure-number">Figure 3:</span> f和g画翻了 😂 不过逻辑式对的，注意 &gt;&gt;= 和大火箭 &lt;=&lt; 的轨迹</figcaption>
+<figcaption><span class="figure-number">Figure 5:</span> f和g画翻了 😂 不过逻辑式对的，注意 &gt;&gt;= 和大火箭 &lt;=&lt; 的轨迹</figcaption>
 </figure>
 
 <p>
@@ -553,16 +628,16 @@ Functor 的 Catergory 叫做 Functor Catergory，因为有箭头自然变换。M
 </p>
 
 <ul class="org-ul">
-<li><code>g':: T b -&gt; T^2 c</code></li>
-<li id="=&mu;">T<sup>2</sup> c -&gt; T c=</li>
+<li>g':: T b -&gt; T<sup>2</sup> c</li>
+<li id="&mu;">T<sup>2</sup> c -&gt; T c</li>
 </ul>
 
 <p>
 所以
 </p>
 <ul class="org-ul">
-<li>~(&gt;&gt;=) = &mu; . g'~</li>
-<li>大火箭 ~(&lt;=&lt;) = &mu; . g' . f' = &mu; . F g . f' ~</li>
+<li>(&gt;&gt;=) = &mu; . g'</li>
+<li>大火箭 (&lt;=&lt;) = &mu; . g' . f' = &mu; . F g . f'</li>
 </ul>
 
 <p>
@@ -570,7 +645,7 @@ Functor 的 Catergory 叫做 Functor Catergory，因为有箭头自然变换。M
 </p>
 
 <p>
-<code>(y -&gt; T z) &lt;=&lt; (x -&gt; T y) = (x -&gt; T z)</code>
+(y -&gt; T z) &lt;=&lt; (x -&gt; T y) = (x -&gt; T z)
 </p>
 
 <p>
@@ -580,36 +655,36 @@ Functor 的 Catergory 叫做 Functor Catergory，因为有箭头自然变换。M
 </div>
 </div>
 
-<div id="outline-container-orgheadline12" class="outline-2">
-<h2 id="orgheadline12"><span class="todo TODO">TODO</span> 第二章：Practical Monads</h2>
-<div class="outline-text-2" id="text-orgheadline12">
+<div id="outline-container-orgheadline13" class="outline-2">
+<h2 id="orgheadline13"><span class="todo TODO">TODO</span> 第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></h2>
+<div class="outline-text-2" id="text-orgheadline13">
 <p>
 一些有用的 Monad instances
 </p>
 </div>
-<div id="outline-container-orgheadline16" class="outline-3">
-<h3 id="orgheadline16">Applicative</h3>
-<div class="outline-text-3" id="text-orgheadline16">
-</div><div id="outline-container-orgheadline13" class="outline-4">
-<h4 id="orgheadline13">Alternative</h4>
-</div>
-<div id="outline-container-orgheadline14" class="outline-4">
-<h4 id="orgheadline14">Arrow</h4>
+<div id="outline-container-orgheadline17" class="outline-3">
+<h3 id="orgheadline17">Applicative</h3>
+<div class="outline-text-3" id="text-orgheadline17">
+</div><div id="outline-container-orgheadline14" class="outline-4">
+<h4 id="orgheadline14">Alternative</h4>
 </div>
 <div id="outline-container-orgheadline15" class="outline-4">
-<h4 id="orgheadline15">Bifunctor</h4>
+<h4 id="orgheadline15">Arrow</h4>
+</div>
+<div id="outline-container-orgheadline16" class="outline-4">
+<h4 id="orgheadline16">Bifunctor</h4>
 </div>
 </div>
 
-<div id="outline-container-orgheadline17" class="outline-3">
-<h3 id="orgheadline17">Either</h3>
-</div>
 <div id="outline-container-orgheadline18" class="outline-3">
-<h3 id="orgheadline18">Validate</h3>
+<h3 id="orgheadline18">Either</h3>
 </div>
 <div id="outline-container-orgheadline19" class="outline-3">
-<h3 id="orgheadline19">Reader</h3>
-<div class="outline-text-3" id="text-orgheadline19">
+<h3 id="orgheadline19">Validate</h3>
+</div>
+<div id="outline-container-orgheadline20" class="outline-3">
+<h3 id="orgheadline20">Reader</h3>
+<div class="outline-text-3" id="text-orgheadline20">
 <p>
 给一个computation喂数据
 输入 r
@@ -644,9 +719,9 @@ asks 可以通过函数 r-&gt;a 得到一个 Reader r a monad
 </div>
 </div>
 </div>
-<div id="outline-container-orgheadline20" class="outline-3">
-<h3 id="orgheadline20">Writter</h3>
-<div class="outline-text-3" id="text-orgheadline20">
+<div id="outline-container-orgheadline21" class="outline-3">
+<h3 id="orgheadline21">Writter</h3>
+<div class="outline-text-3" id="text-orgheadline21">
 <p>
 除了返回值，computation会写一些额外的数据
 </p>
@@ -673,53 +748,54 @@ asks 可以通过函数 r-&gt;a 得到一个 Reader r a monad
 </div>
 </div>
 </div>
-<div id="outline-container-orgheadline21" class="outline-3">
-<h3 id="orgheadline21">State</h3>
+<div id="outline-container-orgheadline22" class="outline-3">
+<h3 id="orgheadline22">State</h3>
 </div>
 
-<div id="outline-container-orgheadline22" class="outline-3">
-<h3 id="orgheadline22">RWS</h3>
-</div>
 <div id="outline-container-orgheadline23" class="outline-3">
-<h3 id="orgheadline23">Expection</h3>
+<h3 id="orgheadline23">RWS</h3>
 </div>
 <div id="outline-container-orgheadline24" class="outline-3">
-<h3 id="orgheadline24">Monad Transform</h3>
+<h3 id="orgheadline24">Expection</h3>
 </div>
 <div id="outline-container-orgheadline25" class="outline-3">
-<h3 id="orgheadline25">Cont</h3>
+<h3 id="orgheadline25">Monad Transform</h3>
 </div>
 <div id="outline-container-orgheadline26" class="outline-3">
-<h3 id="orgheadline26">MonadPlus</h3>
+<h3 id="orgheadline26">Cont</h3>
 </div>
 <div id="outline-container-orgheadline27" class="outline-3">
-<h3 id="orgheadline27">MonadFix</h3>
+<h3 id="orgheadline27">MonadPlus</h3>
 </div>
 <div id="outline-container-orgheadline28" class="outline-3">
-<h3 id="orgheadline28">ST</h3>
+<h3 id="orgheadline28">MonadFix</h3>
 </div>
 <div id="outline-container-orgheadline29" class="outline-3">
-<h3 id="orgheadline29">Free Monad</h3>
+<h3 id="orgheadline29">ST</h3>
 </div>
 <div id="outline-container-orgheadline30" class="outline-3">
-<h3 id="orgheadline30">Eff</h3>
+<h3 id="orgheadline30">Free Monad</h3>
+</div>
+<div id="outline-container-orgheadline31" class="outline-3">
+<h3 id="orgheadline31">Eff</h3>
 </div>
 </div>
 
-<div id="outline-container-orgheadline31" class="outline-2">
-<h2 id="orgheadline31">References</h2>
-<div class="outline-text-2" id="text-orgheadline31">
-<p>
-<a href="http://dev.stephendiehl.com/hask">http://dev.stephendiehl.com/hask</a>
-<a href="https://www.youtube.com/watch?v=ZKmodCApZwk">https://www.youtube.com/watch?v=ZKmodCApZwk</a>
-</p>
+<div id="outline-container-orgheadline32" class="outline-2">
+<h2 id="orgheadline32">References</h2>
+<div class="outline-text-2" id="text-orgheadline32">
+<ul class="org-ul">
+<li><a href="http://dev.stephendiehl.com/hask">http://dev.stephendiehl.com/hask</a></li>
+<li><a href="https://www.youtube.com/watch?v=ZKmodCApZwk">https://www.youtube.com/watch?v=ZKmodCApZwk</a></li>
+<li><a href="https://en.wikibooks.org/wiki/Haskell/Category_theory">https://en.wikibooks.org/wiki/Haskell/Category_theory</a></li>
+</ul>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <footer>
 <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-<p>Modified: 2017-02-23 Thu 12:27</p>
+<p>Modified: 2017-02-25 Sat 05:26</p>
 <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6)</p>
 <p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
