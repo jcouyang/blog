@@ -2,57 +2,86 @@
 #+Date: <2017-02-10 Fri>
 #+AUTHOR: 欧阳继超
 #+OPTIONS: ^:t
+#+MACRO: ruby @@html:<ruby>$1<rt>$2</rt></ruby>@@
 
-很多人都不明白什么是Monad，并不是因为不会用，不知觉可能就在用某种monad。定义和使用起来其实不难，困惑的大多应该是后面的这堆理论-- +饭稠+ 范畴论。当然，我也没学过范畴论，只是略微看得懂写Haskell罢了。
+很多人都不明白什么是Monad，并不是因为不会用，不知觉可能就在用某种 monad。\\
+定义和使用起来其实不难，困惑的大多应该是后面的这堆理论-- 范畴论。当然，我也没学过范畴论，只是略微看得懂写Haskell罢了。
 
-我尝试过很多种方式解释，比如为了降低门槛用JS来实现，那Haskell/Scala的人出来喷你们前端这些不懂函数式的人乱搞出来的东西根本就不是monad。比如用图来解释，又会被嫌弃画风不好。但是，作为灵魂画师，我只 +是觉得自己萌萌的啊+ 在乎画的灵魂是否能够给你一点启发。
+我在书中[[https://book.douban.com/subject/26883736/][写过一章]]来解释，某人也尝试过很[[http://www.ruanyifeng.com/blog/2017/02/fp-tutorial.html][写博客解释]]，比如为了降低门槛用JS来，那Haskell/Scala的人出来喷你们前端这些不懂函数式的渣渣乱搞出来的东西根本就不是 monad。
 
-好了，安全带系好，我要开车了。为了防止鄙视链顶端的语言用户们喷再嫌弃，我决定就用Haskell好了，其实也不难解释清楚 +才怪+ 。
+我也画过一些图来解释，又会被嫌弃画风不好。但是，作为灵魂画师，我只 +是觉得自己萌萌的啊+ 在乎画的灵魂是否能够给你一点启发。好吧，讲这么学术的东西，还是用dot来画吧，看起来好正规呢。
 
-这里面很多很装逼的单词(它们都是 /斜体/)，就算没看懂，把这些词记住也足够装一阵子逼了。
+好了，安全带系好，我真的要开车了。为了 +防止鄙视链顶端的语言用户们喷再嫌弃+ 解释的不到位，就用 Haskell 好了（虽然haskell也没到鄙视链顶），其实也不难解释清楚 +才怪+ 。
 
-* 第一章：Catergory Theory
+这里面很多很装逼的单词，它们都是 /斜体/ ，就算没看懂，把这些词记住也足够{{{ruby(装一阵子逼了,买一阵子萌了)}}}。
+
+* COMMENT
+#+BEGIN_SRC emacs-lisp
+(require 'ob-dot)
+#+END_SRC
+
+#+RESULTS:
+: ob-dot
+
+* 第一部分：{{{ruby(范畴论,Catergory Theory)}}}
 ** /Category/
 #+INDEX: Catergory
 #+INDEX: 范畴
 
-一个 /范畴/ 包含两个玩意
+一个 /{{{ruby(范畴,Category)}}}/ 包含两个玩意
 - 东西 =O= （Object）
-- 两个东西的关系，箭头 =~>= （ /Morphism/ ，书上叫 /态射/ ）
+- 两个东西的关系，箭头 =~>= （ /{{{ruby(态射,Morphism)}}}/ ）
 
 一些属性
 - 一定有一个叫 id 的箭头，也叫做 1
-- 箭头可以 /组合(compose)/
+- 箭头可以 /{{{ruby(组合, compose)}}}/
 
 恩，就是这么简单
 
-#+CAPTION: 在酒店破笔画的，忍一忍看吧，回去用surface补上
-https://www.evernote.com/l/ABdanaXlenVL5oMgKmviXVKaO2fQ_F9P9mQB/image.png
+#+BEGIN_SRC dot :file images/category.svg :exports results
+  digraph {
+          label="Category"
+          rankdir=RL
+          a -> b [label=g]
+          b -> c [label=f]
+          a -> a [label=id]
+          b -> b [label=id]
+          c -> c [label=id]
+          a -> c [label="f . g"]
+  }
+#+END_SRC
 
-这些玩意对应到haskell的typeclass大致就是这样
+#+CAPTION: 有东西 a, b, c 和箭头 f, g 的 Category，其中 f . g 表示 compose f 和 g
+#+RESULTS:
+[[file:images/category.svg]]
+
+这些玩意对应到 haskell 的 typeclass 大致就是这样
 #+BEGIN_SRC haskell
 class Category (c :: * -> * -> *) where
   id :: c a a
   (.) :: c y z -> c x y -> c x z
 #+END_SRC
 
-其中：
-c 是 /higher kind/ ，跟higher order function的定义差不多，它是接收类型，构造新类型的类型。这里的 c 接收一个类型，再接收一个类型，就可以返回个类型。
-
-- =id :: c a a= c范畴上的 a 到 a 的箭头
-
+如果这是你第一次见到 Haskell 代码，没有关系，语法真的很简单 +才怪+
+- =class= 定义了一个 TypeClass， =Category= 是这个 TypeClass 的名字
+- Type class 类似于定义类型的规范，规范为 =where= 后面那一坨
+- 类型规范的对象是参数 ~(c:: * -> * -> *)~ ， =::= 后面是c的类型
+- c 是 /higher kind/ ，跟higher order function的定义差不多，它是接收类型，构造新类型的类型。这里的 c 接收一个类型，再接收一个类型，就可以返回个类型。
+- ~id:: c a a~ 表示 c 范畴上的 a 到 a 的箭头
 - =.= 的意思 c 范畴上，如果喂一个 y 到 z 的箭头，再喂一个 x 到 y 的箭头，那么就返回 x 到 z 的箭头。
+
+{{{ruby(简单吧,hen nan ba)}}}?还没有高数抽象呢。
 
 *** /Hask/
 Haskell 类型系统范畴叫做 Hask
 #+INDEX: Hask
 
-Hask 范畴的：
+在 Hask 范畴上：
 
-- 东西是 =type=
-- 箭头是 =->= 也就是函数的箭头
+- 东西是类型
+- 箭头是类型的变换，即 =->=
 - id 就是 id 函数的类型 =a -> a=
-- compose 当然就是函数组合
+- compose 当然就是函数组合的类型
 
 #+BEGIN_SRC haskell
 type Hask = (->)
@@ -60,13 +89,60 @@ instance Category (Hask:: * -> * -> *) where
   (f . g) x = f (g x)
 #+END_SRC
 
-** Functor / 函子
+我们看见新的关键字 =instance= ，这表示 Hask 是 Type class Category 的实例类型，也就是说我们可以Hask的个构造器去真的构造一个类型
+
+比如：
+#+BEGIN_SRC haskell
+(->) a a
+#+END_SRC
+就构造了一个从a类型到a类型的的类型
+
+构造出来的这个类型可以作为 id 函数的类型
+#+BEGIN_SRC haskell
+id :: (->) a a
+#+END_SRC
+
+** /{{{ruby(函子, Functor)}}}/
 #+INDEX: Functor
 #+INDEX: 函子
-两个范畴中间可以用叫Functor的东西来连接起来，简称 T。
+两个范畴中间可以用叫 Functor 的东西来连接起来，简称 T。
+
+#+BEGIN_SRC dot :file images/functor.svg :exports results
+  digraph {
+
+  label="Functor C D G"
+  compound=true;
+  rankdir=RL
+  subgraph cluster_C {
+          style=dotted
+          label="C"
+          a -> a [label=id]
+          a -> b [label=g]
+          b -> c [label=f]
+          a -> c [label="f . g"]
+  }
+  subgraph cluster_D {
+          style=dotted
+          label=D
+          "G a" -> "G a" [label="G id"]
+          "G a" -> "G b" [label="G g"]
+          "G b" -> "G c" [label="G f"]
+          "G a" -> "G c" [label="G f . g = G f . G g"]
+  }
+
+  c ->"G a"[ltail=cluster_C,lhead=cluster_D,label=G]
+  }
+#+END_SRC
+
+#+CAPTION: Functor C D G, 从 C 到 D 范畴的Functor G
+#+RESULTS:
+[[file:images/functor.svg]]
+
+所以大部分把Functor/Monad比喻成盒子其实在定义上是错的，虽然这样比喻比较容易理解，在使用上问题也不大。但是，Functor只是从一个范畴到另一个范畴的映射关系而已。
+
 - 范畴间 东西的 Functor 标记为 =T(O)=
 - 范畴间 箭头的 Functor 标记为 =T(~>)=
-- 存在一个 T 把所有的 O 和 ~> 都映射到自己，标记为id functor 1_C
+- 任何范畴C上存在一个 T 把所有的 O 和 ~> 都映射到自己，标记为id functor 1_C
   - 1_C(O) = O
   - 1_C(~>) = ~>
 
@@ -92,20 +168,71 @@ class Functor t where
   fmap :: (a -> b) -> (t a -> t b)
 #+END_SRC
 
-而 /endofunctor/ 就是这种连接相同范畴的 Functor，因为它从范畴 Hask 到达同样的范畴 Hask
+而 /{{{ruby(自函子,endofunctor)}}}/ 就是这种连接相同范畴的 Functor，因为它从范畴 Hask 到达同样的范畴 Hask
 #+INDEX: endofunctor
+#+INDEX: 自函子
 
 这里的 fmap 就是 T(~>)，在 Hask 范畴上，所以是 T(->), 这个箭头是函数，所以也能表示成 T(f) 如果 =f:: a -> b=
 
+** /{{{ruby(Cat, +猫+)}}}/
+当我们把一个Category看成一个object，functor看成箭头，那么我们又得到了一个Category，这种object是category的category我们叫它 -- /Cat/
 
+已经没法讲了，看 TODO 图吧
 
-** Natural Transformations / 自然变换
+** /{{{ruby(自然变换,Natural Transformations)}}}/
 #+INDEX: Natural Transformations
 #+INDEX: 自然变换
-Functor 是范畴间的映射，而自然变换，则是Functor间的映射。
+Functor 是范畴间的映射，而 Functor 在 Cat 范畴又是个箭头，所以，Functor间的映射，也就是 Cat 范畴上的 Functor，叫做 /自然变换/
 
-#+CAPTION: Functor F和G，自然变化 \eta， 以及Functor Category
-https://www.evernote.com/l/ABfSbtcBnthEIp82P0f4ptd-BMNxusJ5jQUB/image.jpg
+#+BEGIN_SRC dot :file images/natrual-transformation.svg :exports results
+  digraph {
+  label="Functor F 到 G 的自然变换"
+  compound=true;
+  rankdir=RL
+  subgraph cluster_C {
+          style=dotted
+          label="C"
+          a -> a [label=id]
+          a -> b [label=g]
+          b -> c [label=f]
+          a -> c [label="f . g"]
+  }
+  subgraph cluster_D {
+          style=dotted
+          label=D
+          "G a" -> "G a" [label="G id"]
+          "G a" -> "G b" [label="G g"]
+          "G b" -> "G c" [label="G f"]
+          "G a" -> "G c" [label="G f . g = G f . G g"]
+  }
+  subgraph cluster_E {
+          style=dotted
+          label=E
+          "F a" -> "F a" [label="F id"]
+          "F a" -> "F b" [label="F g"]
+          "F b" -> "F c" [label="F f"]
+          "F a" -> "F c" [label="F f . g = F f . F g"]
+  }
+
+  subgraph FunctorCategory {
+          style=dotted
+          label="Functor Category"
+          rank=same;
+          functorG [label="G",shape=plaintext,width=0.01, height=0.01];
+          functorF [label="F", shape=plaintext, width=0.01, height=0.01];
+  }
+  functorF -> functorG[label="η"]
+  c -> functorG [arrowhead=none]
+  c -> functorF [arrowhead=none]
+  functorG ->"G a"[ltail=cluster_C,lhead=cluster_D]
+
+  functorF ->"F a"[ltail=cluster_C,lhead=cluster_E]
+  }
+#+END_SRC
+
+#+CAPTION: Functor F和G，以及 F 到 G 的自然变化 \eta
+#+RESULTS:
+[[file:natrual-transformation.svg]]
 
 所以范畴 c 上的函子 f 到 g 的自然变化就可以表示成
 #+BEGIN_SRC haskell
@@ -126,9 +253,28 @@ type NatHask f g = f a -> g a
 - id 为 f a 到 f a 的自然变换
 - 自然变换的组合
 
-现在维度越来越高了，已经不能用简单的图来描述了，所以需要引入 String Diagram。
+#+BEGIN_SRC dot :file images/functor-category.svg :exports results
+digraph FunctorCategory {
+          style=dotted
+          label="Functor Category"
+          rank=same;
+          functorG [label="G",shape=plaintext,width=0.01, height=0.01];
+          functorF [label="F", shape=plaintext, width=0.01, height=0.01];
+functorF -> functorG[label="η"]
+  }
+#+END_SRC
 
-*** TODO String Diagram
+#+RESULTS:
+[[file:images/functor-category.svg]]
+
+我们来梳理一下，已经不知道升了几个维度了，我们假设类型是第一维度
+- 一维：范畴 Hask，东西是类型，箭头是 ->
+- 二维：范畴 Cat， 东西是 Hask， 箭头是 Functor
+- 三维：范畴 Functor， 东西是Functor， 箭头是自然变换
+
+感觉到达三维已经是极限了，尼玛还有完没完了，每升一个维度还要起这么多装逼的名字，再升维度就要一脸懵逼了呢。虽然维度不算太高，但是已经不能用简单的图来描述了，所以需要引入 String Diagram。
+
+** TODO String Diagram
 
 T1 是 范畴 a 到 b 的functor
 
@@ -247,20 +393,20 @@ Functor 的 Catergory 叫做 Functor Catergory，因为有箭头自然变换。M
 
 看到图上的 g' 和 \mu 了没？
 
-- =g':: T b -> T^2 c=
-- =\mu :: T^2 c -> T c=
+- g':: T b -> T^2 c
+- \mu :: T^2 c -> T c
 
 所以
-- ~(>>=) = \mu . g'~
-- 大火箭 ~(<=<) = \mu . g' . f' = \mu . F g . f' ~
+- (>>=) = \mu . g'
+- 大火箭 (<=<) = \mu . g' . f' = \mu . F g . f'
 
 大火箭满足compose
 
-=(y -> T z) <=< (x -> T y) = (x -> T z)=
+(y -> T z) <=< (x -> T y) = (x -> T z)
 
 沿着图上轨迹找找看
 
-* TODO 第二章：Practical Monads
+* TODO 第二部分：{{{ruby(食用猫呢, Practical Monads)}}}
 一些有用的 Monad instances
 ** Applicative
 *** Alternative
@@ -328,5 +474,6 @@ output = runWriter example
 ** Eff
 
 * References
-http://dev.stephendiehl.com/hask
-https://www.youtube.com/watch?v=ZKmodCApZwk
+- http://dev.stephendiehl.com/hask
+- https://www.youtube.com/watch?v=ZKmodCApZwk
+- https://en.wikibooks.org/wiki/Haskell/Category_theory
