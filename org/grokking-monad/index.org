@@ -310,12 +310,13 @@ instance Category (End f) where
 
 ** TODO /Adjunction Functor/ 伴随函子
 #+INDEX: Adjunction Functor
-范畴C和D直接有来有回的函子
-** TODO Yoneda lemma / +米田共+ 米田引理
-#+INDEX: 米田引理
-#+INDEX: Yoneda Lemma
+范畴C和D直接有来有回的函子，为什么要介绍这个，因为它直接可以推出 Monad
 
-米田引理是说所有Functor =f a= 一定存在 embed 和 unembed，使得 =f a= 和 =(a -> b) -> F b= isomorphic 同构
+让我们来看看什么叫有来回。
+
+一个范畴 C 可以通过函子 G 到 D，再通过函子 F 回到 C，那么 F 和 G 就是伴随函子。
+
+同时根据同构的定义，G 与 F 是同构的。
 #+INDEX: isomorphic
 #+INDEX: 同构
 
@@ -325,6 +326,15 @@ f :: a -> b
 f':: b -> a
 #+END_SRC
 那么 f 与 f' 同构，因为 f . f' = id = f' . f
+
+伴随函子的组合是id函子 F . G = 1_c
+
+
+** Yoneda lemma / +米田共+ 米田引理
+#+INDEX: 米田引理
+#+INDEX: Yoneda Lemma
+
+米田引理是说所有Functor =f a= 一定存在 embed 和 unembed，使得 =f a= 和 =(a -> b) -> F b= isomorphic 同构
 
 haskell还要先打开 RankNTypes 的 feature
 
@@ -344,26 +354,32 @@ unembed 是反过来， =(a -> b) -> f b= 变成 =f a=
 
 上个图就明白了
 #+BEGIN_SRC dot :file images/yoneda-lemma.svg  :exports results
-  digraph {
-          rankdir=RL
-          compound=true;
+    digraph {
+            rankdir=RL
+            newrank=true;
+            compound=true;
+            subgraph cluster_C {
+                  0[style=invis,shape=point,height=0,margin=0];
+                    style=dotted
+                    label=C
+                    a;b;
+                    a -> b
+            }
 
-                  subgraph cluster_C {
-                          style=dotted
-                          label=C
-                          a;b;
-                          a -> b
-                  }
 
 
-
-          subgraph cluster_D {
-                  style=dotted
-                  label=D
-                  "F a" -> "F b"
-          }
-          b -> "F a"[ltail=cluster_C,lhead=cluster_D, label=F]
-  }
+            subgraph cluster_D {
+                  1[style=invis, shape=point,height=0,margin=0];
+                    style=dotted
+                    label=D
+                    "F a" -> "F b"
+            }
+            edge[constraint=false, style=solid];
+            0 -> 1[ltail=cluster_C, lhead=cluster_D, label=F]
+            // a -> F [ltail=cluster_C,arrowhead=none]
+            // F ->"F a"[lhead=cluster_D]
+            {rank=same;a;"F a"}
+    }
 #+END_SRC
 
 #+CAPTION: 也就是说，图中无论知道a->b 再加上任意一个 F x，都能推出另外一个 F
@@ -393,7 +409,7 @@ rank2 f = (f True, f 'a')
 - f 在 =f True= 时类型 =Boolean -> Boolean= 是符合 =forall a. a->a= 的
 - 在 =f 'a'= 时类型是 =Char -> Char= 也符合 =forall a. a->a=
 
-但是到rank1就类型系统就懵逼了
+但是到 rank1 类型系统就懵逼了
 #+BEGIN_SRC haskell
 rank1 :: forall a. (a -> a) -> (Bool, Char)
 rank1 f = (f True, f 'a')
@@ -424,102 +440,97 @@ class Endofunctor m => Monad m where
 ** /Kleisli Catergory/
 #+INDEX: Kleisi Catergory
 
-#+CAPTION: f和g画翻了 😂 不过逻辑式对的，注意 >>= 和大火箭 <=< 的轨迹
-https://www.evernote.com/l/ABeNc2skWiZCdLKdJGy4h8L_2GeUo-EDHGsB/image.jpg
+#+BEGIN_SRC dot :file images/kleisli.svg :exports results
+      digraph g {
+              rankdir="RL";
+              edge[style=invis];
 
-Functor 的 Catergory 叫做 Functor Catergory，因为有箭头自然变换。Monad 也可以定义出来一个 Catergory（当然由于Monad是 Endofunctor，所以他也可以是 自函子范畴），叫做 Kleisli Catergory，那么 Kleisli 的箭头是什么？
+              { rank=same;
+                      0 [style = invis, shape=point];
+                      01 [style = invis,shape=point];
+                      02 [style=invis,shape=point];
+                      0 -> 01 -> 02;
+              }
+
+              subgraph clusterA {
+                      style=dotted
+                      "a" -> "b" -> "c";
+                      "a" -> "b" [label="g'", constraint=false, style=solid];
+                      "b" -> "c" [label="f'", constraint=false, style=solid];
+              }
+              subgraph clusterB {
+                      style=dotted
+                      "T a" -> "T b" -> "T c";
+                      "T a" -> "T b" [label="T g'", constraint=false, style=solid];
+                      "T b" -> "T c" [label="T f'", constraint=false, style=solid];
+              }
+
+              subgraph clusterC {
+                      style=dotted
+                      "T T a" -> "T T b" -> "T T c";
+                      "T T a" -> "T T b" [label="T T g'", constraint=false, style=solid];
+                      "T T b" -> "T T c" [label="T T f'", constraint=false, style=solid];
+              }
+
+
+              0 -> a;
+              01 -> "T a";
+              02 -> "T T a";
+
+              // edges between clusters
+              edge[constraint=false, style=solid];
+              a -> "T b"[label=g, color=blue, fontcolor=blue];
+              a -> "T c" [label="f <=< g", style=dashed, color=blue, fontcolor=blue]
+              "b" -> "T c"[label=f];
+              "T b" -> "T T c"[label="T f", color=purple, fontcolor=purple];
+              "T T c" -> "T c" [label="μ", style=dashed, color=purple];
+              c -> "T c" [label="η", style=dashed]
+              "T b" -> "T c" [label="μ . T f (>>= f)", style=dashed, color=blue,fontcolor=blue]
+
+
+      }
+#+END_SRC
+
+#+CAPTION: 注意观察大火箭 <=< 的轨迹（不知道dot为什么会把这根线搞这么又弯又骚的） 和 >>= 。所以 Kleisli 其实就是斜着走的一个范畴，但是 >>= 把它硬生生掰 +弯+ 直了。
+#+RESULTS:
+[[file:images/kleisli.svg]]
+
+Functor 的 Catergory 叫做 Functor Catergory，因为有箭头 -- 自然变换。Monad 也可以定义出来一个 Catergory（当然由于Monad是 Endofunctor，所以他也可以是 自函子范畴），叫做 Kleisli Catergory，那么 Kleisli 的箭头是什么？
 
 我们看定义，Kleisli Catergory
 1. 箭头是 Kleisli 箭头 =a -> T b=
 2. 东西就是c范畴中的东西. 因为 a 和 b 都是 c 范畴上的， 由于T是自函子，所以 T b 也是 c 范畴的
 
-看到图上的 g' 和 \mu 了没？
+看到图上的 {{{ruby(T f, fmap f)}}} 和 \mu 了没？
 
-- g':: T b -> T^2 c
-- \mu :: T^2 c -> T c
+#+BEGIN_SRC haskell
+f :: b -> T c
+fmap f :: T b -> T^2 c
+mu :: T^2 c -> T c
+#+END_SRC
 
-所以
-- (>>=) = \mu . g'
-- 大火箭 (<=<) = \mu . g' . f' = \mu . F g . f'
+紫色的箭头连起来（compose）就是 T f'，所以, 
+#+BEGIN_SRC haskell
+tb >>= f = \mu . fmap f tb
+#+END_SRC
 
-大火箭满足compose
+大火箭则是蓝色箭头的组合 
+#+BEGIN_SRC haskel
+(f <=< g) = \mu . T f . g = \mu . fmap f . g
+#+END_SRC
 
-(y -> T z) <=< (x -> T y) = (x -> T z)
+而且大火箭就是 Kleisli 范畴的 compose
 
-沿着图上轨迹找找看
+#+BEGIN_SRC haskell
+(<=<) :: Monad T => (b -> T c) -> (a -> T b) -> (a -> T c)
+#+END_SRC
 
-#+BEGIN_QUOTE
+** Summary
 第一部分理论部分都讲完了， 如果你读到这里还没有被这些{{{ruby(吊炸天,乱七八糟)}}}的概念搞daze，接下来可以看看它到底跟我们编程有鸟关系呢？第二部分将介绍这些概念产生的一些实用的monad
 
+- 👉 [[./part2.org][第二部分：{{{ruby(食用猫呢, Practical Monads)}}}]]
+
 当然我还没空全部写完，如果有很多人{{{ruby(预定,只要998)}}} Gumroad 上的 @@html: <script src="https://gumroad.com/js/gumroad.js"></script><a class="gumroad-button" href="https://gum.co/grokking-monad" target="_blank">Grokking Monad</a>@@ 电子书的话，我可能会稍微写得快一些。毕竟，写了也没人感兴趣也怪浪费时间的。不过，我猜也没几个人能看到这一行。
-#+END_QUOTE
-
-* TODO 第二部分：{{{ruby(食用猫呢, Practical Monads)}}}
-一些有用的 Monad instances
-** Applicative
-*** Alternative
-*** Arrow
-*** Bifunctor
-
-** Either
-** Validate
-** Reader
-给一个computation喂数据
-输入 r
-asks 可以通过函数 r->a 得到一个 Reader r a monad
-#+BEGIN_SRC haskell
-asks :: (r -> a) -> Reader r a
-runReader :: Reader r a -> r -> a
-
-import Control.Monad.Reader
-
-data MyContext = MyContext
-  { foo :: String
-  , bar :: Int
-  } deriving (Show)
-
-computation :: Reader MyContext (Maybe String)
-computation = do
-  n <- asks bar
-  x <- asks foo
-  if n > 0
-    then return (Just x)
-    else return Nothing
-
-ex1 :: Maybe String
-ex1 = runReader computation $ MyContext "hello" 1
-
-ex2 :: Maybe String
-ex2 = runReader computation $ MyContext "haskell" 0
-#+END_SRC
-** Writter
-除了返回值，computation会写一些额外的数据
-
-返回值会是一个这样 =(result, log)= 的 tuple
-
-限制是 log 的类型必须是个 monoid
-
-#+BEGIN_SRC haskell
-example  = do
-  tell [1..3]
-  tell [3..5]
-  return "foo"
-
-output :: (String, [Int])
-output = runWriter example
--- ("foo", [1, 2, 3, 3, 4, 5])
-#+END_SRC
-** State
-
-** RWS
-** Expection
-** Monad Transform
-** Cont
-** MonadPlus
-** MonadFix
-** ST
-** Free Monad
-** Eff
 
 * References
 - http://dev.stephendiehl.com/hask

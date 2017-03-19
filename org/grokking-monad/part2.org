@@ -1,0 +1,78 @@
+#+TITLE: 范畴论完全装逼手册(二) / Grokking Monad
+#+Date: <2017-02-10 Fri>
+#+AUTHOR: 欧阳继超
+#+OPTIONS: ^:t
+#+MACRO: ruby @@html:<ruby>$1<rt>$2</rt></ruby>@@
+
+第一部分理论部分都讲完了， 如果你读到这里还没有被这些{{{ruby(吊炸天,乱七八糟)}}}的概念搞daze，接下来可以看看它到底跟我们编程有鸟关系呢？
+
+第二部分将介绍由这些概念产生的一些实用的monad instances，这些 monad 都通过同样的抽象方式，解决了分离计算与副作用的工作。
+
+最后，我们还可以像 IO monad 一样，通过 free 或者 Eff 自定义自己的计算，和可能带副作用的解释器。
+
+* TODO 第二部分：{{{ruby(食用猫呢, Practical Monads)}}}
+一些有用的 Monad instances
+** Applicative
+*** Alternative
+*** Arrow
+*** Bifunctor
+
+** Either
+** Validate
+** Reader
+给一个computation喂数据
+输入 r
+asks 可以通过函数 r->a 得到一个 Reader r a monad
+#+BEGIN_SRC haskell
+asks :: (r -> a) -> Reader r a
+runReader :: Reader r a -> r -> a
+
+import Control.Monad.Reader
+
+data MyContext = MyContext
+  { foo :: String
+  , bar :: Int
+  } deriving (Show)
+
+computation :: Reader MyContext (Maybe String)
+computation = do
+  n <- asks bar
+  x <- asks foo
+  if n > 0
+    then return (Just x)
+    else return Nothing
+
+ex1 :: Maybe String
+ex1 = runReader computation $ MyContext "hello" 1
+
+ex2 :: Maybe String
+ex2 = runReader computation $ MyContext "haskell" 0
+#+END_SRC
+** Writter
+除了返回值，computation会写一些额外的数据
+
+返回值会是一个这样 =(result, log)= 的 tuple
+
+限制是 log 的类型必须是个 monoid
+
+#+BEGIN_SRC haskell
+example  = do
+  tell [1..3]
+  tell [3..5]
+  return "foo"
+
+output :: (String, [Int])
+output = runWriter example
+-- ("foo", [1, 2, 3, 3, 4, 5])
+#+END_SRC
+** State
+
+** RWS
+** Expection
+** Monad Transform
+** Cont
+** MonadPlus
+** MonadFix
+** ST
+** Free Monad
+** Eff
