@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- 2017-02-28 Tue 10:04 -->
+<!-- 2017-03-19 Sun 14:34 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
 <title>范畴论完全装逼手册 / Grokking Monad</title>
@@ -82,7 +82,7 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline13">第一部分：<ruby>范畴论<rt>Catergory Theory</rt></ruby></a>
+<li><a href="#orgheadline14">第一部分：<ruby>范畴论<rt>Catergory Theory</rt></ruby></a>
 <ul>
 <li><a href="#orgheadline1"><i>Category</i></a>
 <ul>
@@ -95,44 +95,25 @@ for the JavaScript code in this tag.
 <li><a href="#orgheadline6"><i><ruby>自然变换<rt>Natural Transformations</rt></ruby></i></a></li>
 <li><a href="#orgheadline7"><span class="todo TODO">TODO</span> String Diagram</a></li>
 <li><a href="#orgheadline8"><span class="todo TODO">TODO</span> <i>Adjunction Functor</i> 伴随函子</a></li>
-<li><a href="#orgheadline9"><span class="todo TODO">TODO</span> Yoneda lemma / <del>米田共</del> 米田引理</a>
+<li><a href="#orgheadline9">Yoneda lemma / <del>米田共</del> 米田引理</a>
 <ul>
 <li><a href="#orgheadline10">Rank N Type</a></li>
 </ul>
 </li>
 <li><a href="#orgheadline11"><i>Monad</i> 单子</a></li>
 <li><a href="#orgheadline12"><i>Kleisli Catergory</i></a></li>
+<li><a href="#orgheadline13">Summary</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline14"><span class="todo TODO">TODO</span> 第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></a>
-<ul>
-<li><a href="#orgheadline18">Applicative</a>
-<ul>
-<li><a href="#orgheadline15">Alternative</a></li>
-<li><a href="#orgheadline16">Arrow</a></li>
-<li><a href="#orgheadline17">Bifunctor</a></li>
-</ul>
-</li>
-<li><a href="#orgheadline19">Either</a></li>
-<li><a href="#orgheadline20">Validate</a></li>
-<li><a href="#orgheadline21">Reader</a></li>
-<li><a href="#orgheadline22">Writter</a></li>
-<li><a href="#orgheadline23">State</a></li>
-<li><a href="#orgheadline24">RWS</a></li>
-<li><a href="#orgheadline25">Expection</a></li>
-<li><a href="#orgheadline26">Monad Transform</a></li>
-<li><a href="#orgheadline27">Cont</a></li>
-<li><a href="#orgheadline28">MonadPlus</a></li>
-<li><a href="#orgheadline29">MonadFix</a></li>
-<li><a href="#orgheadline30">ST</a></li>
-<li><a href="#orgheadline31">Free Monad</a></li>
-<li><a href="#orgheadline32">Eff</a></li>
-</ul>
-</li>
-<li><a href="#orgheadline33">References</a></li>
+<li><a href="#orgheadline15">References</a></li>
 </ul>
 </div>
 </nav>
+<ul class="org-ul">
+<li><b><a href="./index.html">第一部分：范畴论</a></b> 👈</li>
+<li><a href="./part2.html">第二部分：食用猫呢</a></li>
+</ul>
+
 <p>
 很多人都不明白什么是Monad，并不是因为不会用，不知觉可能就在用某种 monad。<br >
 定义和使用起来其实不难，困惑的大多应该是后面的这堆理论&#x2013; 范畴论。当然，我也没学过范畴论，只是略微看得懂写Haskell罢了。
@@ -154,9 +135,9 @@ for the JavaScript code in this tag.
 这里面很多很装逼的单词，它们都是 <i>斜体</i> ，就算没看懂，把这些词记住也足够<ruby>装一阵子逼了<rt>买一阵子萌了</rt></ruby>。
 </p>
 
-<div id="outline-container-orgheadline13" class="outline-2">
-<h2 id="orgheadline13">第一部分：<ruby>范畴论<rt>Catergory Theory</rt></ruby></h2>
-<div class="outline-text-2" id="text-orgheadline13">
+<div id="outline-container-orgheadline14" class="outline-2">
+<h2 id="orgheadline14">第一部分：<ruby>范畴论<rt>Catergory Theory</rt></ruby></h2>
+<div class="outline-text-2" id="text-orgheadline14">
 </div><div id="outline-container-orgheadline1" class="outline-3">
 <h3 id="orgheadline1"><i>Category</i></h3>
 <div class="outline-text-3" id="text-orgheadline1">
@@ -502,15 +483,19 @@ T2 是范畴 b 到 c 的functor
 <h3 id="orgheadline8"><span class="todo TODO">TODO</span> <i>Adjunction Functor</i> 伴随函子</h3>
 <div class="outline-text-3" id="text-orgheadline8">
 <p>
-范畴C和D直接有来有回的函子
+范畴C和D直接有来有回的函子，为什么要介绍这个，因为它直接可以推出 Monad
 </p>
-</div>
-</div>
-<div id="outline-container-orgheadline9" class="outline-3">
-<h3 id="orgheadline9"><span class="todo TODO">TODO</span> Yoneda lemma / <del>米田共</del> 米田引理</h3>
-<div class="outline-text-3" id="text-orgheadline9">
+
 <p>
-米田引理是说所有Functor <code>f a</code> 一定存在 embed 和 unembed，使得 <code>f a</code> 和 <code>(a -&gt; b) -&gt; F b</code> isomorphic 同构
+让我们来看看什么叫有来回。
+</p>
+
+<p>
+一个范畴 C 可以通过函子 G 到 D，再通过函子 F 回到 C，那么 F 和 G 就是伴随函子。
+</p>
+
+<p>
+同时根据同构的定义，G 与 F 是同构的。
 </p>
 <p>
 同构指的是若是有
@@ -523,6 +508,20 @@ f'<span style="color: #b8860b;">::</span> b <span style="color: #b8860b;">-&gt;<
 </div>
 <p>
 那么 f 与 f' 同构，因为 f . f' = id = f' . f
+</p>
+
+<p>
+伴随函子的组合是id函子 F . G = 1<sub>c</sub>
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgheadline9" class="outline-3">
+<h3 id="orgheadline9">Yoneda lemma / <del>米田共</del> 米田引理</h3>
+<div class="outline-text-3" id="text-orgheadline9">
+<p>
+米田引理是说所有Functor <code>f a</code> 一定存在 embed 和 unembed，使得 <code>f a</code> 和 <code>(a -&gt; b) -&gt; F b</code> isomorphic 同构
 </p>
 
 <p>
@@ -599,7 +598,7 @@ Sorry, your browser does not support SVG.</object>
 </ul>
 
 <p>
-但是到rank1就类型系统就懵逼了
+但是到 rank1 类型系统就懵逼了
 </p>
 <div class="org-src-container">
 
@@ -655,13 +654,14 @@ f 在 <code>f True</code> 是确定 a 是 Boolean，在rank1多态是时就确�
 <div class="outline-text-3" id="text-orgheadline12">
 
 <figure>
-<p><img src="https://www.evernote.com/l/ABeNc2skWiZCdLKdJGy4h8L_2GeUo-EDHGsB/image.jpg" alt="image.jpg">
+<p><object type="image/svg+xml" data="images/kleisli.svg" >
+Sorry, your browser does not support SVG.</object>
 </p>
-<figcaption><span class="figure-number">Figure 6:</span> f和g画翻了 😂 不过逻辑式对的，注意 &gt;&gt;= 和大火箭 &lt;=&lt; 的轨迹</figcaption>
+<figcaption><span class="figure-number">Figure 6:</span> 注意观察大火箭 &lt;=&lt; 的轨迹（不知道dot为什么会把这根线搞这么又弯又骚的） 和 &gt;&gt;= 。所以 Kleisli 其实就是斜着走的一个范畴，但是 &gt;&gt;= 把它硬生生掰 <del>弯</del> 直了。</figcaption>
 </figure>
 
 <p>
-Functor 的 Catergory 叫做 Functor Catergory，因为有箭头自然变换。Monad 也可以定义出来一个 Catergory（当然由于Monad是 Endofunctor，所以他也可以是 自函子范畴），叫做 Kleisli Catergory，那么 Kleisli 的箭头是什么？
+Functor 的 Catergory 叫做 Functor Catergory，因为有箭头 &#x2013; 自然变换。Monad 也可以定义出来一个 Catergory（当然由于Monad是 Endofunctor，所以他也可以是 自函子范畴），叫做 Kleisli Catergory，那么 Kleisli 的箭头是什么？
 </p>
 
 <p>
@@ -673,176 +673,68 @@ Functor 的 Catergory 叫做 Functor Catergory，因为有箭头自然变换。M
 </ol>
 
 <p>
-看到图上的 g' 和 &mu; 了没？
+看到图上的 <ruby>T f<rt> fmap f</rt></ruby> 和 &mu; 了没？
 </p>
 
-<ul class="org-ul">
-<li>g':: T b -&gt; T<sup>2</sup> c</li>
-<li id="&mu;">T<sup>2</sup> c -&gt; T c</li>
-</ul>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">f</span> <span style="color: #b8860b;">::</span> b <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">T</span> c
+<span style="color: #6a5acd;">fmap</span> f <span style="color: #b8860b;">::</span> <span style="color: #36648b;">T</span> b <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">T</span><span style="color: #b8860b;">^</span>2 c
+<span style="color: #6a5acd;">mu</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">T</span><span style="color: #b8860b;">^</span>2 c <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">T</span> c
+</pre>
+</div>
 
 <p>
-所以
+紫色的箭头连起来（compose）就是 T f'，所以, 
 </p>
-<ul class="org-ul">
-<li>(&gt;&gt;=) = &mu; . g'</li>
-<li>大火箭 (&lt;=&lt;) = &mu; . g' . f' = &mu; . F g . f'</li>
-</ul>
+<div class="org-src-container">
+
+<pre class="src src-haskell">tb <span style="color: #6a5acd;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> <span style="color: #b8860b;">\</span>mu <span style="color: #b8860b;">.</span> fmap f tb
+</pre>
+</div>
 
 <p>
-大火箭满足compose
+大火箭则是蓝色箭头的组合 
 </p>
+<div class="org-src-container">
+
+<pre class="src src-haskel">(f &lt;=&lt; g) = \mu . T f . g = \mu . fmap f . g
+</pre>
+</div>
 
 <p>
-(y -&gt; T z) &lt;=&lt; (x -&gt; T y) = (x -&gt; T z)
+而且大火箭就是 Kleisli 范畴的 compose
 </p>
 
-<p>
-沿着图上轨迹找找看
-</p>
+<div class="org-src-container">
 
-<blockquote>
+<pre class="src src-haskell">(<span style="color: #6a5acd;">&lt;=&lt;</span>) <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Monad</span> <span style="color: #36648b;">T</span> <span style="color: #b8860b;">=&gt;</span> (b <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">T</span> c) <span style="color: #b8860b;">-&gt;</span> (a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">T</span> b) <span style="color: #b8860b;">-&gt;</span> (a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">T</span> c)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline13" class="outline-3">
+<h3 id="orgheadline13">Summary</h3>
+<div class="outline-text-3" id="text-orgheadline13">
 <p>
 第一部分理论部分都讲完了， 如果你读到这里还没有被这些<ruby>吊炸天<rt>乱七八糟</rt></ruby>的概念搞daze，接下来可以看看它到底跟我们编程有鸟关系呢？第二部分将介绍这些概念产生的一些实用的monad
 </p>
 
+<ul class="org-ul">
+<li>👉 <a href="./part2.html">第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></a></li>
+</ul>
+
 <p>
 当然我还没空全部写完，如果有很多人<ruby>预定<rt>只要998</rt></ruby> Gumroad 上的  <script src="https://gumroad.com/js/gumroad.js"></script><a class="gumroad-button" href="https://gum.co/grokking-monad" target="_blank">Grokking Monad</a> 电子书的话，我可能会稍微写得快一些。毕竟，写了也没人感兴趣也怪浪费时间的。不过，我猜也没几个人能看到这一行。
 </p>
-</blockquote>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgheadline14" class="outline-2">
-<h2 id="orgheadline14"><span class="todo TODO">TODO</span> 第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></h2>
-<div class="outline-text-2" id="text-orgheadline14">
-<p>
-一些有用的 Monad instances
-</p>
-</div>
-<div id="outline-container-orgheadline18" class="outline-3">
-<h3 id="orgheadline18">Applicative</h3>
-<div class="outline-text-3" id="text-orgheadline18">
-</div><div id="outline-container-orgheadline15" class="outline-4">
-<h4 id="orgheadline15">Alternative</h4>
-</div>
-<div id="outline-container-orgheadline16" class="outline-4">
-<h4 id="orgheadline16">Arrow</h4>
-</div>
-<div id="outline-container-orgheadline17" class="outline-4">
-<h4 id="orgheadline17">Bifunctor</h4>
-</div>
-</div>
-
-<div id="outline-container-orgheadline19" class="outline-3">
-<h3 id="orgheadline19">Either</h3>
-</div>
-<div id="outline-container-orgheadline20" class="outline-3">
-<h3 id="orgheadline20">Validate</h3>
-</div>
-<div id="outline-container-orgheadline21" class="outline-3">
-<h3 id="orgheadline21">Reader</h3>
-<div class="outline-text-3" id="text-orgheadline21">
-<p>
-给一个computation喂数据
-输入 r
-asks 可以通过函数 r-&gt;a 得到一个 Reader r a monad
-</p>
-<div class="org-src-container">
-
-<pre class="src src-haskell"><span style="color: #6a5acd;">asks</span> <span style="color: #b8860b;">::</span> (r <span style="color: #b8860b;">-&gt;</span> a) <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Reader</span> r a
-<span style="color: #6a5acd;">runReader</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Reader</span> r a <span style="color: #b8860b;">-&gt;</span> r <span style="color: #b8860b;">-&gt;</span> a
-
-<span style="color: #00008b;">import</span> <span style="color: #36648b;">Control.Monad.Reader</span>
-
-<span style="color: #00008b;">data</span> <span style="color: #36648b;">MyContext</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">MyContext</span>
-  { foo <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span>
-  , bar <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span>
-  } <span style="color: #00008b;">deriving</span> (<span style="color: #36648b;">Show</span>)
-
-<span style="color: #6a5acd;">computation</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Reader</span> <span style="color: #36648b;">MyContext</span> (<span style="color: #36648b;">Maybe</span> <span style="color: #36648b;">String</span>)
-<span style="color: #6a5acd;">computation</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
-  n <span style="color: #b8860b;">&lt;-</span> asks bar
-  x <span style="color: #b8860b;">&lt;-</span> asks foo
-  <span style="color: #00008b;">if</span> n <span style="color: #b8860b;">&gt;</span> 0
-    <span style="color: #00008b;">then</span> return (<span style="color: #36648b;">Just</span> x)
-    <span style="color: #00008b;">else</span> return <span style="color: #36648b;">Nothing</span>
-
-<span style="color: #6a5acd;">ex1</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Maybe</span> <span style="color: #36648b;">String</span>
-<span style="color: #6a5acd;">ex1</span> <span style="color: #b8860b;">=</span> runReader computation <span style="color: #b8860b;">$</span> <span style="color: #36648b;">MyContext</span> <span style="color: #8b0000;">"hello"</span> 1
-
-<span style="color: #6a5acd;">ex2</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Maybe</span> <span style="color: #36648b;">String</span>
-<span style="color: #6a5acd;">ex2</span> <span style="color: #b8860b;">=</span> runReader computation <span style="color: #b8860b;">$</span> <span style="color: #36648b;">MyContext</span> <span style="color: #8b0000;">"haskell"</span> 0
-</pre>
-</div>
-</div>
-</div>
-<div id="outline-container-orgheadline22" class="outline-3">
-<h3 id="orgheadline22">Writter</h3>
-<div class="outline-text-3" id="text-orgheadline22">
-<p>
-除了返回值，computation会写一些额外的数据
-</p>
-
-<p>
-返回值会是一个这样 <code>(result, log)</code> 的 tuple
-</p>
-
-<p>
-限制是 log 的类型必须是个 monoid
-</p>
-
-<div class="org-src-container">
-
-<pre class="src src-haskell"><span style="color: #6a5acd;">example</span>  <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
-  tell [1<span style="color: #b8860b;">..</span>3]
-  tell [3<span style="color: #b8860b;">..</span>5]
-  return <span style="color: #8b0000;">"foo"</span>
-
-<span style="color: #6a5acd;">output</span> <span style="color: #b8860b;">::</span> (<span style="color: #36648b;">String</span>, [<span style="color: #36648b;">Int</span>])
-<span style="color: #6a5acd;">output</span> <span style="color: #b8860b;">=</span> runWriter example
-<span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">("foo", [1, 2, 3, 3, 4, 5])</span>
-</pre>
-</div>
-</div>
-</div>
-<div id="outline-container-orgheadline23" class="outline-3">
-<h3 id="orgheadline23">State</h3>
-</div>
-
-<div id="outline-container-orgheadline24" class="outline-3">
-<h3 id="orgheadline24">RWS</h3>
-</div>
-<div id="outline-container-orgheadline25" class="outline-3">
-<h3 id="orgheadline25">Expection</h3>
-</div>
-<div id="outline-container-orgheadline26" class="outline-3">
-<h3 id="orgheadline26">Monad Transform</h3>
-</div>
-<div id="outline-container-orgheadline27" class="outline-3">
-<h3 id="orgheadline27">Cont</h3>
-</div>
-<div id="outline-container-orgheadline28" class="outline-3">
-<h3 id="orgheadline28">MonadPlus</h3>
-</div>
-<div id="outline-container-orgheadline29" class="outline-3">
-<h3 id="orgheadline29">MonadFix</h3>
-</div>
-<div id="outline-container-orgheadline30" class="outline-3">
-<h3 id="orgheadline30">ST</h3>
-</div>
-<div id="outline-container-orgheadline31" class="outline-3">
-<h3 id="orgheadline31">Free Monad</h3>
-</div>
-<div id="outline-container-orgheadline32" class="outline-3">
-<h3 id="orgheadline32">Eff</h3>
-</div>
-</div>
-
-<div id="outline-container-orgheadline33" class="outline-2">
-<h2 id="orgheadline33">References</h2>
-<div class="outline-text-2" id="text-orgheadline33">
+<div id="outline-container-orgheadline15" class="outline-2">
+<h2 id="orgheadline15">References</h2>
+<div class="outline-text-2" id="text-orgheadline15">
 <ul class="org-ul">
 <li><a href="http://dev.stephendiehl.com/hask">http://dev.stephendiehl.com/hask</a></li>
 <li><a href="https://www.youtube.com/watch?v=ZKmodCApZwk">https://www.youtube.com/watch?v=ZKmodCApZwk</a></li>
@@ -854,7 +746,7 @@ asks 可以通过函数 r-&gt;a 得到一个 Reader r a monad
 <div id="postamble" class="status">
 <footer>
 <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-<p>Modified: 2017-02-28 Tue 10:01</p>
+<p>Modified: 2017-03-19 Sun 14:32</p>
 <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6)</p>
 <p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
