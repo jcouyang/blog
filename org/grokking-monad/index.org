@@ -286,7 +286,9 @@ String Diagram 的概念很简单，就是点变线线变点。
 当有了自然变换之后，没法表示了呀，那原来的点和线都升一维度，变成线和面，这样，就腾出一个点来表示自然变换了。
 
 #+CAPTION: String Diagram：自然变换是点，Functor是线，范畴是面
-https://www.evernote.com/l/ABdTD63_idxFyKnvfX39lvCgfuC0GeAWPjEB/image.png
+https://www.evernote.com/l/ABecC0oxzthLE5w382ydpghjjHjpw2UFqkgB/image.png
+
+compose的方向是从右往左，从下到上。
 
 ** /Adjunction Functor/ 伴随函子
 #+INDEX: Adjunction Functor
@@ -318,14 +320,17 @@ f':: b -> a
 #+CAPTION: 伴随函子的两个Functor组合, 左侧为 F \eta, 右侧为 \epsilon F
 https://www.evernote.com/l/ABd_ole4GrRMGJ82dcTN4Du4x0b1CShrinsB/image.png
 
-Functor的组合在自然变换维度上是可以组合的，因为自然变换是Functor 范畴的箭头
+Functor 不仅横着可以组合，竖着(自然变换维度)也是可以组合的，因为自然变换是 Functor 范畴的箭头。
 
 #+CAPTION: F \eta . \epsilon F  = F
-https://www.evernote.com/l/ABc-GpFhWhxN6K06AmOhCUgL0tMa-a8dMS0B/image.png
+https://www.evernote.com/l/ABcPa4yf4XpENptngB9xFoJRfHffZ8GPtIoB/image.png
+
+当到组合 F \eta . \epsilon F 得到一个弯弯曲曲的 F 时，我们可以拽着F的两段一拉，就得到了直的 F。
+
+String Diagram 神奇的地方是所有线都可以拉上下两端，这个技巧非常有用，在之后的单子推导还需要用到。
 
 ** 从伴随函子到 {{{ruby(单子, Monad)}}}
-有了伴随函子，很容易推出单子，让我们来看看什么是单子
-
+有了伴随函子，很容易推出单子，让我们先来看看什么是单子
 
 - 首先，它是一个 endofunctor T
 - 有一个从 i_c 到 T 的自然变化 \eta (eta)
@@ -346,13 +351,19 @@ class Endofunctor m => Monad m where
   mu :: m m a -> m a
 #+END_SRC
 
+要推出单子的 \eta 变换，只需要让 FG = T
 #+CAPTION: 伴随函子的 \epsilon 就是单子的 \eta
 https://www.evernote.com/l/ABfg4vXk8DJGRZGPRv6A_ifmOykudKxqyqUB/image.png
 
+同样的，当 FG = T, F \eta G 就可以变成 \mu
 #+CAPTION: 伴随函子的 F \eta G 是函子的 \mu
 https://www.evernote.com/l/ABf_3PObVKVLI4xOK9ijFcnC0hZ29TJIZVsB/image.png
 
 *** 三角等式
+
+三角等式是指 \mu . T \eta = T = \mu . \eta T
+
+要推出三角等式只需要组合 F \eta G 和 \epsilon F G
 #+CAPTION: F \eta G  . \epsilon F G = F G
 https://www.evernote.com/l/ABemC0HnOQ1PIpiI6Y-34nEm4CSoITFuB64B/image.png
 
@@ -385,6 +396,7 @@ m >>= eta = m
 #+END_SRC
 
 *** 结合律
+
 单子另一大定律是结合律，让我们从伴随函子推起
 
 假设我们现在有函子 F \eta G 和 函子 F \eta G F G, compose 起来会变成  F \eta G . F \eta G F G
@@ -543,7 +555,7 @@ f 在 =f True= 是确定 a 是 Boolean，在rank1多态是时就确定了 =a->a=
               edge[constraint=false, style=solid];
               a -> "T b"[label=g, color=blue, fontcolor=blue];
               a -> "T c" [label="f <=< g", style=dashed, color=blue, fontcolor=blue]
-              "b" -> "T c"[label=f];
+              "b" -> "T c"[label=f,color=blue,fontcolor=blue];
               "T b" -> "T T c"[label="T f", color=purple, fontcolor=purple];
               "T T c" -> "T c" [label="μ", style=dashed, color=purple];
               c -> "T c" [label="η", style=dashed]
