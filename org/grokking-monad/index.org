@@ -279,47 +279,30 @@ functorF -> functorG[label="η"]
 
 感觉到达三维已经是极限了，尼玛还有完没完了，每升一个维度还要起这么多装逼的名字，再升维度就要一脸懵逼了呢。虽然维度不算太高，但是已经不能用简单的图来描述了，所以需要引入 String Diagram。
 
-** TODO String Diagram
+** String Diagram
 
 String Diagram 的概念很简单，就是点变线线变点。
 
 当有了自然变换之后，没法表示了呀，那原来的点和线都升一维度，变成线和面，这样，就腾出一个点来表示自然变换了。
 
-来试试 T1 是 范畴 a 到 b 的functor
+#+CAPTION: String Diagram：自然变换是点，Functor是线，范畴是面
+https://www.evernote.com/l/ABdTD63_idxFyKnvfX39lvCgfuC0GeAWPjEB/image.png
 
-T2 是范畴 b 到 c 的functor
-
-那么 T2 . T1 就是 a 到 c 的funtor咯
-
-如果 T 是范畴a上的endofunctor
-
-那么可以 T.T 可以写成 TT 或者 T^2
-
-那么 compose 完的箭头张什么样呢？
-
-用 Maybe Functor来说
-
-#+BEGIN_SRC haskell
--- Functor category
-newtype Fun f g a b = FNat (f a -> g b)
-
--- Endofunctor category
-type End f = Fun f f
-
-instance Category (End f) where
-  id = FNat id
-  (FNat f) . (FNat g) = FNat (f . g)
-#+END_SRC
-
-** TODO /Adjunction Functor/ 伴随函子
+** /Adjunction Functor/ 伴随函子
 #+INDEX: Adjunction Functor
 范畴C和D直接有来有回的函子，为什么要介绍这个，因为它直接可以推出 Monad
 
 让我们来看看什么叫有来回。
 
-一个范畴 C 可以通过函子 G 到 D，再通过函子 F 回到 C，那么 F 和 G 就是伴随函子。
+https://www.evernote.com/l/ABdLVPGwUI5FX4WJpCP26KQ4tjuQBYzbk3MB/image.png
 
-同时根据同构的定义，G 与 F 是同构的。
+其中：
+
+- 一个范畴 C 可以通过函子 G 到 D，再通过函子 F 回到 C，那么 F 和 G 就是伴随函子。
+- \eta 是 GF 到 1_D 的自然变换
+- \epsilon 是 1_C 到 FG 的自然变换
+
+同时根据同构的定义，G 与 F 是 /同构/ 的。
 #+INDEX: isomorphic
 #+INDEX: 同构
 
@@ -330,8 +313,103 @@ f':: b -> a
 #+END_SRC
 那么 f 与 f' 同构，因为 f . f' = id = f' . f
 
-伴随函子的组合是id函子 F . G = 1_c
+伴随函子的 FG 组合是 C 范畴的 id 函子 F . G = 1_c
 
+#+CAPTION: 伴随函子的两个Functor组合, 左侧为 F \eta, 右侧为 \epsilon F
+https://www.evernote.com/l/ABd_ole4GrRMGJ82dcTN4Du4x0b1CShrinsB/image.png
+
+Functor的组合在自然变换维度上是可以组合的，因为自然变换是Functor 范畴的箭头
+
+#+CAPTION: F \eta . \epsilon F  = F
+https://www.evernote.com/l/ABc-GpFhWhxN6K06AmOhCUgL0tMa-a8dMS0B/image.png
+
+** 从伴随函子到 {{{ruby(单子, Monad)}}}
+有了伴随函子，很容易推出单子，让我们来看看什么是单子
+
+
+- 首先，它是一个 endofunctor T
+- 有一个从 i_c 到 T 的自然变化 \eta (eta)
+- 有一个从 T^2 到 T 的自然变化 \mu (mu)
+
+https://www.evernote.com/l/ABexO3KphElMrZ_5scYTDxjOelA5cigrHCoB/image.png
+
+#+BEGIN_SRC haskell
+class Endofunctor c t => Monad c t where
+  eta :: c a (t a)
+  mu  :: c (t (t a)) (t a)
+#+END_SRC
+
+同样，把 c = Hask 替换进去，就得到更类似我们 Haskell 中 Monad 的定义
+#+BEGIN_SRC haskell
+class Endofunctor m => Monad m where
+  eta :: a -> (m a)
+  mu :: m m a -> m a
+#+END_SRC
+
+#+CAPTION: 伴随函子的 \epsilon 就是单子的 \eta
+https://www.evernote.com/l/ABfg4vXk8DJGRZGPRv6A_ifmOykudKxqyqUB/image.png
+
+#+CAPTION: 伴随函子的 F \eta G 是函子的 \mu
+https://www.evernote.com/l/ABf_3PObVKVLI4xOK9ijFcnC0hZ29TJIZVsB/image.png
+
+*** 三角等式
+#+CAPTION: F \eta G  . \epsilon F G = F G
+https://www.evernote.com/l/ABemC0HnOQ1PIpiI6Y-34nEm4CSoITFuB64B/image.png
+
+#+CAPTION: F \eta G  . \epsilon F G= F G 对应到Monad就是 \mu . \eta T = T
+https://www.evernote.com/l/ABePUH_43tVLgJJ8y4QNKhr10UnxWlWnpI0B/image.png
+
+换到代码上来说
+#+BEGIN_SRC haskell
+  class Endofunctor m => Monad m where
+    (mu . eta) m = m
+#+END_SRC
+
+同样的，左右翻转也成立
+
+#+CAPTION: F \eta G . F G \epsilon = F G
+https://www.evernote.com/l/ABfdt-llk4dKvY94Pqn5fZFlRt5B9qwii6UB/image.png
+
+#+CAPTION: F \eta G . F G \epsilon = F G 对应到 Monad是 \mu . T \eta = T
+https://www.evernote.com/l/ABcG2YoCCNdHd7pdFViyMBMli12foiuBIsAB/image.png
+
+T \eta 就是 fmap eta
+#+BEGIN_SRC haskell
+    (mu . fmap eta) m = m
+#+END_SRC
+
+如果把 ~mu . fmap~ 写成 ~>>=~ , 就有了
+
+#+BEGIN_SRC haskell
+m >>= eta = m
+#+END_SRC
+
+*** 结合律
+单子另一大定律是结合律，让我们从伴随函子推起
+
+假设我们现在有函子 F \eta G 和 函子 F \eta G F G, compose 起来会变成  F \eta G . F \eta G F G
+https://www.evernote.com/l/ABfsS4KBjE1Gbrd8AouQJeBVc9u_sqBUzPwB/image.png
+
+用 F G = T ， F \eta G = \mu 代换那么就得到了单子的 \mu . \mu T
+https://www.evernote.com/l/ABc_scvfquxHhKZZ6I51i1hL3f5Oe382IZ0B/image.png
+
+当组合 F \eta G 和 F G F \mu G 后，会得到一个镜像的图
+https://www.evernote.com/l/ABcsGipPc8BFL7Yp9NuCfUQQ3W0JntC7JDcB/image.png
+
+对应到单子的 \mu . T \mu
+https://www.evernote.com/l/ABdRAkfmbjJMHZNeSNxzc_r2bgeq2MNKrC8B/image.png
+
+结合律是说 \mu . \mu T = \mu . T \mu , 即图左右翻转结果是相等的，为什么呢？看单子的String Diagram 不太好看出来，我们来看伴随函子
+
+如果把左图的左边的 \mu 往上挪一点，右边的 \mu 往下挪一点，是不是跟右图就一样了
+https://www.evernote.com/l/ABcv0axE5alKiZupUL2SyhrALuS-4DyBfQAB/image.png
+
+结合律反映到代码中就是
+#+BEGIN_SRC haskell
+mu . fmap mu = mu . mu
+#+END_SRC
+
+代码很难看出结合在哪里，因为正常的结合律应该是这样的 (1+2)+3 = 1+(2+3)，但是不想加法的维度不一样，这里说的是自然变换维度的结合，可以通过String Diagram 很清楚的看见结合的过程，即 \mu 左边的两个T和先 \mu 右边两个 T 是相等的。
 
 ** Yoneda lemma / +米田共+ 米田引理
 #+INDEX: 米田引理
@@ -421,25 +499,6 @@ f 在 =f True= 是确定 a 是 Boolean，在rank1多态是时就确定了 =a->a=
 
 所以到 =f 'a'= 类型就挂了。
 
-** /Monad/ 单子
-有了 Functor，解释 Monad 就简单了。Monad 的定义比 Functor 再多一些要求
-- 首先，它是一个 endofunctor T
-- 一个从 i_c 到 T 的自然变化 \eta (eta)
-- 一个从 T^2 到 T 的自然变化 \mu (mu)
-
-#+BEGIN_SRC haskell
-class Endofunctor c t => Monad c t where
-  eta :: c a (t a)
-  mu  :: c (t (t a)) (t a)
-#+END_SRC
-
-同样，把 c = Hask 替换进去，就得到更类似我们 Haskell 中 Monad 的定义
-#+BEGIN_SRC haskell
-class Endofunctor m => Monad m where
-  eta :: a -> (m a)
-  mu :: m m a -> m a
-
-#+END_SRC
 ** /Kleisli Catergory/
 #+INDEX: Kleisi Catergory
 
@@ -514,12 +573,12 @@ mu :: T^2 c -> T c
 
 紫色的箭头连起来（compose）就是 T f'，所以, 
 #+BEGIN_SRC haskell
-tb >>= f = \mu . fmap f tb
+tb >>= f = mu . fmap f tb
 #+END_SRC
 
 大火箭则是蓝色箭头的组合 
 #+BEGIN_SRC haskel
-(f <=< g) = \mu . T f . g = \mu . fmap f . g
+(f <=< g) = mu . T f . g = mu . fmap f . g
 #+END_SRC
 
 而且大火箭就是 Kleisli 范畴的 compose
