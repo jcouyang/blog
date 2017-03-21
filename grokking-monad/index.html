@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- 2017-03-19 Sun 14:34 -->
+<!-- 2017-03-21 Tue 06:39 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
 <title>范畴论完全装逼手册 / Grokking Monad</title>
@@ -82,7 +82,7 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline14">第一部分：<ruby>范畴论<rt>Catergory Theory</rt></ruby></a>
+<li><a href="#orgheadline16">第一部分：<ruby>范畴论<rt>Catergory Theory</rt></ruby></a>
 <ul>
 <li><a href="#orgheadline1"><i>Category</i></a>
 <ul>
@@ -93,19 +93,24 @@ for the JavaScript code in this tag.
 <li><a href="#orgheadline4"><i><ruby>函子<rt> Functor</rt></ruby></i></a></li>
 <li><a href="#orgheadline5"><i><ruby>Cat<rt> +猫+</rt></ruby></i></a></li>
 <li><a href="#orgheadline6"><i><ruby>自然变换<rt>Natural Transformations</rt></ruby></i></a></li>
-<li><a href="#orgheadline7"><span class="todo TODO">TODO</span> String Diagram</a></li>
-<li><a href="#orgheadline8"><span class="todo TODO">TODO</span> <i>Adjunction Functor</i> 伴随函子</a></li>
-<li><a href="#orgheadline9">Yoneda lemma / <del>米田共</del> 米田引理</a>
+<li><a href="#orgheadline7">String Diagram</a></li>
+<li><a href="#orgheadline8"><i>Adjunction Functor</i> 伴随函子</a></li>
+<li><a href="#orgheadline9">从伴随函子到 <ruby>单子<rt> Monad</rt></ruby></a>
 <ul>
-<li><a href="#orgheadline10">Rank N Type</a></li>
+<li><a href="#orgheadline10">三角等式</a></li>
+<li><a href="#orgheadline11">结合律</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline11"><i>Monad</i> 单子</a></li>
-<li><a href="#orgheadline12"><i>Kleisli Catergory</i></a></li>
-<li><a href="#orgheadline13">Summary</a></li>
+<li><a href="#orgheadline12">Yoneda lemma / <del>米田共</del> 米田引理</a>
+<ul>
+<li><a href="#orgheadline13">Rank N Type</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline15">References</a></li>
+<li><a href="#orgheadline14"><i>Kleisli Catergory</i></a></li>
+<li><a href="#orgheadline15">Summary</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline17">References</a></li>
 </ul>
 </div>
 </nav>
@@ -135,9 +140,9 @@ for the JavaScript code in this tag.
 这里面很多很装逼的单词，它们都是 <i>斜体</i> ，就算没看懂，把这些词记住也足够<ruby>装一阵子逼了<rt>买一阵子萌了</rt></ruby>。
 </p>
 
-<div id="outline-container-orgheadline14" class="outline-2">
-<h2 id="orgheadline14">第一部分：<ruby>范畴论<rt>Catergory Theory</rt></ruby></h2>
-<div class="outline-text-2" id="text-orgheadline14">
+<div id="outline-container-orgheadline16" class="outline-2">
+<h2 id="orgheadline16">第一部分：<ruby>范畴论<rt>Catergory Theory</rt></ruby></h2>
+<div class="outline-text-2" id="text-orgheadline16">
 </div><div id="outline-container-orgheadline1" class="outline-3">
 <h3 id="orgheadline1"><i>Category</i></h3>
 <div class="outline-text-3" id="text-orgheadline1">
@@ -425,7 +430,7 @@ Sorry, your browser does not support SVG.</object>
 </div>
 
 <div id="outline-container-orgheadline7" class="outline-3">
-<h3 id="orgheadline7"><span class="todo TODO">TODO</span> String Diagram</h3>
+<h3 id="orgheadline7">String Diagram</h3>
 <div class="outline-text-3" id="text-orgheadline7">
 <p>
 String Diagram 的概念很简单，就是点变线线变点。
@@ -435,52 +440,17 @@ String Diagram 的概念很简单，就是点变线线变点。
 当有了自然变换之后，没法表示了呀，那原来的点和线都升一维度，变成线和面，这样，就腾出一个点来表示自然变换了。
 </p>
 
-<p>
-来试试 T1 是 范畴 a 到 b 的functor
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABdTD63_idxFyKnvfX39lvCgfuC0GeAWPjEB/image.png" alt="image.png">
 </p>
-
-<p>
-T2 是范畴 b 到 c 的functor
-</p>
-
-<p>
-那么 T2 . T1 就是 a 到 c 的funtor咯
-</p>
-
-<p>
-如果 T 是范畴a上的endofunctor
-</p>
-
-<p>
-那么可以 T.T 可以写成 TT 或者 T<sup>2</sup>
-</p>
-
-<p>
-那么 compose 完的箭头张什么样呢？
-</p>
-
-<p>
-用 Maybe Functor来说
-</p>
-
-<div class="org-src-container">
-
-<pre class="src src-haskell"><span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">Functor category</span>
-<span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Fun</span> f g a b <span style="color: #b8860b;">=</span> <span style="color: #36648b;">FNat</span> (f a <span style="color: #b8860b;">-&gt;</span> g b)
-
-<span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">Endofunctor category</span>
-<span style="color: #00008b;">type</span> <span style="color: #36648b;">End</span> f <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Fun</span> f f
-
-<span style="color: #00008b;">instance</span> <span style="color: #36648b;">Category</span> (<span style="color: #36648b;">End</span> f) <span style="color: #00008b;">where</span>
-  id <span style="color: #b8860b;">=</span> <span style="color: #36648b;">FNat</span> id
-  (<span style="color: #36648b;">FNat</span> f) <span style="color: #b8860b;">.</span> (<span style="color: #36648b;">FNat</span> g) <span style="color: #b8860b;">=</span> <span style="color: #36648b;">FNat</span> (f <span style="color: #b8860b;">.</span> g)
-</pre>
-</div>
+<figcaption><span class="figure-number">Figure 5:</span> String Diagram：自然变换是点，Functor是线，范畴是面</figcaption>
+</figure>
 </div>
 </div>
 
 <div id="outline-container-orgheadline8" class="outline-3">
-<h3 id="orgheadline8"><span class="todo TODO">TODO</span> <i>Adjunction Functor</i> 伴随函子</h3>
+<h3 id="orgheadline8"><i>Adjunction Functor</i> 伴随函子</h3>
 <div class="outline-text-3" id="text-orgheadline8">
 <p>
 范畴C和D直接有来有回的函子，为什么要介绍这个，因为它直接可以推出 Monad
@@ -490,12 +460,24 @@ T2 是范畴 b 到 c 的functor
 让我们来看看什么叫有来回。
 </p>
 
-<p>
-一个范畴 C 可以通过函子 G 到 D，再通过函子 F 回到 C，那么 F 和 G 就是伴随函子。
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABdLVPGwUI5FX4WJpCP26KQ4tjuQBYzbk3MB/image.png" alt="image.png">
 </p>
+</figure>
 
 <p>
-同时根据同构的定义，G 与 F 是同构的。
+其中：
+</p>
+
+<ul class="org-ul">
+<li>一个范畴 C 可以通过函子 G 到 D，再通过函子 F 回到 C，那么 F 和 G 就是伴随函子。</li>
+<li>&eta; 是 GF 到 1<sub>D</sub> 的自然变换</li>
+<li>&epsilon; 是 1<sub>C</sub> 到 FG 的自然变换</li>
+</ul>
+
+<p>
+同时根据同构的定义，G 与 F 是 <i>同构</i> 的。
 </p>
 <p>
 同构指的是若是有
@@ -511,15 +493,204 @@ f'<span style="color: #b8860b;">::</span> b <span style="color: #b8860b;">-&gt;<
 </p>
 
 <p>
-伴随函子的组合是id函子 F . G = 1<sub>c</sub>
+伴随函子的 FG 组合是 C 范畴的 id 函子 F . G = 1<sub>c</sub>
+</p>
+
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABd_ole4GrRMGJ82dcTN4Du4x0b1CShrinsB/image.png" alt="image.png">
+</p>
+<figcaption><span class="figure-number">Figure 7:</span> 伴随函子的两个Functor组合, 左侧为 F &eta;, 右侧为 &epsilon; F</figcaption>
+</figure>
+
+<p>
+Functor的组合在自然变换维度上是可以组合的，因为自然变换是Functor 范畴的箭头
+</p>
+
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABc-GpFhWhxN6K06AmOhCUgL0tMa-a8dMS0B/image.png" alt="image.png">
+</p>
+<figcaption><span class="figure-number">Figure 8:</span> F &eta; . &epsilon; F  = F</figcaption>
+</figure>
+</div>
+</div>
+
+<div id="outline-container-orgheadline9" class="outline-3">
+<h3 id="orgheadline9">从伴随函子到 <ruby>单子<rt> Monad</rt></ruby></h3>
+<div class="outline-text-3" id="text-orgheadline9">
+<p>
+有了伴随函子，很容易推出单子，让我们来看看什么是单子
+</p>
+
+
+<ul class="org-ul">
+<li>首先，它是一个 endofunctor T</li>
+<li>有一个从 i<sub>c</sub> 到 T 的自然变化 &eta; (eta)</li>
+<li>有一个从 T<sup>2</sup> 到 T 的自然变化 &mu; (mu)</li>
+</ul>
+
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABexO3KphElMrZ_5scYTDxjOelA5cigrHCoB/image.png" alt="image.png">
+</p>
+</figure>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Endofunctor</span> c t <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> c t <span style="color: #00008b;">where</span>
+  eta <span style="color: #b8860b;">::</span> c a (t a)
+  mu  <span style="color: #b8860b;">::</span> c (t (t a)) (t a)
+</pre>
+</div>
+
+<p>
+同样，把 c = Hask 替换进去，就得到更类似我们 Haskell 中 Monad 的定义
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Endofunctor</span> m <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> m <span style="color: #00008b;">where</span>
+  eta <span style="color: #b8860b;">::</span> a <span style="color: #b8860b;">-&gt;</span> (m a)
+  mu <span style="color: #b8860b;">::</span> m m a <span style="color: #b8860b;">-&gt;</span> m a
+</pre>
+</div>
+
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABfg4vXk8DJGRZGPRv6A_ifmOykudKxqyqUB/image.png" alt="image.png">
+</p>
+<figcaption><span class="figure-number">Figure 10:</span> 伴随函子的 &epsilon; 就是单子的 &eta;</figcaption>
+</figure>
+
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABf_3PObVKVLI4xOK9ijFcnC0hZ29TJIZVsB/image.png" alt="image.png">
+</p>
+<figcaption><span class="figure-number">Figure 11:</span> 伴随函子的 F &eta; G 是函子的 &mu;</figcaption>
+</figure>
+</div>
+
+<div id="outline-container-orgheadline10" class="outline-4">
+<h4 id="orgheadline10">三角等式</h4>
+<div class="outline-text-4" id="text-orgheadline10">
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABemC0HnOQ1PIpiI6Y-34nEm4CSoITFuB64B/image.png" alt="image.png">
+</p>
+<figcaption><span class="figure-number">Figure 12:</span> F &eta; G  . &epsilon; F G = F G</figcaption>
+</figure>
+
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABePUH_43tVLgJJ8y4QNKhr10UnxWlWnpI0B/image.png" alt="image.png">
+</p>
+<figcaption><span class="figure-number">Figure 13:</span> F &eta; G  . &epsilon; F G= F G 对应到Monad就是 &mu; . &eta; T = T</figcaption>
+</figure>
+
+<p>
+换到代码上来说
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Endofunctor</span> m <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> m <span style="color: #00008b;">where</span>
+  (mu <span style="color: #b8860b;">.</span> eta) m <span style="color: #b8860b;">=</span> m
+</pre>
+</div>
+
+<p>
+同样的，左右翻转也成立
+</p>
+
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABfdt-llk4dKvY94Pqn5fZFlRt5B9qwii6UB/image.png" alt="image.png">
+</p>
+<figcaption><span class="figure-number">Figure 14:</span> F &eta; G . F G &epsilon; = F G</figcaption>
+</figure>
+
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABcG2YoCCNdHd7pdFViyMBMli12foiuBIsAB/image.png" alt="image.png">
+</p>
+<figcaption><span class="figure-number">Figure 15:</span> F &eta; G . F G &epsilon; = F G 对应到 Monad是 &mu; . T &eta; = T</figcaption>
+</figure>
+
+<p>
+T &eta; 就是 fmap eta
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell">(mu <span style="color: #b8860b;">.</span> fmap eta) m <span style="color: #b8860b;">=</span> m
+</pre>
+</div>
+
+<p>
+如果把 <code>mu . fmap</code> 写成 <code>&gt;&gt;=</code> , 就有了
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell">m <span style="color: #6a5acd;">&gt;&gt;=</span> eta <span style="color: #b8860b;">=</span> m
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline11" class="outline-4">
+<h4 id="orgheadline11">结合律</h4>
+<div class="outline-text-4" id="text-orgheadline11">
+<p>
+单子另一大定律是结合律，让我们从伴随函子推起
+</p>
+
+<p>
+假设我们现在有函子 F &eta; G 和 函子 F &eta; G F G, compose 起来会变成  F &eta; G . F &eta; G F G
+<img src="https://www.evernote.com/l/ABfsS4KBjE1Gbrd8AouQJeBVc9u_sqBUzPwB/image.png" alt="image.png">
+</p>
+
+<p>
+用 F G = T ， F &eta; G = &mu; 代换那么就得到了单子的 &mu; . &mu; T
+<img src="https://www.evernote.com/l/ABc_scvfquxHhKZZ6I51i1hL3f5Oe382IZ0B/image.png" alt="image.png">
+</p>
+
+<p>
+当组合 F &eta; G 和 F G F &mu; G 后，会得到一个镜像的图
+<img src="https://www.evernote.com/l/ABcsGipPc8BFL7Yp9NuCfUQQ3W0JntC7JDcB/image.png" alt="image.png">
+</p>
+
+<p>
+对应到单子的 &mu; . T &mu;
+<img src="https://www.evernote.com/l/ABdRAkfmbjJMHZNeSNxzc_r2bgeq2MNKrC8B/image.png" alt="image.png">
+</p>
+
+<p>
+结合律是说 &mu; . &mu; T = &mu; . T &mu; , 即图左右翻转结果是相等的，为什么呢？看单子的String Diagram 不太好看出来，我们来看伴随函子
+</p>
+
+<p>
+如果把左图的左边的 &mu; 往上挪一点，右边的 &mu; 往下挪一点，是不是跟右图就一样了
+<img src="https://www.evernote.com/l/ABcv0axE5alKiZupUL2SyhrALuS-4DyBfQAB/image.png" alt="image.png">
+</p>
+
+<p>
+结合律反映到代码中就是
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell">mu <span style="color: #6a5acd;">.</span> fmap mu <span style="color: #b8860b;">=</span> mu <span style="color: #b8860b;">.</span> mu
+</pre>
+</div>
+
+<p>
+代码很难看出结合在哪里，因为正常的结合律应该是这样的 (1+2)+3 = 1+(2+3)，但是不想加法的维度不一样，这里说的是自然变换维度的结合，可以通过String Diagram 很清楚的看见结合的过程，即 &mu; 左边的两个T和先 &mu; 右边两个 T 是相等的。
 </p>
 </div>
 </div>
+</div>
 
-
-<div id="outline-container-orgheadline9" class="outline-3">
-<h3 id="orgheadline9">Yoneda lemma / <del>米田共</del> 米田引理</h3>
-<div class="outline-text-3" id="text-orgheadline9">
+<div id="outline-container-orgheadline12" class="outline-3">
+<h3 id="orgheadline12">Yoneda lemma / <del>米田共</del> 米田引理</h3>
+<div class="outline-text-3" id="text-orgheadline12">
 <p>
 米田引理是说所有Functor <code>f a</code> 一定存在 embed 和 unembed，使得 <code>f a</code> 和 <code>(a -&gt; b) -&gt; F b</code> isomorphic 同构
 </p>
@@ -556,13 +727,13 @@ unembed 是反过来， <code>(a -&gt; b) -&gt; f b</code> 变成 <code>f a</cod
 <p><object type="image/svg+xml" data="images/yoneda-lemma.svg" >
 Sorry, your browser does not support SVG.</object>
 </p>
-<figcaption><span class="figure-number">Figure 5:</span> 也就是说，图中无论知道a-&gt;b 再加上任意一个 F x，都能推出另外一个 F</figcaption>
+<figcaption><span class="figure-number">Figure 16:</span> 也就是说，图中无论知道a-&gt;b 再加上任意一个 F x，都能推出另外一个 F</figcaption>
 </figure>
 </div>
 
-<div id="outline-container-orgheadline10" class="outline-4">
-<h4 id="orgheadline10">Rank N Type</h4>
-<div class="outline-text-4" id="text-orgheadline10">
+<div id="outline-container-orgheadline13" class="outline-4">
+<h4 id="orgheadline13">Rank N Type</h4>
+<div class="outline-text-4" id="text-orgheadline13">
 <ul class="org-ul">
 <li>Monomorphic Rank 0 / 0级单态: t</li>
 <li>Polymorphic Rank 1 / 1级 <del>变态</del> 多态: forall a. a -&gt; t</li>
@@ -617,47 +788,15 @@ f 在 <code>f True</code> 是确定 a 是 Boolean，在rank1多态是时就确�
 </div>
 </div>
 
-<div id="outline-container-orgheadline11" class="outline-3">
-<h3 id="orgheadline11"><i>Monad</i> 单子</h3>
-<div class="outline-text-3" id="text-orgheadline11">
-<p>
-有了 Functor，解释 Monad 就简单了。Monad 的定义比 Functor 再多一些要求
-</p>
-<ul class="org-ul">
-<li>首先，它是一个 endofunctor T</li>
-<li>一个从 i<sub>c</sub> 到 T 的自然变化 &eta; (eta)</li>
-<li>一个从 T<sup>2</sup> 到 T 的自然变化 &mu; (mu)</li>
-</ul>
-
-<div class="org-src-container">
-
-<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Endofunctor</span> c t <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> c t <span style="color: #00008b;">where</span>
-  eta <span style="color: #b8860b;">::</span> c a (t a)
-  mu  <span style="color: #b8860b;">::</span> c (t (t a)) (t a)
-</pre>
-</div>
-
-<p>
-同样，把 c = Hask 替换进去，就得到更类似我们 Haskell 中 Monad 的定义
-</p>
-<div class="org-src-container">
-
-<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Endofunctor</span> m <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> m <span style="color: #00008b;">where</span>
-  eta <span style="color: #b8860b;">::</span> a <span style="color: #b8860b;">-&gt;</span> (m a)
-  mu <span style="color: #b8860b;">::</span> m m a <span style="color: #b8860b;">-&gt;</span> m a
-</pre>
-</div>
-</div>
-</div>
-<div id="outline-container-orgheadline12" class="outline-3">
-<h3 id="orgheadline12"><i>Kleisli Catergory</i></h3>
-<div class="outline-text-3" id="text-orgheadline12">
+<div id="outline-container-orgheadline14" class="outline-3">
+<h3 id="orgheadline14"><i>Kleisli Catergory</i></h3>
+<div class="outline-text-3" id="text-orgheadline14">
 
 <figure>
 <p><object type="image/svg+xml" data="images/kleisli.svg" >
 Sorry, your browser does not support SVG.</object>
 </p>
-<figcaption><span class="figure-number">Figure 6:</span> 注意观察大火箭 &lt;=&lt; 的轨迹（不知道dot为什么会把这根线搞这么又弯又骚的） 和 &gt;&gt;= 。所以 Kleisli 其实就是斜着走的一个范畴，但是 &gt;&gt;= 把它硬生生掰 <del>弯</del> 直了。</figcaption>
+<figcaption><span class="figure-number">Figure 17:</span> 注意观察大火箭 &lt;=&lt; 的轨迹（不知道dot为什么会把这根线搞这么又弯又骚的） 和 &gt;&gt;= 。所以 Kleisli 其实就是斜着走的一个范畴，但是 &gt;&gt;= 把它硬生生掰 <del>弯</del> 直了。</figcaption>
 </figure>
 
 <p>
@@ -689,7 +828,7 @@ Functor 的 Catergory 叫做 Functor Catergory，因为有箭头 &#x2013; 自然
 </p>
 <div class="org-src-container">
 
-<pre class="src src-haskell">tb <span style="color: #6a5acd;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> <span style="color: #b8860b;">\</span>mu <span style="color: #b8860b;">.</span> fmap f tb
+<pre class="src src-haskell">tb <span style="color: #6a5acd;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> mu <span style="color: #b8860b;">.</span> fmap f tb
 </pre>
 </div>
 
@@ -698,7 +837,7 @@ Functor 的 Catergory 叫做 Functor Catergory，因为有箭头 &#x2013; 自然
 </p>
 <div class="org-src-container">
 
-<pre class="src src-haskel">(f &lt;=&lt; g) = \mu . T f . g = \mu . fmap f . g
+<pre class="src src-haskel">(f &lt;=&lt; g) = mu . T f . g = mu . fmap f . g
 </pre>
 </div>
 
@@ -714,9 +853,9 @@ Functor 的 Catergory 叫做 Functor Catergory，因为有箭头 &#x2013; 自然
 </div>
 </div>
 
-<div id="outline-container-orgheadline13" class="outline-3">
-<h3 id="orgheadline13">Summary</h3>
-<div class="outline-text-3" id="text-orgheadline13">
+<div id="outline-container-orgheadline15" class="outline-3">
+<h3 id="orgheadline15">Summary</h3>
+<div class="outline-text-3" id="text-orgheadline15">
 <p>
 第一部分理论部分都讲完了， 如果你读到这里还没有被这些<ruby>吊炸天<rt>乱七八糟</rt></ruby>的概念搞daze，接下来可以看看它到底跟我们编程有鸟关系呢？第二部分将介绍这些概念产生的一些实用的monad
 </p>
@@ -732,13 +871,14 @@ Functor 的 Catergory 叫做 Functor Catergory，因为有箭头 &#x2013; 自然
 </div>
 </div>
 
-<div id="outline-container-orgheadline15" class="outline-2">
-<h2 id="orgheadline15">References</h2>
-<div class="outline-text-2" id="text-orgheadline15">
+<div id="outline-container-orgheadline17" class="outline-2">
+<h2 id="orgheadline17">References</h2>
+<div class="outline-text-2" id="text-orgheadline17">
 <ul class="org-ul">
 <li><a href="http://dev.stephendiehl.com/hask">http://dev.stephendiehl.com/hask</a></li>
-<li><a href="https://www.youtube.com/watch?v=ZKmodCApZwk">https://www.youtube.com/watch?v=ZKmodCApZwk</a></li>
 <li><a href="https://en.wikibooks.org/wiki/Haskell/Category_theory">https://en.wikibooks.org/wiki/Haskell/Category_theory</a></li>
+<li><a href="https://www.youtube.com/watch?v=ZKmodCApZwk">https://www.youtube.com/watch?v=ZKmodCApZwk</a></li>
+<li><a href="https://www.youtube.com/watch?v=kiXjcqxVogE&amp;list=PL50ABC4792BD0A086&amp;index=5">https://www.youtube.com/watch?v=kiXjcqxVogE&amp;list=PL50ABC4792BD0A086&amp;index=5</a></li>
 </ul>
 </div>
 </div>
@@ -746,7 +886,7 @@ Functor 的 Catergory 叫做 Functor Catergory，因为有箭头 &#x2013; 自然
 <div id="postamble" class="status">
 <footer>
 <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-<p>Modified: 2017-03-19 Sun 14:32</p>
+<p>Modified: 2017-03-21 Tue 06:38</p>
 <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6)</p>
 <p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
