@@ -15,12 +15,53 @@
 
 * TODO 第二部分：{{{ruby(食用猫呢, Practical Monads)}}}
 一些有用的 Monad instances
-** Applicative
+** COMMENT Applicative
 *** Alternative
 *** Arrow
 *** Bifunctor
 
+** Identity
+这可能是最简单的 monad 了。不包含任何计算
+#+BEGIN_SRC haskell
+newtype Identity a = Identity { runIdentity :: a } 
+#+END_SRC
+这里使用 =newtype= 而不是 =data= 是因为 =Identity= 与 =runIdentity= 是 isomorphic 的。
+
+#+BEGIN_SRC haskell
+Identity :: a -> Identity a
+runIdentity :: Identity a -> a
+#+END_SRC
+
+** Maybe
+这是一个再简单的 Monad，首先，需要定义这个一个 {{{ruby(代数数据类型, Algebra Data Type(ADT))}}}
+#+BEGIN_SRC haskell
+data Maybe a = Just a | Nothing
+#+END_SRC
+Haskell中定义一个ADT十分简单，不像Scala那么啰嗦。左边是类型，右边有类型构造器，你会发现有一根竖线 =|= ， 它分隔着两个构造器
+- Just a
+- Nothing
+其中 a （一定要小写）可以是任意类型
+
+所以 =Just 1= 会得到一个 =Num a => Mabye a= 类型（意思就是 =Maybe a= 但是 =a= 的类型约束为 =Num= ）， =Nothing= 也会得到一个 =Maybe a= 只不过 =a= 没有类型约束。
+
+总之我们有了构造器可以构造出 Maybe 类型，而这个类型能做的事情，就要取决它实现了哪些 class 的 instance 了。
+
+
 ** Either
+
+*** /Coproduct/
+注意到两个构造器的类型分别为
+- Just:: a -> Maybe a
+- Nothing:: Maybe a
+
+*** 
+比如： Monad
+#+BEGIN_SRC haskell
+  instance Monad Maybe where
+    Just a >>= f = f a
+    Nothing >>= f = Nothing
+#+END_SRC
+
 ** Validate
 ** Reader
 给一个computation喂数据
@@ -79,3 +120,6 @@ output = runWriter example
 ** ST
 ** Free Monad
 ** Eff
+
+** References
+- https://wiki.haskell.org/All_About_Monads
