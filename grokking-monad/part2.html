@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- 2017-04-15 Sat 09:24 -->
+<!-- 2017-04-15 Sat 14:02 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
 <title>范畴论完全装逼手册(二) / Grokking Monad</title>
@@ -142,7 +142,6 @@ for the JavaScript code in this tag.
 <p>
 最后，我们还可以像 IO monad 一样，通过 free 或者 Eff 自定义自己的计算，和可能带副作用的解释器。
 </p>
-
 <div id="outline-container-orgheadline1" class="outline-2">
 <h2 id="orgheadline1"><span class="todo TODO">TODO</span> 第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></h2>
 <div class="outline-text-2" id="text-orgheadline1">
@@ -260,6 +259,16 @@ Haskell中定义一个ADT十分简单，不像Scala那么啰嗦。左边是类�
 </pre>
 </div>
 
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABeKvGaM2S1LV5QzdmQv_U98pCX164j7-2MB/image.png" alt="image.png">
+</p>
+<figcaption><span class="figure-number">Figure 1:</span> fmap :: (a -&gt; b) -&gt; f a -&gt; f b</figcaption>
+</figure>
+
+<p>
+然后，还实现 Monad
+</p>
 <div class="org-src-container">
 
 <pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> <span style="color: #36648b;">Maybe</span> <span style="color: #00008b;">where</span>
@@ -316,7 +325,7 @@ Either 的定义也很简单
 <figure>
 <p><img src="https://www.evernote.com/l/ABeCtsXrN7xCWqa7bsNAU0eVQVTDdkRKqVEB/image.png" alt="image.png">
 </p>
-<figcaption><span class="figure-number">Figure 1:</span> Coproduct</figcaption>
+<figcaption><span class="figure-number">Figure 2:</span> Coproduct</figcaption>
 </figure>
 
 <p>
@@ -336,7 +345,7 @@ Either 的定义也很简单
 <figure>
 <p><img src="https://www.evernote.com/l/ABea91BEgH5OH41WorLYjqichYC0rmVCAXMB/image.png" alt="image.png">
 </p>
-<figcaption><span class="figure-number">Figure 2:</span> Product</figcaption>
+<figcaption><span class="figure-number">Figure 3:</span> Product</figcaption>
 </figure>
 
 <p>
@@ -593,6 +602,54 @@ Writer 的定义更简单
 
 <div id="outline-container-orgheadline11" class="outline-3">
 <h3 id="orgheadline11">State</h3>
+<div class="outline-text-3" id="text-orgheadline11">
+<p>
+跟名字就看得出来 State monad 是为了处理状态。虽然函数式编程不应该有状态，不然会引用透明性。但是，state monad并不是在计算过程中修改状态，而是通过描述这种变化，然后需要时在运行返回最终结果。这一点跟 Reader 和 Writer 这两个看起来是副作用的 IO 是一样的。
+</p>
+
+<p>
+先看下 State 类型的定义
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">State</span> s a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">State</span> { runState <span style="color: #b8860b;">::</span> s <span style="color: #b8860b;">-&gt;</span> (a, s) }
+</pre>
+</div>
+
+<p>
+可以看到 State 只包含一个 从旧状态 s 到新状态 s 和返回值 a 的 Tuple 的函数。
+</p>
+
+<p>
+通过实现 Monad，State 就可以实现命令式编程中的变量的功能。
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> (<span style="color: #36648b;">State</span> s) <span style="color: #00008b;">where</span> 
+  return a        <span style="color: #b8860b;">=</span> <span style="color: #36648b;">State</span> <span style="color: #b8860b;">$</span> <span style="color: #b8860b;">\</span>s <span style="color: #b8860b;">-&gt;</span> (a,s)
+  (<span style="color: #36648b;">State</span> x) <span style="color: #b8860b;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> <span style="color: #36648b;">State</span> <span style="color: #b8860b;">$</span> <span style="color: #b8860b;">\</span>s <span style="color: #b8860b;">-&gt;</span> <span style="color: #00008b;">let</span> (v,s') <span style="color: #b8860b;">=</span> x s <span style="color: #00008b;">in</span>
+                                 runState (f v) s'
+</pre>
+</div>
+<p>
+return 很简单，就不用解释了。x 类型是 <code>s -&gt; (a, s)</code> ,所以 x s 之后会返回 结果和状态。也就是运行当前 State，把结果 v 传给函数 f，返回的 State 再接着上次状态运行。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">import</span> <span style="color: #36648b;">Control.Monad.Trans.State.Strict</span>
+<span style="color: #6a5acd;">test</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">State</span> <span style="color: #36648b;">Int</span> <span style="color: #36648b;">Int</span>
+<span style="color: #6a5acd;">test</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
+  a <span style="color: #b8860b;">&lt;-</span> get
+  modify (<span style="color: #b8860b;">+</span>1)
+  b <span style="color: #b8860b;">&lt;-</span> get
+  return (a <span style="color: #b8860b;">+</span> b)
+
+<span style="color: #6a5acd;">main</span> <span style="color: #b8860b;">=</span> print <span style="color: #b8860b;">$</span> show <span style="color: #b8860b;">$</span> runState test 3
+<span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">(7, 4)</span>
+</pre>
+</div>
+</div>
 </div>
 
 <div id="outline-container-orgheadline12" class="outline-3">
@@ -636,7 +693,7 @@ Writer 的定义更简单
 <div id="postamble" class="status">
 <footer>
 <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-<p>Modified: 2017-04-15 Sat 09:20</p>
+<p>Modified: 2017-04-15 Sat 14:00</p>
 <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6)</p>
 <p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
