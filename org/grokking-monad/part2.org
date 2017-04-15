@@ -12,6 +12,13 @@
 第二部分将介绍由这些概念产生的一些实用的monad instances，这些 monad 都通过同样的抽象方式，解决了分离计算与副作用的工作。
 
 最后，我们还可以像 IO monad 一样，通过 free 或者 Eff 自定义自己的计算，和可能带副作用的解释器。
+* COMMENT
+#+BEGIN_SRC emacs-lisp
+(require 'ob-haskell)
+#+END_SRC
+
+#+RESULTS:
+: ob-haskell
 
 * TODO 第二部分：{{{ruby(食用猫呢, Practical Monads)}}}
 一些有用的 Monad instances
@@ -78,6 +85,10 @@ Haskell中定义一个ADT十分简单，不像Scala那么啰嗦。左边是类�
     fmap f (Just a) = Just (f a)
 #+END_SRC
 
+#+CAPTION: fmap :: (a -> b) -> f a -> f b
+https://www.evernote.com/l/ABeKvGaM2S1LV5QzdmQv_U98pCX164j7-2MB/image.png
+
+然后，还实现 Monad
 #+BEGIN_SRC haskell
   instance Monad Maybe where
     return a = Just a
@@ -266,6 +277,36 @@ newtype Writer l a = Writer { runWriter :: (a,l) }
 所以在 >>= 时，我们先把 f a 返回的 Writer run了，然后把两次 log =mappend= 起来。
 
 ** State
+跟名字就看得出来 State monad 是为了处理状态。虽然函数式编程不应该有状态，不然会引用透明性。但是，state monad并不是在计算过程中修改状态，而是通过描述这种变化，然后需要时在运行返回最终结果。这一点跟 Reader 和 Writer 这两个看起来是副作用的 IO 是一样的。
+
+先看下 State 类型的定义
+#+BEGIN_SRC haskell
+newtype State s a = State { runState :: s -> (a, s) }
+#+END_SRC
+
+可以看到 State 只包含一个 从旧状态 s 到新状态 s 和返回值 a 的 Tuple 的函数。
+
+通过实现 Monad，State 就可以实现命令式编程中的变量的功能。
+#+BEGIN_SRC haskell
+  instance Monad (State s) where 
+    return a        = State $ \s -> (a,s)
+    (State x) >>= f = State $ \s -> let (v,s') = x s in
+                                   runState (f v) s'
+#+END_SRC
+return 很简单，就不用解释了。x 类型是 =s -> (a, s)= ,所以 x s 之后会返回 结果和状态。也就是运行当前 State，把结果 v 传给函数 f，返回的 State 再接着上次状态运行。
+
+#+BEGIN_SRC haskell :results output
+  import Control.Monad.Trans.State.Strict
+  test :: State Int Int
+  test = do
+    a <- get
+    modify (+1)
+    b <- get
+    return (a + b)
+  
+  main = print $ show $ runState test 3
+  -- (7, 4)
+#+END_SRC
 
 ** RWS
 ** Expection
