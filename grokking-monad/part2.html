@@ -1,22 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- 2017-03-19 Sun 14:34 -->
+<!-- 2017-04-15 Sat 09:24 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
 <title>范畴论完全装逼手册(二) / Grokking Monad</title>
 <meta  name="generator" content="Org-mode">
 <meta  name="author" content="欧阳继超">
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                                                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                                                                                              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                                                                                                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-NJRFJGX');</script>
+<!-- End Google Tag Manager -->
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="/style/pixyll.css"/>
-<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="http://blog.oyanglul.us/index.xml"/>
+<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css" />
 <!--[if lt IE 9]>
      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.ie.min.css" />
-     <![endif]--> 
+     <![endif]-->
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -66,10 +73,14 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="preamble" class="status">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJRFJGX"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 <header>
     <a accesskey="h" href="/index.html"> HOME </a> |
     <a href="#" id="edit-in-github">EDIT</a> |
-    <a href="/index.xml">RSS</a> |
+    <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
     <a href="/archive.html">ARCHIVE</a> |
     <a href="/theindex.html">INDEX</a> |
     <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a>
@@ -84,27 +95,32 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#orgheadline1"><span class="todo TODO">TODO</span> 第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></a>
 <ul>
-<li><a href="#orgheadline5">Applicative</a>
+<li><a href="#orgheadline2">Identity</a></li>
+<li><a href="#orgheadline3">Maybe</a></li>
+<li><a href="#orgheadline4">Either</a>
 <ul>
-<li><a href="#orgheadline2">Alternative</a></li>
-<li><a href="#orgheadline3">Arrow</a></li>
-<li><a href="#orgheadline4">Bifunctor</a></li>
+<li><a href="#orgheadline5">Product &amp; Coproduct</a></li>
+<li><a href="#orgheadline6">Either Monad</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline6">Either</a></li>
-<li><a href="#orgheadline7">Validate</a></li>
-<li><a href="#orgheadline8">Reader</a></li>
-<li><a href="#orgheadline9">Writter</a></li>
-<li><a href="#orgheadline10">State</a></li>
-<li><a href="#orgheadline11">RWS</a></li>
-<li><a href="#orgheadline12">Expection</a></li>
-<li><a href="#orgheadline13">Monad Transform</a></li>
-<li><a href="#orgheadline14">Cont</a></li>
-<li><a href="#orgheadline15">MonadPlus</a></li>
-<li><a href="#orgheadline16">MonadFix</a></li>
-<li><a href="#orgheadline17">ST</a></li>
-<li><a href="#orgheadline18">Free Monad</a></li>
-<li><a href="#orgheadline19">Eff</a></li>
+<li><a href="#orgheadline7"><span class="todo TODO">TODO</span> Validate</a></li>
+<li><a href="#orgheadline8">Reader</a>
+<ul>
+<li><a href="#orgheadline9">do notation</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline10">Writer</a></li>
+<li><a href="#orgheadline11">State</a></li>
+<li><a href="#orgheadline12">RWS</a></li>
+<li><a href="#orgheadline13">Expection</a></li>
+<li><a href="#orgheadline14">Monad Transform</a></li>
+<li><a href="#orgheadline15">Cont</a></li>
+<li><a href="#orgheadline16">MonadPlus</a></li>
+<li><a href="#orgheadline17">MonadFix</a></li>
+<li><a href="#orgheadline18">ST</a></li>
+<li><a href="#orgheadline19">Free Monad</a></li>
+<li><a href="#orgheadline20">Eff</a></li>
+<li><a href="#orgheadline21">References</a></li>
 </ul>
 </li>
 </ul>
@@ -134,129 +150,493 @@ for the JavaScript code in this tag.
 一些有用的 Monad instances
 </p>
 </div>
-<div id="outline-container-orgheadline5" class="outline-3">
-<h3 id="orgheadline5">Applicative</h3>
-<div class="outline-text-3" id="text-orgheadline5">
-</div><div id="outline-container-orgheadline2" class="outline-4">
-<h4 id="orgheadline2">Alternative</h4>
+<div id="outline-container-orgheadline2" class="outline-3">
+<h3 id="orgheadline2">Identity</h3>
+<div class="outline-text-3" id="text-orgheadline2">
+<p>
+这可能是最简单的 monad 了。不包含任何计算
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Identity</span> a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Identity</span> { runIdentity <span style="color: #b8860b;">::</span> a }
+</pre>
 </div>
-<div id="outline-container-orgheadline3" class="outline-4">
-<h4 id="orgheadline3">Arrow</h4>
+<p>
+这里使用 <code>newtype</code> 而不是 <code>data</code> 是因为 <code>Identity</code> 与 <code>runIdentity</code> 是 isomorphic （同构，忘了的话回去翻第一部分）
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #36648b;">Identity</span> <span style="color: #b8860b;">::</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Identity</span> a
+<span style="color: #6a5acd;">runIdentity</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Identity</span> a <span style="color: #b8860b;">-&gt;</span> a
+</pre>
 </div>
-<div id="outline-container-orgheadline4" class="outline-4">
-<h4 id="orgheadline4">Bifunctor</h4>
+
+<p>
+所以 <code>runIdentity . Identity = id</code> ，所以他们是同构的。
+</p>
+
+<p>
+左边的 <code>Identity</code> 是类型构造器, 接收类型 <code>a</code> 返回 <code>Identity a</code> 类型
+</p>
+
+<p>
+如果 a 是 Int，那么就得到一个 <code>Identity Int</code> 类型。
+</p>
+
+<p>
+右边的 <code>Identity</code> 是数据构造器，也就是构造值，比如 <code>Identity 1</code> 会构造出一个值，其类型为 <code>Identity Int</code>
+</p>
+
+<p>
+大括号比较诡异，可以想象成给 <code>a</code> 一个 key，同过这个 key 可以把 a 取出来，比如
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">runIdentity</span> (<span style="color: #36648b;">Identity</span> 1)
+</pre>
+</div>
+<p>
+会返回 1
+</p>
+
+<p>
+Identity 可以实现 Functor 和 Monad，就得到 Identity functor 和 Identity monad
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Functor</span> <span style="color: #36648b;">Identity</span> <span style="color: #00008b;">where</span>
+  fmap f (<span style="color: #36648b;">Identity</span> a) <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Identity</span> (f a)
+
+<span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> <span style="color: #36648b;">Identity</span> <span style="color: #00008b;">where</span>
+  return a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Identity</span> a
+  <span style="color: #36648b;">Identity</span> a <span style="color: #b8860b;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> f a
+</pre>
+</div>
+
+<p>
+可以看到 Identity 即是构造器，也是解构器，在模式匹配是可以 destructure 值。例如上面Functor 实现中的 <code>fmap f (Identity a)</code> , 假如fmap的是 <code>Identity 1</code>, 那么这个模式匹配到 <code>(Identity a)</code> 时会把 <code>1</code> 放到 <code>a</code> 的位置。
+</p>
+
+<p>
+Identity 看起来什么也没有干，就跟 identity 函数一样，但是在后面讲到 State monad时你会发现他的价值。
+</p>
 </div>
 </div>
 
-<div id="outline-container-orgheadline6" class="outline-3">
-<h3 id="orgheadline6">Either</h3>
+<div id="outline-container-orgheadline3" class="outline-3">
+<h3 id="orgheadline3">Maybe</h3>
+<div class="outline-text-3" id="text-orgheadline3">
+<p>
+这是一个超级简单的 Monad，首先，需要定义这个一个 <ruby>代数数据类型<rt> Algebra Data Type(ADT)</rt></ruby>
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">data</span> <span style="color: #36648b;">Maybe</span> a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Just</span> a <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Nothing</span>
+</pre>
 </div>
+<p>
+Haskell中定义一个ADT十分简单，不像Scala那么啰嗦。左边是类型构造器，右边有数据构造器，你会发现有一根竖线 <code>|</code> ， 它分隔着两个构造器
+</p>
+<ul class="org-ul">
+<li>Just</li>
+<li>Nothing</li>
+</ul>
+<p>
+其中 a （一定要小写）可以是任意类型
+</p>
+
+<p>
+所以 <code>Just 1</code> 会得到一个 <code>Num a =&gt; Mabye a</code> 类型（意思就是 <code>Maybe a</code> 但是 <code>a</code> 的类型约束为 <code>Num</code> ）， <code>Nothing</code> 也会得到一个 <code>Maybe a</code> 只不过 <code>a</code> 没有类型约束。
+</p>
+
+<p>
+总之我们有了构造器可以构造出 Maybe 类型，而这个类型能做的事情，就要取决它实现了哪些 class 的 instance 了。比如它可以是一个 Functor
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Functor</span> <span style="color: #36648b;">Maybe</span> <span style="color: #00008b;">where</span>
+  fmap f (<span style="color: #36648b;">Just</span> a) <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Just</span> (f a)
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> <span style="color: #36648b;">Maybe</span> <span style="color: #00008b;">where</span>
+  return a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Just</span> a
+  (<span style="color: #36648b;">Just</span> a) <span style="color: #b8860b;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> f a
+  <span style="color: #36648b;">Nothing</span> <span style="color: #b8860b;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Nothing</span>
+</pre>
+</div>
+
+<p>
+Maybe 有用在于能合适的处理 <i><ruby>偏函数<rt> Partial Function</rt></ruby></i> 的返回值。偏函数相对于<ruby>全函数<rt> Total Function</rt></ruby>，是指只能对部分输入返回输出的函数。
+</p>
+
+<p>
+比如一个取数组某一位上的值的函数，就是偏函数，因为假设你想取第4位的值，但不是所有数组长度都大于4，就会有获取不了的尴尬情况。
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell">[1,2,3] <span style="color: #b8860b;">!!</span> 4
+</pre>
+</div>
+
+<p>
+如果使用 Maybe 把偏函数处理不了的输入都返回成 Nothing，这样结果依然保持 Maybe 类型，不影响后面的计算。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-3">
+<h3 id="orgheadline4">Either</h3>
+<div class="outline-text-3" id="text-orgheadline4">
+<p>
+Either 的定义也很简单
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">data</span> <span style="color: #36648b;">Either</span> a b <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Left</span> a <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Right</span> b
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline5" class="outline-4">
+<h4 id="orgheadline5">Product &amp; Coproduct</h4>
+<div class="outline-text-4" id="text-orgheadline5">
+<p>
+看过第一部分应该还能记得有一个东西叫 Duel，所以见到如果范畴上有 Coproduct 那么肯定在duel范畴上会有同样的东西叫 Product。
+</p>
+
+<p>
+那么我们先来看看什么是 Coproduct
+</p>
+
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABeCtsXrN7xCWqa7bsNAU0eVQVTDdkRKqVEB/image.png" alt="image.png">
+</p>
+<figcaption><span class="figure-number">Figure 1:</span> Coproduct</figcaption>
+</figure>
+
+<p>
+像这样，能通过两个箭头到达同一个东西，就是 Coproduct。这里箭头 <code>Left</code> 能让 <code>a</code> 到 <code>Either a b</code> ， 箭头 <code>Right</code> 也能让 <code>b</code> 到达 <code>Either a b</code>
+</p>
+
+<p>
+有意思的是还肯定存在一个 Coproduct 和 箭头，使得下图成立
+<img src="https://www.evernote.com/l/ABfP9Sz8diJFxoXCJpjHeo_gF5JAmsiFvPYB/image.png" alt="image.png">
+</p>
+
+<p>
+箭头反过来，就是 Product, 比如 Tuple
+</p>
+
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABea91BEgH5OH41WorLYjqichYC0rmVCAXMB/image.png" alt="image.png">
+</p>
+<figcaption><span class="figure-number">Figure 2:</span> Product</figcaption>
+</figure>
+
+<p>
+Tuple 的 <code>fst</code> 箭头能让 <code>(a, b)</code> 到达 <code>a</code> 对象，而箭头 <code>snd</code> 能让其到达 <code>b</code> 对象。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline6" class="outline-4">
+<h4 id="orgheadline6">Either Monad</h4>
+<div class="outline-text-4" id="text-orgheadline6">
+<p>
+确切的说，Either 不是 monad， <code>Either a</code> 才是。还记得 monad 的 class 定义吗？
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Endofunctor</span> m <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> m <span style="color: #00008b;">where</span>
+  eta <span style="color: #b8860b;">::</span> a <span style="color: #b8860b;">-&gt;</span> (m a)
+  mu <span style="color: #b8860b;">::</span> m m a <span style="color: #b8860b;">-&gt;</span> m a
+</pre>
+</div>
+<p>
+所以 m 必须是个 Endofunctor，也就是要满足Functor
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Functor</span> t <span style="color: #00008b;">where</span>
+  fmap <span style="color: #b8860b;">::</span> (a <span style="color: #b8860b;">-&gt;</span> b) <span style="color: #b8860b;">-&gt;</span> (t a <span style="color: #b8860b;">-&gt;</span> t b)
+</pre>
+</div>
+<p>
+t a 的 kind 是 *，所以 t 必须是 kind * -&gt; *
+也就是说，m 必须是接收一个类型参数的类型构造器
+</p>
+
+<p>
+而 Either 的 kind 是 * -&gt; * -&gt; *, Either a 才是 * -&gt; *
+</p>
+
+<p>
+所以只能定义 Either a 的 Monad
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> (<span style="color: #36648b;">Either</span> a) <span style="color: #00008b;">where</span>
+  <span style="color: #36648b;">Left</span>  l <span style="color: #b8860b;">&gt;&gt;=</span> <span style="color: #00008b;">_</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Left</span> l
+  <span style="color: #36648b;">Right</span> r <span style="color: #b8860b;">&gt;&gt;=</span> k <span style="color: #b8860b;">=</span> k r
+</pre>
+</div>
+
+<p>
+很明显的，&gt;&gt;= 任何函数到<ruby>左边<rt> Left</rt></ruby> 都不会改变，只有 &gt;&gt;= 右边才能产生新的计算。
+</p>
+</div>
+</div>
+</div>
+
 <div id="outline-container-orgheadline7" class="outline-3">
-<h3 id="orgheadline7">Validate</h3>
+<h3 id="orgheadline7"><span class="todo TODO">TODO</span> Validate</h3>
 </div>
 <div id="outline-container-orgheadline8" class="outline-3">
 <h3 id="orgheadline8">Reader</h3>
 <div class="outline-text-3" id="text-orgheadline8">
 <p>
-给一个computation喂数据
-输入 r
-asks 可以通过函数 r-&gt;a 得到一个 Reader r a monad
+Reader 的作用是给一个计算喂数据。
+</p>
+
+<p>
+在描述计算的时候，并不需要关心输入时什么，只需要 asks 就可以拿到输入值
+</p>
+
+<p>
+而真正的输入，会在运行计算时给予。
+</p>
+
+<p>
+跟 Identity 一样，我们用 newtype 来定义一个同构的 Reader 类型
 </p>
 <div class="org-src-container">
 
-<pre class="src src-haskell"><span style="color: #6a5acd;">asks</span> <span style="color: #b8860b;">::</span> (r <span style="color: #b8860b;">-&gt;</span> a) <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Reader</span> r a
-<span style="color: #6a5acd;">runReader</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Reader</span> r a <span style="color: #b8860b;">-&gt;</span> r <span style="color: #b8860b;">-&gt;</span> a
+<pre class="src src-haskell"><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Reader</span> e a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Reader</span> { runReader <span style="color: #b8860b;">::</span> (e <span style="color: #b8860b;">-&gt;</span> a) }
+</pre>
+</div>
 
-<span style="color: #00008b;">import</span> <span style="color: #36648b;">Control.Monad.Reader</span>
+<p>
+其中
+</p>
+<ul class="org-ul">
+<li>e 是输入</li>
+<li>a 是结果</li>
+<li>构造 Reader 类型需要确定 输入的类型 e 与输出的类型 a</li>
+<li><code>runReader</code> 的类型是 <code>runReader:: (Reader e a) -&gt; (e -&gt; a)</code></li>
+</ul>
 
-<span style="color: #00008b;">data</span> <span style="color: #36648b;">MyContext</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">MyContext</span>
-  { foo <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span>
-  , bar <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span>
+<p>
+也就是说在描述完一个 Reader 的计算后，使用 runReader 可以得到一个 e -&gt; a 的函数，使用这个函数，就可以接收输入，通过构造好的计算，算出结果 a 返回。
+</p>
+
+<p>
+那么，让我们来实现 Reader 的 monad instance，就可以描述一个可以 ask 的计算了。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> (<span style="color: #36648b;">Reader</span> e) <span style="color: #00008b;">where</span> 
+    return a         <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Reader</span> <span style="color: #b8860b;">$</span> <span style="color: #b8860b;">\</span><span style="color: #00008b;">_</span> <span style="color: #b8860b;">-&gt;</span> a 
+    (<span style="color: #36648b;">Reader</span> g) <span style="color: #b8860b;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Reader</span> <span style="color: #b8860b;">$</span> <span style="color: #b8860b;">\</span>e <span style="color: #b8860b;">-&gt;</span> runReader (f (g e)) e
+</pre>
+</div>
+
+<p>
+跟Either一样，我们只能定义 Reader e 的 monad instance。
+</p>
+
+<p>
+注意这里的 
+</p>
+<ul class="org-ul">
+<li>f 类型是 <code>(a -&gt; Reader e a)</code></li>
+<li>g 其实就是是 destructure 出来的 runReader，也就是 e -&gt; a</li>
+<li>所以 (g e) 返回 a</li>
+<li>f (g e) 就是 <code>Reader e a</code></li>
+<li>再 run 一把最后得到 a</li>
+</ul>
+
+<p>
+让我们来看看如何使用 Reader
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">import</span> <span style="color: #36648b;">Control.Monad.Reader</span>
+
+<span style="color: #00008b;">data</span> <span style="color: #36648b;">Environment</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Env</span>
+  { fistName <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span>
+  , lastName <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span>
   } <span style="color: #00008b;">deriving</span> (<span style="color: #36648b;">Show</span>)
 
-<span style="color: #6a5acd;">computation</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Reader</span> <span style="color: #36648b;">MyContext</span> (<span style="color: #36648b;">Maybe</span> <span style="color: #36648b;">String</span>)
-<span style="color: #6a5acd;">computation</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
-  n <span style="color: #b8860b;">&lt;-</span> asks bar
-  x <span style="color: #b8860b;">&lt;-</span> asks foo
-  <span style="color: #00008b;">if</span> n <span style="color: #b8860b;">&gt;</span> 0
-    <span style="color: #00008b;">then</span> return (<span style="color: #36648b;">Just</span> x)
-    <span style="color: #00008b;">else</span> return <span style="color: #36648b;">Nothing</span>
+<span style="color: #6a5acd;">helloworld</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Reader</span> <span style="color: #36648b;">Environment</span> <span style="color: #36648b;">String</span>
+<span style="color: #6a5acd;">helloworld</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
+  f <span style="color: #b8860b;">&lt;-</span> asks firstName
+  l <span style="color: #b8860b;">&lt;-</span> asks lastName
+  return <span style="color: #8b0000;">"Hello "</span> <span style="color: #b8860b;">++</span> f <span style="color: #b8860b;">++</span> l
 
-<span style="color: #6a5acd;">ex1</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Maybe</span> <span style="color: #36648b;">String</span>
-<span style="color: #6a5acd;">ex1</span> <span style="color: #b8860b;">=</span> runReader computation <span style="color: #b8860b;">$</span> <span style="color: #36648b;">MyContext</span> <span style="color: #8b0000;">"hello"</span> 1
+<span style="color: #6a5acd;">runHelloworld</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span>
+<span style="color: #6a5acd;">runHelloworld</span> <span style="color: #b8860b;">=</span> runReader helloworld <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Env</span> <span style="color: #8b0000;">"Jichao"</span> <span style="color: #8b0000;">"Ouyang"</span>
+</pre>
+</div>
 
-<span style="color: #6a5acd;">ex2</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Maybe</span> <span style="color: #36648b;">String</span>
-<span style="color: #6a5acd;">ex2</span> <span style="color: #b8860b;">=</span> runReader computation <span style="color: #b8860b;">$</span> <span style="color: #36648b;">MyContext</span> <span style="color: #8b0000;">"haskell"</span> 0
+<p>
+这段代码很简单，helloworld 负责打招呼，也就是在名字前面加个 "Hello"，而跟谁打招呼，这个函数并不关心，而单纯的是向 Environment <ruby>问<rt>asks</rt></ruby> 就好。
+</p>
+
+<p>
+在运行时，可以提供给 Reader 的输入 Env fistname lastname
+</p>
+</div>
+
+<div id="outline-container-orgheadline9" class="outline-4">
+<h4 id="orgheadline9">do notation</h4>
+<div class="outline-text-4" id="text-orgheadline9">
+<p>
+这可能是你第一次见到 <code>do</code> 和 <code>&lt;-</code>. 如果不是，随意跳过这节。
+</p>
+
+<ul class="org-ul">
+<li>do 中所有 &lt;- 的右边都是 <code>Reader Environment String</code> 类型</li>
+<li>do 中的 return 返回类型也必须为  <code>Reader Environment String</code></li>
+<li><code>asks firstName</code> 返回的是 <code>Reader Environment String</code> 类型， <code>&lt;-</code> 可以理解成吧 monad <code>Reader Environment</code> 的内容放到左边的 f, 所以 f 的类型是 String。</li>
+</ul>
+
+<p>
+看起来像命令式的语句，其实只是 <code>&gt;&gt;=</code> 的语法糖，但是明显用do可读性要高很多。
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">helloworld</span> <span style="color: #b8860b;">=</span> (asks firstName) <span style="color: #b8860b;">&gt;&gt;=</span>
+  <span style="color: #b8860b;">\</span>f <span style="color: #b8860b;">-&gt;</span> (asks lastName) <span style="color: #b8860b;">&gt;&gt;=</span>
+       <span style="color: #b8860b;">\</span>l <span style="color: #b8860b;">-&gt;</span> return <span style="color: #8b0000;">"Hello "</span> <span style="color: #b8860b;">++</span> f <span style="color: #b8860b;">++</span> l
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-orgheadline9" class="outline-3">
-<h3 id="orgheadline9">Writter</h3>
-<div class="outline-text-3" id="text-orgheadline9">
+</div>
+
+
+<div id="outline-container-orgheadline10" class="outline-3">
+<h3 id="orgheadline10">Writer</h3>
+<div class="outline-text-3" id="text-orgheadline10">
 <p>
-除了返回值，computation会写一些额外的数据
+除了返回值，计算会需要产生一些额外的数据，比如 log
 </p>
 
 <p>
-返回值会是一个这样 <code>(result, log)</code> 的 tuple
+此时就需要一个 Writter，其返回值会是一个这样 <code>(result, log)</code> 的 tuple
 </p>
 
 <p>
-限制是 log 的类型必须是个 monoid
+限制是 log 的类型必须是个 <ruby>含幺半群<rt>monoid</rt></ruby>
 </p>
 
 <div class="org-src-container">
 
-<pre class="src src-haskell"><span style="color: #6a5acd;">example</span>  <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
-  tell [1<span style="color: #b8860b;">..</span>3]
-  tell [3<span style="color: #b8860b;">..</span>5]
-  return <span style="color: #8b0000;">"foo"</span>
+<pre class="src src-haskell"><span style="color: #6a5acd;">example</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Writer</span> <span style="color: #36648b;">String</span> <span style="color: #36648b;">String</span>
+<span style="color: #6a5acd;">example</span>  <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
+  tell <span style="color: #8b0000;">"How are you?"</span>
+  tell <span style="color: #8b0000;">"I'm fine thank you, and you?"</span>
+  return <span style="color: #8b0000;">"Hehe Da~"</span>
 
-<span style="color: #6a5acd;">output</span> <span style="color: #b8860b;">::</span> (<span style="color: #36648b;">String</span>, [<span style="color: #36648b;">Int</span>])
+<span style="color: #6a5acd;">output</span> <span style="color: #b8860b;">::</span> (<span style="color: #36648b;">String</span>, <span style="color: #36648b;">String</span>)
 <span style="color: #6a5acd;">output</span> <span style="color: #b8860b;">=</span> runWriter example
-<span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">("foo", [1, 2, 3, 3, 4, 5])</span>
+<span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">("Hehe Da~", "How are you?I'm fine thank you, and you?")</span>
 </pre>
 </div>
+
+<p>
+Writer 的定义更简单
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Writer</span> l a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Writer</span> { runWriter <span style="color: #b8860b;">::</span> (a,l) }
+</pre>
 </div>
+<p>
+里面只是一个 tuple 而已
+</p>
+<ul class="org-ul">
+<li>w 是 log</li>
+<li>a 是 返回值</li>
+</ul>
+
+<p>
+看看如何实现 Writer monad
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> (<span style="color: #36648b;">Monoid</span> w) <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> (<span style="color: #36648b;">Writer</span> w) <span style="color: #00008b;">where</span> 
+    return a             <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Writer</span> (a,mempty) 
+    (<span style="color: #36648b;">Writer</span> (a,l)) <span style="color: #b8860b;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> <span style="color: #00008b;">let</span> (a',l') <span style="color: #b8860b;">=</span> runWriter <span style="color: #b8860b;">$</span> f a <span style="color: #00008b;">in</span>
+                           <span style="color: #36648b;">Writer</span> (a',l <span style="color: #b8860b;">`mappend`</span> l')
+</pre>
 </div>
-<div id="outline-container-orgheadline10" class="outline-3">
-<h3 id="orgheadline10">State</h3>
+
+<ul class="org-ul">
+<li>return 不会有任何 log，l 是 monoid 的 mempty</li>
+<li>f 的类型为 <code>a -&gt; Writer l a</code></li>
+<li><code>runWriter $ f a</code> 返回 <code>(a, l)</code></li>
+</ul>
+
+<p>
+所以在 &gt;&gt;= 时，我们先把 f a 返回的 Writer run了，然后把两次 log <code>mappend</code> 起来。
+</p>
+</div>
 </div>
 
 <div id="outline-container-orgheadline11" class="outline-3">
-<h3 id="orgheadline11">RWS</h3>
+<h3 id="orgheadline11">State</h3>
 </div>
+
 <div id="outline-container-orgheadline12" class="outline-3">
-<h3 id="orgheadline12">Expection</h3>
+<h3 id="orgheadline12">RWS</h3>
 </div>
 <div id="outline-container-orgheadline13" class="outline-3">
-<h3 id="orgheadline13">Monad Transform</h3>
+<h3 id="orgheadline13">Expection</h3>
 </div>
 <div id="outline-container-orgheadline14" class="outline-3">
-<h3 id="orgheadline14">Cont</h3>
+<h3 id="orgheadline14">Monad Transform</h3>
 </div>
 <div id="outline-container-orgheadline15" class="outline-3">
-<h3 id="orgheadline15">MonadPlus</h3>
+<h3 id="orgheadline15">Cont</h3>
 </div>
 <div id="outline-container-orgheadline16" class="outline-3">
-<h3 id="orgheadline16">MonadFix</h3>
+<h3 id="orgheadline16">MonadPlus</h3>
 </div>
 <div id="outline-container-orgheadline17" class="outline-3">
-<h3 id="orgheadline17">ST</h3>
+<h3 id="orgheadline17">MonadFix</h3>
 </div>
 <div id="outline-container-orgheadline18" class="outline-3">
-<h3 id="orgheadline18">Free Monad</h3>
+<h3 id="orgheadline18">ST</h3>
 </div>
 <div id="outline-container-orgheadline19" class="outline-3">
-<h3 id="orgheadline19">Eff</h3>
+<h3 id="orgheadline19">Free Monad</h3>
+</div>
+<div id="outline-container-orgheadline20" class="outline-3">
+<h3 id="orgheadline20">Eff</h3>
+</div>
+
+<div id="outline-container-orgheadline21" class="outline-3">
+<h3 id="orgheadline21">References</h3>
+<div class="outline-text-3" id="text-orgheadline21">
+<ul class="org-ul">
+<li><a href="https://wiki.haskell.org/All_About_Monads">https://wiki.haskell.org/All_About_Monads</a></li>
+</ul>
+</div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <footer>
 <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-<p>Modified: 2017-03-19 Sun 14:32</p>
+<p>Modified: 2017-04-15 Sat 09:20</p>
 <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6)</p>
 <p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
@@ -265,6 +645,7 @@ asks 可以通过函数 r-&gt;a 得到一个 Reader r a monad
 </div>
 <a class="github-fork-ribbon right-bottom fixed" href="https://github.com/jcouyang/blog" title="Fork me on GitHub">Fork me on GitHub</a>
 </footer>
+
 <script>
  (function(){
    document.getElementById('edit-in-github').addEventListener("click",function(){
@@ -273,47 +654,8 @@ asks 可以通过函数 r-&gt;a 得到一个 Reader r a monad
    })
  })()
 </script>
-<script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
-<!-- Gumroad -->
+
 <blockquote class="embedly-card" data-card-key="608383ce38a24d51b7c578c57302e7c7" data-card-controls="0" data-card-image="https://static-2.gumroad.com/res/gumroad/1806288866681/asset_previews/d14d1973f09439c18984c9d4595ddbf6/retina/s29070174.jpg" data-card-type="article"><h4><a href="https://gumroad.com/jcouyang">Jichao Ouyang</a></h4><p>Follow me for updates on what I am creating.</p></blockquote>
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-<!-- Google Analystics -->
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-32314154-10', 'auto');
-  ga('send', 'pageview');
-</script>
-
-<!-- Disqus -->
-<div id="disqus_thread"></div>
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES * * */
- var disqus_shortname = 'orgblog';
- var href = window.location.href;
- href.replace(/^https/, 'http');
- var disqus_url = href;
-    /* * * DON'T EDIT BELOW THIS LINE * * */
-    (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
-<!-- Swiftype Search -->
-<script type="text/javascript">
- (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
-     (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
-     e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
- })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
- 
- _st('install','eGLqWnAM75a66SiXKVW3','2.0.0');
-</script>
 </div>
 </body>
 </html>
