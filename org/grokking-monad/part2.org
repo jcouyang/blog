@@ -25,90 +25,246 @@
 #+BEGIN_SRC haskell
 newtype Identity a = Identity { runIdentity :: a } 
 #+END_SRC
-这里使用 =newtype= 而不是 =data= 是因为 =Identity= 与 =runIdentity= 是 isomorphic 的。
+这里使用 =newtype= 而不是 =data= 是因为 =Identity= 与 =runIdentity= 是 isomorphic （同构，忘了的话回去翻第一部分）
 
 #+BEGIN_SRC haskell
 Identity :: a -> Identity a
 runIdentity :: Identity a -> a
 #+END_SRC
 
+所以 ~runIdentity . Identity = id~ ，所以他们是同构的。
+
+左边的 =Identity= 是类型构造器, 接收类型 =a= 返回 =Identity a= 类型
+
+如果 a 是 Int，那么就得到一个 =Identity Int= 类型。
+
+右边的 =Identity= 是数据构造器，也就是构造值，比如 =Identity 1= 会构造出一个值，其类型为 =Identity Int=
+
+大括号比较诡异，可以想象成给 =a= 一个 key，同过这个 key 可以把 a 取出来，比如
+#+BEGIN_SRC haskell
+runIdentity (Identity 1)
+#+END_SRC
+会返回 1
+
+Identity 可以实现 Functor 和 Monad，就得到 Identity functor 和 Identity monad
+#+BEGIN_SRC haskell
+  instance Functor Identity where
+    fmap f (Identity a) = Identity (f a)
+
+  instance Monad Identity where
+    return a = Identity a
+    Identity a >>= f = f a
+#+END_SRC
+
+可以看到 Identity 即是构造器，也是解构器，在模式匹配是可以 destructure 值。例如上面Functor 实现中的 =fmap f (Identity a)= , 假如fmap的是 =Identity 1=, 那么这个模式匹配到 =(Identity a)= 时会把 =1= 放到 =a= 的位置。
+
+Identity 看起来什么也没有干，就跟 identity 函数一样，但是在后面讲到 State monad时你会发现他的价值。
+
 ** Maybe
-这是一个再简单的 Monad，首先，需要定义这个一个 {{{ruby(代数数据类型, Algebra Data Type(ADT))}}}
+这是一个超级简单的 Monad，首先，需要定义这个一个 {{{ruby(代数数据类型, Algebra Data Type(ADT))}}}
 #+BEGIN_SRC haskell
 data Maybe a = Just a | Nothing
 #+END_SRC
-Haskell中定义一个ADT十分简单，不像Scala那么啰嗦。左边是类型，右边有类型构造器，你会发现有一根竖线 =|= ， 它分隔着两个构造器
-- Just a
+Haskell中定义一个ADT十分简单，不像Scala那么啰嗦。左边是类型构造器，右边有数据构造器，你会发现有一根竖线 =|= ， 它分隔着两个构造器
+- Just
 - Nothing
 其中 a （一定要小写）可以是任意类型
 
 所以 =Just 1= 会得到一个 =Num a => Mabye a= 类型（意思就是 =Maybe a= 但是 =a= 的类型约束为 =Num= ）， =Nothing= 也会得到一个 =Maybe a= 只不过 =a= 没有类型约束。
 
-总之我们有了构造器可以构造出 Maybe 类型，而这个类型能做的事情，就要取决它实现了哪些 class 的 instance 了。
+总之我们有了构造器可以构造出 Maybe 类型，而这个类型能做的事情，就要取决它实现了哪些 class 的 instance 了。比如它可以是一个 Functor
+#+BEGIN_SRC haskell
+  instance Functor Maybe where
+    fmap f (Just a) = Just (f a)
+#+END_SRC
 
-
-** Either
-
-*** /Coproduct/
-注意到两个构造器的类型分别为
-- Just:: a -> Maybe a
-- Nothing:: Maybe a
-
-*** 
-比如： Monad
 #+BEGIN_SRC haskell
   instance Monad Maybe where
-    Just a >>= f = f a
+    return a = Just a
+    (Just a) >>= f = f a
     Nothing >>= f = Nothing
 #+END_SRC
 
-** Validate
+Maybe 有用在于能合适的处理 /{{{ruby(偏函数, Partial Function)}}}/ 的返回值。偏函数相对于{{{ruby(全函数, Total Function)}}}，是指只能对部分输入返回输出的函数。
+
+比如一个取数组某一位上的值的函数，就是偏函数，因为假设你想取第4位的值，但不是所有数组长度都大于4，就会有获取不了的尴尬情况。
+#+BEGIN_SRC haskell
+[1,2,3] !! 4
+#+END_SRC
+
+如果使用 Maybe 把偏函数处理不了的输入都返回成 Nothing，这样结果依然保持 Maybe 类型，不影响后面的计算。
+
+** Either
+
+Either 的定义也很简单
+#+BEGIN_SRC haskell
+data Either a b = Left a | Right b
+#+END_SRC
+
+*** Product & Coproduct
+看过第一部分应该还能记得有一个东西叫 Duel，所以见到如果范畴上有 Coproduct 那么肯定在duel范畴上会有同样的东西叫 Product。
+
+那么我们先来看看什么是 Coproduct
+
+#+CAPTION: Coproduct
+https://www.evernote.com/l/ABeCtsXrN7xCWqa7bsNAU0eVQVTDdkRKqVEB/image.png
+
+像这样，能通过两个箭头到达同一个东西，就是 Coproduct。这里箭头 =Left= 能让 =a= 到 =Either a b= ， 箭头 =Right= 也能让 =b= 到达 =Either a b=
+
+有意思的是还肯定存在一个 Coproduct 和 箭头，使得下图成立
+https://www.evernote.com/l/ABfP9Sz8diJFxoXCJpjHeo_gF5JAmsiFvPYB/image.png
+
+箭头反过来，就是 Product, 比如 Tuple
+
+#+CAPTION: Product
+https://www.evernote.com/l/ABea91BEgH5OH41WorLYjqichYC0rmVCAXMB/image.png
+
+Tuple 的 =fst= 箭头能让 =(a, b)= 到达 =a= 对象，而箭头 =snd= 能让其到达 =b= 对象。
+
+*** Either Monad
+确切的说，Either 不是 monad， =Either a= 才是。还记得 monad 的 class 定义吗？
+#+BEGIN_SRC haskell
+class Endofunctor m => Monad m where
+  eta :: a -> (m a)
+  mu :: m m a -> m a
+#+END_SRC
+所以 m 必须是个 Endofunctor，也就是要满足Functor
+#+BEGIN_SRC haskell
+class Functor t where
+  fmap :: (a -> b) -> (t a -> t b)
+#+END_SRC
+t a 的 kind 是 *，所以 t 必须是 kind * -> *
+也就是说，m 必须是接收一个类型参数的类型构造器
+
+而 Either 的 kind 是 * -> * -> *, Either a 才是 * -> *
+
+所以只能定义 Either a 的 Monad
+#+BEGIN_SRC haskell
+  instance Monad (Either a) where
+    Left  l >>= _ = Left l
+    Right r >>= k = k r
+#+END_SRC
+
+很明显的，>>= 任何函数到{{{ruby(左边, Left)}}} 都不会改变，只有 >>= 右边才能产生新的计算。
+
+** TODO Validate
 ** Reader
-给一个computation喂数据
-输入 r
-asks 可以通过函数 r->a 得到一个 Reader r a monad
+Reader 的作用是给一个计算喂数据。
+
+在描述计算的时候，并不需要关心输入时什么，只需要 asks 就可以拿到输入值
+
+而真正的输入，会在运行计算时给予。
+
+跟 Identity 一样，我们用 newtype 来定义一个同构的 Reader 类型
 #+BEGIN_SRC haskell
-asks :: (r -> a) -> Reader r a
-runReader :: Reader r a -> r -> a
-
-import Control.Monad.Reader
-
-data MyContext = MyContext
-  { foo :: String
-  , bar :: Int
-  } deriving (Show)
-
-computation :: Reader MyContext (Maybe String)
-computation = do
-  n <- asks bar
-  x <- asks foo
-  if n > 0
-    then return (Just x)
-    else return Nothing
-
-ex1 :: Maybe String
-ex1 = runReader computation $ MyContext "hello" 1
-
-ex2 :: Maybe String
-ex2 = runReader computation $ MyContext "haskell" 0
+newtype Reader e a = Reader { runReader :: (e -> a) }
 #+END_SRC
-** Writter
-除了返回值，computation会写一些额外的数据
 
-返回值会是一个这样 =(result, log)= 的 tuple
+其中
+- e 是输入
+- a 是结果
+- 构造 Reader 类型需要确定 输入的类型 e 与输出的类型 a
+- =runReader= 的类型是 =runReader:: (Reader e a) -> (e -> a)=
 
-限制是 log 的类型必须是个 monoid
+也就是说在描述完一个 Reader 的计算后，使用 runReader 可以得到一个 e -> a 的函数，使用这个函数，就可以接收输入，通过构造好的计算，算出结果 a 返回。
+
+那么，让我们来实现 Reader 的 monad instance，就可以描述一个可以 ask 的计算了。
 
 #+BEGIN_SRC haskell
+instance Monad (Reader e) where 
+    return a         = Reader $ \_ -> a 
+    (Reader g) >>= f = Reader $ \e -> runReader (f (g e)) e
+#+END_SRC
+
+跟Either一样，我们只能定义 Reader e 的 monad instance。
+
+注意这里的 
+- f 类型是 =(a -> Reader e a)=
+- g 其实就是是 destructure 出来的 runReader，也就是 e -> a
+- 所以 (g e) 返回 a
+- f (g e) 就是 =Reader e a=
+- 再 run 一把最后得到 a
+
+让我们来看看如何使用 Reader
+#+BEGIN_SRC haskell
+  import Control.Monad.Reader
+
+  data Environment = Env
+    { fistName :: String
+    , lastName :: String
+    } deriving (Show)
+
+  helloworld :: Reader Environment String
+  helloworld = do
+    f <- asks firstName
+    l <- asks lastName
+    return "Hello " ++ f ++ l
+
+  runHelloworld :: String
+  runHelloworld = runReader helloworld $ Env "Jichao" "Ouyang"
+#+END_SRC
+
+这段代码很简单，helloworld 负责打招呼，也就是在名字前面加个 "Hello"，而跟谁打招呼，这个函数并不关心，而单纯的是向 Environment {{{ruby(问,asks)}}} 就好。
+
+在运行时，可以提供给 Reader 的输入 Env fistname lastname
+
+*** do notation
+这可能是你第一次见到 =do= 和 =<-=. 如果不是，随意跳过这节。
+
+- do 中所有 <- 的右边都是 =Reader Environment String= 类型
+- do 中的 return 返回类型也必须为  =Reader Environment String=
+- =asks firstName= 返回的是 =Reader Environment String= 类型， =<-= 可以理解成吧 monad =Reader Environment= 的内容放到左边的 f, 所以 f 的类型是 String。
+
+看起来像命令式的语句，其实只是 ~>>=~ 的语法糖，但是明显用do可读性要高很多。
+#+BEGIN_SRC haskell
+  helloworld = (asks firstName) >>=
+    \f -> (asks lastName) >>=
+         \l -> return "Hello " ++ f ++ l
+#+END_SRC
+
+
+** Writer
+
+除了返回值，计算会需要产生一些额外的数据，比如 log
+
+此时就需要一个 Writter，其返回值会是一个这样 =(result, log)= 的 tuple
+
+限制是 log 的类型必须是个 {{{ruby(含幺半群,monoid)}}}
+
+#+BEGIN_SRC haskell
+example :: Writer String String
 example  = do
-  tell [1..3]
-  tell [3..5]
-  return "foo"
+  tell "How are you?"
+  tell "I'm fine thank you, and you?"
+  return "Hehe Da~"
 
-output :: (String, [Int])
+output :: (String, String)
 output = runWriter example
--- ("foo", [1, 2, 3, 3, 4, 5])
+-- ("Hehe Da~", "How are you?I'm fine thank you, and you?")
 #+END_SRC
+
+Writer 的定义更简单
+#+BEGIN_SRC haskell
+newtype Writer l a = Writer { runWriter :: (a,l) } 
+#+END_SRC
+里面只是一个 tuple 而已
+- w 是 log
+- a 是 返回值
+
+看看如何实现 Writer monad
+#+BEGIN_SRC haskell
+  instance (Monoid w) => Monad (Writer w) where 
+      return a             = Writer (a,mempty) 
+      (Writer (a,l)) >>= f = let (a',l') = runWriter $ f a in
+                             Writer (a',l `mappend` l')
+#+END_SRC
+
+- return 不会有任何 log，l 是 monoid 的 mempty
+- f 的类型为 =a -> Writer l a=
+- =runWriter $ f a= 返回 =(a, l)=
+
+所以在 >>= 时，我们先把 f a 返回的 Writer run了，然后把两次 log =mappend= 起来。
+
 ** State
 
 ** RWS
