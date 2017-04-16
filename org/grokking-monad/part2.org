@@ -96,6 +96,9 @@ https://www.evernote.com/l/ABeKvGaM2S1LV5QzdmQv_U98pCX164j7-2MB/image.png
     Nothing >>= f = Nothing
 #+END_SRC
 
+#+CAPTION: 还记得第一部分提到的 Kleisli 范畴吗？
+https://www.evernote.com/l/ABfAhPgWI_5Awbov_2gLY_BcB9CwKyIJZjYB/image.png
+
 Maybe 有用在于能合适的处理 /{{{ruby(偏函数, Partial Function)}}}/ 的返回值。偏函数相对于{{{ruby(全函数, Total Function)}}}，是指只能对部分输入返回输出的函数。
 
 比如一个取数组某一位上的值的函数，就是偏函数，因为假设你想取第4位的值，但不是所有数组长度都大于4，就会有获取不了的尴尬情况。
@@ -196,6 +199,9 @@ instance Monad (Reader e) where
 - f (g e) 就是 =Reader e a=
 - 再 run 一把最后得到 a
 
+#+CAPTION: f 函数，接收 a 返回一个 从 e 到 a 的 Reader
+https://www.evernote.com/l/ABeL9xOcX7VNmJdaq49OSQf0ejRLsz_EWZ0B/image.png
+
 让我们来看看如何使用 Reader
 #+BEGIN_SRC haskell
   import Control.Monad.Reader
@@ -217,7 +223,11 @@ instance Monad (Reader e) where
 
 这段代码很简单，helloworld 负责打招呼，也就是在名字前面加个 "Hello"，而跟谁打招呼，这个函数并不关心，而单纯的是向 Environment {{{ruby(问,asks)}}} 就好。
 
-在运行时，可以提供给 Reader 的输入 Env fistname lastname
+#+CAPTION: asks 可以将 e -> a 的函数变换成 Reader e a
+https://www.evernote.com/l/ABejjs0RksRL_LOo2jgoUk1bT54BBfMCqNAB/image.png
+
+在运行时，可以提供给 Reader 的输入 Env fistname lastname。
+https://www.evernote.com/l/ABc5cVh6zMND1KHY42FYTyRWzdfPcP4YYdEB/image.png
 
 *** do notation
 这可能是你第一次见到 =do= 和 =<-=. 如果不是，随意跳过这节。
@@ -274,7 +284,11 @@ newtype Writer l a = Writer { runWriter :: (a,l) }
 - f 的类型为 =a -> Writer l a=
 - =runWriter $ f a= 返回 =(a, l)=
 
+https://www.evernote.com/l/ABeB64fSK2BO27_IffFrMrIYjglJrp5rb5sB/image.png
+
 所以在 >>= 时，我们先把 f a 返回的 Writer run了，然后把两次 log =mappend= 起来。
+
+https://www.evernote.com/l/ABeLJJ_cN0JJa5PqDPVlKk4Tt0oAvBKnxf4B/image.png
 
 ** State
 跟名字就看得出来 State monad 是为了处理状态。虽然函数式编程不应该有状态，不然会引用透明性。但是，state monad并不是在计算过程中修改状态，而是通过描述这种变化，然后需要时在运行返回最终结果。这一点跟 Reader 和 Writer 这两个看起来是副作用的 IO 是一样的。
@@ -293,7 +307,16 @@ newtype State s a = State { runState :: s -> (a, s) }
     (State x) >>= f = State $ \s -> let (v,s') = x s in
                                    runState (f v) s'
 #+END_SRC
-return 很简单，就不用解释了。x 类型是 =s -> (a, s)= ,所以 x s 之后会返回 结果和状态。也就是运行当前 State，把结果 v 传给函数 f，返回的 State 再接着上次状态运行。
+return 很简单，就不用解释了。
+
+https://www.evernote.com/l/ABdBcGXH7T9FDoePyOg564ey9Kg7kndHtNUB/image.png
+
+x 类型是 =s -> (a, s)= ,所以 x s 之后会返回 结果和状态。也就是运行当前 State，把结果 v 传给函数 f，返回的 State 再接着上次状态运行。
+
+#+CAPTION: State x >>= f 后runState的数据流（啊啊啊，画歪了，感觉需要脉动一下）
+https://www.evernote.com/l/ABdHal0u69ZNBqHpPWJp-Dc6KC_yvQ1t3tsB/image.png
+
+使用起来也很方便，State 提供 =get= =put= =moidfy= 三个方便的函数可以生成修改状态的State monad
 
 #+BEGIN_SRC haskell :results output
   import Control.Monad.Trans.State.Strict
