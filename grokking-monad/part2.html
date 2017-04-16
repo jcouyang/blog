@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- 2017-04-15 Sat 14:02 -->
+<!-- 2017-04-16 Sun 09:58 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
 <title>范畴论完全装逼手册(二) / Grokking Monad</title>
@@ -278,6 +278,13 @@ Haskell中定义一个ADT十分简单，不像Scala那么啰嗦。左边是类�
 </pre>
 </div>
 
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABfAhPgWI_5Awbov_2gLY_BcB9CwKyIJZjYB/image.png" alt="image.png">
+</p>
+<figcaption><span class="figure-number">Figure 2:</span> 还记得第一部分提到的 Kleisli 范畴吗？</figcaption>
+</figure>
+
 <p>
 Maybe 有用在于能合适的处理 <i><ruby>偏函数<rt> Partial Function</rt></ruby></i> 的返回值。偏函数相对于<ruby>全函数<rt> Total Function</rt></ruby>，是指只能对部分输入返回输出的函数。
 </p>
@@ -325,7 +332,7 @@ Either 的定义也很简单
 <figure>
 <p><img src="https://www.evernote.com/l/ABeCtsXrN7xCWqa7bsNAU0eVQVTDdkRKqVEB/image.png" alt="image.png">
 </p>
-<figcaption><span class="figure-number">Figure 2:</span> Coproduct</figcaption>
+<figcaption><span class="figure-number">Figure 3:</span> Coproduct</figcaption>
 </figure>
 
 <p>
@@ -345,7 +352,7 @@ Either 的定义也很简单
 <figure>
 <p><img src="https://www.evernote.com/l/ABea91BEgH5OH41WorLYjqichYC0rmVCAXMB/image.png" alt="image.png">
 </p>
-<figcaption><span class="figure-number">Figure 3:</span> Product</figcaption>
+<figcaption><span class="figure-number">Figure 4:</span> Product</figcaption>
 </figure>
 
 <p>
@@ -471,6 +478,13 @@ Reader 的作用是给一个计算喂数据。
 <li>再 run 一把最后得到 a</li>
 </ul>
 
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABeL9xOcX7VNmJdaq49OSQf0ejRLsz_EWZ0B/image.png" alt="image.png">
+</p>
+<figcaption><span class="figure-number">Figure 5:</span> f 函数，接收 a 返回一个 从 e 到 a 的 Reader</figcaption>
+</figure>
+
 <p>
 让我们来看看如何使用 Reader
 </p>
@@ -498,8 +512,16 @@ Reader 的作用是给一个计算喂数据。
 这段代码很简单，helloworld 负责打招呼，也就是在名字前面加个 "Hello"，而跟谁打招呼，这个函数并不关心，而单纯的是向 Environment <ruby>问<rt>asks</rt></ruby> 就好。
 </p>
 
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABejjs0RksRL_LOo2jgoUk1bT54BBfMCqNAB/image.png" alt="image.png">
+</p>
+<figcaption><span class="figure-number">Figure 6:</span> asks 可以将 e -&gt; a 的函数变换成 Reader e a</figcaption>
+</figure>
+
 <p>
-在运行时，可以提供给 Reader 的输入 Env fistname lastname
+在运行时，可以提供给 Reader 的输入 Env fistname lastname。
+<img src="https://www.evernote.com/l/ABc5cVh6zMND1KHY42FYTyRWzdfPcP4YYdEB/image.png" alt="image.png">
 </p>
 </div>
 
@@ -594,9 +616,21 @@ Writer 的定义更简单
 <li><code>runWriter $ f a</code> 返回 <code>(a, l)</code></li>
 </ul>
 
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABeB64fSK2BO27_IffFrMrIYjglJrp5rb5sB/image.png" alt="image.png">
+</p>
+</figure>
+
 <p>
 所以在 &gt;&gt;= 时，我们先把 f a 返回的 Writer run了，然后把两次 log <code>mappend</code> 起来。
 </p>
+
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABeLJJ_cN0JJa5PqDPVlKk4Tt0oAvBKnxf4B/image.png" alt="image.png">
+</p>
+</figure>
 </div>
 </div>
 
@@ -632,7 +666,28 @@ Writer 的定义更简单
 </pre>
 </div>
 <p>
-return 很简单，就不用解释了。x 类型是 <code>s -&gt; (a, s)</code> ,所以 x s 之后会返回 结果和状态。也就是运行当前 State，把结果 v 传给函数 f，返回的 State 再接着上次状态运行。
+return 很简单，就不用解释了。
+</p>
+
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABdBcGXH7T9FDoePyOg564ey9Kg7kndHtNUB/image.png" alt="image.png">
+</p>
+</figure>
+
+<p>
+x 类型是 <code>s -&gt; (a, s)</code> ,所以 x s 之后会返回 结果和状态。也就是运行当前 State，把结果 v 传给函数 f，返回的 State 再接着上次状态运行。
+</p>
+
+
+<figure>
+<p><img src="https://www.evernote.com/l/ABdHal0u69ZNBqHpPWJp-Dc6KC_yvQ1t3tsB/image.png" alt="image.png">
+</p>
+<figcaption><span class="figure-number">Figure 10:</span> State x &gt;&gt;= f 后runState的数据流（啊啊啊，画歪了，感觉需要脉动一下）</figcaption>
+</figure>
+
+<p>
+使用起来也很方便，State 提供 <code>get</code> <code>put</code> <code>moidfy</code> 三个方便的函数可以生成修改状态的State monad
 </p>
 
 <div class="org-src-container">
@@ -693,7 +748,7 @@ return 很简单，就不用解释了。x 类型是 <code>s -&gt; (a, s)</code> 
 <div id="postamble" class="status">
 <footer>
 <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-<p>Modified: 2017-04-15 Sat 14:00</p>
+<p>Modified: 2017-04-16 Sun 09:53</p>
 <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6)</p>
 <p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
