@@ -1,6 +1,6 @@
 # Summary
 
-## Part I 猫论
+### 猫论
   - [*Category*](./part1.md#org40bcb20)
     - [*Hask*](./part1.md#orge66bef3)
     - [*Duel*](./part1.md#org178a8c1)
@@ -17,7 +17,7 @@
   - [*Kleisli Catergory*](./part1.md#orgc62a7fc)
   - [Summary](./part1.md#org46d983e)
 
-### Part II
+### 食用猫呢
 * [食用猫呢](./part2.md)
 <!-- * [搞基猫呢](./part13.md) -->
 

@@ -20,7 +20,7 @@
 #+RESULTS:
 : ob-haskell
 
-* TODO 第二部分：{{{ruby(食用猫呢, Practical Monads)}}}
+* 第二部分：{{{ruby(食用猫呢, Practical Monads)}}}
 一些有用的 Monad instances
 ** COMMENT Applicative
 *** Alternative
@@ -161,7 +161,7 @@ t a 的 kind 是 *，所以 t 必须是 kind * -> *
 
 很明显的，>>= 任何函数到{{{ruby(左边, Left)}}} 都不会改变，只有 >>= 右边才能产生新的计算。
 
-** TODO Validate
+
 ** Reader
 Reader 的作用是给一个计算喂数据。
 
@@ -332,8 +332,54 @@ https://www.evernote.com/l/ABdHal0u69ZNBqHpPWJp-Dc6KC_yvQ1t3tsB/image.png
 #+END_SRC
 
 
-** Expection
-** Cont
+** TODO Expection
+
+** TODO Validation
+如果你有注意到，前面的 Either 可以用在处理错误和正确的路径分支，但是问题是错误只发生一次。
+
+想象一下这种场景，用户提交一个表单，我们需要对每一个field进行验证，如果有错误，需要把错误的哪几个field的错误消息返回。显然如果使用 Either 来做，只能返回第一个field的错误信息，后面的计算都会被跳过。
+
+针对这种情况， Validation 更适合
+#+BEGIN_SRC haskell
+data Validation e a = Failure e | Success a
+#+END_SRC
+
+ADT定义看起来跟 Either 是一样的，不同的是 {{{ruby(左边,Left)}}} Failure 是 {{{ruby(含幺半群,Monoid)}}}
+
+*** {{{ruby(含幺半群,Monoid)}}}
+monoid 首先得是 {{{(半群,Semigroup)}}} ，然后再 含幺。
+#+BEGIN_SRC haskell
+  class Semigroup a where
+    (<>) :: a -> a -> a
+    (<>) = mappend
+#+END_SRC
+
+半群非常简单，只要是可以 =<>= (mappend) 的类型就是了。
+
+含幺只需要有一个 =mempty= 的 幺元就行
+#+BEGIN_SRC haskell
+  class Monoid a where
+    mempty  :: a
+    mappend :: a -> a -> a
+#+END_SRC
+
+比如 List 就是 Semigroup
+#+BEGIN_SRC haskell
+instance Semigroup [a] where
+  (<>) = (++)
+#+END_SRC
+也是 Monoid
+#+BEGIN_SRC haskell
+  instance Monoid [a] where
+    mempty  = []
+    mappend = (++)
+#+END_SRC
+
+=<>= 满足：
+- mempty <> a = a
+- a <> b <> c = a <> (b <> c)
+
+** TODO Cont
 ** Summary
 第二部分食用部分也讲完了， 不知是否以及大致了解了monad的尿性各种基本玩法呢？通过这些常用的基本的 monad instance，解决命令式编程中的一些简单问题应该是够了。
 
@@ -342,7 +388,3 @@ https://www.evernote.com/l/ABdHal0u69ZNBqHpPWJp-Dc6KC_yvQ1t3tsB/image.png
 - 👉 [[./part3.org][第三部分：{{{ruby(搞基猫呢, Advanced Monads)}}}]]
 
 当然我又还没空全部写完，如果还有很多人{{{ruby(预定,只要998)}}} Gumroad 上的 @@html: <script src="https://gumroad.com/js/gumroad.js"></script><a class="gumroad-button" href="https://gum.co/grokking-monad" target="_blank">Grokking Monad</a>@@ 电子书的话，我可能会稍微写得快一些。毕竟，写了也没人感兴趣也怪浪费时间的。不过，我猜也没几个人能看到这一行，就当是我又自言自语吧，怎么又突然觉得自己好分裂，诶~，为什么我要说又？
-
-** References
-- https://wiki.haskell.org/All_About_Monads
-- http://dev.stephendiehl.com/hask/
