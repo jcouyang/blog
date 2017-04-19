@@ -1,0 +1,209 @@
+#+TITLE: the 99 problems
+#+BEGIN_SRC emacs-lisp
+(require 'ob-haskell)
+#+END_SRC
+
+#+RESULTS:
+: ob-haskell
+
+* 1. Find the last element
+
+#+BEGIN_SRC haskell
+last [1, 2, 3, 4]
+#+END_SRC
+
+#+RESULTS:
+: 4
+
+* 2. Find the but last element
+#+BEGIN_SRC haskell
+last . init $ [1,2,3,4]
+#+END_SRC
+
+#+RESULTS:
+: 3
+
+* 3. find kth element
+#+BEGIN_SRC haskell
+[1,2,3,4,5] !! 2
+#+END_SRC
+
+#+RESULTS:
+: 3
+
+* 4. length
+#+BEGIN_SRC haskell
+length [1,2,3,4,5]
+#+END_SRC
+
+#+RESULTS:
+: 5
+
+* 5. reverse list
+#+BEGIN_SRC haskell
+reverse [1,2,3,4,5]
+#+END_SRC
+
+#+RESULTS:
+| 5 | 4 | 3 | 2 | 1 |
+
+* 6. palindrome
+#+BEGIN_SRC haskell
+let isPalindrome a = reverse a == a
+isPalindrome [1,2,3,2,1]
+#+END_SRC
+
+#+RESULTS:
+: True
+
+* 7. flatten list
+#+BEGIN_SRC haskell
+  :set +m
+  data NestedList a = Elem a | List [NestedList a]
+
+  let flatten (List []) = []
+      flatten (Elem a) = [a]
+      flatten (List (x:xs)) = flatten x ++ flatten (List xs)
+
+  flatten (List [Elem 1, List [Elem 2, List [Elem 3, Elem 4], Elem 5]])
+#+END_SRC
+
+#+RESULTS:
+: Prelude> [1,2,3,4,5]
+
+* 8. compress
+#+BEGIN_SRC haskell
+import Data.List
+map head $ group "aaaabccaadeeee"
+#+END_SRC
+
+#+RESULTS:
+: abcade
+
+* 9. pack
+#+BEGIN_SRC haskell
+group ['a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e']
+#+END_SRC
+
+#+RESULTS:
+: Prelude Data.List| ["aaaa","b","cc","aa","d","eeee"]
+
+* 10. encode
+#+BEGIN_SRC haskell
+map (\n -> (head n, length n)) $ group "aaaabccaadeeee"
+#+END_SRC
+
+#+RESULTS:
+| a | 4 |
+| b | 1 |
+| c | 2 |
+| a | 2 |
+| d | 1 |
+| e | 4 |
+
+* 11. Modified run-length encoding.
+#+BEGIN_SRC haskell :session run-length
+  :set +m
+  import Data.List
+  data Modified a b = Single b | Multiple a b deriving Show
+  let encode = map (\n -> (head n, length n)) . group 
+  let encodeModified = map modify . encode where
+        modify (b, 1) = Single b
+        modify (c, d) = Multiple d c
+
+  encodeModified "aaaabccaadeeee"
+#+END_SRC
+
+#+RESULTS:
+: Prelude Data.List> Prelude Data.List> Prelude Data.List> Prelude Data.List| Prelude Data.List| Prelude Data.List| Prelude Data.List> [Multiple 4 'a',Single 'b',Multiple 2 'c',Multiple 2 'a',Single 'd',Multiple 4 'e']
+
+* 12. Decode a run-length encoded list. 
+#+BEGIN_SRC haskell :session run-length
+  let decodeModified [] = []
+      decodeModified (x:xs) = decode x ++ decodeModified xs where
+        decode (Multiple a b) = replicate a b  
+        decode (Single a) = [a]
+
+  decodeModified [Multiple 4 'a',Single 'b',Multiple 2 'c', Multiple 2 'a',Single 'd',Multiple 4 'e']
+#+END_SRC
+
+#+RESULTS:
+: Prelude Data.List> "aaaabccaadeeee"
+
+* 13. Run-length encoding of a list
+#+BEGIN_SRC haskell :session run-length
+encodeModified "aaaabccaadeeee"
+#+END_SRC
+
+#+RESULTS:
+| Multiple | 4 | a | Single | b | Multiple | 2 | c | Multiple | 2 | a | Single | d | Multiple | 4 | e |
+
+* 14. Duplicate the elements of a list. 
+#+BEGIN_SRC haskell
+let dupli = concatMap (replicate 2)
+
+dupli [1,2,3,4]
+#+END_SRC
+
+#+RESULTS:
+: Prelude Data.List| Prelude Data.List> [1,1,2,2,3,3,4,4]
+
+* 15. Replicate the elements of a list a given number of times.
+#+BEGIN_SRC haskell
+let dupli a b = concatMap (replicate b) a
+
+dupli [1,2,3,4] 3
+#+END_SRC
+
+#+RESULTS:
+: Prelude Data.List| Prelude Data.List> [1,1,1,2,2,2,3,3,3,4,4,4]
+
+* 16. Drop every N'th element from a list. 
+#+BEGIN_SRC haskell
+let dropEvery a n = map fst $ filter (\(d, i) -> i `mod` n /= 0) $ zip a [1..]
+
+dropEvery "abcdefghik" 3
+#+END_SRC
+
+#+RESULTS:
+: Prelude Data.List| Prelude Data.List> "abdeghk"
+
+* 17. Split a list into two parts; the length of the first part is given
+#+BEGIN_SRC haskell
+splitAt 3 "abcdefghik"
+#+END_SRC
+
+#+RESULTS:
+| abc | defghik |
+
+* 18. Extract a slice from a list.
+#+BEGIN_SRC haskell
+let slice c a b = take (b-a+1) $ drop (a-1) c
+
+slice ['a','b','c','d','e','f','g','h','i','k'] 3 7
+#+END_SRC
+
+#+RESULTS:
+: Prelude Data.List| Prelude Data.List> "cdefg"
+
+* 19. Rotate a list N places to the left. 
+#+BEGIN_SRC haskell
+  let rotate a n = drop (c n) a ++ take (c n) a where
+        c d = ((length a) + d) `mod` (length a)
+
+  rotate ['a','b','c','d','e','f','g','h'] 3
+  rotate ['a','b','c','d','e','f','g','h'] (-2)
+#+END_SRC
+
+#+RESULTS:
+: ghabcdef
+
+* 20. Remove the K'th element from a list.
+#+BEGIN_SRC haskell
+let removeAt n a = take (n-1) a ++ drop (n) a
+
+removeAt 3 "abcd"
+#+END_SRC
+
+#+RESULTS:
+: Prelude Data.List| Prelude Data.List> "abd"
