@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- 2017-04-16 Sun 10:23 -->
+<!-- 2017-04-19 Wed 14:28 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
 <title>范畴论完全装逼手册(二) / Grokking Monad</title>
@@ -93,7 +93,7 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1"><span class="todo TODO">TODO</span> 第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></a>
+<li><a href="#orgheadline1">第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></a>
 <ul>
 <li><a href="#orgheadline2">Identity</a></li>
 <li><a href="#orgheadline3">Maybe</a></li>
@@ -103,18 +103,21 @@ for the JavaScript code in this tag.
 <li><a href="#orgheadline6">Either Monad</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline7"><span class="todo TODO">TODO</span> Validate</a></li>
-<li><a href="#orgheadline8">Reader</a>
+<li><a href="#orgheadline7">Reader</a>
 <ul>
-<li><a href="#orgheadline9">do notation</a></li>
+<li><a href="#orgheadline8">do notation</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline10">Writer</a></li>
-<li><a href="#orgheadline11">State</a></li>
-<li><a href="#orgheadline12">Expection</a></li>
-<li><a href="#orgheadline13">Cont</a></li>
-<li><a href="#orgheadline14">Summary</a></li>
-<li><a href="#orgheadline15">References</a></li>
+<li><a href="#orgheadline9">Writer</a></li>
+<li><a href="#orgheadline10">State</a></li>
+<li><a href="#orgheadline11"><span class="todo TODO">TODO</span> Expection</a></li>
+<li><a href="#orgheadline12"><span class="todo TODO">TODO</span> Validation</a>
+<ul>
+<li><a href="#orgheadline13"><ruby>含幺半群<rt>Monoid</rt></ruby></a></li>
+</ul>
+</li>
+<li><a href="#orgheadline14"><span class="todo TODO">TODO</span> Cont</a></li>
+<li><a href="#orgheadline15">Summary</a></li>
 </ul>
 </li>
 </ul>
@@ -137,7 +140,7 @@ for the JavaScript code in this tag.
 最后一部分，我们还可以像 IO monad 一样，通过 free 或者 Eff 自定义自己的计算，和可能带副作用的解释器。
 </p>
 <div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1"><span class="todo TODO">TODO</span> 第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></h2>
+<h2 id="orgheadline1">第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></h2>
 <div class="outline-text-2" id="text-orgheadline1">
 <p>
 一些有用的 Monad instances
@@ -154,6 +157,7 @@ for the JavaScript code in this tag.
 <pre class="src src-haskell"><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Identity</span> a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Identity</span> { runIdentity <span style="color: #b8860b;">::</span> a }
 </pre>
 </div>
+
 <p>
 这里使用 <code>newtype</code> 而不是 <code>data</code> 是因为 <code>Identity</code> 与 <code>runIdentity</code> 是 isomorphic （同构，忘了的话回去翻第一部分）
 </p>
@@ -189,6 +193,7 @@ for the JavaScript code in this tag.
 <pre class="src src-haskell"><span style="color: #6a5acd;">runIdentity</span> (<span style="color: #36648b;">Identity</span> 1)
 </pre>
 </div>
+
 <p>
 会返回 1
 </p>
@@ -404,12 +409,10 @@ t a 的 kind 是 *，所以 t 必须是 kind * -&gt; *
 </div>
 </div>
 
+
 <div id="outline-container-orgheadline7" class="outline-3">
-<h3 id="orgheadline7"><span class="todo TODO">TODO</span> Validate</h3>
-</div>
-<div id="outline-container-orgheadline8" class="outline-3">
-<h3 id="orgheadline8">Reader</h3>
-<div class="outline-text-3" id="text-orgheadline8">
+<h3 id="orgheadline7">Reader</h3>
+<div class="outline-text-3" id="text-orgheadline7">
 <p>
 Reader 的作用是给一个计算喂数据。
 </p>
@@ -519,9 +522,9 @@ Reader 的作用是给一个计算喂数据。
 </p>
 </div>
 
-<div id="outline-container-orgheadline9" class="outline-4">
-<h4 id="orgheadline9">do notation</h4>
-<div class="outline-text-4" id="text-orgheadline9">
+<div id="outline-container-orgheadline8" class="outline-4">
+<h4 id="orgheadline8">do notation</h4>
+<div class="outline-text-4" id="text-orgheadline8">
 <p>
 这可能是你第一次见到 <code>do</code> 和 <code>&lt;-</code>. 如果不是，随意跳过这节。
 </p>
@@ -547,9 +550,9 @@ Reader 的作用是给一个计算喂数据。
 </div>
 
 
-<div id="outline-container-orgheadline10" class="outline-3">
-<h3 id="orgheadline10">Writer</h3>
-<div class="outline-text-3" id="text-orgheadline10">
+<div id="outline-container-orgheadline9" class="outline-3">
+<h3 id="orgheadline9">Writer</h3>
+<div class="outline-text-3" id="text-orgheadline9">
 <p>
 除了返回值，计算会需要产生一些额外的数据，比如 log
 </p>
@@ -628,9 +631,9 @@ Writer 的定义更简单
 </div>
 </div>
 
-<div id="outline-container-orgheadline11" class="outline-3">
-<h3 id="orgheadline11">State</h3>
-<div class="outline-text-3" id="text-orgheadline11">
+<div id="outline-container-orgheadline10" class="outline-3">
+<h3 id="orgheadline10">State</h3>
+<div class="outline-text-3" id="text-orgheadline10">
 <p>
 跟名字就看得出来 State monad 是为了处理状态。虽然函数式编程不应该有状态，不然会引用透明性。但是，state monad并不是在计算过程中修改状态，而是通过描述这种变化，然后需要时在运行返回最终结果。这一点跟 Reader 和 Writer 这两个看起来是副作用的 IO 是一样的。
 </p>
@@ -702,15 +705,101 @@ x 类型是 <code>s -&gt; (a, s)</code> ,所以 x s 之后会返回 结果和状
 </div>
 
 
+<div id="outline-container-orgheadline11" class="outline-3">
+<h3 id="orgheadline11"><span class="todo TODO">TODO</span> Expection</h3>
+</div>
+
 <div id="outline-container-orgheadline12" class="outline-3">
-<h3 id="orgheadline12">Expection</h3>
+<h3 id="orgheadline12"><span class="todo TODO">TODO</span> Validation</h3>
+<div class="outline-text-3" id="text-orgheadline12">
+<p>
+如果你有注意到，前面的 Either 可以用在处理错误和正确的路径分支，但是问题是错误只发生一次。
+</p>
+
+<p>
+想象一下这种场景，用户提交一个表单，我们需要对每一个field进行验证，如果有错误，需要把错误的哪几个field的错误消息返回。显然如果使用 Either 来做，只能返回第一个field的错误信息，后面的计算都会被跳过。
+</p>
+
+<p>
+针对这种情况， Validation 更适合
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">data</span> <span style="color: #36648b;">Validation</span> e a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Failure</span> e <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Success</span> a
+</pre>
 </div>
-<div id="outline-container-orgheadline13" class="outline-3">
-<h3 id="orgheadline13">Cont</h3>
+
+<p>
+ADT定义看起来跟 Either 是一样的，不同的是 <ruby>左边<rt>Left</rt></ruby> Failure 是 <ruby>含幺半群<rt>Monoid</rt></ruby>
+</p>
 </div>
+
+<div id="outline-container-orgheadline13" class="outline-4">
+<h4 id="orgheadline13"><ruby>含幺半群<rt>Monoid</rt></ruby></h4>
+<div class="outline-text-4" id="text-orgheadline13">
+<p>
+monoid 首先得是 {{{(半群,Semigroup)}}} ，然后再 含幺。
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Semigroup</span> a <span style="color: #00008b;">where</span>
+  (<span style="color: #b8860b;">&lt;&gt;</span>) <span style="color: #b8860b;">::</span> a <span style="color: #b8860b;">-&gt;</span> a <span style="color: #b8860b;">-&gt;</span> a
+  (<span style="color: #b8860b;">&lt;&gt;</span>) <span style="color: #b8860b;">=</span> mappend
+</pre>
+</div>
+
+<p>
+半群非常简单，只要是可以 <code>&lt;&gt;</code> (mappend) 的类型就是了。
+</p>
+
+<p>
+含幺只需要有一个 <code>mempty</code> 的 幺元就行
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Monoid</span> a <span style="color: #00008b;">where</span>
+  mempty  <span style="color: #b8860b;">::</span> a
+  mappend <span style="color: #b8860b;">::</span> a <span style="color: #b8860b;">-&gt;</span> a <span style="color: #b8860b;">-&gt;</span> a
+</pre>
+</div>
+
+<p>
+比如 List 就是 Semigroup
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Semigroup</span> [a] <span style="color: #00008b;">where</span>
+  (<span style="color: #b8860b;">&lt;&gt;</span>) <span style="color: #b8860b;">=</span> (<span style="color: #b8860b;">++</span>)
+</pre>
+</div>
+<p>
+也是 Monoid
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monoid</span> [a] <span style="color: #00008b;">where</span>
+  mempty  <span style="color: #b8860b;">=</span> <span style="color: #36648b;">[]</span>
+  mappend <span style="color: #b8860b;">=</span> (<span style="color: #b8860b;">++</span>)
+</pre>
+</div>
+
+<p>
+<code>&lt;&gt;</code> 满足：
+</p>
+<ul class="org-ul">
+<li>mempty &lt;&gt; a = a</li>
+<li>a &lt;&gt; b &lt;&gt; c = a &lt;&gt; (b &lt;&gt; c)</li>
+</ul>
+</div>
+</div>
+</div>
+
 <div id="outline-container-orgheadline14" class="outline-3">
-<h3 id="orgheadline14">Summary</h3>
-<div class="outline-text-3" id="text-orgheadline14">
+<h3 id="orgheadline14"><span class="todo TODO">TODO</span> Cont</h3>
+</div>
+<div id="outline-container-orgheadline15" class="outline-3">
+<h3 id="orgheadline15">Summary</h3>
+<div class="outline-text-3" id="text-orgheadline15">
 <p>
 第二部分食用部分也讲完了， 不知是否以及大致了解了monad的尿性各种基本玩法呢？通过这些常用的基本的 monad instance，解决命令式编程中的一些简单问题应该是够了。
 </p>
@@ -728,22 +817,12 @@ x 类型是 <code>s -&gt; (a, s)</code> ,所以 x s 之后会返回 结果和状
 </p>
 </div>
 </div>
-
-<div id="outline-container-orgheadline15" class="outline-3">
-<h3 id="orgheadline15">References</h3>
-<div class="outline-text-3" id="text-orgheadline15">
-<ul class="org-ul">
-<li><a href="https://wiki.haskell.org/All_About_Monads">https://wiki.haskell.org/All_About_Monads</a></li>
-<li><a href="http://dev.stephendiehl.com/hask/">http://dev.stephendiehl.com/hask/</a></li>
-</ul>
-</div>
-</div>
 </div>
 </div>
 <div id="postamble" class="status">
 <footer>
 <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-<p>Modified: 2017-04-16 Sun 10:18</p>
+<p>Modified: 2017-04-19 Wed 14:25</p>
 <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6)</p>
 <p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
