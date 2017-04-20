@@ -200,10 +200,71 @@ slice ['a','b','c','d','e','f','g','h','i','k'] 3 7
 
 * 20. Remove the K'th element from a list.
 #+BEGIN_SRC haskell
-let removeAt n a = take (n-1) a ++ drop (n) a
+let removeAt n a = (a !! (n-1), take (n-1) a ++ drop (n) a)
 
 removeAt 3 "abcd"
 #+END_SRC
 
 #+RESULTS:
-: Prelude Data.List| Prelude Data.List> "abd"
+| c | abd |
+
+* 21. Insert an element at a given position into a list.
+#+BEGIN_SRC haskell
+  let insertAt x a n = fst b ++ [x] ++ snd b where
+        b = splitAt (n-1) a
+
+  insertAt 'X' "abcd" 2
+#+END_SRC
+
+#+RESULTS:
+: Prelude| Prelude| Prelude> "aXbcd"
+
+* 22. Create a list containing all integers within a given range
+#+BEGIN_SRC haskell
+range a b= [a..b]
+range 4 9
+#+END_SRC
+
+#+RESULTS:
+| 4 | 5 | 6 | 7 | 8 | 9 |
+
+* 23. Extract a given number of randomly selected elements from a list
+#+BEGIN_SRC haskell :session random
+import System.Random
+let rnd_select xs n = do
+    gen <- getStdGen
+    return $ take n [ xs !! x | x <- randomRs (0, (length xs) - 1) gen]
+
+rnd_select "abcdefgh" 3
+#+END_SRC
+
+#+RESULTS:
+: Prelude System.Random| Prelude System.Random| Prelude System.Random| Prelude System.Random> dbc
+
+* 24. Draw N different random numbers from the set 1..M
+#+BEGIN_SRC haskell :session random
+let diffSelect xs n = do
+    gen <- getStdGen
+    return $ (take n . nub) [ xs !! x | x <- randomRs (0, (length xs) - 1) gen]
+
+
+diffSelect 6 43
+#+END_SRC
+
+#+RESULTS:
+: Prelude System.Random> [41,13,4,36,3,33]
+
+* 25. Generate a random permutation of the elements of a list.
+#+BEGIN_SRC haskell :session random
+import Data.List
+let permu xs = do
+    gen <- getStdGen
+    return $ take 10 [ xs !! x | x <- randomRs (0, (length xs) - 1) gen]
+
+permu "asdfasdf"
+#+END_SRC
+
+#+RESULTS:
+: Prelude System.Random Data.List| Prelude System.Random Data.List| Prelude System.Random Data.List| 
+: <interactive>:172:1: error:
+:     parse error (possibly incorrect indentation or mismatched brackets)

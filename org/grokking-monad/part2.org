@@ -382,11 +382,27 @@ instance Semigroup [a] where
     mappend = (++)
 #+END_SRC
 
-=<>= 满足：
+Monoid 的 =<>= 满足：
 - mempty <> a = a
 - a <> b <> c = a <> (b <> c)
+*** 回到 Validation
+现在让 Failure e 满足 Monoid，就可以 =mappend= 错误信息了。
+#+BEGIN_SRC haskell
+instance Semigroup e => Semigroup (Validation e a) where
+  Failure e1 <> Failure e2 = Failure (e1 <> e2)
+  Failure _  <> Success a2 = Success a2
+  Success a1 <> Failure _  = Success a1
+  Success a1 <> Success _  = Success a1
+#+END_SRC
 
 ** TODO Cont
+#+BEGIN_SRC haskell
+newtype Cont r a = Cont { runCont :: ((a -> r) -> r) }
+ 
+instance Monad (Cont r) where 
+    return a       = Cont $ \k -> k a
+    (Cont c) >>= f = Cont $ \k -> c (\a -> runCont (f a) k)
+#+END_SRC
 ** Summary
 第二部分食用部分也讲完了， 不知是否以及大致了解了monad的尿性各种基本玩法呢？通过这些常用的基本的 monad instance，解决命令式编程中的一些简单问题应该是够了。
 
