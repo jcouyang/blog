@@ -1,12 +1,14 @@
 #+TITLE: the 99 problems
 #+BEGIN_SRC emacs-lisp
 (require 'ob-haskell)
+(require 'ob-clojure)
 #+END_SRC
 
 #+RESULTS:
-: ob-haskell
+: ob-clojure
 
-* 1. Find the last element
+* List
+** 1. Find the last element
 
 #+BEGIN_SRC haskell
 last [1, 2, 3, 4]
@@ -15,7 +17,7 @@ last [1, 2, 3, 4]
 #+RESULTS:
 : 4
 
-* 2. Find the but last element
+** 2. Find the but last element
 #+BEGIN_SRC haskell
 last . init $ [1,2,3,4]
 #+END_SRC
@@ -23,7 +25,7 @@ last . init $ [1,2,3,4]
 #+RESULTS:
 : 3
 
-* 3. find kth element
+** 3. find kth element
 #+BEGIN_SRC haskell
 [1,2,3,4,5] !! 2
 #+END_SRC
@@ -31,7 +33,7 @@ last . init $ [1,2,3,4]
 #+RESULTS:
 : 3
 
-* 4. length
+** 4. length
 #+BEGIN_SRC haskell
 length [1,2,3,4,5]
 #+END_SRC
@@ -39,7 +41,7 @@ length [1,2,3,4,5]
 #+RESULTS:
 : 5
 
-* 5. reverse list
+** 5. reverse list
 #+BEGIN_SRC haskell
 reverse [1,2,3,4,5]
 #+END_SRC
@@ -47,7 +49,7 @@ reverse [1,2,3,4,5]
 #+RESULTS:
 | 5 | 4 | 3 | 2 | 1 |
 
-* 6. palindrome
+** 6. palindrome
 #+BEGIN_SRC haskell
 let isPalindrome a = reverse a == a
 isPalindrome [1,2,3,2,1]
@@ -56,7 +58,7 @@ isPalindrome [1,2,3,2,1]
 #+RESULTS:
 : True
 
-* 7. flatten list
+** 7. flatten list
 #+BEGIN_SRC haskell
   :set +m
   data NestedList a = Elem a | List [NestedList a]
@@ -71,7 +73,7 @@ isPalindrome [1,2,3,2,1]
 #+RESULTS:
 : Prelude> [1,2,3,4,5]
 
-* 8. compress
+** 8. compress
 #+BEGIN_SRC haskell
 import Data.List
 map head $ group "aaaabccaadeeee"
@@ -80,7 +82,7 @@ map head $ group "aaaabccaadeeee"
 #+RESULTS:
 : abcade
 
-* 9. pack
+** 9. pack
 #+BEGIN_SRC haskell
 group ['a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e']
 #+END_SRC
@@ -88,7 +90,7 @@ group ['a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e']
 #+RESULTS:
 : Prelude Data.List| ["aaaa","b","cc","aa","d","eeee"]
 
-* 10. encode
+** 10. encode
 #+BEGIN_SRC haskell
 map (\n -> (head n, length n)) $ group "aaaabccaadeeee"
 #+END_SRC
@@ -101,7 +103,7 @@ map (\n -> (head n, length n)) $ group "aaaabccaadeeee"
 | d | 1 |
 | e | 4 |
 
-* 11. Modified run-length encoding.
+** 11. Modified run-length encoding.
 #+BEGIN_SRC haskell :session run-length
   :set +m
   import Data.List
@@ -117,7 +119,7 @@ map (\n -> (head n, length n)) $ group "aaaabccaadeeee"
 #+RESULTS:
 : Prelude Data.List> Prelude Data.List> Prelude Data.List> Prelude Data.List| Prelude Data.List| Prelude Data.List| Prelude Data.List> [Multiple 4 'a',Single 'b',Multiple 2 'c',Multiple 2 'a',Single 'd',Multiple 4 'e']
 
-* 12. Decode a run-length encoded list. 
+** 12. Decode a run-length encoded list. 
 #+BEGIN_SRC haskell :session run-length
   let decodeModified [] = []
       decodeModified (x:xs) = decode x ++ decodeModified xs where
@@ -130,7 +132,7 @@ map (\n -> (head n, length n)) $ group "aaaabccaadeeee"
 #+RESULTS:
 : Prelude Data.List> "aaaabccaadeeee"
 
-* 13. Run-length encoding of a list
+** 13. Run-length encoding of a list
 #+BEGIN_SRC haskell :session run-length
 encodeModified "aaaabccaadeeee"
 #+END_SRC
@@ -138,7 +140,7 @@ encodeModified "aaaabccaadeeee"
 #+RESULTS:
 | Multiple | 4 | a | Single | b | Multiple | 2 | c | Multiple | 2 | a | Single | d | Multiple | 4 | e |
 
-* 14. Duplicate the elements of a list. 
+** 14. Duplicate the elements of a list. 
 #+BEGIN_SRC haskell
 let dupli = concatMap (replicate 2)
 
@@ -148,7 +150,7 @@ dupli [1,2,3,4]
 #+RESULTS:
 : Prelude Data.List| Prelude Data.List> [1,1,2,2,3,3,4,4]
 
-* 15. Replicate the elements of a list a given number of times.
+** 15. Replicate the elements of a list a given number of times.
 #+BEGIN_SRC haskell
 let dupli a b = concatMap (replicate b) a
 
@@ -158,7 +160,7 @@ dupli [1,2,3,4] 3
 #+RESULTS:
 : Prelude Data.List| Prelude Data.List> [1,1,1,2,2,2,3,3,3,4,4,4]
 
-* 16. Drop every N'th element from a list. 
+** 16. Drop every N'th element from a list. 
 #+BEGIN_SRC haskell
 let dropEvery a n = map fst $ filter (\(d, i) -> i `mod` n /= 0) $ zip a [1..]
 
@@ -168,7 +170,7 @@ dropEvery "abcdefghik" 3
 #+RESULTS:
 : Prelude Data.List| Prelude Data.List> "abdeghk"
 
-* 17. Split a list into two parts; the length of the first part is given
+** 17. Split a list into two parts; the length of the first part is given
 #+BEGIN_SRC haskell
 splitAt 3 "abcdefghik"
 #+END_SRC
@@ -176,7 +178,7 @@ splitAt 3 "abcdefghik"
 #+RESULTS:
 | abc | defghik |
 
-* 18. Extract a slice from a list.
+** 18. Extract a slice from a list.
 #+BEGIN_SRC haskell
 let slice c a b = take (b-a+1) $ drop (a-1) c
 
@@ -186,7 +188,7 @@ slice ['a','b','c','d','e','f','g','h','i','k'] 3 7
 #+RESULTS:
 : Prelude Data.List| Prelude Data.List> "cdefg"
 
-* 19. Rotate a list N places to the left. 
+** 19. Rotate a list N places to the left. 
 #+BEGIN_SRC haskell
   let rotate a n = drop (c n) a ++ take (c n) a where
         c d = ((length a) + d) `mod` (length a)
@@ -198,7 +200,7 @@ slice ['a','b','c','d','e','f','g','h','i','k'] 3 7
 #+RESULTS:
 : ghabcdef
 
-* 20. Remove the K'th element from a list.
+** 20. Remove the K'th element from a list.
 #+BEGIN_SRC haskell
 let removeAt n a = (a !! (n-1), take (n-1) a ++ drop (n) a)
 
@@ -208,7 +210,7 @@ removeAt 3 "abcd"
 #+RESULTS:
 | c | abd |
 
-* 21. Insert an element at a given position into a list.
+** 21. Insert an element at a given position into a list.
 #+BEGIN_SRC haskell
   let insertAt x a n = fst b ++ [x] ++ snd b where
         b = splitAt (n-1) a
@@ -219,7 +221,7 @@ removeAt 3 "abcd"
 #+RESULTS:
 : Prelude| Prelude| Prelude> "aXbcd"
 
-* 22. Create a list containing all integers within a given range
+** 22. Create a list containing all integers within a given range
 #+BEGIN_SRC haskell
 range a b= [a..b]
 range 4 9
@@ -228,7 +230,7 @@ range 4 9
 #+RESULTS:
 | 4 | 5 | 6 | 7 | 8 | 9 |
 
-* 23. Extract a given number of randomly selected elements from a list
+** 23. Extract a given number of randomly selected elements from a list
 #+BEGIN_SRC haskell :session random
 import System.Random
 let rnd_select xs n = do
@@ -241,7 +243,7 @@ rnd_select "abcdefgh" 3
 #+RESULTS:
 : Prelude System.Random| Prelude System.Random| Prelude System.Random| Prelude System.Random> dbc
 
-* 24. Draw N different random numbers from the set 1..M
+** 24. Draw N different random numbers from the set 1..M
 #+BEGIN_SRC haskell :session random
 let diffSelect xs n = do
     gen <- getStdGen
@@ -254,7 +256,7 @@ diffSelect 6 43
 #+RESULTS:
 : Prelude System.Random> [41,13,4,36,3,33]
 
-* 25. Generate a random permutation of the elements of a list.
+** 25. Generate a random permutation of the elements of a list.
 #+BEGIN_SRC haskell :session random
 import Data.List
 let permu xs = do
@@ -268,3 +270,115 @@ permu "asdfasdf"
 : Prelude System.Random Data.List| Prelude System.Random Data.List| Prelude System.Random Data.List| 
 : <interactive>:172:1: error:
 :     parse error (possibly incorrect indentation or mismatched brackets)
+
+#+BEGIN_SRC haskell
+import Data.List
+permutations "asd"
+#+END_SRC
+
+#+RESULTS:
+| asd | sad | dsa | sda | das | ads |
+
+** 26. Generate the combinations of K distinct objects chosen from the N elements of a list
+#+BEGIN_SRC haskell
+  let combinations _ [] = []
+      combinations 0 _ = [[]]
+      combinations n (x:xs) = map (x:) (combinations (n-1) xs) ++ combinations n xs
+
+  combinations 3 "abcdef"
+#+END_SRC
+
+#+RESULTS:
+: Prelude| Prelude| Prelude| Prelude> ["abc","abd","abe","acd","ace","ade","bcd","bce","bde","cde"]
+
+#+BEGIN_SRC haskell
+filter (\x -> ((length x)==3)) $ subsequences "abcdef"
+#+END_SRC
+
+#+RESULTS:
+| abc | abd | acd | bcd | abe | ace | bce | ade | bde | cde | abf | acf | bcf | adf | bdf | cdf | aef | bef | cef | def |
+
+** TODO 27. Group the elements of a set into disjoint subsets. 
+#+BEGIN_SRC haskell :results raw
+combinations n = filter (\x -> ((length x)==n)) $ subsequences
+group ns xs = map ($ xs) $ map combinations ns
+
+group [2,3,4] ["aldo","beat","carla","david","evi","flip","gary","hugo","ida"]
+#+END_SRC
+
+#+RESULTS:
+** 28. Sorting a list of lists according to length of sublists 
+#+BEGIN_SRC haskell
+sortOn length ["abc","de","fgh","de","ijkl","mn","o"]
+#+END_SRC
+
+#+RESULTS:
+| o | de | de | mn | abc | fgh | ijkl |
+
+* Arithmetic 
+** 31. is prime
+#+BEGIN_SRC haskell
+  isPrime p = filterPrime [2..p] where
+    filterPrime [] = False
+    filterPrime (x:xs) | x == p = True
+                       | otherwise = filterPrime [y | y <- xs, y `mod` x /= 0]
+  
+  isPrime 7
+#+END_SRC
+
+#+RESULTS:
+: Prelude Data.List| Prelude Data.List| Prelude Data.List| Prelude Data.List| Prelude Data.List> True
+
+** 32. Determine the greatest common divisor of two positive integer numbers
+
+#+BEGIN_SRC haskell
+gcd 36 63
+#+END_SRC
+
+#+RESULTS:
+: 9
+
+#+BEGIN_SRC haskell :session gcd
+  let mygcd 0 a = a
+      mygcd a 0 = a
+      mygcd a b = mygcd b (a `mod` b)
+
+  mygcd 36 63
+#+END_SRC
+
+** 33. Determine whether two positive integer numbers are coprime. Two numbers are coprime if their greatest common divisor equals 1
+#+BEGIN_SRC haskell :session gcd
+  :set +m
+  let coprime :: Int -> Int -> Bool
+      coprime a b = (==1) $ gcd a b
+
+  coprime 35 36
+#+END_SRC
+
+#+RESULTS:
+: Prelude| Prelude| Prelude> True
+
+** 34. Calculate Euler's totient function phi(m)
+#+BEGIN_SRC haskell :session gcd
+totient n = length $ filter (coprime n) [1..n]
+totient 10
+#+END_SRC
+
+#+RESULTS:
+: 4
+
+** 35. Determine the prime factors of a given positive integer. Construct a flat list containing the prime factors in ascending order
+#+BEGIN_SRC haskell
+  let primes = filterPrime [2..] where
+        filterPrime (p:xs) = p:[x | x <- xs, x `mod` p /=0]
+
+  let primeFactors :: Int -> [Int] -> [Int]
+      primeFactors n (p:xs) | (n < p) = []
+                            | (n `mod` p) == 0 = p:(primeFactors (n `div` p) (p:xs))
+                            | otherwise = primeFactors n xs
+
+  primeFactors 315 primes
+#+END_SRC
+
+#+RESULTS:
+: Prelude| Prelude| Prelude> Prelude| Prelude| Prelude| Prelude| Prelude> [3,3,5,7]
