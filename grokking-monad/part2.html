@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- 2017-04-19 Wed 14:28 -->
+<!-- 2017-04-25 Tue 14:44 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
 <title>范畴论完全装逼手册(二) / Grokking Monad</title>
@@ -110,13 +110,13 @@ for the JavaScript code in this tag.
 </li>
 <li><a href="#orgheadline9">Writer</a></li>
 <li><a href="#orgheadline10">State</a></li>
-<li><a href="#orgheadline11"><span class="todo TODO">TODO</span> Expection</a></li>
-<li><a href="#orgheadline12"><span class="todo TODO">TODO</span> Validation</a>
+<li><a href="#orgheadline11">Validation</a>
 <ul>
-<li><a href="#orgheadline13"><ruby>含幺半群<rt>Monoid</rt></ruby></a></li>
+<li><a href="#orgheadline12"><ruby>含幺半群<rt>Monoid</rt></ruby></a></li>
+<li><a href="#orgheadline13">回到 Validation</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline14"><span class="todo TODO">TODO</span> Cont</a></li>
+<li><a href="#orgheadline14">Cont</a></li>
 <li><a href="#orgheadline15">Summary</a></li>
 </ul>
 </li>
@@ -706,15 +706,17 @@ x 类型是 <code>s -&gt; (a, s)</code> ,所以 x s 之后会返回 结果和状
 
 
 <div id="outline-container-orgheadline11" class="outline-3">
-<h3 id="orgheadline11"><span class="todo TODO">TODO</span> Expection</h3>
-</div>
-
-<div id="outline-container-orgheadline12" class="outline-3">
-<h3 id="orgheadline12"><span class="todo TODO">TODO</span> Validation</h3>
-<div class="outline-text-3" id="text-orgheadline12">
+<h3 id="orgheadline11">Validation</h3>
+<div class="outline-text-3" id="text-orgheadline11">
 <p>
 如果你有注意到，前面的 Either 可以用在处理错误和正确的路径分支，但是问题是错误只发生一次。
 </p>
+
+<blockquote>
+<p>
+Validation 没有在标准库中，但是我觉得好有用啊，你可以在 ekmett 的 <a href="https://github.com/ekmett/either">github</a> 中找到源码
+</p>
+</blockquote>
 
 <p>
 想象一下这种场景，用户提交一个表单，我们需要对每一个field进行验证，如果有错误，需要把错误的哪几个field的错误消息返回。显然如果使用 Either 来做，只能返回第一个field的错误信息，后面的计算都会被跳过。
@@ -734,9 +736,9 @@ ADT定义看起来跟 Either 是一样的，不同的是 <ruby>左边<rt>Left</r
 </p>
 </div>
 
-<div id="outline-container-orgheadline13" class="outline-4">
-<h4 id="orgheadline13"><ruby>含幺半群<rt>Monoid</rt></ruby></h4>
-<div class="outline-text-4" id="text-orgheadline13">
+<div id="outline-container-orgheadline12" class="outline-4">
+<h4 id="orgheadline12"><ruby>含幺半群<rt>Monoid</rt></ruby></h4>
+<div class="outline-text-4" id="text-orgheadline12">
 <p>
 monoid 首先得是 {{{(半群,Semigroup)}}} ，然后再 含幺。
 </p>
@@ -784,7 +786,7 @@ monoid 首先得是 {{{(半群,Semigroup)}}} ，然后再 含幺。
 </div>
 
 <p>
-<code>&lt;&gt;</code> 满足：
+Monoid 的 <code>&lt;&gt;</code> 满足：
 </p>
 <ul class="org-ul">
 <li>mempty &lt;&gt; a = a</li>
@@ -792,11 +794,171 @@ monoid 首先得是 {{{(半群,Semigroup)}}} ，然后再 含幺。
 </ul>
 </div>
 </div>
+<div id="outline-container-orgheadline13" class="outline-4">
+<h4 id="orgheadline13">回到 Validation</h4>
+<div class="outline-text-4" id="text-orgheadline13">
+<p>
+现在让 Failure e 满足 Monoid，就可以 <code>mappend</code> 错误信息了。
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Semigroup</span> e <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Semigroup</span> (<span style="color: #36648b;">Validation</span> e a) <span style="color: #00008b;">where</span>
+  <span style="color: #36648b;">Failure</span> e1 <span style="color: #b8860b;">&lt;&gt;</span> <span style="color: #36648b;">Failure</span> e2 <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Failure</span> (e1 <span style="color: #b8860b;">&lt;&gt;</span> e2)
+  <span style="color: #36648b;">Failure</span> <span style="color: #00008b;">_</span>  <span style="color: #b8860b;">&lt;&gt;</span> <span style="color: #36648b;">Success</span> a2 <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Success</span> a2
+  <span style="color: #36648b;">Success</span> a1 <span style="color: #b8860b;">&lt;&gt;</span> <span style="color: #36648b;">Failure</span> <span style="color: #00008b;">_</span>  <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Success</span> a1
+  <span style="color: #36648b;">Success</span> a1 <span style="color: #b8860b;">&lt;&gt;</span> <span style="color: #36648b;">Success</span> <span style="color: #00008b;">_</span>  <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Success</span> a1
+</pre>
+</div>
+
+<p>
+下来，我们用一个简单的例子来看看 Validation 与 Either 有什么区别。
+</p>
+
+<p>
+假设我们有一个form，需要输入姓名与电话，验证需要姓名是非空而电话是11位数字。
+</p>
+
+<p>
+首先，我们需要有一个函数去创建包含姓名和电话的model
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">data</span> <span style="color: #36648b;">Info</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Info</span> {name<span style="color: #36648b;">:</span> <span style="color: #36648b;">String</span>, phone<span style="color: #36648b;">:</span> <span style="color: #36648b;">String</span>} <span style="color: #00008b;">deriving</span> <span style="color: #36648b;">Show</span>
+</pre>
+</div>
+
+<p>
+然后我们需要验证函数
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">notEmpty</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Validation</span> [<span style="color: #36648b;">String</span>] <span style="color: #36648b;">String</span>
+<span style="color: #6a5acd;">notEmpty</span> desc <span style="color: #8b0000;">""</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Failure</span> [desc <span style="color: #b8860b;">&lt;&gt;</span> <span style="color: #8b0000;">" cannot be empty!"</span>]
+<span style="color: #6a5acd;">notEmpty</span> <span style="color: #00008b;">_</span> field <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Success</span> field
+</pre>
+</div>
+<p>
+notEmpty 检查字符是否为空，如果是空返回 Failure 包含错误信息，若是非空则返回 Success 包含 field
+</p>
+
+<p>
+同样的可以创建 11位数字的验证函数
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">phoneNumberLength</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Validation</span> [<span style="color: #36648b;">String</span>] <span style="color: #36648b;">String</span>
+<span style="color: #6a5acd;">phoneNumberLength</span> desc field <span style="color: #b8860b;">|</span> (length field) <span style="color: #b8860b;">==</span> 11 <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Success</span> field
+                             <span style="color: #b8860b;">|</span> otherwise <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Failure</span> [desc <span style="color: #b8860b;">&lt;&gt;</span> <span style="color: #8b0000;">"'s length is not 11"</span>]
+</pre>
+</div>
+<p>
+实现 Validation 的 Applicative instance，这样就可以把函数调用lift成带有验证的 Applicative
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Semigroup</span> e <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Applicative</span> (<span style="color: #36648b;">Validation</span> e) <span style="color: #00008b;">where</span>
+  pure <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Success</span>
+  <span style="color: #36648b;">Failure</span> e1 <span style="color: #b8860b;">&lt;*&gt;</span> <span style="color: #36648b;">Failure</span> e2 <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Failure</span> e1 <span style="color: #b8860b;">&lt;&gt;</span> <span style="color: #36648b;">Failure</span> e2
+  <span style="color: #36648b;">Failure</span> e1 <span style="color: #b8860b;">&lt;*&gt;</span> <span style="color: #36648b;">Success</span> <span style="color: #00008b;">_</span>  <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Failure</span> e1
+  <span style="color: #36648b;">Success</span> <span style="color: #00008b;">_</span>  <span style="color: #b8860b;">&lt;*&gt;</span> <span style="color: #36648b;">Failure</span> e2 <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Failure</span> e2
+  <span style="color: #36648b;">Success</span> f <span style="color: #b8860b;">&lt;*&gt;</span> <span style="color: #36648b;">Success</span> a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Success</span> (f a)
+</pre>
+</div>
+<ul class="org-ul">
+<li>失败应用到失败会 concat 起来</li>
+<li>失败跟应用或被成功应用还是失败</li>
+<li>只有成功应用到成功才能成功，这很符合验证的逻辑，一旦验证中发生任何错误，都应该返回失败。</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">createInfo</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Validation</span> [<span style="color: #36648b;">String</span>] <span style="color: #36648b;">Info</span>
+<span style="color: #6a5acd;">createInfo</span> name phone <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Info</span> <span style="color: #b8860b;">&lt;$&gt;</span> notEmpty <span style="color: #8b0000;">"name"</span> name <span style="color: #b8860b;">&lt;*&gt;</span> phoneNumberLength <span style="color: #8b0000;">"phone"</span> phone
+</pre>
+</div>
+
+<p>
+现在我们就可以使用带validation的 createInfo 来安全的创建 Info 了
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">createInfo</span> <span style="color: #8b0000;">"jichao"</span> <span style="color: #8b0000;">"12345678910"</span> <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">Success Info "jichao" "12345678910"</span>
+<span style="color: #6a5acd;">createInfo</span> <span style="color: #8b0000;">""</span> <span style="color: #8b0000;">"123"</span> <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">Failure ["name cannot be empty!", "phone's length is not 11"]</span>
+</pre>
+</div>
+</div>
+</div>
 </div>
 
 <div id="outline-container-orgheadline14" class="outline-3">
-<h3 id="orgheadline14"><span class="todo TODO">TODO</span> Cont</h3>
+<h3 id="orgheadline14">Cont</h3>
+<div class="outline-text-3" id="text-orgheadline14">
+<p>
+Cont 是 <ruby>Continuation Passing Style<rt>CPS</rt></ruby> 的 monad，也就是说，它是包含 cps 计算 monad。
+</p>
+
+<p>
+先看一下什么是 CPS，比如有一个加法
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">add</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span>
+<span style="color: #6a5acd;">add</span> <span style="color: #b8860b;">=</span> (<span style="color: #b8860b;">+</span>)
+</pre>
 </div>
+
+<p>
+但是如果你想在算法加法后，能够继续进行一个其他的计算，那么就可以写一个 cps版本的加法
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">addCPS</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> (<span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> r) <span style="color: #b8860b;">-&gt;</span> r
+<span style="color: #6a5acd;">addCPS</span> a b k <span style="color: #b8860b;">=</span> k (a <span style="color: #b8860b;">+</span> b)
+</pre>
+</div>
+
+<p>
+非常简单，现在我们可以看看为什么需要一个 Cont monad 来包住 CPS 计算，首先，来看 ADT 定义
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Cont</span> r a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Cont</span> { runCont <span style="color: #b8860b;">::</span> ((a <span style="color: #b8860b;">-&gt;</span> r) <span style="color: #b8860b;">-&gt;</span> r) }
+</pre>
+</div>
+
+<p>
+又是一个同构的类型，Cont 构造器只需要一个 runCount，也就是让他能继续计算的一个函数。
+</p>
+
+<p>
+完了之后来把之前的 addCPS 改成 Cont
+</p>
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #6a5acd;">add</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Cont</span> k <span style="color: #36648b;">Int</span>
+<span style="color: #6a5acd;">add</span> a b <span style="color: #b8860b;">=</span> return (a <span style="color: #b8860b;">+</span> b)
+</pre>
+</div>
+
+<p>
+注意到 addCPS 接收到 a 和 b 之后返回的类型是 <code>(Int -&gt; r) -&gt; r</code> ，而 Cont 版本的 <code>add</code> 返回 <code>Cont k Int</code>
+</p>
+
+<p>
+明显构造 <code>Cont k Int</code> 也正是需要 <code>(Int -&gt; r) -&gt; r</code> ，所以 Cont 就是算了 k 的抽象了。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> (<span style="color: #36648b;">Cont</span> r) <span style="color: #00008b;">where</span>
+    return a       <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Cont</span> <span style="color: #b8860b;">$</span> <span style="color: #b8860b;">\</span>k <span style="color: #b8860b;">-&gt;</span> k a
+    (<span style="color: #36648b;">Cont</span> c) <span style="color: #b8860b;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Cont</span> <span style="color: #b8860b;">$</span> <span style="color: #b8860b;">\</span>k <span style="color: #b8860b;">-&gt;</span> c (<span style="color: #b8860b;">\</span>a <span style="color: #b8860b;">-&gt;</span> runCont (f a) k)
+</pre>
+</div>
+</div>
+</div>
+
 <div id="outline-container-orgheadline15" class="outline-3">
 <h3 id="orgheadline15">Summary</h3>
 <div class="outline-text-3" id="text-orgheadline15">
@@ -822,7 +984,7 @@ monoid 首先得是 {{{(半群,Semigroup)}}} ，然后再 含幺。
 <div id="postamble" class="status">
 <footer>
 <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-<p>Modified: 2017-04-19 Wed 14:25</p>
+<p>Modified: 2017-04-25 Tue 09:07</p>
 <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6)</p>
 <p>&lt;Publish&gt; with _(:з」∠)_ by <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
