@@ -339,10 +339,12 @@ https://www.evernote.com/l/ABdHal0u69ZNBqHpPWJp-Dc6KC_yvQ1t3tsB/image.png
 #+END_SRC
 
 
-** TODO Expection
-
-** TODO Validation
+** Validation
 如果你有注意到，前面的 Either 可以用在处理错误和正确的路径分支，但是问题是错误只发生一次。
+
+#+BEGIN_QUOTE
+Validation 没有在标准库中，但是我觉得好有用啊，你可以在 ekmett 的 [[https://github.com/ekmett/either][github]] 中找到源码
+#+END_QUOTE
 
 想象一下这种场景，用户提交一个表单，我们需要对每一个field进行验证，如果有错误，需要把错误的哪几个field的错误消息返回。显然如果使用 Either 来做，只能返回第一个field的错误信息，后面的计算都会被跳过。
 
@@ -395,14 +397,92 @@ instance Semigroup e => Semigroup (Validation e a) where
   Success a1 <> Success _  = Success a1
 #+END_SRC
 
-** TODO Cont
+下来，我们用一个简单的例子来看看 Validation 与 Either 有什么区别。
+
+假设我们有一个form，需要输入姓名与电话，验证需要姓名是非空而电话是11位数字。
+
+首先，我们需要有一个函数去创建包含姓名和电话的model
+#+BEGIN_SRC haskell
+data Info = Info {name: String, phone: String} deriving Show
+#+END_SRC
+
+然后我们需要验证函数
+#+BEGIN_SRC haskell
+notEmpty :: String -> String -> Validation [String] String
+notEmpty desc "" = Failure [desc <> " cannot be empty!"]
+notEmpty _ field = Success field
+#+END_SRC
+notEmpty 检查字符是否为空，如果是空返回 Failure 包含错误信息，若是非空则返回 Success 包含 field
+
+同样的可以创建 11位数字的验证函数
+#+BEGIN_SRC haskell
+  phoneNumberLength :: String -> String -> Validation [String] String
+  phoneNumberLength desc field | (length field) == 11 = Success field
+                               | otherwise = Failure [desc <> "'s length is not 11"]
+#+END_SRC
+实现 Validation 的 Applicative instance，这样就可以把函数调用lift成带有验证的 Applicative
+#+BEGIN_SRC haskell
+instance Semigroup e => Applicative (Validation e) where
+  pure = Success
+  Failure e1 <*> Failure e2 = Failure e1 <> Failure e2
+  Failure e1 <*> Success _  = Failure e1
+  Success _  <*> Failure e2 = Failure e2
+  Success f <*> Success a = Success (f a)
+#+END_SRC
+- 失败应用到失败会 concat 起来
+- 失败跟应用或被成功应用还是失败
+- 只有成功应用到成功才能成功，这很符合验证的逻辑，一旦验证中发生任何错误，都应该返回失败。
+
+#+BEGIN_SRC haskell
+createInfo :: String -> String -> Validation [String] Info
+createInfo name phone = Info <$> notEmpty "name" name <*> phoneNumberLength "phone" phone
+#+END_SRC
+
+现在我们就可以使用带validation的 createInfo 来安全的创建 Info 了
+
+#+BEGIN_SRC haskell
+createInfo "jichao" "12345678910" -- Success Info "jichao" "12345678910"
+createInfo "" "123" -- Failure ["name cannot be empty!", "phone's length is not 11"]
+#+END_SRC
+
+** Cont
+Cont 是 {{{ruby(Continuation Passing Style,CPS)}}} 的 monad，也就是说，它是包含 cps 计算 monad。
+
+先看一下什么是 CPS，比如有一个加法
+#+BEGIN_SRC haskell
+add :: Int -> Int -> Int
+add = (+)
+#+END_SRC
+
+但是如果你想在算法加法后，能够继续进行一个其他的计算，那么就可以写一个 cps版本的加法
+#+BEGIN_SRC haskell
+addCPS :: Int -> Int -> (Int -> r) -> r
+addCPS a b k = k (a + b)
+#+END_SRC
+
+非常简单，现在我们可以看看为什么需要一个 Cont monad 来包住 CPS 计算，首先，来看 ADT 定义
 #+BEGIN_SRC haskell
 newtype Cont r a = Cont { runCont :: ((a -> r) -> r) }
- 
-instance Monad (Cont r) where 
+#+END_SRC
+
+又是一个同构的类型，Cont 构造器只需要一个 runCount，也就是让他能继续计算的一个函数。
+
+完了之后来把之前的 addCPS 改成 Cont
+#+BEGIN_SRC haskell
+add :: Int -> Int -> Cont k Int
+add a b = return (a + b)
+#+END_SRC
+
+注意到 addCPS 接收到 a 和 b 之后返回的类型是 =(Int -> r) -> r= ，而 Cont 版本的 =add= 返回 =Cont k Int=
+
+明显构造 =Cont k Int= 也正是需要 =(Int -> r) -> r= ，所以 Cont 就是算了 k 的抽象了。
+
+#+BEGIN_SRC haskell
+instance Monad (Cont r) where
     return a       = Cont $ \k -> k a
     (Cont c) >>= f = Cont $ \k -> c (\a -> runCont (f a) k)
 #+END_SRC
+
 ** Summary
 第二部分食用部分也讲完了， 不知是否以及大致了解了monad的尿性各种基本玩法呢？通过这些常用的基本的 monad instance，解决命令式编程中的一些简单问题应该是够了。
 
