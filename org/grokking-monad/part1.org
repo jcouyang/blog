@@ -122,7 +122,7 @@ id :: (->) a a
 #+BEGIN_SRC dot :file images/functor.svg :exports results
   digraph {
 
-  label="Functor C D G"
+  label="Functor C D T"
   compound=true;
   rankdir=RL
   subgraph cluster_C {
@@ -136,17 +136,17 @@ id :: (->) a a
   subgraph cluster_D {
           style=dotted
           label=D
-          "G a" -> "G a" [label="G id"]
-          "G a" -> "G b" [label="G g"]
-          "G b" -> "G c" [label="G f"]
-          "G a" -> "G c" [label="G f . g = G f . G g"]
+          "T a" -> "T a" [label="T id"]
+          "T a" -> "T b" [label="T g"]
+          "T b" -> "T c" [label="T f"]
+          "T a" -> "T c" [label="T f . g = T f . T g"]
   }
 
-  c ->"G a"[ltail=cluster_C,lhead=cluster_D,label=G]
+  c ->"G a"[ltail=cluster_C,lhead=cluster_D,label=T]
   }
 #+END_SRC
 
-#+CAPTION: Functor C D G, 从 C 到 D 范畴的Functor G
+#+CAPTION: Functor C D G, 从 C 到 D 范畴的Functor T
 #+RESULTS:
 [[file:images/functor.svg]]
 
@@ -159,13 +159,13 @@ id :: (->) a a
   - 1_C(~>) = ~>
 
 #+BEGIN_SRC haskell
-class (Category a, Category b) => Functor a b t where
+class (Category c, Category d) => Functor c d t where
   fmap :: c a b -> d (t a) (t b)
 #+END_SRC
 
-=Functor a b t= 这表示从范畴 a 到范畴 b 的一个 Functor t
+=Functor c d t= 这表示从范畴 c 到范畴 d 的一个 Functor t
 
-如果把范畴 a 和 b 都限制到 Hask 范畴
+如果把范畴 c 和 d 都限制到 Hask 范畴
 
 #+BEGIN_SRC haskell
 class Functor (->) (->) t where
