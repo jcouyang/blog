@@ -1,0 +1,75 @@
+#+TITLE: 为毛需要声明式 / Declarative vs Imperative in React
+#+DATE: <2017-05-07 Sun>
+
+* 命令式大家都很懂
+
+我就不讲了...
+
+* 声明式
+
+我能想到的最好的比喻就是点餐
+
+https://media.giphy.com/media/3orif4xzApfAWWlcre/giphy.gif
+
+你大概会声明式的描述你需要点的食物
+
+而厨师则会命令式的给你做
+
+想象一下如果用html或sql来描述点餐这件事情
+** HTML
+#+BEGIN_SRC html
+  <ol class="order">
+    <li class="item">
+      <h3 class="name">肉夹馍</h3>
+      <span class="count">3</span>
+      <span class="filter">不要肉</span>
+    </li>
+    <li class="item">
+      <h3 class="name">冰峰</h3>
+      <span class="count">3</span>
+      <span class="filter">常温</span>
+    </li>
+  </ol>
+#+END_SRC
+
+** SQL
+#+BEGIN_SRC sql
+select * from 肉夹馍 where 有肉=false limit 3;
+#+END_SRC
+
+* 为什么需要声明式
+
+** 很好“测试”
+没什么好测得，因为太简单了
+
+比如你会如何测试你的html吗，全都是声明又没什么逻辑，有什么好测的，写一个测试来验证点餐的数量对不对，名字对不对，是不是很鸡肋。
+
+** 好推理
+这些因素都是描述，无所谓先后顺序，这样代码会非常容易推理，脑子里不需要记忆任何一个步骤，或者每一个步骤时变量都变成了什么，这些容易导致推理错误的麻烦。
+
+比如你说 “我要一个煎饼果子，不要果子” 和 ”我要一个没有果子的煎饼果子“ 没什么区别。
+
+但是如果命令式的话，步骤就不能错。比如“先打一个鸡蛋到煎饼上，再刮一刮”，就不能反过来，“先刮一刮鸡蛋，再打到煎饼上”。
+
+** 引用透明
+
+https://media.giphy.com/media/BBkKEBJkmFbTG/giphy.gif
+
+我说要三个夹馍，这句话不管去哪家夹馍店都会返回三个夹馍，就算我说十几遍也只有三个夹馍。
+
+** lazy
+想象一下在点餐时，不管我们怎么说，都不会有人开始给你做，因为你还没交钱。
+
+那么在交钱之前，很多东西都可以优化，比如你在帮3个童鞋点餐，你给服务员说：“我要十个肉夹馍，一个冰峰，两个凉皮”。突然其中一个童鞋发现自己不太饿，说他可以少吃三个。你会给服务员说：“肉夹馍少来三个，只要七个”。
+
+因为是声明式，厨师不会给你做十个肉夹馍（假设这家店现在只有你们一伙人），然后给你七个。而是厨师只做七个给你，因为你交钱的时候下的单子小票上写着七个。
+
+
+* 那么跟 React 什么关系
+声明式这个词，为什么 React 要这么强调？
+
+因为写 Virtual DOM 和用HTML描述点肉夹馍这个事情，你不觉得一样吗？
+
+* 例子
+
+https://github.com/ReactTraining/react-subjects/blob/master/subjects/ImperativeToDeclarative/lecture.js
