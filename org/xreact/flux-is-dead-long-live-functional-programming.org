@@ -1,0 +1,131 @@
+#+TITLE: Flux is Dead, Long Live FP
+#+Date: <2017-09-09 Sat>
+#+AUTHOR: 欧阳继超
+#+PROPERTY: :exports source :tangle yes :eval no-export
+
+看看用最流行的flux框架 -- redux [[https://github.com/reactjs/redux/tree/master/examples/todomvc/src][写个 todomvc]] 是有多费劲. 当然我并没有说 redux 不好用 +是一点也不好用+ 其实如果你喜欢低级别的抽象, 写一些 verbose 的代码, 是没有什么错的. 但是, 明明可以进行更 +搞基+ 高级别的华丽抽象, 我们为什么要浪费生命写那么 verbose 的代码.
+
+要问什么是verbose, 你看 [[https://github.com/reactjs/redux/blob/f26697bde273d3a81f95681a2ca66be0c7d46d80/examples/todomvc/src/reducers/todos.js#L12][这]], [[https://github.com/reactjs/redux/blob/f26697bde273d3a81f95681a2ca66be0c7d46d80/examples/todomvc/src/containers/App.js#L25][这个]], [[https://github.com/reactjs/redux/blob/f26697bde273d3a81f95681a2ca66be0c7d46d80/examples/todomvc/src/actions/index.js#L3][还有特么这个]]
+
+这些槽可以吐好几年, 但是, 比起吐槽, 更重要的节约你的生命, 更快的开发出有可读, 可推理, 可测, 可扩展的代码.
+
+同样是 todomvc, 让我们看看函数式都是怎么抽象的.
+
+一个 todo, 有六种操作, 无需定义action这个框架模板代码, 先不要想怎build UI 组件, 如果让你写六个函数, 是不是分分钟的事情, 但是既然我们要聊 FP, 不如看看用 lens 是否能写出更简单而且健壮的代码:
+
+* Lens
+lens 的原理可以看看
+
+- [[http://adit.io/posts/2013-07-22-lenses-in-pictures.html][图片版]]
+- [[https://github.com/ekmett/lens/wiki/Derivation][文字版]]
+
+基本上, 想象成放大镜就好了.
+
+让我们来为 state 定义一些 lens
+
+比如 state 结构是这样的:
+#+BEGIN_SRC js
+{
+  todos: [{
+    id: uuid,
+    text: 'blahblah',
+    completed: false
+  }]
+}
+#+END_SRC
+
+#+BEGIN_SRC js :tangle src/transforms/todo.js
+import * as r from 'ramda'
+// 把放大镜放到 prop todos 上
+let lensTodos = r.lensProp('todos')
+// 把放大镜放到 prop completed 上
+let lensComplete = r.lensProp('completed')
+
+let findIndexById = id => r.findIndex(r.propEq('id', id))
+// 放大镜放到 对应 id 的 todo 上
+let lensTodo = id => compose(lensTodos, r.lensIndex(findTodoById(id)))
+// 放大镜放到对应 id 的 todo 的 completed 上
+let lensTodoComplete = id => compose(lensTodo, r.prop('completed'))
+#+END_SRC
+
+注意到最后一行 lens 跟函数一样, 是可以 compose 的
+
+#+BEGIN_SRC js :tangle src/transforms/todo.js
+import {lift} from 'xreact'
+import * as uuid from 'uuid/v4'
+export const addTodo = r.over(lensTodos, r.append({
+  id: uuid(),
+  completed: false,
+  text: state.add.text
+}))
+
+export const deleteTodo = r.over(lensTodos, r.filter((todo) => todo.id != state.delete.id))
+
+export const editTodo = r.set(lensTodo(state.edit.id), state.edit)
+
+export const completeTodo = r.over(lensTodoComplete(state.complete.id), r.not)
+
+export const clearCompleted = r.over(lensTodos, r.filter(todo => !todo.completed))
+#+END_SRC
+
+把这几个纯函数测好, 就可以 lift 起来了, 这些函数, 都变成了操作 FantasyX 类型级别的函数
+
+#+BEGIN_SRC js
+export const xAddTodo = lift(addTodo)
+export const xDeleteTodo = lift(deleteTodo)
+export const xEditTodo = lift(editTodo)
+#+END_SRC
+
+
+#+BEGIN_SRC jsx :tangle src/views/todo.jsx
+  export const TodoTextInput = props => (
+  <header class="header">
+      <h1>todos</h1>
+      <input name="new-todo"
+             className="new-todo"
+             placeholder="What needs to be done?"
+             autoFocus="true"
+             value={props.newTodo.text}
+             onChange={(e)=>({newTodo: {text: e.target.value}})}
+             onKeyDown={(e)=>{
+                   if(e.which==13)
+                   return {newTodo: {text: '', submited: e.target.value}}
+                   return {}
+                   }}
+      />
+  </header>
+  )
+  TodoTextInput.defaultProps = { newTodo: {text: ''}}
+#+END_SRC
+
+#+BEGIN_SRC js :tangle src/components/todo.js
+  import {TodoTextInput} from '../views/todo'
+  import {addTodo} from '../transforms/todo'
+  import {xinput} from 'xreact'
+
+  const XTodoInput = xinput('new-todo').map(state=>{
+    if(state.newTodo.submited) {
+      return addTodo(state.newTodo.submited)
+    } else {
+      return {newTodo: state.newTodo}
+    }
+  })
+
+  export const Todo = XTodoInput.apply(TodoTextInput)
+#+END_SRC
+
+#+BEGIN_SRC js :tangle src/todo-app.jsx
+  import * as React from 'react'
+  import { render } from 'react-dom';
+  import {Todo} from './components/todo'
+  import {X} from 'xreact'
+  import * as RX from 'xreact/lib/xs/rx'
+  const xmount = (component, dom) => render(React.createFactory(X)({ x: RX }, component), dom)
+  xmount(<Todo />, document.getElementById('app'))
+#+END_SRC
+
+#+HTML: <iframe src="./public/todomvc.html" frameborder="0" width="100%" height="700"></iframe> 
+
+#+BEGIN_SRC js
+xAddTodo.apply(')
+#+END_SRC
