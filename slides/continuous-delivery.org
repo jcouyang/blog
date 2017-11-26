@@ -1,0 +1,123 @@
+#+TITLE: Continuous Delivery
+#+INFOJS_OPT: view:info
+* What is Continuous Delivery
+#+BEGIN_QUOTE
+/Continuous Delivery/[fn:2] is the *ability* to get changes of all types including new *features*, configuration *changes*, bug *fixes* and *experiments* into PRODUCTION, or into the hands of users, *safely* and *quickly* in a *sustainable* way.
+#+END_QUOTE
+* What is Continuous Integration
+#+BEGIN_QUOTE
+/Continuous Integration/[fn:3] is a software development *practice* where members of a team *integrate* their work *frequently*, usually each person integrates at least daily - leading to multiple integrations per day. Each integration is *verified* by an *automated build* (including test) to *detect* integration *errors* as *quickly* as possible.
+#+END_QUOTE
+* Why Continuous Delivery
+** Low risk releases
+[[https://www.evernote.com/l/ABeIYFLHPiBG-5ExmehzW-_cH1GiX4jVXHYB/image.jpg]]
+** Faster time to market
+[[https://www.evernote.com/l/ABeA0Sr5KGdNTLBperhbcqTtN5dwR0XulVQB/image.png]]
+** Higher quality
+- discover regressions within minutes
+- teams are freed to focus on higher level exploratory testing, usability testing, performance and security testing
+- ensuring quality is built in to products and services from the beginning
+
+** Better products
+[[https://www.evernote.com/l/ABe34B0bA6ZNy7zzN3smjKTa-Fp6JxG9KnwB/image.png]]
+** Happier teams
+[[https://blog.oyanglul.us/javascript/images/conga.jpg]]
+* Why Continuous Integration
+#+BEGIN_CENTER
+[[Why Continuous Delivery]]
+#+END_CENTER
+
+* Essentials[fn:4]
+** Maintain a single-source repository
+
+[[https://www.evernote.com/l/ABdzsWIdHuJOfZ2FjTGVWuABXkRMouqkX8AB/image.png]]
+
+** Make your build self-testing
+ repeatable, scalable, and maintainable
+ [[https://media.giphy.com/media/xcucdKgZeO69a/giphy.gif]]
+
+** Automate the build
+[[./images/futurama_June_30__2016_at_0906PM.gif]]
+
+** Fix broken builds immediately
+
+[[https://www.evernote.com/l/ABeF0OIG_VpDKLhsx7v57kF87OWmbN__-QkB/image.png]]
+
+** Keep the build fast
+[[./images/futurama_June_29__2016_at_1154PM.gif]]
+
+** Test in a clone of the production environment
+
+[[https://blog.oyanglul.us/javascript/images/lambda/which-leela.gif]]
+
+** Make it easy for anyone to get the latest executable
+
+[[https://www.evernote.com/l/ABevhNc9M9VGEbMFB9JgqIHF9JsU3OHtenkB/image.png]]
+
+** Automate deployment
+
+[[./images/futurama_June_10__2016_at_1101PM.gif]]
+
+* Pipeline
+
+[[https://github.com/drone/brand/raw/master/screenshots/screenshot_build_success.png]]
+
+** Pipeline as Code
+#+BEGIN_SRC yaml
+pipeline:
+  backend:
+    image: golang
+    commands:
+      - go get
+      - go build
+      - go test
+
+  frontend:
+    image: node:6
+    commands:
+      - npm install
+      - npm test
+
+  publish:
+    image: plugins/docker
+    repo: octocat/hello-world
+    tags: [ 1, 1.1, latest ]
+    registry: index.docker.io
+
+  notify:
+    image: plugins/slack
+    channel: developers
+    username: drone
+#+END_SRC
+
+* QA in Production[fn:5]
+
+[[https://martinfowler.com/articles/qa-in-production/qa-in-prod.png]]
+
+- Gathering production data
+  - Critical success indicators
+  - Logging
+  - Metrics
+  - APIs
+
+- Learning from production data
+
+  - Alerting
+  - Dashboards
+
+* Popular CI tools
+[[https://user-images.githubusercontent.com/7321362/32575895-ea563032-c49a-11e7-9581-e05ec882658b.png]][fn:1]
+
+* Homework
+
+* Footnotes
+
+[fn:5] https://martinfowler.com/articles/qa-in-production.html
+
+[fn:4] https://resources.codeship.com/hubfs/Codeship_Why_Continuous_Integration_is_Important.pdf?t=1510790079206
+
+[fn:3] https://www.martinfowler.com/articles/continuousIntegration.html
+
+[fn:2] https://continuousdelivery.com/
+
+[fn:1] https://github.com/blog/2463-github-welcomes-all-ci-tools
