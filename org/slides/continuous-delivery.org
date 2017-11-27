@@ -3,7 +3,7 @@
 
 * What is Continuous Delivery
 #+BEGIN_QUOTE
-/Continuous Delivery/[fn:2] is the *ability* to get changes of all types including new *features*, configuration *changes*, bug *fixes* and *experiments* into PRODUCTION, or into the hands of users, *safely* and *quickly* in a *sustainable* way.
+/Continuous Delivery/[fn:2] is the *ability* to get changes of all types including new *features*, configuration *changes*, bug *fixes* and *experiments* into *PRODUCTION*, or into the hands of users, *safely* and *quickly* in a *sustainable* way.
 #+END_QUOTE
 * What is Continuous Integration
 #+BEGIN_QUOTE
@@ -16,6 +16,8 @@
 
 - release fast
 - release often
+- increment
+- decouple release and deployment
 
 ** Faster time to market
 [[https://www.evernote.com/l/ABeA0Sr5KGdNTLBperhbcqTtN5dwR0XulVQB/image.png]]
@@ -24,16 +26,19 @@
 - avoid the large amounts of re-work
 
 ** Higher quality
-- discover regressions within minutes
-- teams are freed to focus on higher level exploratory testing, usability testing, performance and security testing
+
+- discover *regressions* within minutes
+- teams are freed to *focus* on *higher level* exploratory testing, usability testing, performance and security testing
 - ensuring quality is built in to products and services from the beginning
+** Lower Cost
+Any successful software product or service will evolve significantly over the course of its lifetime.
 
 ** Better products
 
 [[https://www.evernote.com/l/ABe34B0bA6ZNy7zzN3smjKTa-Fp6JxG9KnwB/image.png]]
 
 - shorten feedback cycle
-- avoid features we build that deliver zero
+- avoid features we build that deliver zero value
 
 ** Happier teams
 
@@ -41,8 +46,11 @@
 * Why Continuous Integration
 
 #+BEGIN_CENTER
-Same reason [[Why Continuous Delivery]]
+Same reason as [[Why Continuous Delivery]]
 #+END_CENTER
+* Evolutionary architecture
+
+[[https://continuousdelivery.com/images/strangler.png]]
 
 * Essentials[fn:4]
 ** Maintain a single-source repository
@@ -51,7 +59,7 @@ Same reason [[Why Continuous Delivery]]
 
 - no feature branches
 - every commit on =origin/master= should be deployable
-- feature toggles
+- feature toggles[fn:6]
 
 ** Make your build self-testing
  
@@ -82,7 +90,7 @@ Keep it green
 ** Test in a clone of the production environment
 
 #+BEGIN_QUOTE
-It works on my machine
+It works on my machine!
 #+END_QUOTE
 
 - same platform
@@ -98,11 +106,21 @@ It works on my machine
 
 [[./images/futurama_June_10__2016_at_1101PM.gif]]
 
+- every success build should be able to automate deploy
+- every build should be able to rollback instantly[fn:7]
+- 0 downtime deployment
+- automate data migration
+
 * Pipeline
+
+** Journey from code to product
+
+[[https://www.evernote.com/l/ABeRk2yi3kFFV4mFxn1K-vOBbNhLOoFSqa8B/image.jpg]]
+
+** Pipeline as Code
 
 [[https://github.com/drone/brand/raw/master/screenshots/screenshot_build_success.png]]
 
-** Pipeline as Code
 #+BEGIN_SRC yaml
 pipeline:
   backend:
@@ -156,6 +174,11 @@ pipeline:
 - Write a =.drone.yml= pipeline
 
 * Footnotes
+
+
+[fn:7] https://martinfowler.com/bliki/BlueGreenDeployment.html
+
+[fn:6] https://martinfowler.com/bliki/FeatureToggle.html
 
 [fn:5] https://martinfowler.com/articles/qa-in-production.html
 
