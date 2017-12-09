@@ -1,30 +1,42 @@
-(load-file "config.el")
+(setq exec-path (split-string (getenv "PATH") ":"))
+(require 'package) ;; You might already have this line
+(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+                    (not (gnutls-available-p))))
+       (url (concat (if no-ssl "http" "https") "://melpa.org/packages/")))
+  (add-to-list 'package-archives (cons "melpa" url) t))
+(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+
+(package-initialize) ;; You might already have this line
+(package-refresh-contents)
+
+(package-install 'scala-mode)
+(package-install 'haskell-mode)
+(package-install 'org-plus-contrib)
+(package-install 'ox-tufte)
+(package-install 'htmlize)
+(package-install 'dash)
+(package-install 'color-theme)
+(package-install 'clojure-mode)
+
 (require 'color-theme)
 (color-theme-initialize)
 (color-theme-gtk-ide)
-(require 'clojure-mode)
 (require 'scala-mode)
-(require 'haskell)
+(require 'haskell-mode)
 (require 'ob-sh)
 (require 'ob-ruby)
-
-(clojure-font-lock-setup)
 (require 'org)
-(require 'org-blog)
 (require 'htmlize)
+(require 'ox-deck)
+(require 'ox-rss)
+
+(load-file "config.el")
 (setq make-backup-files nil)
 (setq debug-on-error t)
 (setq blog-path (expand-file-name "org"))
 (setq assets-path (expand-file-name "assets"))
 (setq org-html-validation-link nil)
 (setq org-confirm-babel-evaluate nil)
-
-(require 'ox-deck)
-(setq slide-path (expand-file-name "slides"))
-(setq org-deck-base-url "https://blog.oyanglul.us/deck.js")
-(setq org-deck-theme "web-2.0.css")
-(setq org-deck-transition "horizontal-slide.css")
-(setq org-deck-postamble "<p>%t - %a</p>")
 (setq org-export-babel-evaluate nil)
 (custom-set-variables
   '(org-publish-timestamp-directory
@@ -37,7 +49,34 @@
                   (buffer-string)))
 (setq header (with-temp-buffer
                   (insert-file-contents "html/header.html")
-                  (buffer-string)))
+               (buffer-string)))
+
+(defun my-publish-sitemap (title list)
+  "Default site map, as a string.
+TITLE is the the title of the site map.  LIST is an internal
+representation for the files to include, as returned by
+`org-list-to-lisp'.  PROJECT is the current project."
+  (concat "#+TITLE:" config-blog-title "\n" "#+OPTIONS: toc:nil\n\n"
+	  (org-list-to-subtree (rest list))))
+
+(defun my-sitemap-format (entry style project)
+  "Custom sitemap entry formatting"
+  (if (not (directory-name-p entry))
+    (format-spec "
+[[%l][%t]]
+:PROPERTIES:
+:HTML_CONTAINER_CLASS: blogentry
+:RSS_PERMALINK: %L
+:PUBDATE: %D
+:END:
+" `((?t . ,(org-publish-find-title entry project))
+                 (?D . ,(format-time-string "<%Y-%m-%d %a>" (org-publish-find-date entry project)))
+                 (?c . ,(org-publish-find-property entry :subtitle project))
+                 (?l . ,(concat "file:" entry))
+                 (?L . ,(replace-regexp-in-string "\.org" "\.html" entry))
+                 ))
+    "--- Oops ---"))
+
 (defun set-org-publish-project-alist ()
   "Set publishing projects for Orgweb and Worg."
   (interactive)
@@ -53,32 +92,28 @@
         :html-postamble ,postamble
         ;; HTML directory
         :publishing-directory "public"
-        :publishing-function org-html-publish-to-tufte-html
+        :publishing-function org-html-publish-to-html
         :recursive t
         :headline-levels 4
         :with-sub-superscript nil
         :section-numbers nil
         :auto-preamble nil
         :auto-sitemap t
+        :sitemap-style list
+        :sitemap-sort-folders ignore
+        :sitemap-sort-files anti-chronologically
+        :sitemap-format-entry my-sitemap-format
+        :sitemap-function my-publish-sitemap
         :sitemap-filename "index.org"
         :exclude "\!.*\.org"
-        :sitemap-function org-blog-export
-        :blog-entry-format ,config-entry-format
+archive        :blog-entry-format ,config-entry-format
         :blog-export-dates t
         :sitemap-date-format ,config-date-format
         :blog-title ,config-blog-title
-        :makeindex t
+        :makeindex nil
         :html-head-include-default-style nil
         )
 
-      ("slides"
-         :base-directory ,slide-path
-         :base-extension "org"
-         :publishing-directory "public/slides"
-         :recursive t
-         :publishing-function org-deck-publish-to-html
-       )
-       ;; where static files (images, pdfs) are stored
        ("blog-static"
          :base-directory ,blog-path
          :base-extension "css\\|js\\|png\\|jpg\\|gif\\|svg\\|pdf\\|mp3\\|woff2\\|woff"
@@ -105,6 +140,6 @@
          :exclude ".*"            ;; To exclude all files...
          :include ("index.org")   ;; ... except index.org.
          :table-of-contents nil)
-       ("blog" :components ("blog-notes" "slides" "blog-static" "rss"))
+       ("blog" :components ("blog-notes" "assets" "blog-static" "rss"))
        )))
 (set-org-publish-project-alist)
