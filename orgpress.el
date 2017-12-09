@@ -9,25 +9,23 @@
 (package-initialize) ;; You might already have this line
 (package-refresh-contents)
 
+(package-install 'org-plus-contrib)
 (package-install 'scala-mode)
 (package-install 'haskell-mode)
-(package-install 'org-plus-contrib)
 (package-install 'ox-tufte)
 (package-install 'htmlize)
-(package-install 'dash)
 (package-install 'color-theme)
 (package-install 'clojure-mode)
 
 (require 'color-theme)
 (color-theme-initialize)
 (color-theme-gtk-ide)
+(require 'org)
 (require 'scala-mode)
 (require 'haskell-mode)
 (require 'ob-sh)
 (require 'ob-ruby)
-(require 'org)
 (require 'htmlize)
-(require 'ox-deck)
 (require 'ox-rss)
 
 (load-file "config.el")
