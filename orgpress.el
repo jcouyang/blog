@@ -92,7 +92,7 @@ representation for the files to include, as returned by
         :html-postamble ,postamble
         ;; HTML directory
         :publishing-directory "public"
-        :publishing-function org-html-publish-to-html
+        :publishing-function org-html-publish-to-tufte-html
         :recursive t
         :headline-levels 4
         :with-sub-superscript nil
@@ -106,10 +106,7 @@ representation for the files to include, as returned by
         :sitemap-function my-publish-sitemap
         :sitemap-filename "index.org"
         :exclude "\!.*\.org"
-archive        :blog-entry-format ,config-entry-format
-        :blog-export-dates t
         :sitemap-date-format ,config-date-format
-        :blog-title ,config-blog-title
         :makeindex nil
         :html-head-include-default-style nil
         )
