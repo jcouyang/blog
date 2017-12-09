@@ -1,0 +1,1093 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--[if lt IE 7]> <html class='no-js ie6' lang='en' xmlns='http://www.w3.org/1999/xhtml'> <![endif]-->
+<!--[if IE 7]> <html class='no-js ie7' lang='en' xmlns='http://www.w3.org/1999/xhtml'> <![endif]-->
+<!--[if IE 8]> <html class='no-js ie8' lang='en' xmlns='http://www.w3.org/1999/xhtml'> <![endif]-->
+<!--[if gt IE 8]><!--> <html  lang='en' xmlns='http://www.w3.org/1999/xhtml'> <!--<![endif]-->
+<head>
+<title>函数式 Ruby 编程</title>
+<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+<meta name='generator' content='Org-mode'/>
+<meta name='author' content='<a href="https://oyanglul.us/">欧阳继超</a>'/>
+
+<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/core/deck.core.css' type='text/css' />
+<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/extensions/goto/deck.goto.css' type='text/css' />
+<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/extensions/menu/deck.menu.css' type='text/css' />
+<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/extensions/navigation/deck.navigation.css' type='text/css' />
+<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/extensions/scale/deck.scale.css' type='text/css' />
+<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/extensions/status/deck.status.css' type='text/css' />
+<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/themes/style/web-2.0.css' type='text/css' />
+<link rel='stylesheet' href='https://blog.oyanglul.us/deck.js/themes/transition/horizontal-slide.css' type='text/css' />
+<script src='https://blog.oyanglul.us/deck.js/jquery.min.js' type='text/javascript'></script>
+<script src='https://blog.oyanglul.us/deck.js/core/deck.core.js' type='text/javascript'></script>
+<script src='https://blog.oyanglul.us/deck.js/modernizr.custom.js' type='text/javascript'></script>
+<script src='https://blog.oyanglul.us/deck.js/extensions/goto/deck.goto.js' type='text/javascript'></script>
+<script src='https://blog.oyanglul.us/deck.js/extensions/menu/deck.menu.js' type='text/javascript'></script>
+<script src='https://blog.oyanglul.us/deck.js/extensions/navigation/deck.navigation.js' type='text/javascript'></script>
+<script src='https://blog.oyanglul.us/deck.js/extensions/scale/deck.scale.js' type='text/javascript'></script>
+<script src='https://blog.oyanglul.us/deck.js/extensions/status/deck.status.js' type='text/javascript'></script>
+
+<script type='text/javascript'>
+  $(document).ready(function () { $.deck('.slide'); });
+</script>
+
+<style type='text/css'>
+#table-of-contents a {color: inherit;}
+#table-of-contents ul {margin-bottom: 0;}
+#table-of-contents li {padding: 0;}
+#table-of-contents ul li {list-style-type: none;}
+#preamble, #postamble {left: 5px; width: 100%;}
+#preamble {position: absolute; top: 10px;}
+#postamble {}
+
+#title-slide h1 {
+    position: static; padding: 0;
+    margin-top: 10%;
+    -webkit-transform: none;
+    -moz-transform: none;
+    -ms-transform: none;
+    -o-transform: none;
+    transform: none;
+}
+#title-slide h2 {
+    text-align: center;
+    border:none;
+    padding: 0;
+    margin: 0;
+}
+</style>
+</head>
+<body>
+<div id='content' class='deck-container'>
+
+<div id='title-slide' class='slide'>
+<h1>函数式 Ruby 编程</h1>
+<h2><a href="https://github.com/jcouyang"><img src="https://www.evernote.com/l/ABdT021c-5RLDp9FvGm084F6Diu-N3h-Cz8B/image.jpg" alt="image.jpg" /></a></h2>
+<h2><a href="https://oyanglul.us/">欧阳继超</a></h2>
+<h2><a href="mailto:oyanglulu@gmail.com">oyanglulu@gmail.com</a></h2>
+<h2></h2>
+</div>
+<div id='table-of-contents' class='slide'>
+<h2>Table of Contents</h2>
+
+<ul>
+<li><a href='#outline-container-sec-1'>1. Agenda</a></li>
+<li><a href='#outline-container-sec-2'>2. FBI Warning</a></li>
+<li><a href='#outline-container-sec-3'>3. 我是&#x2026;</a></li>
+<li><a href='#outline-container-sec-4'>4. 我是&#x2026;</a></li>
+<li><a href='#outline-container-sec-5'>5. 我还是</a></li>
+<li><a href='#outline-container-sec-6'>6. 啊?</a></li>
+<li><a href='#outline-container-sec-7'>7. 我在 JavaScript 社区讲函数式的时候, 观众是这样的&#x2026;</a></li>
+<li><a href='#outline-container-sec-8'>8. Ruby 函数式 ?</a></li>
+<li><a href='#outline-container-sec-9'>9. 什么是函数式</a></li>
+<li><a href='#outline-container-sec-10'>10. 好处呢?</a></li>
+<li><a href='#outline-container-sec-11'>11. 你可能不知道的Ruby</a></li>
+<li><a href='#outline-container-sec-12'>12. lambda aka 匿名函数</a></li>
+<li><a href='#outline-container-sec-13'>13. 万物皆对象, lambda 也不例外</a></li>
+<li><a href='#outline-container-sec-14'>14. 如果给这个lambda一个引用,我们可以跟用method一样用</a></li>
+<li><a href='#outline-container-sec-15'>15. 三等公民</a></li>
+<li><a href='#outline-container-sec-16'>16. 一等 vs 三等</a></li>
+<li><a href='#outline-container-sec-17'>17. 一等公民 Proc</a></li>
+<li><a href='#outline-container-sec-18'>18. 给三等座升个舱</a></li>
+<li><a href='#outline-container-sec-19'>19. 升舱的魔法 <code>#to_proc</code></a></li>
+<li><a href='#outline-container-sec-20'>20. 升舱实例2 - Symbol</a></li>
+<li><a href='#outline-container-sec-21'>21. 来 🍬 Desugar <code>&amp;</code></a></li>
+<li><a href='#outline-container-sec-22'>22. 模式匹配 pattern matching</a></li>
+<li><a href='#outline-container-sec-23'>23. destructure - 数组</a></li>
+<li><a href='#outline-container-sec-24'>24. destructure - 哈希</a></li>
+<li><a href='#outline-container-sec-25'>25. case when</a></li>
+<li><a href='#outline-container-sec-26'>26. 值</a></li>
+<li><a href='#outline-container-sec-27'>27. 类型</a></li>
+<li><a href='#outline-container-sec-28'>28. lambda （aka guard）</a></li>
+<li><a href='#outline-container-sec-29'>29. <i>正则</i></a></li>
+<li><a href='#outline-container-sec-30'>30. 但其实只是个简单的语法糖</a></li>
+<li><a href='#outline-container-sec-31'>31. </a></li>
+<li><a href='#outline-container-sec-32'>32. Category Theory</a></li>
+<li><a href='#outline-container-sec-33'>33. 一个简单 🌰</a></li>
+<li><a href='#outline-container-sec-34'>34. 命令式放大象</a></li>
+<li><a href='#outline-container-sec-35'>35. 监控</a></li>
+<li><a href='#outline-container-sec-36'>36. 或者用更极端的抛异常方式</a></li>
+<li><a href='#outline-container-sec-37'>37. 广告时间</a></li>
+<li><a href='#outline-container-sec-38'>38. 让我们用一个简单的 Either Monad</a></li>
+<li><a href='#outline-container-sec-39'>39. 来简化控制流</a></li>
+<li><a href='#outline-container-sec-40'>40. 怎么做到的</a></li>
+<li><a href='#outline-container-sec-41'>41. </a></li>
+<li><a href='#outline-container-sec-42'>42. Either 魔法</a></li>
+<li><a href='#outline-container-sec-43'>43. 一个更实际的 🌰</a></li>
+<li><a href='#outline-container-sec-44'>44. 上图有几次 IO</a></li>
+<li><a href='#outline-container-sec-45'>45. 控制流不关心失败和监控</a></li>
+<li><a href='#outline-container-sec-46'>46. IO自挂东南枝</a></li>
+<li><a href='#outline-container-sec-47'>47. </a></li>
+<li><a href='#outline-container-sec-48'>48. </a></li>
+<li><a href='#outline-container-sec-49'>49. 还可不可以在纯一些</a></li>
+<li><a href='#outline-container-sec-50'>50. Free Monad aka Interpreter Pattern</a></li>
+<li><a href='#outline-container-sec-51'>51. 有些像 Cons</a></li>
+<li><a href='#outline-container-sec-52'>52. 还有&#x2026;</a></li>
+<li><a href='#outline-container-sec-53'>53. </a></li>
+<li><a href='#outline-container-sec-54'>54. </a></li>
+<li><a href='#outline-container-sec-55'>55. Q/A</a></li>
+<li><a href='#outline-container-sec-56'>56. 性能</a></li>
+<li><a href='#outline-container-sec-57'>57. 并发多线程 made easy</a></li>
+<li><a href='#outline-container-sec-58'>58. 多谢</a></li>
+</ul>
+</div>
+
+<div id="outline-container-orgheadline1" class="outline-2  slide">
+<h2 id="orgheadline1"><span class="section-number-2">1</span> Agenda</h2>
+<div class="outline-text-2" id="text-1">
+<ul class="org-ul">
+<li>什么是函数式编程</li>
+<li>Ruby 的一些函数式特性</li>
+<li>使用 Monad 纯化/简化控制流</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-2  slide">
+<h2 id="orgheadline2"><span class="section-number-2">2</span> FBI Warning</h2>
+<div class="outline-text-2" id="text-2">
+
+<div class="figure">
+<p><img src="./images/functional-ruby-qr.jpg" alt="functional-ruby-qr.jpg" />
+</p>
+</div>
+
+<blockquote>
+<p>
+用 Nokia 的同学请自己手动输入 <a href="https://git.io/fprb">git.io/fprb</a>
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-2  slide">
+<h2 id="orgheadline3"><span class="section-number-2">3</span> 我是&#x2026;</h2>
+<div class="outline-text-2" id="text-3">
+
+<div class="figure">
+<p><img src="https://www.evernote.com/l/ABcPPnCpE69P3KjZoG_w5zfMmKnkmYMVeVEB/image.png" alt="image.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-2  slide">
+<h2 id="orgheadline4"><span class="section-number-2">4</span> 我是&#x2026;</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+<img src="https://www.evernote.com/l/ABfuI5J5AQlH1LDGI1d-DdQN1frUg3u0eYoB/image.png" alt="image.png" />
+<img src="https://gist.github.com.ru/jcouyang/6336168ecbbf4fbdc46e.png?username=jcouyang&amp;amp;width=400&amp;amp;height=53;.png" alt="6336168ecbbf4fbdc46e.png?username=jcouyang&amp;amp;width=400&amp;amp;height=53;.png" />
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline5" class="outline-2  slide">
+<h2 id="orgheadline5"><span class="section-number-2">5</span> 我还是</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+<img src="https://img3.doubanio.com/mpic/s25996532.jpg" alt="s25996532.jpg" />
+<img src="https://img1.doubanio.com/mpic/s28861278.jpg" alt="s28861278.jpg" />
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline6" class="outline-2  slide">
+<h2 id="orgheadline6"><span class="section-number-2">6</span> 啊?</h2>
+<div class="outline-text-2" id="text-6">
+
+<div class="figure">
+<p><img src="https://cloud.githubusercontent.com/assets/1235045/17973424/00e33c72-6b15-11e6-8bdf-a1a58a3631b4.jpg" alt="00e33c72-6b15-11e6-8bdf-a1a58a3631b4.jpg" />
+</p>
+</div>
+
+<blockquote>
+<p>
+所以是&#x2026;一个会点 Scala 的 JavaScript 程序员来教 Rubyist 函数式编程?
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-orgheadline7" class="outline-2  slide">
+<h2 id="orgheadline7"><span class="section-number-2">7</span> 我在 JavaScript 社区讲函数式的时候, 观众是这样的&#x2026;</h2>
+<div class="outline-text-2" id="text-7">
+
+<div class="figure">
+<p><img src="https://cloud.githubusercontent.com/assets/1235045/17973424/00e33c72-6b15-11e6-8bdf-a1a58a3631b4.jpg" alt="00e33c72-6b15-11e6-8bdf-a1a58a3631b4.jpg" />
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgheadline8" class="outline-2  slide">
+<h2 id="orgheadline8"><span class="section-number-2">8</span> Ruby 函数式 ?</h2>
+<div class="outline-text-2" id="text-8">
+
+<div class="figure">
+<p><img src="https://cloud.githubusercontent.com/assets/1235045/17933311/321ff7d2-6a46-11e6-903e-8cc84f3acc78.JPG" alt="321ff7d2-6a46-11e6-903e-8cc84f3acc78.JPG" />
+</p>
+</div>
+
+<blockquote>
+<p>
+You might be surprised to see Ruby in the list of functional languages because they generally count as object oriented languages.  
+&#x2013; Martin Odersky
+</p>
+</blockquote>
+
+<blockquote>
+<p>
+你可能奇怪我把Ruby也放到了函数式语言的列表, 这些语言通常会被归到面向对象语言. 
+&#x2013; Scala 之父
+</p>
+</blockquote>
+</div>
+</div>
+
+
+<div id="outline-container-orgheadline9" class="outline-2  slide">
+<h2 id="orgheadline9"><span class="section-number-2">9</span> 什么是函数式</h2>
+<div class="outline-text-2" id="text-9">
+
+<div class="figure">
+<p><img src="https://blog.oyanglul.us/images/data-port.gif" alt="data-port.gif" />
+</p>
+</div>
+<ul class="org-ul">
+<li>一等函数 first class function / 入 lambda</li>
+<li>纯 purity</li>
+<li>引用透明性 referential transparency</li>
+<li>无副作用 side effectless</li>
+<li>不可变 immutability</li>
+<li>持久化数据结构 persistent data structures</li>
+</ul>
+
+<p>
+&#x2026;当纯到一定程度可能就需要
+</p>
+<ul class="org-ul">
+<li>范畴论 Catergory Theory</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline10" class="outline-2  slide">
+<h2 id="orgheadline10"><span class="section-number-2">10</span> 好处呢?</h2>
+<div class="outline-text-2" id="text-10">
+<ul class="org-ul">
+<li>好组合 composible</li>
+<li>好推理 easy to reason about</li>
+<li>好测试 easy to test</li>
+<li>好多线程 Multi-thread</li>
+<li>好玩 fun</li>
+<li>好 <del>高逼格 high bigger</del> elegant</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline11" class="outline-2  slide">
+<h2 id="orgheadline11"><span class="section-number-2">11</span> 你可能不知道的Ruby</h2>
+<div class="outline-text-2" id="text-11">
+
+<div class="figure">
+<p><img src="https://cloud.githubusercontent.com/assets/1235045/17936038/020c3f88-6a50-11e6-88bd-6c6ad6815495.png" alt="020c3f88-6a50-11e6-88bd-6c6ad6815495.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline12" class="outline-2  slide">
+<h2 id="orgheadline12"><span class="section-number-2">12</span> lambda aka 匿名函数</h2>
+<div class="outline-text-2" id="text-12">
+<p>
+[多选题] 请选出所有的 lambda
+</p>
+<div class="org-src-container">
+
+<pre class="src src-ruby"><span style="color: #36648b;">A</span>: {}/<span style="color: #00008b;">do</span> <span style="color: #00008b;">end</span> <span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">such as =[1,2,3].map{|x| x+1 }=</span>
+<span style="color: #36648b;">B</span>: plus1 = <span style="color: #228b22;">lambda</span> {|x| x + 1 }
+<span style="color: #36648b;">C</span>: plus1 = -&gt; (x) { x + 1 }
+<span style="color: #36648b;">D</span>: plus1 = <span style="color: #36648b;">Proc</span>.new { |x| x + 1 }
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline13" class="outline-2  slide">
+<h2 id="orgheadline13"><span class="section-number-2">13</span> 万物皆对象, lambda 也不例外</h2>
+<div class="outline-text-2" id="text-13">
+<p>
+lambda 也就是一个正常的对象
+</p>
+<div class="org-src-container">
+
+<pre class="src src-ruby">plus1 = -&gt;(x) { x + 1 }
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline14" class="outline-2  slide">
+<h2 id="orgheadline14"><span class="section-number-2">14</span> 如果给这个lambda一个引用,我们可以跟用method一样用</h2>
+<div class="outline-text-2" id="text-14">
+<div class="org-src-container">
+
+<pre class="src src-ruby">plus1 = -&gt;(x) { x + 1 }
+plus1.call(3)
+plus1.(3)
+plus1[3]
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline15" class="outline-2  slide">
+<h2 id="orgheadline15"><span class="section-number-2">15</span> 三等公民</h2>
+<div class="outline-text-2" id="text-15">
+<div class="org-src-container">
+
+<pre class="src src-ruby"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">plus1</span> x
+  x + 1
+<span style="color: #00008b;">end</span>
+[1,2,3,4].map &amp;plus1
+</pre>
+</div>
+
+<pre class="example">
+`plus1': wrong number of arguments (0 for 1) (ArgumentError)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline16" class="outline-2  slide">
+<h2 id="orgheadline16"><span class="section-number-2">16</span> 一等 vs 三等</h2>
+<div class="outline-text-2" id="text-16">
+
+<div class="figure">
+<p><img src="https://www.evernote.com/l/ABcXHBGTERhJv5sNDPdAeiseZP0ke-Pd9TYB/image.png" alt="image.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline17" class="outline-2  slide">
+<h2 id="orgheadline17"><span class="section-number-2">17</span> 一等公民 Proc</h2>
+<div class="outline-text-2" id="text-17">
+<div class="org-src-container">
+
+<pre class="src src-ruby">plus1 = -&gt;(x) { x + 1 }
+[1,2,3,4].map &amp;plus1
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline18" class="outline-2  slide">
+<h2 id="orgheadline18"><span class="section-number-2">18</span> 给三等座升个舱</h2>
+<div class="outline-text-2" id="text-18">
+<div class="org-src-container">
+
+<pre class="src src-ruby"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">plus1</span> x
+  x + 1
+<span style="color: #00008b;">end</span>
+first_class_plus1 = method(<span style="color: #6b8e23;">:plus1</span>)
+[1,2,3,4].map &amp;first_class_plus1
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline19" class="outline-2  slide">
+<h2 id="orgheadline19"><span class="section-number-2">19</span> 升舱的魔法 <code>#to_proc</code></h2>
+<div class="outline-text-2" id="text-19">
+<div class="org-src-container">
+
+<pre class="src src-ruby">method(<span style="color: #6b8e23;">:plus1</span>)
+<span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">=&gt; #&lt;Method: Object#plus1&gt;</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-ruby"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Method</span>
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">to_proc</span>
+    <span style="color: #228b22;">lambda</span>{|*args|
+      <span style="color: #00008b;">self</span>.call(*args)
+    }
+  <span style="color: #00008b;">end</span>
+<span style="color: #00008b;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline20" class="outline-2  slide">
+<h2 id="orgheadline20"><span class="section-number-2">20</span> 升舱实例2 - Symbol</h2>
+<div class="outline-text-2" id="text-20">
+<div class="org-src-container">
+
+<pre class="src src-ruby"><span style="color: #8b0000;">%w(ouyang jichao)</span>.map &amp;<span style="color: #6b8e23;">:capitalize</span> 
+<span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">===</span>
+<span style="color: #8b0000;">%w(ouyang jichao)</span>.map { |x| x.capitalize}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline21" class="outline-2  slide">
+<h2 id="orgheadline21"><span class="section-number-2">21</span> 来 🍬 Desugar <code>&amp;</code></h2>
+<div class="outline-text-2" id="text-21">
+<div class="org-src-container">
+
+<pre class="src src-ruby"><span style="color: #8b0000;">%w(ouyang jichao)</span>.map &amp;<span style="color: #6b8e23;">:capitalize</span>.to_proc
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-ruby"><span style="color: #8b0000;">%w(ouyang jichao)</span>.map &amp;<span style="color: #36648b;">Proc</span>.new(|x| x.send(<span style="color: #6b8e23;">:capitalize</span>))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline22" class="outline-2  slide">
+<h2 id="orgheadline22"><span class="section-number-2">22</span> 模式匹配 pattern matching</h2>
+<div class="outline-text-2" id="text-22">
+
+<div class="figure">
+<p><img src="https://i.giphy.com/3o6MbdPcxvF7Hb5G3S.gif" alt="3o6MbdPcxvF7Hb5G3S.gif" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline23" class="outline-2  slide">
+<h2 id="orgheadline23"><span class="section-number-2">23</span> destructure - 数组</h2>
+<div class="outline-text-2" id="text-23">
+<div class="org-src-container">
+
+<pre class="src src-ruby">first, *middle_and_last = [<span style="color: #8b0000;">'Phillip'</span>, <span style="color: #8b0000;">'Jay'</span>, <span style="color: #8b0000;">'Fry'</span>]
+<span style="color: #8b0000;">"first: </span><span style="color: #b8860b;">#{first}</span><span style="color: #8b0000;">, middle_and_last: </span><span style="color: #b8860b;">#{middle_and_last}</span><span style="color: #8b0000;">"</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline24" class="outline-2  slide">
+<h2 id="orgheadline24"><span class="section-number-2">24</span> destructure - 哈希</h2>
+<div class="outline-text-2" id="text-24">
+<p>
+方法的参数会自带 destructure 哈希的功能 aka <code>keyword arguments</code>:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-ruby">fry = {<span style="color: #6b8e23;">first</span>: <span style="color: #8b0000;">'Phillip'</span>, <span style="color: #6b8e23;">middle</span>: <span style="color: #8b0000;">'Jay'</span>, <span style="color: #6b8e23;">last</span>: <span style="color: #8b0000;">'Fry'</span>}
+<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">printFirstName</span> <span style="color: #6b8e23;">first</span>:, **rest
+  <span style="color: #228b22;">p</span> first, rest
+<span style="color: #00008b;">end</span>
+printFirstName fry
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline25" class="outline-2  slide">
+<h2 id="orgheadline25"><span class="section-number-2">25</span> case when</h2>
+<div class="outline-text-2" id="text-25">
+<p>
+ruby 中的 case 可以搞定这几种模式匹配
+</p>
+<ul class="org-ul">
+<li>值/表达式</li>
+<li>类型</li>
+<li>Proc</li>
+<li>正则</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline26" class="outline-2  slide">
+<h2 id="orgheadline26"><span class="section-number-2">26</span> 值</h2>
+<div class="outline-text-2" id="text-26">
+<p>
+这个很简单，应该都有用过
+</p>
+<div class="org-src-container">
+
+<pre class="src src-ruby">me = <span style="color: #8b0000;">'ouyang'</span>
+<span style="color: #00008b;">case</span> me
+<span style="color: #00008b;">when</span> <span style="color: #8b0000;">'ouyang'</span> 
+  <span style="color: #8b0000;">"hehe </span><span style="color: #b8860b;">#{me}</span><span style="color: #8b0000;">"</span>
+<span style="color: #00008b;">else</span> <span style="color: #8b0000;">'hehe jichao'</span>
+<span style="color: #00008b;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline27" class="outline-2  slide">
+<h2 id="orgheadline27"><span class="section-number-2">27</span> 类型</h2>
+<div class="outline-text-2" id="text-27">
+<div class="org-src-container">
+
+<pre class="src src-ruby"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Me</span>
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">initialize</span> name
+    <span style="color: #b8860b;">@name</span> = name
+  <span style="color: #00008b;">end</span>
+
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">heheda</span>
+    <span style="color: #8b0000;">"&#21621;&#21621;&#21714; </span><span style="color: #b8860b;">#{@name}</span><span style="color: #8b0000;">"</span>
+  <span style="color: #00008b;">end</span>
+<span style="color: #00008b;">end</span>
+
+me = <span style="color: #36648b;">Me</span>.new <span style="color: #8b0000;">'ouyang'</span>
+
+<span style="color: #00008b;">case</span> me
+<span style="color: #00008b;">when</span> <span style="color: #36648b;">Me</span>
+  me.heheda
+<span style="color: #00008b;">else</span>
+  <span style="color: #8b0000;">'&#21621;&#21621;&#21714;&#20102;'</span>
+<span style="color: #00008b;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline28" class="outline-2  slide">
+<h2 id="orgheadline28"><span class="section-number-2">28</span> lambda （aka guard）</h2>
+<div class="outline-text-2" id="text-28">
+<div class="org-src-container">
+
+<pre class="src src-ruby"><span style="color: #228b22;">require</span> <span style="color: #8b0000;">'ostruct'</span>
+me = <span style="color: #36648b;">OpenStruct</span>.new(<span style="color: #6b8e23;">name</span>: <span style="color: #8b0000;">'jichao'</span>, <span style="color: #6b8e23;">first_name</span>: <span style="color: #8b0000;">'ouyang'</span>)
+<span style="color: #00008b;">case</span> me
+<span style="color: #00008b;">when</span> -&gt;(who){who.name==<span style="color: #8b0000;">'jichao'</span>}
+  <span style="color: #8b0000;">"hehe </span><span style="color: #b8860b;">#{me}</span><span style="color: #8b0000;">"</span>
+<span style="color: #00008b;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline29" class="outline-2  slide">
+<h2 id="orgheadline29"><span class="section-number-2">29</span> <i>正则</i></h2>
+<div class="outline-text-2" id="text-29">
+<div class="org-src-container">
+
+<pre class="src src-ruby"><span style="color: #00008b;">case</span> <span style="color: #8b0000;">'jichao ouyang'</span>
+<span style="color: #00008b;">when</span> <span style="color: #8b0000;">/ouyang/</span>
+<span style="color: #8b0000;">"&#21621;&#21621;&#21714;"</span>
+<span style="color: #00008b;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline30" class="outline-2  slide">
+<h2 id="orgheadline30"><span class="section-number-2">30</span> 但其实只是个简单的语法糖</h2>
+<div class="outline-text-2" id="text-30">
+<p>
+case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的正则
+</p>
+<div class="org-src-container">
+
+<pre class="src src-ruby"><span style="color: #00008b;">if</span>(<span style="color: #8b0000;">/ouyang/</span> === <span style="color: #8b0000;">'jichao'</span>)
+  <span style="color: #8b0000;">"heheda"</span>
+<span style="color: #00008b;">end</span>
+</pre>
+</div>
+
+<p>
+所以 magic 则是所有 when 的对象都实现了 <code>===</code> 方法而已
+</p>
+<ul class="org-ul">
+<li>值： <code>object.===</code> 会代理到 <code>==</code></li>
+<li>类型： <code>Module.===</code> 会看是否是其 instance</li>
+<li>正则： <code>regex.===</code> 如果匹配返回 true</li>
+<li>表达式：取决于表达式返回的值的 <code>===</code> 方法</li>
+<li>lambda： <code>proc.===</code> 会运行 lambda 或者 proc</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline31" class="outline-2  slide">
+<h2 id="orgheadline31"><span class="section-number-2">31</span> </h2>
+<div class="outline-text-2" id="text-31">
+
+<div class="figure">
+<p><img src="https://i.giphy.com/55xWvUIMb51mw.gif" alt="55xWvUIMb51mw.gif" />
+</p>
+</div>
+<blockquote>
+<p>
+说了这么些奇技淫巧, <del>逼格还是不够高呀</del> 除了花式一些有什么用呢?
+</p>
+</blockquote>
+
+<blockquote>
+<p>
+纯 pure
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-orgheadline32" class="outline-2  slide">
+<h2 id="orgheadline32"><span class="section-number-2">32</span> Category Theory</h2>
+<div class="outline-text-2" id="text-32">
+<blockquote>
+<p>
+Monad - 自函子范畴上的含幺半群
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-orgheadline33" class="outline-2  slide">
+<h2 id="orgheadline33"><span class="section-number-2">33</span> 一个简单 🌰</h2>
+<div class="outline-text-2" id="text-33">
+<blockquote>
+<p>
+把大象放冰箱里需要几步
+</p>
+</blockquote>
+
+<div class="figure">
+<p><img src="https://www.evernote.com/l/ABeEwMnpRdVB7pup8Sw-KV3Iq02sI7fSe90B/image.png" alt="image.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline34" class="outline-2  slide">
+<h2 id="orgheadline34"><span class="section-number-2">34</span> 命令式放大象</h2>
+<div class="outline-text-2" id="text-34">
+<div class="org-src-container">
+
+<pre class="src src-ruby">opened_fridge = open_fridge
+<span style="color: #00008b;">if</span> opened_fridge
+  fridge_w_elephent = put_elephent_in opened_fridge
+  <span style="color: #00008b;">if</span> fridge_w_elephent
+    closed_fridge = close_fridge
+    <span style="color: #00008b;">if</span> closed_fridge
+      <span style="color: #8b0000;">'yay'</span>
+    <span style="color: #00008b;">else</span>
+      <span style="color: #8b0000;">'fail to close fridge'</span>
+    <span style="color: #00008b;">end</span>
+  <span style="color: #00008b;">else</span>
+    <span style="color: #8b0000;">'fail to put elephent in'</span>
+  <span style="color: #00008b;">end</span>
+<span style="color: #00008b;">else</span>
+  <span style="color: #8b0000;">'fail to open fridge'</span>
+<span style="color: #00008b;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline35" class="outline-2  slide">
+<h2 id="orgheadline35"><span class="section-number-2">35</span> 监控</h2>
+<div class="outline-text-2" id="text-35">
+<div class="org-src-container">
+
+<pre class="src src-ruby">opened_fridge = open_fridge
+<span style="color: #00008b;">if</span> opened_fridge
+  <span style="color: #36648b;">Monitoring</span>.logger.info(<span style="color: #8b0000;">'fridge opened'</span>)
+  fridge_w_elephent = put_elephent_in opened_fridge
+  <span style="color: #00008b;">if</span> fridge_w_elephent
+    <span style="color: #36648b;">Monitoring</span>.logger.info(<span style="color: #8b0000;">'puted a elephent into fridge'</span>)
+    closed_fridge = close_fridge
+    <span style="color: #00008b;">if</span> closed_fridge
+      <span style="color: #36648b;">Monitoring</span>.logger.info(<span style="color: #8b0000;">'fridge closed'</span>)
+      <span style="color: #8b0000;">'yay'</span>
+    <span style="color: #00008b;">else</span>
+      <span style="color: #36648b;">Monitoring</span>.logger.error(<span style="color: #8b0000;">'no able to close fridge'</span>)
+      <span style="color: #8b0000;">'fail to close fridge'</span>
+    <span style="color: #00008b;">end</span>
+  <span style="color: #00008b;">else</span>
+    <span style="color: #36648b;">Monitoring</span>.logger.error(<span style="color: #8b0000;">'elephent put failed'</span>)
+    <span style="color: #8b0000;">'fail to put elephent in'</span>
+  <span style="color: #00008b;">end</span>
+<span style="color: #00008b;">else</span>
+  <span style="color: #36648b;">Monitoring</span>.logger.error(<span style="color: #8b0000;">'fail to open fridge'</span>)
+  <span style="color: #8b0000;">'fail to open fridge'</span>
+<span style="color: #00008b;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline36" class="outline-2  slide">
+<h2 id="orgheadline36"><span class="section-number-2">36</span> 或者用更极端的抛异常方式</h2>
+<div class="outline-text-2" id="text-36">
+<div class="org-src-container">
+
+<pre class="src src-ruby"><span style="color: #00008b;">begin</span>
+  close(put_elephent_in open_fridge)
+<span style="color: #00008b;">rescue</span> <span style="color: #36648b;">A</span>=&gt;e
+ ...
+<span style="color: #00008b;">rescue</span> <span style="color: #36648b;">B</span>=&gt;e
+ ...
+<span style="color: #00008b;">rescue</span> <span style="color: #36648b;">C</span>=&gt;e
+ ...
+<span style="color: #00008b;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline37" class="outline-2  slide">
+<h2 id="orgheadline37"><span class="section-number-2">37</span> 广告时间</h2>
+<div class="outline-text-2" id="text-37">
+<pre class="example">
+😹 ➡️ 😼
+⬇️ ↘️ ⬇️
+🙀 ➡️ 😻
+</pre>
+<blockquote>
+<p>
+猫呢?
+</p>
+
+<p>
+<a href="https://git.io/cats.rb">https://git.io/cats.rb</a>
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-orgheadline38" class="outline-2  slide">
+<h2 id="orgheadline38"><span class="section-number-2">38</span> 让我们用一个简单的 <a href="https://github.com/jcouyang/cats.rb#dataeither">Either Monad</a></h2>
+<div class="outline-text-2" id="text-38">
+<pre class="example">
+gem install data.either
+</pre>
+
+<div class="org-src-container">
+
+<pre class="src src-ruby"><span style="color: #228b22;">require</span> <span style="color: #8b0000;">'data.either'</span>
+<span style="color: #36648b;">Right</span>.new(1).flat_map <span style="color: #00008b;">do</span> |x| 
+  <span style="color: #00008b;">if</span> x &lt; 1
+    <span style="color: #36648b;">Left</span>.new(<span style="color: #8b0000;">'meh'</span>)
+  <span style="color: #00008b;">else</span>
+    <span style="color: #36648b;">Right</span>.new(x+1)
+  <span style="color: #00008b;">end</span>
+<span style="color: #00008b;">end</span>
+<span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">=&gt; #&lt;Right 2&gt;</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline39" class="outline-2  slide">
+<h2 id="orgheadline39"><span class="section-number-2">39</span> 来简化控制流</h2>
+<div class="outline-text-2" id="text-39">
+<div class="org-src-container">
+
+<pre class="src src-ruby">open_fridge.flat_map <span style="color: #00008b;">do</span> |fridge|  <span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">&lt;= 1</span>
+  put_elephent_in fridge          <span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">&lt;= 2</span>
+<span style="color: #00008b;">end</span>.flat_map <span style="color: #00008b;">do</span> |fridge|
+  close fridge                    <span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">&lt;= 3</span>
+<span style="color: #00008b;">end</span>
+</pre>
+</div>
+
+<p>
+这样可以专心构造控制逻辑,而不需要关心上一步如果错误该怎么办
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline40" class="outline-2  slide">
+<h2 id="orgheadline40"><span class="section-number-2">40</span> 怎么做到的</h2>
+<div class="outline-text-2" id="text-40">
+
+<div class="figure">
+<p><img src="https://i.giphy.com/12dBjCf9NclhBe.gif" alt="12dBjCf9NclhBe.gif" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline41" class="outline-2  slide">
+<h2 id="orgheadline41"><span class="section-number-2">41</span> </h2>
+<div class="outline-text-2" id="text-41">
+
+<div class="figure">
+<p><img src="https://www.evernote.com/l/ABfo-EYfrKlJ9L8jv7jh_927W-0Z3h7_FZsB/image.png" alt="image.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline42" class="outline-2  slide">
+<h2 id="orgheadline42"><span class="section-number-2">42</span> Either 魔法</h2>
+<div class="outline-text-2" id="text-42">
+<div class="org-src-container">
+<label class="org-src-name"><a href="https://github.com/jcouyang/cats.rb/blob/master/lib/data.either.rb">https://github.com/jcouyang/cats.rb/blob/master/lib/data.either.rb</a></label>
+<pre class="src src-ruby"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">flat_map</span>
+  <span style="color: #00008b;">case</span> <span style="color: #00008b;">self</span>
+  <span style="color: #00008b;">when</span> <span style="color: #36648b;">Right</span>
+    <span style="color: #00008b;">yield</span> <span style="color: #b8860b;">@v</span>
+  <span style="color: #00008b;">else</span>
+    <span style="color: #00008b;">self</span>
+  <span style="color: #00008b;">end</span>
+<span style="color: #00008b;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline43" class="outline-2  slide">
+<h2 id="orgheadline43"><span class="section-number-2">43</span> 一个更实际的 🌰</h2>
+<div class="outline-text-2" id="text-43">
+<p>
+用 microservices 组合成新的 service
+</p>
+
+
+<div class="figure">
+<p><img src="https://www.evernote.com/l/ABd47442ZCNJHbYn1sfcZhZtV2jFjftPdRwB/image.png" alt="image.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline44" class="outline-2  slide">
+<h2 id="orgheadline44"><span class="section-number-2">44</span> 上图有几次 IO</h2>
+<div class="outline-text-2" id="text-44">
+<ul class="org-ul">
+<li>总共4个IO, 每一步骤都可能出错</li>
+<li>但程序猿不希望漏掉任何错误信息</li>
+<li>但是又不能为了监控,影响了这个简单的工作流</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline45" class="outline-2  slide">
+<h2 id="orgheadline45"><span class="section-number-2">45</span> 控制流不关心失败和监控</h2>
+<div class="outline-text-2" id="text-45">
+<div class="org-src-container">
+
+<pre class="src src-haskell"><span style="color: #00008b;">do</span>
+  a <span style="color: #b8860b;">&lt;-</span> fetchA
+  b <span style="color: #b8860b;">&lt;-</span> fetchB
+  c <span style="color: #b8860b;">&lt;-</span> put <span style="color: #b8860b;">$</span> blah a <span style="color: #b8860b;">++</span> b
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline46" class="outline-2  slide">
+<h2 id="orgheadline46"><span class="section-number-2">46</span> IO自挂东南枝</h2>
+<div class="outline-text-2" id="text-46">
+
+<div class="figure">
+<p><img src="https://www.evernote.com/l/ABeIbzxUeghNkZMGpgZljl8K0P6JNasFga4B/image.jpg" alt="image.jpg" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline47" class="outline-2  slide">
+<h2 id="orgheadline47"><span class="section-number-2">47</span> </h2>
+<div class="outline-text-2" id="text-47">
+<div class="org-src-container">
+
+<pre class="src src-ruby"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fetch</span>(endpoint, decoder)
+  response = <span style="color: #00008b;">self</span>.class.get(endpoint, <span style="color: #6b8e23;">format</span>: <span style="color: #6b8e23;">:json</span>)
+  <span style="color: #00008b;">case</span> response.code
+  <span style="color: #00008b;">when</span> 410
+    <span style="color: #36648b;">Left</span>.new(<span style="color: #36648b;">Exceptions</span>::<span style="color: #36648b;">DataFailure</span>.new(<span style="color: #8b0000;">"Resource </span><span style="color: #b8860b;">#{endpoint}</span><span style="color: #8b0000;"> was deleted"</span>))
+  <span style="color: #00008b;">when</span> 404
+    <span style="color: #36648b;">Left</span>.new(<span style="color: #36648b;">Exceptions</span>::<span style="color: #36648b;">DataFailure</span>.new(<span style="color: #8b0000;">"Resource </span><span style="color: #b8860b;">#{endpoint}</span><span style="color: #8b0000;"> not exist"</span>))
+  <span style="color: #00008b;">when</span> 200
+    <span style="color: #36648b;">Right</span>.new decoder.from_json(response.body)
+  <span style="color: #00008b;">else</span>
+    <span style="color: #36648b;">Left</span>.new(<span style="color: #36648b;">Exceptions</span>::<span style="color: #36648b;">RepositoryError</span>.new(<span style="color: #8b0000;">"Fetching </span><span style="color: #b8860b;">#{endpoint}</span><span style="color: #8b0000;"> with Error:\n</span><span style="color: #b8860b;">#{endpoint}</span><span style="color: #8b0000;">, response code: </span><span style="color: #b8860b;">#{response.code}</span><span style="color: #8b0000;">"</span>))
+  <span style="color: #00008b;">end</span>
+<span style="color: #00008b;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline48" class="outline-2  slide">
+<h2 id="orgheadline48"><span class="section-number-2">48</span> </h2>
+<div class="outline-text-2" id="text-48">
+<div class="org-src-container">
+
+<pre class="src src-ruby">failure_processed, success_processed = <span style="color: #36648b;">Either</span>.partition <span style="color: #36648b;">Mapinator</span>.run
+
+<span style="color: #36648b;">Monitoring</span>.send_processed success_processed.length
+<span style="color: #36648b;">Monitoring</span>.logger.info(<span style="color: #8b0000;">"Processed successful </span><span style="color: #b8860b;">#{success_processed.length}</span><span style="color: #8b0000;"> listings: </span><span style="color: #b8860b;">#{success_processed}</span><span style="color: #8b0000;">"</span>)
+<span style="color: #36648b;">Monitoring</span>.logger.error(<span style="color: #8b0000;">"Processed FAILURE </span><span style="color: #b8860b;">#{failure_processed.length}</span><span style="color: #8b0000;"> with Exceptions:"</span>) <span style="color: #00008b;">unless</span> failure_processed.empty?
+...
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline49" class="outline-2  slide">
+<h2 id="orgheadline49"><span class="section-number-2">49</span> 还可不可以在纯一些</h2>
+<div class="outline-text-2" id="text-49">
+
+<div class="figure">
+<p><img src="https://imgs.xkcd.com/comics/haskell.png" alt="haskell.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline50" class="outline-2  slide">
+<h2 id="orgheadline50"><span class="section-number-2">50</span> Free Monad aka Interpreter Pattern</h2>
+<div class="outline-text-2" id="text-50">
+
+<div class="figure">
+<p><img src="https://www.evernote.com/l/ABe66Nse7nlPpKWTYgGPBFWt1Uv_m-ZFn_cB/image.png" alt="image.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline51" class="outline-2  slide">
+<h2 id="orgheadline51"><span class="section-number-2">51</span> 有些像 Cons</h2>
+<div class="outline-text-2" id="text-51">
+
+<div class="figure">
+<p><img src="https://www.evernote.com/l/ABecKErC7s5Mpa6cfyAt3mL7zpTS9v1N85QB/image.png" alt="image.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline52" class="outline-2  slide">
+<h2 id="orgheadline52"><span class="section-number-2">52</span> 还有&#x2026;</h2>
+<div class="outline-text-2" id="text-52">
+<ul class="org-ul">
+<li>Coyoneda</li>
+<li>Free Monoid</li>
+<li>State</li>
+<li>EitherT</li>
+<li>MaybeT</li>
+<li>&#x2026;</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline53" class="outline-2  slide">
+<h2 id="orgheadline53"><span class="section-number-2">53</span> </h2>
+<div class="outline-text-2" id="text-53">
+<blockquote>
+<p>
+这些我都不会讲&#x2026;
+</p>
+</blockquote>
+</div>
+</div>
+
+
+<div id="outline-container-orgheadline54" class="outline-2  slide">
+<h2 id="orgheadline54"><span class="section-number-2">54</span> </h2>
+<div class="outline-text-2" id="text-54">
+<blockquote>
+<p>
+因为我不会讲&#x2026;
+</p>
+</blockquote>
+
+<p>
+希望不久之后可以&#x2026; 
+</p>
+<pre class="example">
+gem install control.monad.free
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline55" class="outline-2  slide">
+<h2 id="orgheadline55"><span class="section-number-2">55</span> Q/A</h2>
+</div>
+
+<div id="outline-container-orgheadline56" class="outline-2  slide">
+<h2 id="orgheadline56"><span class="section-number-2">56</span> 性能</h2>
+<div class="outline-text-2" id="text-56">
+
+<div class="figure">
+<p><img src="https://www.evernote.com/l/ABdxEUHAmZlMII8QBKAYYtI5xgY4KkO1T7MB/image.png" alt="image.png" />
+</p>
+</div>
+<blockquote>
+<p>
+你TM都选 Ruby 了还在乎性能?
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-orgheadline57" class="outline-2  slide">
+<h2 id="orgheadline57"><span class="section-number-2">57</span> 并发多线程 made easy</h2>
+<div class="outline-text-2" id="text-57">
+<div class="org-src-container">
+
+<pre class="src src-ruby"><span style="color: #228b22;">require</span> <span style="color: #8b0000;">"celluloid/autostart"</span>
+
+<span style="color: #00008b;">module</span> <span style="color: #36648b;">Enumerable</span>
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">pmap</span>(&amp;block)
+    futures = map { |elem| <span style="color: #36648b;">Celluloid</span>::<span style="color: #36648b;">Future</span>.new(elem, &amp;block) }
+    futures.map(&amp;<span style="color: #6b8e23;">:value</span>)
+  <span style="color: #00008b;">end</span>
+<span style="color: #00008b;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline58" class="outline-2  slide">
+<h2 id="orgheadline58"><span class="section-number-2">58</span> 多谢</h2>
+<div class="outline-text-2" id="text-58">
+<ul class="org-ul">
+<li><a href="https://blog.oyanglul.us/functional-ruby.html">https://blog.oyanglul.us/functional-ruby.html</a></li>
+<li><a href="https://github.com/jcouyang/cats.rb">https://github.com/jcouyang/cats.rb</a></li>
+<li><a href="https://github.com/typelevel/cats">https://github.com/typelevel/cats</a></li>
+<li><a href="http://hackage.haskell.org/package/base-4.8.1.0/docs/src/Data.Either.html">http://hackage.haskell.org/package/base-4.8.1.0/docs/src/Data.Either.html</a></li>
+<li><a href="https://wiki.haskell.org/Free_structure">https://wiki.haskell.org/Free_structure</a></li>
+<li><a href="http://underscore.io/blog/posts/2015/04/23/deriving-the-free-monad.html">http://underscore.io/blog/posts/2015/04/23/deriving-the-free-monad.html</a></li>
+<li><a href="http://underscore.io/blog/posts/2015/04/14/free-monads-are-simple.html">http://underscore.io/blog/posts/2015/04/14/free-monads-are-simple.html</a></li>
+<li><a href="https://www.coursera.org/learn/progfun2">https://www.coursera.org/learn/progfun2</a></li>
+<li><a href="https://www.amazon.com/Well-Grounded-Rubyist-David-Black/dp/1933988657">https://www.amazon.com/Well-Grounded-Rubyist-David-Black/dp/1933988657</a></li>
+<li><a href="https://mitpress.mit.edu/sicp">https://mitpress.mit.edu/sicp</a></li>
+</ul>
+</div>
+</div>
+
+
+<!-- Place the following snippet at the bottom of the deck container. -->
+<p class="deck-status" aria-role="status">
+  <span class="deck-status-current"></span>
+  /
+  <span class="deck-status-total"></span>
+</p>
+
+<!-- Place the following snippet at the bottom of the deck container. -->
+<div aria-role="navigation">
+  <a href="#" class="deck-prev-link" title="Previous">&#8592;</a>
+  <a href="#" class="deck-next-link" title="Next">&#8594;</a>
+</div>
+
+<!-- Place the following snippet at the bottom of the deck container. -->
+<form action="." method="get" class="goto-form">
+  <label for="goto-slide">Go to slide:</label>
+  <input type="text" name="slidenum" id="goto-slide" list="goto-datalist">
+  <datalist id="goto-datalist"></datalist>
+  <input type="submit" value="Go">
+</form>
+<div id="postamble" class="deck-status">
+<p>函数式 Ruby 编程 - <a href="https://oyanglul.us/">欧阳继超</a></p>
+</div>
+
+</div>
+</body>
+</html>
