@@ -1,0 +1,148 @@
+#+TITLE: 范畴论完全装逼手册(三) / Grokking Monad
+#+Date: <2017-02-10 Fri>
+#+AUTHOR: 欧阳继超
+#+OPTIONS: ^:t
+#+MACRO: ruby @@html:<ruby>$1<rt>$2</rt></ruby>@@
+
+* COMMENT
+#+BEGIN_SRC emacs-lisp
+(require 'ob-haskell)
+#+END_SRC
+
+#+RESULTS:
+: ob-haskell
+
+* 第三部分:{{{ruby(搞基猫呢,Advanced Monads)}}}
+第二部分介绍了一些实用的monad instances，这些 monad 都通过同样的抽象方式，解决了分离计算与副作用的工作。
+
+通过它们可以解决大多数的基本问题，但是正对于复杂业务逻辑，我们可能还需要一些更高阶的 monad 或者 pattern。
+
+当有了第一部分的理论基础和第二部分的实践，这部分要介绍的猫其实并不是很搞基，也不是很难懂。通过这一部分介绍的搞基猫呢，我们还可以像 IO monad 一样，通过 free 或者 Eff 自定义自己的计算，和可能带副作用的解释器。
+
+** RWS
+RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。如果已经忘记 Reader Writer 或者 State，请到第二部分复习一下。
+
+一旦把三个 monad 合体，意味着可以使用三个 monad 的方法，比如，可以同时使用 ask, get, put, 和 tell
+
+#+BEGIN_SRC haskell
+  readWriteState = do
+    e <- ask
+    a <- get
+    let res = a + e
+    put res
+    tell [res]
+    return res
+  runRWS readWriteState 1 2
+  -- (3 3 [3])
+#+END_SRC
+
+注意到跟 Reader 和 State 一样，run的时候输入初始值
+
+其中 1 为 Reader 的值，2 为 State 的
+
+** DONE Monad Transform
+:LOGBOOK:
+- State "DONE"       from "IN PROGRESS" [2017-10-26 Thu 21:44]
+- State "IN PROGRESS" from "TODO"       [2017-06-09 Fri 21:33]
+:END:
+你会发现 RWS一起用挺好的，能读能写能打 log，但是已经固定好搭配了，只能是 RWS ，如果我还想加入其它的 Monad，该怎么办呢？
+
+这时候，简单的解决方案是加 T，比如对于 Reader，我们有 ReaderT，RWS，也有对应的 RWST。其中 T 代表 Transform。
+
+*** ReaderT
+
+让我来通过简单的ReaderT来解释到底什么是T吧, 首先跟 Reader 一样我们有个 runReaderT
+
+#+BEGIN_SRC haskell
+newtype ReaderT e m a = ReaderT { runReaderT :: e -> m a }
+#+END_SRC
+
+比较一下 Reader 的定义
+#+BEGIN_SRC haskell
+newtype Reader e a = Reader { runReader :: (e -> a) }
+#+END_SRC
+
+有没有发现多了一个 m, 也就是说, =runReader e= 会返回 a, 但是 =runReaderT e= 则会返回 =m a=
+
+#+BEGIN_SRC haskell
+instance (Monad m) => Monad (ReaderT e m) where
+    return   = lift . return
+    r >>= k  = ReaderT $ \ e -> do
+        a <- runReaderT r e
+        runReaderT (k a) e
+#+END_SRC
+
+再看看 monad 的实现, 也是一样的, 先 run 一下 =r e= 得到结果 =a=, 应用函数 =k= 到 =a=, 再 run 一把.
+
+问题是, 这里的 =return= 里面的 =lift= 是哪来的?
+
+#+BEGIN_SRC haskell
+  instance MonadTrans (ReaderT e) where
+    lift m = ReaderT (const m)
+#+END_SRC
+
+这个函数 =lift= 被定义在 MonadTrans 的实例中, 简单的把 m 放到 ReaderT 结果中.
+
+例如, =lift (Just 1)= 会得到 ReaderT, 其中 e 随意, m 为 Maybe Num
+
+重点需要体会的是, Reader 可以越过 Maybe 直接操作到 Num, 完了再包回来.
+
+有了 ReaderT, 搭配 Id Monad 就很容易创建出来 Reader Monad
+
+#+BEGIN_SRC haskell
+type Reader r a= ReaderT r Identity a
+#+END_SRC
+
+越过 Id read 到 Id 内部, 完了再用 Id 包回来, 不就是 Reader 了么
+
+#+BEGIN_SRC haskell
+ReaderT { runReaderT :: r -> Identity a }
+-- Identity a is a
+ReaderT { runReaderT :: r -> a }
+#+END_SRC
+
+** Alternative
+#+BEGIN_SRC haskell
+class Applicative f => Alternative f where
+    empty :: f a
+    (<|>) :: f a -> f a -> f a
+#+END_SRC
+
+其实就是 Applicative 的 =或=
+
+比如:
+#+BEGIN_SRC haskell
+Just 1 <|> Just 2 -- Just 1
+Just 1 <|> Nothing -- Just 1
+Nothing <|> Just 1 -- Just 1
+Nothing <|> Nothing -- Nothing
+#+END_SRC
+
+** MonadPlus
+这跟 Alternative 是一毛一样的, 只是限制的更细, 必须是 Monad才行
+
+#+BEGIN_SRC haskell
+class (Alternative m, Monad m) => MonadPlus m where
+   mzero :: m a
+   mzero = empty
+   mplus :: m a -> m a -> m a
+   mplus = (<|>)
+#+END_SRC
+
+看, 实现中直接就调用了 Alternative 的 =empty= 和 =<|>=
+
+** TODO ST Monad
+ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 immutable 的, 而是 "immutable" 的在原地做修改. 改完之后 runST 又然他回到了 immutable 的 Haskell 世界.
+
+#+BEGIN_SRC haskell
+  sumST :: Num a => [a] -> a
+  sumST xs = runST $ do           -- do 后面的事情会是不错的内存操作, runST 可以把它拉会纯的世界
+      n <- newSTRef 0             -- 在内存中创建一块并指到 STRef
+      forM_ xs $ \x -> do         -- 这跟命令式的for循环改写变量是一毛一样的
+          modifySTRef n (+x)
+      readSTRef n                 -- 返回改完之后的 n 的值
+#+END_SRC
+
+** TODO Free Monad
+
+** TODO Eff
