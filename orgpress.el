@@ -26,7 +26,6 @@
  '(default ((t (:background "white" :foreground "black"))))
  '(mouse ((t (:foreground "grey15"))))
  '(cursor ((t (:background "grey15"))))
-
  '(font-lock-comment-face ((t (:italic t :foreground "grey55"))))
  '(font-lock-string-face ((t (:foreground "DarkRed"))))
  '(font-lock-keyword-face ((t (:foreground "DarkBlue"))))
@@ -60,7 +59,7 @@
 (setq assets-path (expand-file-name "assets"))
 (setq org-html-validation-link nil)
 (setq org-confirm-babel-evaluate nil)
-(setq org-export-babel-evaluate nil)
+;;(setq org-export-babel-evaluate nil)
 (custom-set-variables
   '(org-publish-timestamp-directory
      (convert-standard-filename "public/.org-timestamps/")))
