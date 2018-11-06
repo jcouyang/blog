@@ -42,8 +42,8 @@
 要想应用能处理一天的大流量 api 的 traces, 自然直接的想法当然是找一个 MapReduce 的 Cluster
 将一天的数据 map 成多份来进行处理, 最后 reduce 到一起来算 pXX.
 
-#+BEGIN_SRC scala -n r
-  lazy val env = ExecutionEnvironment.getExecutionEnvironment // <= 1 (ref:env)
+#+BEGIN_SRC scala -n -r
+  lazy val env = ExecutionEnvironment.getExecutionEnvironment // <= 1 (ref:environment)
 
   lazy val rawSources = (ZipkinClient.datasources foldMap interp) unsafeRunSync ()
 
@@ -52,7 +52,7 @@
 
   lazy val program: DataSet[Vector[String]] = datasources
     .faltMap(splitByHour _)        // <= 3 (ref:split)
-    .rebalance()                   // <= 4 (ref:reblance)
+    .rebalance()                   // <= 4 (ref:rebalance)
     .map(source =>
       (ZipkinClient.fetchTraces(source) foldMap interp) unsafeRunSync ()) // <= 5 (ref:fetch)
     .groupBy(_._1.endpoint.id)   // <= 6 (ref:group)
@@ -65,13 +65,13 @@
 
 #+END_SRC
 
-1. [[(env)][当前执行环境]], 例如跑在 cluster 上, 还是 jvm 里
+1. [[(environment)][当前执行环境]], 例如跑在 cluster 上, 还是 jvm 里
 2. [[(dataset)][初始化DataSet]], DataSet是 flink batch job 的数据结果, DataSet 中的数据意味着可以并行跑在 cluster 中
 3. [[(split)][拆分数据源]], 类似大数据的 helloworld 计算字符个数例子, 你得先把句子拆成字符
 4. [[(rebalance)][负载均衡]]
 5. [[(group)][合并]], 类似于把同样的字符都归到一组, 方便下来计算
 6. [[(reduce)][reduce]], 把每一组数据合并成一条数据
-7. [[aggregate][计算pXX]]
+7. [[(aggregate)][计算pXX]]
 
 https://user-images.githubusercontent.com/1235045/46709689-8d226a80-cc90-11e8-9f7c-5c110d48302c.png
 
