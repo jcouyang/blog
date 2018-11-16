@@ -17,31 +17,7 @@
 (package-install 'color-theme-modern)
 (package-install 'clojure-mode)
 
-(deftheme gtk-ide
-  "gtk-ide theme")
-
-;; (custom-theme-set-faces
-;;  'gtk-ide
-
-;;  '(default ((t (:background "white" :foreground "black"))))
-;;  '(mouse ((t (:foreground "grey15"))))
-;;  '(cursor ((t (:background "grey15"))))
-;;  '(font-lock-comment-face ((t (:italic t :foreground "grey55"))))
-;;  '(font-lock-string-face ((t (:foreground "DarkRed"))))
-;;  '(font-lock-keyword-face ((t (:foreground "DarkBlue"))))
-;;  '(font-lock-warning-face ((t (:bold t :foreground "VioletRed"))))
-;;  '(font-lock-constant-face ((t (:foreground "OliveDrab"))))
-;;  '(font-lock-type-face ((t (:foreground "SteelBlue4"))))
-;;  '(font-lock-variable-name-face ((t (:foreground "DarkGoldenrod"))))
-;;  '(font-lock-function-name-face ((t (:foreground "SlateBlue"))))
-;;  '(font-lock-builtin-face ((t (:foreground "ForestGreen"))))
-;;  '(highline-face ((t (:background "grey95"))))
-;;  '(show-paren-match-face ((t (:background "grey80"))))
-;;  '(region ((t (:background "grey80"))))
-;;  '(highlight ((t (:background "LightSkyBlue"))))
-;;  '(secondary-selection ((t (:background "grey55"))))
-;;  '(widget-field-face ((t (:background "navy"))))
-;;  '(widget-single-line-field-face ((t (:background "royalblue")))))
+(deftheme gtk-ide "gtk-ide theme")
 (load-theme 'gtk-ide t t)
 (enable-theme 'gtk-ide)
 (require 'org)
@@ -105,6 +81,7 @@ representation for the files to include, as returned by
   (setq org-publish-project-alist
     `(("blog-notes"
        ;; Directory for source files in org format
+        :language "zh"
         :base-directory ,blog-path
         :base-extension "org"
         :html-doctype "html5"
