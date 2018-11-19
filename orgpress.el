@@ -23,7 +23,7 @@
 (require 'org)
 (require 'scala-mode)
 (require 'haskell-mode)
-(require 'ob-sh)
+(require 'ob-shell)
 (require 'ob-ruby)
 (require 'htmlize)
 (require 'ox-rss)
