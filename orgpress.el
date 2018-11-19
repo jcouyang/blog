@@ -35,6 +35,8 @@
 (setq assets-path (expand-file-name "assets"))
 (setq org-html-validation-link nil)
 (setq org-confirm-babel-evaluate nil)
+
+(setq user-mail-address "oyanglulu@gmail.com")
 ;;(setq org-export-babel-evaluate nil)
 (custom-set-variables
   '(org-publish-timestamp-directory
