@@ -23,6 +23,7 @@
 (require 'org)
 (require 'scala-mode)
 (require 'haskell-mode)
+(require 'clojure-mode)
 (require 'ob-shell)
 (require 'ob-ruby)
 (require 'htmlize)
@@ -37,7 +38,7 @@
 (setq org-confirm-babel-evaluate nil)
 
 (setq user-mail-address "oyanglulu@gmail.com")
-(setq org-export-babel-evaluate nil)
+;;(setq org-export-babel-evaluate nil)
 (custom-set-variables
   '(org-publish-timestamp-directory
      (convert-standard-filename "public/.org-timestamps/")))
