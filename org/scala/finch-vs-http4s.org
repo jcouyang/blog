@@ -2,21 +2,23 @@
 #+DATE: <2018-12-11 Tue>
 #+AUTHOR: Jichao Ouyang
 
-This is purely personal comparation from Functional Programming point of view, which only
-consider composible, extensible, and joy of FP. performance and eco system are out of scope.
+This is purely personal overall comparation from Functional Programming point of view, which only
+consider composible, extensible, and joy of FP. Performance and eco system are out of the scope.
 
 the explicit version comparing here is finch 0.26.1 and Http4s 0.20-M4
 
 Definition:
 
 - /composible/: how easy to build blocks from exsiting components
-- /extensible/: how easy to add a new type
-- /joy of FP/: how many FP knowledge are actually practiced
+- /extensible/: how easy to add support for new type
+- /joy of FP/: how many FP knowledges are actually practiced
+
+Scale from 1 to 5:
 
 ** Finch
 
-*** composible: 🍎 🍎 🍎 🍎 🍎
-finch took full advantage of shapeless' product and coproduct to match routes
+*** composible: 🍎 🍎 🍎 🍎
+finch takes full advantage of shapeless' product and coproduct to match routes
 #+BEGIN_SRC scala
 val getApples = get("apple") { Ok("🍎🍎")} 
 val getApple = get("apple" :: path[Int]) { (id: Int) => Ok("🍎")}
@@ -29,7 +31,7 @@ val routes = getApples :+: getApple
 =:+:= constructs a coproduct, which means either getApples or getApple matched route will match
 
 *** extensible: 🍎 🍎
-finch has lot of internal custom types, e.g. the magic happen behind the dsl above:
+finch has a lot of internal custom types, e.g. the magic happen behind the dsl above:
 #+BEGIN_SRC scala
 val getApples = get("apple") { Ok("🍎🍎")} 
 #+END_SRC
@@ -46,7 +48,7 @@ took place here.
 but think about it, because all implicit conversion was well defined in finch internally
 we've restrict to the types they provided.
 
-for example my controller will acutally return me a Free Monad i.e. =Free[Program, Output[String]]=
+for example my controller will acutally return me a [[https://typelevel.org/cats/datatypes/freemonad.html][Free Monad]] i.e. =Free[Program, Output[String]]=
 
 how can I get it to work with the router?
 
@@ -58,7 +60,8 @@ it won't compile because the implicit conversion expecting an =Output[_]= type
 
 acutally it support =IO[_]=, =Output[_]=, =Response=
 
-from [[https://github.com/finagle/finch/pull/1045][0.26.1]] it supports custom converter to convert any user custom type to IO
+UPDATE: from [[https://github.com/finagle/finch/pull/1045][0.27.0]] it supports custom converter to convert any user custom type to IO
+
 #+BEGIN_SRC scala
 implicit val conv = new ToEffect[Free[Program, ?], IO] {
 def apply[A](a: Free[Program, A]): IO[A] = ???
@@ -73,14 +76,12 @@ but still, it's so many implicits magic happen behind and the journey wasn't so 
 
 except some funs from shapeless there arn't actually any cats interop during composition of routes
 
-while that could be much more beginer friendly though, user don't have to notice and have
-any knowledge of cats before using finch
-
-
+while that could be much more attractive to beginer friendly though, since user don't have to have
+any knowledge about cats before using finch.
 
 ** Http4s
 *** composible: 🍎 🍎 🍎 🍎 🍎
-while http4s take advantage of cats to achieve path matching
+meanwhile, http4s takes advantage of cats to achieve path matching
 #+BEGIN_SRC scala
 val getApples = HttpRoutes.of[IO] {
   case GET -> Root / "apple" => Ok("🍎🍎")
@@ -97,14 +98,14 @@ what happen here is =HttpRoutes.of[IO] {...}= return a data type [[https://typel
 =<+>= is [[https://typelevel.org/cats/typeclasses/semigroupk.html][combindK]] of ~SemigroupK[Kleisli[OptionT[F, ?], Request[F], ?]]~
 
 you may already realize that nothing of above make any sense to you if you arn't
-familiar with cats or scalaz.
+familiar with data types and typeclasses defined in cats or scalaz.
 
-It require some knowledge from cats, just like you should know some sort of
-of shapeless to fully understand what the hell is =::= and =:+:=
+It require some knowledge backgroud from cats, just like you should know some sort of
+of shapeless to fully understand what the hell is =::= and =:+:= about.
 
-/Kleisli/ is a generic data type representing a function like =A => F[B]=
+Short story, /Kleisli/ is a generic data type representing a function =A => F[B]=
 
-so you could imagine that =Kleisli[OptionT[F, ?], Request[F], F[Response[F]]]= is just
+so you could imagine that =Kleisli[OptionT[F, ?], Request[F], F[Response[F]]]= is just something like
 =Request[F] => OptionT[F, F[Response[F]]]=
 
 while =<+>= is very like =:+:=, it combine these Kleisli, but any of these match, it will
@@ -112,5 +113,58 @@ return that matched Kleisli
 
 *** extensible: 🍎 🍎 🍎 🍎 🍎
 
+Since route matcher is simply just Kleisli, extending http4s to support types other than =F[Response[F]]= will
+be much simpler.
+
+for the same example as above in finch, that my controller will return a free program =Free[Program, IO[Response[IO]]]= instead of =IO[Response[IO]]=
+
+#+BEGIN_SRC scala
+  // type alias for route that return free monad
+  type FreeRoute[F[_]] =
+    Kleisli[OptionT[F, ?], Request[F], ProgramF[F[Response[F]]]]
+
+  // custom dsl
+  def route[F[_]: Monad](
+    pf: PartialFunction[Request[F], ProgramF[F[Response[F]]]]): FreeRoute[F] =
+    Kleisli(
+      (req: Request[F]) => OptionT(implicitly[Monad[F]].pure(pf.lift(req))))
+
+  val getApples = route {
+    case GET -> Root / "apple" => Ok("🍎🍎").pure[Free[Program,?]]
+  }
+#+END_SRC
+
+since getApples is still Kleisli, all the methods such as =<+>= are still available
+
+to hook it back to http4s route, simply map interpreter to =getApples=
+
+#+BEGIN_SRC scala
+val interp: Program ~> IO = ???
+
+val router = getApples flatMapF interp
+#+END_SRC
+
+here I used flatMapF because interp will give it another =IO=, which need to be flatten
+
 
 *** joy of FP: 🍎 🍎 🍎 🍎 🍎
+
+Since Http4s takes full power of data type Kleisli, since Kleisli at the end is just a function, it's much more composable and extensible in every way.
+
+Once you have some knowledge around cats data types and typeclasses, you'll be able to enable all cats power in http4s for free. Since Kleisli has instances
+for:
+- Functor
+- Applicative
+- Monad
+- Alternative
+- Choice
+- Arrow
+- Parallel
+- Monoid
+- MonoidK
+...
+
+those typeclasses above is almost all the most useful typeclasses in FP and cats. and you will get all the chance to practice all of the fun in your http4s server
+by just using Kleisli data type.
+
+
