@@ -18,7 +18,7 @@ Scale from 1 to 5:
 ** Finch
 
 *** composible: 🍎 🍎 🍎 🍎
-finch takes full advantage of shapeless' product and coproduct to match routes
+finch takes full advantage of shapeless' product and coproduct to routes *Matcher*
 #+BEGIN_SRC scala
 val getApples = get("apple") { Ok("🍎🍎")} 
 val getApple = get("apple" :: path[Int]) { (id: Int) => Ok("🍎")}
@@ -29,6 +29,22 @@ val routes = getApples :+: getApple
 =::= here is a product, means the path will match if there is an ="apple"= and an Int in the path =path[Int]=
 
 =:+:= constructs a coproduct, which means either getApples or getApple matched route will match
+
+About *Middleware*, finch need to mix finagle filter to do the job. so it will end up very ugly and inconsistent from the routes above
+#+BEGIN_SRC scala
+  class AuthFilter(implicit ttf: ToTwitterFuture[ProgramF]) extends SimpleFilter[Request, Response] {
+    def apply(req: Request, service: Service[Request, Response]): Future[Response] = {
+      (req.path, req.headerMap.get("TOKEN")) match {
+        case ("/login", _)        => service(req)
+        case (url, Some(token)) => ??? // fetch user info and pass to service
+#+END_SRC
+
+and then compose filter and service
+#+BEGIN_SRC scala
+ new AuthFilter andThen routes.toServiceAs[Application.Json]
+#+END_SRC
+
+you may have notice that the finangle filter is more lower level verbose code and inconsistent with the previous shapeless DSL.
 
 *** extensible: 🍎 🍎
 finch has a lot of internal custom types, e.g. the magic happen behind the DSL above:
@@ -58,7 +74,7 @@ val getApples = get("apple") { Free[Program, Output[String]].pure(Ok("🍎🍎")
 
 it won't compile because the implicit conversion expecting an =Output[_]= type
 
-actually it supports =IO[_]=, =Output[_]=, =Response=
+actually it only supports =IO[_]=, =Output[_]=, =Response=
 
 UPDATE: from [[https://github.com/finagle/finch/pull/1045][0.27.0]] it supports custom converter to convert any user custom type to IO
 
@@ -66,7 +82,7 @@ UPDATE: from [[https://github.com/finagle/finch/pull/1045][0.27.0]] it supports 
 implicit val conv = new ToEffect[Free[Program, ?], IO] {
 def apply[A](a: Free[Program, A]): IO[A] = ???
 }
-val getApples = get("apple") { Free[Program, Output[String]].pure(Ok("
+val getApples = get("apple") { Free[Program, Output[String]].pure(Ok("🍎🍎"))} 
 #+END_SRC
 
 But still, it's so many implicits magic happen behind and the journey wasn't so fun.
@@ -81,7 +97,7 @@ any knowledge about cats before using finch.
 
 ** Http4s
 *** composible: 🍎 🍎 🍎 🍎 🍎
-meanwhile, http4s takes advantage of cats to achieve path matching
+meanwhile, http4s takes advantage of cats to achieve path *Matcher*
 #+BEGIN_SRC scala
 val getApples = HttpRoutes.of[IO] {
   case GET -> Root / "apple" => Ok("🍎🍎")
@@ -110,6 +126,20 @@ so you could imagine that =Kleisli[OptionT[F, ?], Request[F], F[Response[F]]]= i
 while =<+>= is very like =:+:=, it combines these Kleisli, but any of these match, it will
 return that matched Kleisli
 
+About *Middleware*, it's nothing more just compose a Kleisli of type =Kleisli[Option[F,?], Request[F], F[Request[F]]]= before
+or compose a Kleisli of type =Kleisli[Option[F,?], Response[F], F[Response[F]]]= after
+
+e.g. auth user before =getApple=
+#+BEGIN_SRC scala
+  def auth = Kleisli { req: Request[IO] =>
+    findUserInDatabase(req) match {
+      case true => OptionT(IO(Some(req)))
+      case false => OptionT.fromOption[IO](None)
+    }
+  }
+
+  auth andThen getApple
+#+END_SRC
 *** extensible: 🍎 🍎 🍎 🍎 🍎
 
 Since route matcher is simply just Kleisli, extending http4s to support types other than =F[Response[F]]= will
@@ -163,7 +193,11 @@ for:
 - MonoidK
 ...
 
-Those typeclasses above are almost all the most useful typeclasses in FP and cats. And you will get all the chance to practiceall thee fun in your http4s server
+https://cdn.rawgit.com/tpolecat/cats-infographic/master/cats.svg
+
+As you can see it already cover most of the cats typeclasses, plus, those typeclasses are almost the most popular typeclasses in FP and cats. 
+
+And you will get all the chance to practiceall thee fun in your http4s server
 by just using Kleisli data type.
 
 
