@@ -1,0 +1,128 @@
+#+Title: 3 Layer Scala Cake
+#+Date: <2019-03-18 Mon>
+#+Language: en
+#+Author: Jichao Ouyang
+#+MACRO: ruby @@html:<ruby>$1<rt>$2</rt></ruby>@@
+
+I've been using Free Monad in production for a while, as the projects scale and more
+members contribute, the boundary of different layer reveal them self more clearly.
+
+Thanks [[https://www.parsonsmatt.org/2018/03/22/three_layer_haskell_cake.html][Matt Parsons' 3 layer Haskell Cake]]. I found my Scala code also fell into these 3 layer cake. 
+To make the future project has more clear boundary of abstraction, I created [[https://github.com/jcouyang/luci][{{{ruby(鸬鹚,luci)}}}]]
+for better taste of Free Monad effects.
+
+Here it is the Scala version of Cake, prepare your folk please.
+
+But before cutting the cake, let's +wash our hands+ describe the most common program.
+
+It will read output a log, query a data base, and do the calculation.
+
+#+BEGIN_SRC scala
+val xa = Transactor.fromDriverManager[IO]("org.postgresql.Driver", "jdbc:postgresql:postgres", "postgres")
+def program : Int = {
+  val initState = 1
+  getLogger.log(s"init state is $initState")
+  val valueInDatabase = sql"select 32".query[Int].unique.transact(xa) unsafeRunSyn ()
+  initState + valueInDatabase
+}
+#+END_SRC
+
+Your real business logic might be fancier, but basically this should be the most imperative
+way of modeling this simple business.
+
+Anyway, this is really awful piece code in production.
+
+First of all, how do you unit test such thing? oh, maybe not that awful, we just mock =getLogger= and stub it's =log= method
+and then mock doobie's =ConnectionIO= and stub =transact= method.
+
+Sounds reasonable, just 2 mocks and 2 stubs.
+
+But think about it, here is just 2 line of effectful operation, count again such effectful code in production,
+how many mocks and stub you will need then?
+
+Such way of unit testing is definitly not gonna scale
+
+Let's refactor a little bit, with =IO=
+* Refactor
+** Take 1: IO
+modeling your problem with =IO= is easy, just wrap everything in IO
+
+#+BEGIN_SRC scala
+def program : IO[Int] = for {
+  initState <- IO(1)
+  _ <- IO(getLogger.log(s"init state is $initState"))
+  valueInDatabase <- sql"select 32".query[Int].unique.transact(xa)
+} yield initState + valueInDatabase
+#+END_SRC
+
+How the hell this is better than previous one?
+
+No, it's not better in the sense of testable, but, it's /Pure/
+
+When we make something is Pure, it means that thing is Referential Transparent.
+
+In human words, it means I can do this:
+
+#+BEGIN_SRC scala
+initState <- IO(1)
+val logState = IO(getLogger.log(s"init state is ${initState.unsafeRunSync()}"))
+def program : IO[Int] = for {
+  _ <- logState
+  _ <- logState
+  _ <- logState
+  valueInDatabase <- sql"select 32".query[Int].unique.transact(xa)
+} yield initState + valueInDatabase
+#+END_SRC
+
+But you can't do:
+#+BEGIN_SRC scala
+val initState = 1
+val logState = getLogger.log(s"init state is $initState")
+def program : Int = {
+  logState
+  logState
+  logState
+  val valueInDatabase = sql"select 32".query[Int].unique.transact(xa) unsafeRunSyn ()
+  initState + valueInDatabase
+}
+#+END_SRC
+
+Probably not the best example but you should get the idea, that I can place IO anywhere
+and that won't change the semantic and behavior of your program.
+
+Ok, let's place those IO else where so we can inject them into program
+
+#+BEGIN_SRC scala
+  def program(getState: IO[Int], log: String => IO[Unit], queryDB: IO[Int]): IO[Int] = for {
+    initState <- getState
+    _ <- log(s"initState is: $initState")
+    valueInDatabase <- queryDB
+  } yield initState + valueInDatabase
+#+END_SRC
+
+Now it's better, in our test, we could simply testing =program= like
+#+BEGIN_SRC scala
+program(IO(1), (msg: String)=>IO(()), IO(10)) must_== 11
+#+END_SRC
+
+to verify our program can do the math.
+
+But still, it won't scale, e.g. we need to query 3 value from db
+#+BEGIN_SRC scala
+def program(getState: IO[Int], log: String => IO[Unit], queryDB1: IO[Int], queryDB2: IO[Int], queryDB3: IO[Int]): IO[Int] = for {
+    initState <- getState
+    _ <- log(s"initState is: $initState")
+    valueInDatabase1 <- queryDB1
+    valueInDatabase2 <- queryDB2
+    valueInDatabase3 <- queryDB3
+  } yield initState + valueInDatabase1 + valueInDatabase2 + valueInDatabase3
+#+END_SRC
+
+our program will end up very long parameters
+
+* 3 Layer Cake
+** Layer 1: ReaderT[IO, Env, ?]
+
+** Layer 2: Effect ~> ReaderT[IO, Env, ?]
+
+** Layer 3: Pure Fantasy
