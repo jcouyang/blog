@@ -7,7 +7,8 @@
 I've been using Free Monad in production for a while, as the projects scale and more
 members contribute, the boundary of different layer reveal them self more clearly.
 
-Thanks [[https://www.parsonsmatt.org/2018/03/22/three_layer_haskell_cake.html][Matt Parsons' 3 layer Haskell Cake]]. I found my Scala code also fell into these 3 layer cake. 
+Thanks the summary from [[https://www.parsonsmatt.org/2018/03/22/three_layer_haskell_cake.html][Matt Parsons' 3 layer Haskell Cake]]. I found my Scala code also happen to
+fell into these 3 layer cake. 
 To make the future project has more clear boundary of abstraction, I created [[https://github.com/jcouyang/luci][{{{ruby(鸬鹚,luci)}}}]]
 for better taste of Free Monad effects.
 
@@ -18,17 +19,24 @@ But before cutting the cake, let's +wash our hands+ describe the most common pro
 It will read output a log, query a data base, and do the calculation.
 
 #+BEGIN_SRC scala
-val xa = Transactor.fromDriverManager[IO]("org.postgresql.Driver", "jdbc:postgresql:postgres", "postgres")
-def program : Int = {
-  val initState = 1
-  getLogger.log(s"init state is $initState")
-  val valueInDatabase = sql"select 32".query[Int].unique.transact(xa) unsafeRunSyn ()
-  initState + valueInDatabase
-}
+  val xa = Transactor.fromDriverManager[IO]("org.postgresql.Driver", "jdbc:postgresql:postgres", "postgres")
+  def program : Int = {
+    val initState = 1
+    getLogger.log(s"init state is $initState")
+    val valueInDatabase = try{
+      sql"select 32".query[Int].unique.transact(xa) unsafeRunSyn ()
+    } catch { case _: Throwable => 0}
+    initState + valueInDatabase
+  }
 #+END_SRC
 
-Your real business logic might be fancier, but basically this should be the most imperative
-way of modeling this simple business.
+Your real business logic might be fancier, but basically this is the most common case
+
+1. Something to ask
+2. Something to write
+3. Some effects on dependencies
+4. Some error to handle
+5. Some business computation
 
 Anyway, this is really awful piece code in production.
 
@@ -48,42 +56,40 @@ Let's refactor a little bit, with =IO=
 modeling your problem with =IO= is easy, just wrap everything in IO
 
 #+BEGIN_SRC scala
-def program : IO[Int] = for {
-  initState <- IO(1)
-  _ <- IO(getLogger.log(s"init state is $initState"))
-  valueInDatabase <- sql"select 32".query[Int].unique.transact(xa)
-} yield initState + valueInDatabase
+  def program : IO[Int] = for {
+    initState <- IO(1)
+    _ <- IO(getLogger.log(s"init state is $initState"))
+    valueInDatabase <- sql"select 32".query[Int].unique.transact(xa)
+      .handleErrorWith{_=>IO(0)}
+  } yield initState + valueInDatabase
 #+END_SRC
 
 How the hell this is better than previous one?
 
-No, it's not better in the sense of testable, but, it's /Pure/
+Yes and No.
 
-When we make something is Pure, it means that thing is Referential Transparent.
+It's not better in the sense of testable, but, it's /Pure/
+
+When we mention something that is Pure, it means that thing is Referential Transparent.
 
 In human words, it means I can do this:
 
 #+BEGIN_SRC scala
-initState <- IO(1)
-val logState = IO(getLogger.log(s"init state is ${initState.unsafeRunSync()}"))
-def program : IO[Int] = for {
+val logState = IO(getLogger.log(s"log something"))
+def program : IO[Unit] = for {
   _ <- logState
   _ <- logState
   _ <- logState
-  valueInDatabase <- sql"select 32".query[Int].unique.transact(xa)
-} yield initState + valueInDatabase
+} yield ()
 #+END_SRC
 
 But you can't do:
 #+BEGIN_SRC scala
-val initState = 1
-val logState = getLogger.log(s"init state is $initState")
+val logState = getLogger.log(s"log something")
 def program : Int = {
   logState
   logState
   logState
-  val valueInDatabase = sql"select 32".query[Int].unique.transact(xa) unsafeRunSyn ()
-  initState + valueInDatabase
 }
 #+END_SRC
 
@@ -109,7 +115,7 @@ to verify our program can do the math.
 
 But still, it won't scale, e.g. we need to query 3 value from db
 #+BEGIN_SRC scala
-def program(getState: IO[Int], log: String => IO[Unit], queryDB1: IO[Int], queryDB2: IO[Int], queryDB3: IO[Int]): IO[Int] = for {
+def program(getState: IO[Int], log: String => IO[Unit], queryDB: IO[Int], queryDB2: IO[Int], queryDB3: IO[Int]): IO[Int] = for {
     initState <- getState
     _ <- log(s"initState is: $initState")
     valueInDatabase1 <- queryDB1
@@ -119,6 +125,94 @@ def program(getState: IO[Int], log: String => IO[Unit], queryDB1: IO[Int], query
 #+END_SRC
 
 our program will end up very long parameters
+
+Clearly IO isn't enough for more complex scenario, let's see what we can improve by adding another layer of abstraction
+
+** Take 2: ReaderT Pattern
+The problem of Dependent Injection via parameters is limited and not scalable, when your program get bigger,
+eventually you will need to have sub programs and then you will find the dependency has to be passed all the way down
+to each sub program.
+
+Here's the ReaderT pattern to help.
+
+First we move all dependency out, let's model it as =trait Env=
+#+BEGIN_SRC scala
+  trait Env{
+    val state: Int
+    def log(msg: String): IO(Unit)
+    def query[A](c: ConnectionIO[A]): IO[A]
+  }
+#+END_SRC
+
+Then we can move parameters of =program= out as standalone methods:
+#+BEGIN_SRC scala
+  def log(msg: String): ReaderT[IO, Env, Unit] = for {
+    env <- Kleisli.ask[IO, Env]
+    _ <- Kleisli.liftF(env.log(msg))
+  } yield ()
+
+  def doobieQuery[A](query: ConnectionIO[A]): ReaderT[IO, Env, A] = for {
+    env <- Kleisli.ask[IO, Env]
+    res <- Kleisli.liftF(env.query(query))
+  } yield res
+#+END_SRC
+
+These methods just return data type that describe that they need a =Env= but not provided yet,
+so you could put it anywhere you want, without knowing where exactly the instance of =Env= is.
+
+Finally the program, without any parameters!!!
+
+#+BEGIN_SRC scala
+  def program: ReaderT[IO, Env, Int] = for {
+    env <- Kleisli.ask[IO, Int]
+    initState = env.state
+    _ <- log(s"initState is: $state")
+    valueInDatabase <- query(sql"select 32".query[Int].unique)
+  } yield initState + valueInDatabase
+#+END_SRC
+
+** Retro
+Let us retro the evolve progress of the type of =program=
+
+*** Imperative
+#+BEGIN_SRC scala
+def program: Int
+#+END_SRC
+raw values, 0 abstraction
+
+*** IO
+#+BEGIN_SRC scala
+def program(deps...): IO[Int]
+#+END_SRC
+
+Introduce a new layer of abstraction =IO=
+
+when we need value, just run the IO layer
+#+BEGIN_SRC scala
+program(deps...).unsafeRunSync()
+#+END_SRC
+
+Effects are now Referential Transparent, but the way to inject and use effects is not scalable.
+*** ReaderT
+
+#+BEGIN_SRC scala
+def program: ReaderT[IO, Env, Int]
+#+END_SRC
+
+Now we have 2 layers, =IO= and =Reader[Env, Int]=
+
+#+BEGIN_SRC scala
+  program // <- ReaderT[IO, Env, Int]
+  .run(new Env{
+    val state = 1
+    def log(msg: String) = IO(getLogger.log(msg))
+    def query[A](c: ConnectionIO[A]) = c.transact(xa)
+  }) // <- IO[Int]
+  .unsafeRunSync() // <- Int
+#+END_SRC
+so we need to run =Reader=, and then =IO=
+
+and the time we run =Reader= can provide all the dependencies.
 
 * 3 Layer Cake
 ** Layer 1: ReaderT[IO, Env, ?]
