@@ -167,7 +167,7 @@ Finally the program, without any parameters!!!
     env <- Kleisli.ask[IO, Int]
     initState = env.state
     _ <- log(s"initState is: $state")
-    valueInDatabase <- query(sql"select 32".query[Int].unique)
+    valueInDatabase <- doobieQuery(sql"select 32".query[Int].unique)
   } yield initState + valueInDatabase
 #+END_SRC
 
@@ -178,14 +178,16 @@ Let us retro the evolve progress of the type of =program=
 #+BEGIN_SRC scala
 def program: Int
 #+END_SRC
-raw values, 0 abstraction
+I'd name this layer *Bare Metal*. here only exists raw values, 0 abstraction
 
 *** IO
 #+BEGIN_SRC scala
 def program(deps...): IO[Int]
 #+END_SRC
 
-Introduce a new layer of abstraction =IO=
+Introduce a new layer of abstraction =IO=, and I'd like to name it *VM* layer
+
+It's better than Bare metal, but still low level abstraction.
 
 when we need value, just run the IO layer
 #+BEGIN_SRC scala
@@ -193,13 +195,16 @@ program(deps...).unsafeRunSync()
 #+END_SRC
 
 Effects are now Referential Transparent, but the way to inject and use effects is not scalable.
+
 *** ReaderT
 
 #+BEGIN_SRC scala
 def program: ReaderT[IO, Env, Int]
 #+END_SRC
 
-Now we have 2 layers, =IO= and =Reader[Env, Int]=
+=ReaderT[IO, Env, Int]= consists 2 layers, =IO= and =Reader[Env, Int]=, this is the layer of *Functional Programing*
+
+pure business, 0 effect, lazy
 
 #+BEGIN_SRC scala
   program // <- ReaderT[IO, Env, Int]
@@ -210,9 +215,46 @@ Now we have 2 layers, =IO= and =Reader[Env, Int]=
   }) // <- IO[Int]
   .unsafeRunSync() // <- Int
 #+END_SRC
-so we need to run =Reader=, and then =IO=
+
+We need to run this layer by layer, first =Reader=, and then =IO=
 
 and the time we run =Reader= can provide all the dependencies.
+
+ReaderT is pretty good "pattern" after all
+- effectful part is factor out of program into Env (Bare Metal)
+- Dependency Injections are happen in Monad context, scalable in sense of easy to break program into smaller sub program
+- effects are simply ReaderT data type, which is Pure and RT
+
+** Tagless Final is nothing but a fancy name of ReaderT
+if we make some type alias for readerT, it's pretty much the same thing as the recent trending "design pattern" - Tagless Final
+#+BEGIN_SRC scala
+  trait AlgInterp[F[_]] {
+    val state: F[Int]
+    def log(msg: String): F[Unit]
+    def query[A](c: ConnectionIO[A]): F[A]
+  }
+
+  type Alg[F[_], A] = ReaderT[F, AlgInterp[F], A]
+
+  def state[F[_]]: Alg[F, Int]
+  def log[F[_]](msg: String): Alg[F, Unit]
+
+  def doobieQuery[F[_], A](query: ConnectionIO[A]): Alg[F, A]
+
+  def program: Alg[F, A] = for {
+    env <- state
+    _ <- log(s"initState is: $state")
+    valueInDatabase <- doobieQuery(sql"select 32".query[Int].unique)
+  } yield initState + valueInDatabase
+
+ val interp = new AlgInterp[F[_]]{
+    val state = 1
+    def log(msg: String) = IO(getLogger.log(msg))
+    def query[A](c: ConnectionIO[A]) = c.transact(xa)
+  }
+  program.run(interp).unsafeRunSync()
+#+END_SRC
+
 
 * 3 Layer Cake
 ** Layer 1: ReaderT[IO, Env, ?]
