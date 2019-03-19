@@ -16,6 +16,7 @@ Here it is the Scala version of Cake, prepare your folk please.
 
 But before cutting the cake, let's +wash our hands+ describe the most common program.
 
+* the Program
 It will read output a log, query a data base, and do the calculation.
 
 #+BEGIN_SRC scala
@@ -40,7 +41,7 @@ Your real business logic might be fancier, but basically this is the most common
 
 Anyway, this is really awful piece code in production.
 
-First of all, how do you unit test such thing? oh, maybe not that awful, we just mock =getLogger= and stub it's =log= method
+First of all, how do you unit test such thing? Oh, wait, maybe not that awful, we just mock =getLogger= and stub it's =log= method
 and then mock doobie's =ConnectionIO= and stub =transact= method.
 
 Sounds reasonable, just 2 mocks and 2 stubs.
@@ -48,9 +49,9 @@ Sounds reasonable, just 2 mocks and 2 stubs.
 But think about it, here is just 2 line of effectful operation, count again such effectful code in production,
 how many mocks and stub you will need then?
 
-Such way of unit testing is definitly not gonna scale
+Such way of unit testing is definitely not gonna scale.
 
-Let's refactor a little bit, with =IO=
+Let us refactor in a baby step, with =IO=
 * Refactor
 ** Take 1: IO
 modeling your problem with =IO= is easy, just wrap everything in IO
@@ -96,7 +97,7 @@ def program : Int = {
 Probably not the best example but you should get the idea, that I can place IO anywhere
 and that won't change the semantic and behavior of your program.
 
-Ok, let's place those IO else where so we can inject them into program
+Fine, let's place those IO else where, so we can inject them into program
 
 #+BEGIN_SRC scala
   def program(getState: IO[Int], log: String => IO[Unit], queryDB: IO[Int]): IO[Int] = for {
@@ -160,7 +161,7 @@ Then we can move parameters of =program= out as standalone methods:
 These methods just return data type that describe that they need a =Env= but not provided yet,
 so you could put it anywhere you want, without knowing where exactly the instance of =Env= is.
 
-Finally the program, without any parameters!!!
+Finally, the program, without any parameters!!!
 
 #+BEGIN_SRC scala
   def program: ReaderT[IO, Env, Int] = for {
@@ -172,7 +173,7 @@ Finally the program, without any parameters!!!
 #+END_SRC
 
 ** Retro
-Let us retro the evolve progress of the type of =program=
+Let us retro the evolving progress of the type of =program=
 
 *** Imperative
 #+BEGIN_SRC scala
@@ -202,7 +203,7 @@ Effects are now Referential Transparent, but the way to inject and use effects i
 def program: ReaderT[IO, Env, Int]
 #+END_SRC
 
-=ReaderT[IO, Env, Int]= consists 2 layers, =IO= and =Reader[Env, Int]=, this is the layer of *Functional Programing*
+=ReaderT[IO, Env, Int]= consists 2 layers, =IO= and =Reader[Env, Int]=, this is the layer of *Functional Programming*
 
 pure business, 0 effect, lazy
 
@@ -222,8 +223,9 @@ and the time we run =Reader= can provide all the dependencies.
 
 ReaderT is pretty good "pattern" after all
 - effectful part is factor out of program into Env (Bare Metal)
-- Dependency Injections are happen in Monad context, scalable in sense of easy to break program into smaller sub program
+- Dependency Injections are happened in Monad context, scalable in sense of easy to break program into smaller sub program
 - effects are simply ReaderT data type, which is Pure and RT
+- lots of benefits for free from ReaderT's typeclasses instances, such as =Monoid=, =Applicative=, =MonadError=...
 
 ** Tagless Final is nothing but a fancy name of ReaderT
 if we make some type alias for readerT, it's pretty much the same thing as the recent trending "design pattern" - Tagless Final
@@ -241,23 +243,35 @@ if we make some type alias for readerT, it's pretty much the same thing as the r
 
   def doobieQuery[F[_], A](query: ConnectionIO[A]): Alg[F, A]
 
-  def program: Alg[F, A] = for {
+  def program[F[_]]: Alg[F, Int] = for {
     env <- state
     _ <- log(s"initState is: $state")
     valueInDatabase <- doobieQuery(sql"select 32".query[Int].unique)
   } yield initState + valueInDatabase
 
- val interp = new AlgInterp[F[_]]{
+ val interp = new AlgInterp[IO]{
     val state = 1
     def log(msg: String) = IO(getLogger.log(msg))
     def query[A](c: ConnectionIO[A]) = c.transact(xa)
   }
-  program.run(interp).unsafeRunSync()
+  program[IO].run(interp).unsafeRunSync()
 #+END_SRC
 
+If you look close enough, here it actually becomes 3 layers:
+- Layer 1: IO (AlgInterp)
+- Layer 2: IO ~> Alg (state, log, doobieQuery)
+- Layer 3: Alg (program)
+
+both layer 2 and 3 are pure, but the different is,
+- Layer 2 is just 1-1 mapping from IO to Alg
+- Layer 3 is orchestration of Layer 2 for pure business
 
 * 3 Layer Cake
-** Layer 1: ReaderT[IO, Env, ?]
+We now have a solid of 3 Layer Scala Cake base made of =ReaderT=
+
+But you know, single flavor of cake won't satisfy everyone's taste.
+
+** State
 
 ** Layer 2: Effect ~> ReaderT[IO, Env, ?]
 
