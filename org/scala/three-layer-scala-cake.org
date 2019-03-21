@@ -61,7 +61,7 @@ modeling your problem with =IO= is easy, just wrap everything in IO
     initState <- IO(1)
     _ <- IO(getLogger.log(s"init state is $initState"))
     valueInDatabase <- sql"select 32".query[Int].unique.transact(xa)
-      .handleErrorWith{_=>IO(0)}
+      .handleError{_=>0}
   } yield initState + valueInDatabase
 #+END_SRC
 
@@ -221,14 +221,13 @@ We need to run this layer by layer, first =Reader=, and then =IO=
 
 and the time we run =Reader= can provide all the dependencies.
 
-ReaderT is pretty good "pattern" after all
-- effectful part is factor out of program into Env (Bare Metal)
-- Dependency Injections are happened in Monad context, scalable in sense of easy to break program into smaller sub program
-- effects are simply ReaderT data type, which is Pure and RT
-- lots of benefits for free from ReaderT's typeclasses instances, such as =Monoid=, =Applicative=, =MonadError=...
+ReaderT is pretty good "pattern" after all:
+- *Pure*: effectful part is factor out of program into Env (Bare Metal), so program can be Pure and RT
+- *Modular*: Dependency Injections are happened in Monad context, scalable in sense of easy to break program into smaller sub program
+- *Data Type*: since ReaderT is just a Data Type, lots of benefits for free from ReaderT's typeclasses instances, such as =Monoid=, =Applicative=, =MonadError=...
 
 ** Tagless Final is nothing but a fancy name of ReaderT
-if we make some type alias for readerT, it's pretty much the same thing as the recent trending "design pattern" - Tagless Final
+if we make some type alias for readerT, it's pretty much the same thing as the recent trending "design pattern" - /Tagless Final/
 #+BEGIN_SRC scala
   trait AlgInterp[F[_]] {
     val state: F[Int]
@@ -238,19 +237,19 @@ if we make some type alias for readerT, it's pretty much the same thing as the r
 
   type Alg[F[_], A] = ReaderT[F, AlgInterp[F], A]
 
-  def state[F[_]]: Alg[F, Int]
-  def log[F[_]](msg: String): Alg[F, Unit]
+  def state[F[_]]: Alg[F, Int] = Kleisli(_.state)
+  def log[F[_]](msg: String): Alg[F, Unit] = Kleisli(_.log(msg))
 
   def doobieQuery[F[_], A](query: ConnectionIO[A]): Alg[F, A]
 
   def program[F[_]]: Alg[F, Int] = for {
     env <- state
     _ <- log(s"initState is: $state")
-    valueInDatabase <- doobieQuery(sql"select 32".query[Int].unique)
+    valueInDatabase <- doobieQuery(sql"select 32".query[Int].unique).handleError{_=>0}
   } yield initState + valueInDatabase
 
  val interp = new AlgInterp[IO]{
-    val state = 1
+    val state = IO(1)
     def log(msg: String) = IO(getLogger.log(msg))
     def query[A](c: ConnectionIO[A]) = c.transact(xa)
   }
@@ -267,11 +266,55 @@ both layer 2 and 3 are pure, but the different is,
 - Layer 3 is orchestration of Layer 2 for pure business
 
 * 3 Layer Cake
-We now have a solid of 3 Layer Scala Cake base made of =ReaderT=
+We now have a solid 3 Layer Scala Cake base made of =ReaderT=
 
 But you know, single flavor of cake won't satisfy everyone's taste.
 
-** State
+** The Needs of State
+remember the 5 factors that compose our program?
+1. Something to ask
+2. Something to write
+3. Some effects on dependencies
+4. Some error to handle
+5. Some business computation
+
+it has a missing part - Some *state*!
+
+in a 5 lines of code program, you won't see a state is necessary.
+
+in the real world, there are so many scenario needed a state
+
+i.e. a user's login info
+
+supposed that our program has a middleware, controller, repository layer
+
+usually we will need to get user's info in middleware, and use the user info in repository layer for some database query.
+
+so, here is the case, since I want a modular code base, so these 3 layers should not be just single =Alg[F]=, but 3
+
+In Http4s, it would be something like:
+#+BEGIN_SRC scala
+def middleware[F[_]]: Kleisli[OptionT[F, ?], Request[F], Request[F]] = ???
+def controller[F[_]]: Kleisli[OptionT[F, ?], Request[F], Response[F]] = ???
+
+val program = middleware[IO] andThen controller[IO]
+#+END_SRC
+=controller= would probably call repository to query db
+
+Damn, the middleware will return =Request[F]=, how can I pass user info through to controller and then repository
+
+mutating request? but you can only put some header stuff, of transform the body.
+
+than you have to get the info out, and snap it into repsoitory.
+
+someday your controller become bigger and bigger and tech lead said there should be another layer - service, between controller and repository
+
+then it will become a nightmare that you have to pass such thing all over your code base.
+
+But that's exactly State Monad solve, not matter how many State monad you split, every piece alway can share the exactly same state.
+
+But, but http4s routers are ReaderT!!!
+
 
 ** Layer 2: Effect ~> ReaderT[IO, Env, ?]
 
