@@ -292,30 +292,101 @@ usually we will need to get user's info in middleware, and use the user info in 
 
 so, here is the case, since I want a modular code base, so these 3 layers should not be just single =Alg[F]=, but 3
 
-In Http4s, it would be something like:
 #+BEGIN_SRC scala
-def middleware[F[_]]: Kleisli[OptionT[F, ?], Request[F], Request[F]] = ???
-def controller[F[_]]: Kleisli[OptionT[F, ?], Request[F], Response[F]] = ???
+  def middleware[F[_]]: Alg[F, User] = ???
+  def controller[F[_]]: Alg[F, Response] = ???
+  def repository[F[_]](user: User): Alg[F, DBResult] = ???
 
-val program = middleware[IO] andThen controller[IO]
+  val program = for {
+    user <- middleware
+    dbresult <- respository(user)
+    response <- controller
+  } yield response
 #+END_SRC
-=controller= would probably call repository to query db
-
-Damn, the middleware will return =Request[F]=, how can I pass user info through to controller and then repository
-
-mutating request? but you can only put some header stuff, of transform the body.
-
-than you have to get the info out, and snap it into repsoitory.
 
 someday your controller become bigger and bigger and tech lead said there should be another layer - service, between controller and repository
 
+#+BEGIN_SRC scala
+  val program = for {
+    user <- middleware
+    dbresult <- service(user)
+    response <- controller
+  } yield response
+
+  def service(user) = for {
+    dbresult <- respository(user)
+    result <- doSomthingWith(dbresult)
+  } yield result
+#+END_SRC
 then it will become a nightmare that you have to pass such thing all over your code base.
 
-But that's exactly State Monad solve, not matter how many State monad you split, every piece alway can share the exactly same state.
+But that's exactly State Monad solved, no matter how many State monad you split, every piece alway can share the exactly same state.
 
-But, but http4s routers are ReaderT!!!
+#+BEGIN_SRC scala
+  def middleware[F[_]]: StateT[F, User, Unit] = StateT.set[F, User](User("abc"))
+  def controller[F[_]]: StateT[F, User, Response] = ???
+  def repository[F[_]]: StateT[F, User, DBResult] = for {
+    user <- StateT.get[F, User]
+    dbResult <- findResourceInDB(user)
+  } yield dbResult
+#+END_SRC
+
+So our program don't have to passing around user as parameter everywhere
+#+BEGIN_SRC scala
+  val program = for {
+    _ <- middleware
+    dbresult <- service
+    response <- controller
+  } yield response
+
+  val service = for {
+    dbresult <- respository
+    result <- doSomthingWith(dbresult)
+  } yield result
+#+END_SRC
+
+The new problem introduced by =StateT= is, everything else(controller, repository, service) need to be =StateT= as well. If we change them
+to =StateT=, then we will lost the effects of =ReaderT=
+
+** MTL
+To able to use both =ReaderT= and =StateT=, MTL is a eligant solution though.
+
+MTL is like stacking those transformer together to F, at the end, you will get something very nice:
+
+#+BEGIN_SRC scala
+  def middleware[F[_]](implicit S: MonadState[F, User]): F[Unit] = S.set(User("abc"))
+  def controller[F[_]]: F[Response] = ???
+  def repository[F[_]](implicit S: MonadState[F, User]): F[DBResult] = for {
+    user <- S.get
+    dbResult <- findResourceInDB(user)
+  } yield dbResult
+#+END_SRC
+
+Such DSL is nearly ideal, where
+
+- if you look closer to =contorller='s type, it doesn't has any info about =User= or =MonadState=, because it shouldn't care about such things.
+- =middleware= and =respository= connected to each other via the implicit instance of
+=MonadState[F, User]=, which is perfect as well, no need to passing state around, request the implicit instance just in the place you need
+it.
+
+At the very end, provide the monad transformer stacks, so =F= is finally:
+
+#+BEGIN_SRC scala
+program[Alg[StateT[IO, User,? ], A]]
+// which expended to..
+program[ReaderT[StateT[IO, User,? ], AlgInterp[StateT[IO, User,? ]], A]]
+#+END_SRC
 
 
-** Layer 2: Effect ~> ReaderT[IO, Env, ?]
+There's no perfect solution for all, only perfect solution for particular case. For these example, mtl is perfect. But when you
+have more effects, e.g. WriterT(to output something Monoid), EitherT(to provide MonadError) ... the mtl stack is not very easy to reason about, DSL is still nice though.
 
-** Layer 3: Pure Fantasy
+#+BEGIN_SRC scala
+program[ReaderT[WriterT[StateT[IO, User,? ], Chain[String], ?], AlgInterp[WriterT[StateT[IO, User,? ], Chain[String], ?]], A]]
+#+END_SRC
+
+** Free Monad
+thus, the free monad will save your ass by providing monad for free if you have Functor.
+
+
+
