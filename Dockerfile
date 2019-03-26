@@ -1,4 +1,5 @@
-FROM jcouyang/emacs:24
-COPY emacs.el /emacs/orgpress.el
-CMD cask exec emacs --batch -l /emacs/orgpress.el -f org-publish-all
-
+FROM alpine:latest
+RUN apk add emacs
+VOLUME emacsd:/root/.emacs.d
+WORKDIR /orgpress
+CMD emacs -batch -l orgpress.el -f org-publish-all

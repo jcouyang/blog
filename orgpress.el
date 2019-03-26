@@ -2,8 +2,9 @@
 (require 'package) ;; You might already have this line
 (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
                     (not (gnutls-available-p))))
-       (url (concat (if no-ssl "http" "https") "://melpa.org/packages/")))
-  (add-to-list 'package-archives (cons "melpa" url) t))
+       (url (concat (if no-ssl "http" "https") "://stable.melpa.org/packages/")))
+  (add-to-list 'package-archives (cons "melpastable" url) t))
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
 (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
 
 (package-initialize) ;; You might already have this line
@@ -59,7 +60,30 @@ representation for the files to include, as returned by
 `org-list-to-lisp'.  PROJECT is the current project."
   (concat "#+TITLE:" config-blog-title "\n" "#+OPTIONS: toc:nil\n\n"
 	  (org-list-to-subtree (rest list))))
+(defun my-org-publish-find-property (file property project &optional backend)
+  "Find the PROPERTY of FILE in project.
 
+PROPERTY is a keyword referring to an export option, as defined
+in `org-export-options-alist' or in export back-ends.  In the
+latter case, optional argument BACKEND has to be set to the
+back-end where the option is defined, e.g.,
+
+  (org-publish-find-property file :subtitle 'latex)
+
+Return value may be a string or a list, depending on the type of
+PROPERTY, i.e. \"behavior\" parameter from `org-export-options-alist'."
+  (let ((file (org-publish--expand-file-name file project)))
+    (when (and (file-readable-p file) (not (directory-name-p file)))
+      (let* ((org-inhibit-startup t)
+	     (visiting (find-buffer-visiting file))
+	     (buffer (or visiting (find-file-noselect file))))
+	(unwind-protect
+	    (with-current-buffer buffer
+			 (if (not visiting) (org-export-get-environment backend)
+			   ;; Protect local variables in open buffers.
+			   (org-export-with-buffer-copy
+			    (org-export-get-environment backend))))
+	  (unless visiting (kill-buffer buffer)))))))
 (defun my-sitemap-format (entry style project)
   "Custom sitemap entry formatting"
   (if (not (directory-name-p entry))
@@ -70,9 +94,11 @@ representation for the files to include, as returned by
 :RSS_PERMALINK: %L
 :PUBDATE: %D
 :END:
+%k
 " `((?t . ,(org-publish-find-title entry project))
                  (?D . ,(format-time-string "<%Y-%m-%d %a>" (org-publish-find-date entry project)))
-                 (?c . ,(org-publish-find-property entry :subtitle project))
+                 (?c . ,(or (org-publish-find-property entry :description project 'html) " "))
+                 (?k . ,(or (org-publish-find-property entry :keywords project 'html) " "))
                  (?l . ,(concat "file:" entry))
                  (?L . ,(replace-regexp-in-string "\.org" "\.html" entry))
                  ))
