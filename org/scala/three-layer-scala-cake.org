@@ -1,0 +1,607 @@
+#+Title: 3 Layer Scala Cake
+#+Date: <2019-03-18 Mon>
+#+Language: en
+#+Author: Jichao Ouyang
+#+MACRO: ruby @@html:<ruby>$1<rt>$2</rt></ruby>@@
+
+[[https://github.com/jcouyang/luci][https://upload.wikimedia.org/wikipedia/commons/0/0a/Imperial_Encyclopaedia_-_Animal_Kingdom_-_pic057_-_%E9%B8%95%E9%B6%BF%E5%9C%96.svg]]
+
+I've been using Free Monad in production for a while, as the projects scale and more
+members contribute, the boundary of different layer reveal them self more clearly.
+
+Thanks the summary from [[https://www.parsonsmatt.org/2018/03/22/three_layer_haskell_cake.html][Matt Parsons' 3 layer Haskell Cake]]. I found my Scala code also happen to
+fell into these 3 layer cake. 
+To make the future project has more clear boundary of abstraction, I created [[https://github.com/jcouyang/luci][{{{ruby(鸬鹚,luci)}}}]]
+for better taste of Free Monad effects.
+
+Here it is the Scala version of Cake, prepare your folk please.
+
+But before cutting the cake, let's +wash our hands+ describe the most common program.
+
+* the Program
+It will read output a log, query a data base, and do the calculation.
+
+#+BEGIN_SRC scala
+  val xa = Transactor.fromDriverManager[IO]("org.postgresql.Driver", "jdbc:postgresql:postgres", "postgres")
+  def program : Int = {
+    val initState = 1
+    getLogger.log(s"init state is $initState")
+    val valueInDatabase = try{
+      sql"select 32".query[Int].unique.transact(xa) unsafeRunSyn ()
+    } catch { case _: Throwable => 0}
+    initState + valueInDatabase
+  }
+#+END_SRC
+
+Your real business logic might be fancier, but basically this is the most common case
+
+1. Something to ask
+2. Something to write
+3. Some effects on dependencies
+4. Some error to handle
+5. Some business computation
+
+Anyway, this is really awful piece code in production.
+
+First of all, how do you unit test such thing? Oh, wait, maybe not that awful, we just mock =getLogger= and stub it's =log= method
+and then mock doobie's =ConnectionIO= and stub =transact= method.
+
+Sounds reasonable, just 2 mocks and 2 stubs.
+
+But think about it, here is just 2 line of effectful operation, count again such effectful code in production,
+how many mocks and stub you will need then?
+
+Such way of unit testing is definitely not gonna scale.
+
+Let us refactor in a baby step, with =IO=
+* Refactor
+** Take 1: IO
+modeling your problem with =IO= is easy, just wrap everything in IO
+
+#+BEGIN_SRC scala
+  def program : IO[Int] = for {
+    initState <- IO(1)
+    _ <- IO(getLogger.log(s"init state is $initState"))
+    valueInDatabase <- sql"select 32".query[Int].unique.transact(xa)
+      .handleError{_=>0}
+  } yield initState + valueInDatabase
+#+END_SRC
+
+How the hell this is better than previous one?
+
+Yes and No.
+
+It's not better in the sense of testable, but, it's /Pure/
+
+When we mention something that is Pure, it means that thing is Referential Transparent.
+
+In human words, it means I can do this:
+
+#+BEGIN_SRC scala
+val logState = IO(getLogger.log(s"log something"))
+def program : IO[Unit] = for {
+  _ <- logState
+  _ <- logState
+  _ <- logState
+} yield ()
+#+END_SRC
+
+But you can't do:
+#+BEGIN_SRC scala
+val logState = getLogger.log(s"log something")
+def program : Int = {
+  logState
+  logState
+  logState
+}
+#+END_SRC
+
+Probably not the best example but you should get the idea, that I can place IO anywhere
+and that won't change the semantic and behavior of your program.
+
+Fine, let's place those IO else where, so we can inject them into program
+
+#+BEGIN_SRC scala
+  def program(getState: IO[Int], log: String => IO[Unit], queryDB: IO[Int]): IO[Int] = for {
+    initState <- getState
+    _ <- log(s"initState is: $initState")
+    valueInDatabase <- queryDB
+  } yield initState + valueInDatabase
+#+END_SRC
+
+Now it's better, in our test, we could simply test =program= like
+#+BEGIN_SRC scala
+program(IO(1), (msg: String)=>IO(()), IO(10)) must_== 11
+#+END_SRC
+
+To verify our program can do the math.
+
+But still, it won't scale, e.g. we need to query 3 value from db
+#+BEGIN_SRC scala
+def program(getState: IO[Int], log: String => IO[Unit], queryDB: IO[Int], queryDB2: IO[Int], queryDB3: IO[Int]): IO[Int] = for {
+    initState <- getState
+    _ <- log(s"initState is: $initState")
+    valueInDatabase1 <- queryDB1
+    valueInDatabase2 <- queryDB2
+    valueInDatabase3 <- queryDB3
+  } yield initState + valueInDatabase1 + valueInDatabase2 + valueInDatabase3
+#+END_SRC
+
+our program will end up very long parameters
+
+Clearly IO isn't enough for more complex scenario, let's see what we can improve by adding another layer of abstraction
+
+** Take 2: ReaderT Pattern
+The problem of Dependent Injection via parameters is limited and not scalable, when your program get bigger,
+eventually you will need to have sub programs and then you will find the dependency has to be passed all the way down
+to each sub program.
+
+Here's the ReaderT pattern to help.
+
+First we move all dependency out, let's model it as =trait Env=
+#+BEGIN_SRC scala
+  trait Env{
+    val state: Int
+    def log(msg: String): IO(Unit)
+    def query[A](c: ConnectionIO[A]): IO[A]
+  }
+#+END_SRC
+
+Then we can move parameters of =program= out as standalone methods:
+#+BEGIN_SRC scala
+  def log(msg: String): ReaderT[IO, Env, Unit] = for {
+    env <- Kleisli.ask[IO, Env]
+    _ <- Kleisli.liftF(env.log(msg))
+  } yield ()
+
+  def doobieQuery[A](query: ConnectionIO[A]): ReaderT[IO, Env, A] = for {
+    env <- Kleisli.ask[IO, Env]
+    res <- Kleisli.liftF(env.query(query))
+  } yield res
+#+END_SRC
+
+These methods just return data type that describe that they need a =Env= but not provided yet,
+so you could put it anywhere you want, without knowing where exactly the instance of =Env= is.
+
+Finally, the program, without any parameters!!!
+
+#+BEGIN_SRC scala
+  def program: ReaderT[IO, Env, Int] = for {
+    env <- Kleisli.ask[IO, Int]
+    initState = env.state
+    _ <- log(s"initState is: $state")
+    valueInDatabase <- doobieQuery(sql"select 32".query[Int].unique)
+  } yield initState + valueInDatabase
+#+END_SRC
+
+** Retro
+Let us retro the evolving progress of the type of =program=
+
+*** Imperative
+#+BEGIN_SRC scala
+def program: Int
+#+END_SRC
+I'd name this layer *Bare Metal*. Here only exists raw values, 0 abstraction.
+
+*** IO
+#+BEGIN_SRC scala
+def program(deps...): IO[Int]
+#+END_SRC
+
+Introduce a new layer of abstraction =IO=, and I'd like to name it *VM* layer
+
+It's better than Bare metal, but still low level abstraction.
+
+when we need value, just run the IO layer
+#+BEGIN_SRC scala
+program(deps...).unsafeRunSync()
+#+END_SRC
+
+Effects are now Referential Transparent, but the way to inject and use effects is not scalable.
+
+*** ReaderT
+
+#+BEGIN_SRC scala
+def program: ReaderT[IO, Env, Int]
+#+END_SRC
+
+=ReaderT[IO, Env, Int]= consists 2 layers, =IO= and =Reader[Env, Int]=, this is the layer of *Functional Programming*
+
+pure business, 0 effect, lazy
+
+#+BEGIN_SRC scala
+  program // <- ReaderT[IO, Env, Int]
+  .run(new Env{
+    val state = 1
+    def log(msg: String) = IO(getLogger.log(msg))
+    def query[A](c: ConnectionIO[A]) = c.transact(xa)
+  }) // <- IO[Int]
+  .unsafeRunSync() // <- Int
+#+END_SRC
+
+We need to run this layer by layer, first =Reader=, and then =IO=
+
+And the time we run =Reader= can provide all the dependencies.
+
+ReaderT is pretty good "pattern" after all:
+- *Pure*: effectful part is factor out of program into Env (Bare Metal), so program can be Pure and RT
+- *Modular*: Dependency Injections are happened in Monad context, scalable in sense of easy to break program into smaller sub program
+- *Data Type*: since ReaderT is just a Data Type, lots of benefits for free from ReaderT's typeclasses instances, such as =Monoid=, =Applicative=, =MonadError=...
+
+** *Tagless Final* is nothing but a fancy name of *ReaderT*
+if we make some type alias for readerT, it's pretty much the same thing as the recent trending "design pattern" - /Tagless Final/
+#+BEGIN_SRC scala
+  trait AlgInterp[F[_]] {
+    val state: F[Int]
+    def log(msg: String): F[Unit]
+    def query[A](c: ConnectionIO[A]): F[A]
+  }
+
+  type Alg[F[_], A] = ReaderT[F, AlgInterp[F], A]
+
+  def state[F[_]]: Alg[F, Int] = Kleisli(_.state)
+  def log[F[_]](msg: String): Alg[F, Unit] = Kleisli(_.log(msg))
+
+  def doobieQuery[F[_], A](query: ConnectionIO[A]): Alg[F, A]
+
+  def program[F[_]]: Alg[F, Int] = for {
+    env <- state
+    _ <- log(s"initState is: $state")
+    valueInDatabase <- doobieQuery(sql"select 32".query[Int].unique).handleError{_=>0}
+  } yield initState + valueInDatabase
+
+ val interp = new AlgInterp[IO]{
+    val state = IO(1)
+    def log(msg: String) = IO(getLogger.log(msg))
+    def query[A](c: ConnectionIO[A]) = c.transact(xa)
+  }
+  program[IO].run(interp).unsafeRunSync()
+#+END_SRC
+
+If you look close enough, here it actually becomes 3 layers:
+- Layer 1: IO (AlgInterp)
+- Layer 2: IO ~> Alg (state, log, doobieQuery)
+- Layer 3: Alg (program)
+
+both layer 2 and 3 are pure, but the different is,
+- Layer 2 is just 1-1 mapping from IO to Alg
+- Layer 3 is orchestration of Layer 2 for pure business
+
+* 3 Layer Cake
+We now have a solid 3 Layer Scala Cake base made of =ReaderT=
+
+But you know, single flavor of cake won't satisfy everyone's taste.
+
+** The Needs of State
+remember the 5 factors that compose our program?
+1. Something to ask
+2. Something to write
+3. Some effects on dependencies
+4. Some error to handle
+5. Some business computation
+
+It has a missing part - Some *state*!
+
+In a 5 lines of code program, you won't see a state is necessary.
+
+In the real world, there are so many scenario needed a state
+
+i.e. a user's login info
+
+supposed that our program has a middleware, controller, repository layer
+
+Usually we will need to get user's info in middleware, and use the user info in repository layer for some database query.
+
+So, here is the case, since I want a modular code base, so these 3 layers should not be just single =Alg[F]=, but 3
+
+#+BEGIN_SRC scala
+  def middleware[F[_]]: Alg[F, User] = ???
+  def controller[F[_]]: Alg[F, Response] = ???
+  def repository[F[_]](user: User): Alg[F, DBResult] = ???
+
+  val program = for {
+    user <- middleware
+    dbresult <- respository(user)
+    response <- controller
+  } yield response
+#+END_SRC
+
+someday your controller become bigger and bigger and tech lead said there should be another layer - service, between controller and repository
+
+#+BEGIN_SRC scala
+  val program = for {
+    user <- middleware
+    dbresult <- service(user)
+    response <- controller
+  } yield response
+
+  def service(user) = for {
+    dbresult <- respository(user)
+    result <- doSomthingWith(dbresult)
+  } yield result
+#+END_SRC
+then it will become a nightmare that you have to pass such thing all over your code base.
+
+But that's exactly State Monad solved, no matter how many State monad you split, every piece always can share the exactly same state.
+
+#+BEGIN_SRC scala
+  def middleware[F[_]]: StateT[F, User, Unit] = StateT.set[F, User](User("abc"))
+  def controller[F[_]]: StateT[F, User, Response] = ???
+  def repository[F[_]]: StateT[F, User, DBResult] = for {
+    user <- StateT.get[F, User]
+    dbResult <- findResourceInDB(user)
+  } yield dbResult
+#+END_SRC
+
+So our program don't have to passing around user as parameter everywhere
+#+BEGIN_SRC scala
+  val program = for {
+    _ <- middleware
+    dbresult <- service
+    response <- controller
+  } yield response
+
+  val service = for {
+    dbresult <- respository
+    result <- doSomthingWith(dbresult)
+  } yield result
+#+END_SRC
+
+The new problem introduced by =StateT= is, everything else(controller, repository, service) need to be =StateT= as well. If we change them
+to =StateT=, then we will lose the effects of =ReaderT=
+
+** MTL
+To able to use both =ReaderT= and =StateT=, [[https://typelevel.org/cats-mtl/][MTL]] [fn:4]is an elegant solution though.
+
+MTL is like stacking those transformers together to =F=, at the end, you will get something very nice:
+
+#+BEGIN_SRC scala
+  def middleware[F[_]](implicit S: MonadState[F, User]): F[Unit] = S.set(User("abc"))
+  def controller[F[_]]: F[Response] = ???
+  def repository[F[_]](implicit S: MonadState[F, User]): F[DBResult] = for {
+    user <- S.get
+    dbResult <- findResourceInDB(user)
+  } yield dbResult
+#+END_SRC
+
+Such DSL is nearly ideal, where
+
+- if you look closer to =contorller='s type, it doesn't have any info about =User= or =MonadState=, because it shouldn't care about such things.
+- =middleware= and =respository= connected to each other via the implicit instance of
+=MonadState[F, User]=, which is perfect as well, no need to passing state around, request the implicit instance just in the place you need
+it.
+
+At the very end, provide the monad transformer stacks, so =F= is finally:
+
+#+BEGIN_SRC scala
+program[Alg[StateT[IO, User,? ], A]]
+// which expended to..
+program[ReaderT[StateT[IO, User,? ], AlgInterp[StateT[IO, User,? ]], A]]
+#+END_SRC
+
+
+There's no perfect solution for all, only perfect solution for particular case. For these example, MTL is perfect. But when you
+have more effects, e.g. WriterT(to output something Monoid), EitherT(to provide MonadError) ... the MTL stack is not very easy to reason about, DSL is still nice though.
+
+#+BEGIN_SRC scala
+program[ReaderT[WriterT[StateT[IO, User,? ], Chain[String], ?], AlgInterp[WriterT[StateT[IO, User,? ], Chain[String], ?]], A]]
+#+END_SRC
+
+** Free Monad
+Thus, the [[https://typelevel.org/cats/datatypes/freemonad.html][Free Monad]] will save your ass by providing monad for free if you have a Functor[fn:1].
+
+The advantage of Free Monad is providing ability to create your own custom Monad Transformer, and it helps you stack them in a nicer way.
+
+But let's try rewrite previous example first, since =State= and =Reader= are already data type, we could just stack(inject) them into a Free Monad.
+
+#+BEGIN_SRC scala
+import Free.{liftInject => free}
+type Program[A] = EitherK[Reader[AlgoInterp[IO], ?], State[User, ?], A]
+type ProgramF[A] = Free[Program, A]
+#+END_SRC
+
+Oh, since we have Free Monad, we don't need a reader monad to inject Interpreter, we can provide interpreter later for =foldMap=. 
+Great, we save one effect then. Let's have another effect for demonstration i.e. Writer
+
+#+BEGIN_SRC scala
+type Program[A] = EitherK[Writer[Chain[String], ?], State[User, ?], A]
+type ProgramF[A] = Free[Program, A]
+#+END_SRC
+
+Next you'll need to create two interpreters correspond to =Writer= and =State= effect.
+
+#+BEGIN_SRC scala
+def stateInterp(initState: User) = Lambda[State[User, ?] ~> IO[(Int, ?)]] { _.run(initState).value}
+def writerInterp = Lambda[Writer[Chain[String], ?] ~> IO] { _.run(Chain.empty[String])}
+#+END_SRC
+
+#+BEGIN_SRC scala
+  val program = for{
+    initState <- free[Program](State.get[User])
+    _ <- free[Program](Chain.one(s"init state: $initState").tell)
+    _ <- free[Program](State.set(User("jcoy")))
+    res <- free[Program](State.get[User])
+    logs <- free[Program](Chain.one(s"next state: $res").tell)
+  } yield (res, logs)
+  program foldMap (writerInterp or stateInterp(User("anonymous")))
+#+END_SRC
+Guess what, the output will not be =User("jcoy")=, instead, =User("anounymous")=, also writer will only contain the second log.
+
+Sorry I choose a bad example for Free Monad on purpose, in Monad Transformer, we need to run only once =StateT= or =WriterT= at
+the end, thus the state maintained across all monads in program. But here each Free Monad in program will be mapped with interpreter.
+So =State= and =Writer= run many times. Aach time they start with empty value in the interpreter.
+
+Cats provide us [[https://typelevel.org/cats/datatypes/freemonad.html#freet][FreeT]] to cater such scenario, but again, transform one effect is OK, transfrom multiple effect is nightmare, it will bring the same
+problem of Monad Transformer, then what's the whole point of using Free again?
+
+
+** ReaderT + MTL + Free
+Now that we know all approach has their own pros and cons, to eliminate their cons and magnify pros, the ultimate solution for
+abstracting effects is *Why not all of them*
+
+recall the 3 layers from ReaderT patter:
+
+- Layer 1: IO (AlgInterp)
+- Layer 2: IO ~> Alg (state, log, doobieQuery)
+- Layer 3: Alg (program)
+
+The ideal solution is to apply these approaches in different layers where they are good at.
+
+Free Monad is good at providing nice DSL so it naturally serves well in Layer 3.
+
+We also need MTL to transform some stateful effects in, so it's best place should be Layer 2, to provide various combination to provide
+support for domain models.
+
+Finally instead of interpreting Free Monad into IO directly, we can interpret Free Monad into ReaderT, so we get all pros from
+ReaderT pattern to inject dependencies seamlessly.
+
+To ultilize all these approaches together, we can use [[https://github.com/jcouyang/luci][luci]] to apply ReaderT, MTL and Free in the following 3 layer
+
+- Layer 1: *Binary* =ReaderT[IO, Env, ?]=
+- Layer 2: *Compiler* =Effects ~> ReaderT[IO, Env, ?]=
+- Layer 3: *Program* =Free[Program, ?]=
+
+Similar to a real world program, we need to go through the same 3 layer to execute our program:
+
+1. write program in scala
+2. compile scala code to binary(jar file)
+3. run the jar in JVM with some parameters
+
+But here we just keep doing the same thing to our EDSL[fn:2]
+
+For demonstrating the power of ReaderT + MTL + Free, here we compose a program that contains all 6 factors:
+
+1. Something to ask
+2. Something to write
+3. Some effects on dependencies
+4. Some error to handle
+5. Some business computation
+6. Something stateful
+
+
+*** Layer 3: Business (Free)
+to create a EDSL for Business, just use the Effects
+#+BEGIN_SRC scala
+  val program = for {
+    // 1. Somthing to read
+    config <- free[Program](Reader(identity[Config]))
+    // 2. Something to write
+    _ <- free[Program]((Chain.one("config: " + config.token)).tell)
+    // 3. Some effects on dependencies
+    response <- free[Program](
+      GetStatus[IO](GET(Uri.uri("https://blog.oyanglul.us"))))
+    // 4. Some error to handle, response is Either[Throwable, Response[IO]], hence MonadError instance
+    _ <- free[Program](response.ensure(new Exception("oops my website is down"))(_.status == Status.Ok))
+    // 6. Something stateful
+    _ <- free[Program](State.modify[Int](1 + _))
+    state <- free[Program](State.modify[Int](1 + _))
+  } yield state
+#+END_SRC
+
+from here we can easily tell that =Program= should contain following effects:
+
+#+BEGIN_SRC scala
+type Program[A] = Eff5[
+      Http4sClient[IO, ?],
+      Writer[Chain[String], ?],
+      Reader[Config, ?],
+      State[Int, ?],
+      Either[Throwable, ?],
+      A
+    ]
+#+END_SRC
+
+=EffX= is predefined alias of type to construct multiple kind in EitherK in luci.
+
+This is the Layer 3, which only has business DSL no IO[fn:3] thanks to the *Abstraction Barrier* provided by Layer 2.
+ 
+*** Layer 2: MTL + Interpreter
+
+Layer 2 is like a VM, it connects the business and bare metal, here we can deal with stateful effect with transformer
+
+i.e. the state compiler
+#+BEGIN_SRC scala
+  implicit def stateCompiler[L](implicit ev: Monad[E]) =
+    new Compiler[State[L, ?], E] {
+      type Env = MonadState[E, L] :: HNil
+      val compile = Lambda[State[L, ?] ~> Bin](state =>
+        ReaderT(env =>
+          for {
+            currentState <- env.head.get
+            (nextState, value) = state.run(currentState).value
+            _ <- env.head.set(nextState)
+          } yield value))
+    }
+#+END_SRC
+
+the original MTL way is to implicitly find =MonadState= from context
+
+#+BEGIN_SRC diff
+  - implicit def stateCompiler[L](implicit ev: Monad[E]) =
+  + implicit def stateCompiler[L](implicit ev: Monad[E], S: MonadState[E, L]) =
+      new Compiler[State[L, ?], E] {
+  -     type Env = MonadState[E, L] :: HNil
+        val compile = Lambda[State[L, ?] ~> Bin](state =>
+          ReaderT(env =>
+            for {
+  -           currentState <- env.head.get
+  +           currentState <- S.get
+              (nextState, value) = state.run(currentState).value
+  -           _ <- env.head.set(nextState)
+  +           _ <- S.set(nextState)            
+            } yield value))
+      }
+#+END_SRC
+
+But since we have ReaderT, I'll prefer 
+explicitly inject =MonadState= to have everything explicitly managed in one place.
+
+*** Layer 1: ReaderT
+Once we compile the program, a binary is produced.
+
+#+BEGIN_SRC scala
+import us.oyanglul.luci.compilers.io._
+val binary = compile(program)
+#+END_SRC
+
+Everything is automatically infer thanks to [[https://github.com/milessabin/shapeless/][Shapeless]], so you don't need to figure out what type =binary= has, just follow the compiler.
+
+Now we can safely run the binary with all dependencies explicitly
+#+BEGIN_SRC scala
+val args = (httpclient ::
+    logRef.tellInstance ::
+    config ::
+    stateRef.stateInstance ::
+    Unit ::
+    HNil).map(coflatten)
+
+binary.run(args)
+#+END_SRC
+
+Don't worry about types and order since compiler will tell you where exactly the type of args you provided is wrong.
+
+Anyway It's very easy to explain and compose args though!
+
+1. binary for =Http4sClient[IO, ?]= needs =Client[IO]= to run, so here =httpclient= is instance of =Client[IO]=
+2. binary for =Writer[Chain[String], ?]= needs =FuntorTell[IO, Chain[String]]= to run, presented by meow-mtl =.tellInstance=
+3. binary for =Reader[Config, ?]= needs =Config= to run
+6. binary for =State[Int, ?]= needs =MonadState[IO, Int]= to run, which presented here by meow-mtl from =.stateInstance=
+7. binary for =Either[Throwable, ?]= needs nothing so =Unit= is provided
+
+Of course there is one more layer missing - *Layer 0*, if you focus enough you will find out =binary.run(args)= will return =IO=
+
+Run the last layer 0 =binary.run(args).unsafeRunSync()= then all effects will be touching your bare metal.
+
+* Footnotes
+
+[fn:4] Monad Transformer Library
+
+[fn:3] Http4sClient is exception since the effect itself is a Tagless Final
+
+[fn:2] Embedded Domain Specific Language
+
+[fn:1] via [[https://blog.oyanglul.us/grokking-monad/scala/en/part3#orgd67ff11][CoYoneda Lema]] you just need to provide a data type(case class) =F[A]=, and you will get Functor for free.
+
+
+
+
