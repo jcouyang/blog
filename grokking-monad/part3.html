@@ -1,35 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-<!-- 2017-11-26 Sun 14:17 -->
-<meta  charset="utf-8">
-<meta  name="viewport" content="width=device-width, initial-scale=1">
-<title>范畴论完全装逼手册(三) / Grokking Monad</title>
-<meta  name="generator" content="Org-mode">
-<meta  name="author" content="欧阳继超">
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                                                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                                                                                              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                                                                                                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-NJRFJGX');</script>
-<!-- End Google Tag Manager -->
+<!-- 2019-03-27 Wed 02:21 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>范畴论完全装逼手册 / Grokking Monad</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="欧阳继超">
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/style/pixyll.css"/>
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css" />
-<!--[if lt IE 9]>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.ie.min.css" />
-     <![endif]-->
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2013 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -81,38 +71,53 @@ for the JavaScript code in this tag.
     <a accesskey="h" href="/index.html"> HOME </a> |
     <a href="#" id="edit-in-github">EDIT</a> |
     <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
-    <a href="/archive.html">ARCHIVE</a> |
-    <a href="/theindex.html">INDEX</a> |
-    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a>
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
 <div id="content">
 <header>
-<h1 class="title">范畴论完全装逼手册(三) / Grokking Monad</h1>
+<h1 class="title">范畴论完全装逼手册 / Grokking Monad</h1>
 </header><nav id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline8"><ruby>搞基猫呢<rt>Advanced Monads</rt></ruby></a>
+<li><a href="#org2bce1f4">第三部分:<ruby>搞基猫呢<rt>Advanced Monads</rt></ruby></a>
 <ul>
-<li><a href="#orgheadline1">RWS</a></li>
-<li><a href="#orgheadline2">Monad Transform</a></li>
-<li><a href="#orgheadline3">MonadPlus</a></li>
-<li><a href="#orgheadline4">MonadFix</a></li>
-<li><a href="#orgheadline5">ST</a></li>
-<li><a href="#orgheadline6">Free Monad</a></li>
-<li><a href="#orgheadline7">Eff</a></li>
+<li><a href="#org39fcaf3">RWS</a></li>
+<li><a href="#org2a8f580">Monad Transform</a>
+<ul>
+<li><a href="#org0e8a688">ReaderT</a></li>
+</ul>
+</li>
+<li><a href="#org9fbbef7">Alternative</a></li>
+<li><a href="#org6c25e05">MonadPlus</a></li>
+<li><a href="#orgf3c5abb">ST Monad</a></li>
+<li><a href="#org54f188c">Free Monad</a>
+<ul>
+<li><a href="#org2f59fb8">Free</a></li>
+<li><a href="#org519c9d5">Coyoneda</a></li>
+<li><a href="#org7244020">Free Functor</a></li>
+<li><a href="#org9449d12">Interpreter</a></li>
+</ul>
+</li>
+<li><a href="#orgb146a5c"><span class="todo TODO">TODO</span> Free Monoid</a></li>
+<li><a href="#org07a0ef8"><span class="todo TODO">TODO</span> Eff</a></li>
+<li><a href="#org254e01e"><span class="todo TODO">TODO</span> Comonad</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </nav>
 <ul class="org-ul">
-<li><a href="./index.html">第一部分：范畴论</a></li>
+<li><a href="./part1.html">第一部分：猫论</a></li>
 <li><a href="./part2.html">第二部分：食用猫呢</a></li>
-<li><b><a href="./part3.html">第三部分：搞基猫呢</a></b> 👈</li>
+<li><a href="./part3.html"><b>第三部分：搞基猫呢</b></a> 👈</li>
 </ul>
 
+<div id="outline-container-org2bce1f4" class="outline-2">
+<h2 id="org2bce1f4">第三部分:<ruby>搞基猫呢<rt>Advanced Monads</rt></ruby></h2>
+<div class="outline-text-2" id="text-org2bce1f4">
 <p>
 第二部分介绍了一些实用的monad instances，这些 monad 都通过同样的抽象方式，解决了分离计算与副作用的工作。
 </p>
@@ -122,49 +127,469 @@ for the JavaScript code in this tag.
 </p>
 
 <p>
-当有了第一部分的理论基础和第二部分的实践，这部分要介绍的猫其实并不是很搞基，也不是很难懂。通过这一部分介绍的搞基猫呢，我们还可以像 IO monad 一样，通过 free 或者 Eff 自定义自己的计算，和可能带副作用的解释器。
+当有了第一部分的理论基础和第二部分的实践，这部分要介绍的猫呢其实并不是很搞基。通过这一部分介绍的搞基猫呢，
+我们还可以像 IO monad 一样，通过 free 或者 Eff 自定义自己的计算，和可能带副作用的解释器。
+</p>
+</div>
+
+<div id="outline-container-org39fcaf3" class="outline-3">
+<h3 id="org39fcaf3">RWS</h3>
+<div class="outline-text-3" id="text-org39fcaf3">
+<p>
+RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。如果已经忘记 Reader Writer 或者 State，请到第二部分复习一下。
 </p>
 
-<div id="outline-container-orgheadline8" class="outline-2">
-<h2 id="orgheadline8"><ruby>搞基猫呢<rt>Advanced Monads</rt></ruby></h2>
-<div class="outline-text-2" id="text-orgheadline8">
-</div><div id="outline-container-orgheadline1" class="outline-3">
-<h3 id="orgheadline1">RWS</h3>
+<p>
+一旦把三个 monad 合体，意味着可以在同一个 monad 使用三个 monad 的方法，比如，可以同时使用 Reader 的 ask, State 的 get, put, 和 Writer 的 tell
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">readWriteState</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold;">do</span>
+  e <span style="font-weight: bold; font-style: italic;">&lt;-</span> ask
+  a <span style="font-weight: bold; font-style: italic;">&lt;-</span> get
+  <span style="font-weight: bold;">let</span> res <span style="font-weight: bold; font-style: italic;">=</span> a <span style="font-weight: bold; font-style: italic;">+</span> e
+  put res
+  tell [res]
+  return res
+<span style="font-weight: bold;">runRWS</span> readWriteState 1 2
+<span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">(3 3 [3])</span>
+</code></pre>
+
+<p>
+注意到跟 Reader 和 State 一样，run的时候输入初始值
+</p>
+
+<p>
+其中 1 为 Reader 的值，2 为 State 的初始状态.
+</p>
 </div>
-<div id="outline-container-orgheadline2" class="outline-3">
-<h3 id="orgheadline2">Monad Transform</h3>
 </div>
 
-<div id="outline-container-orgheadline3" class="outline-3">
-<h3 id="orgheadline3">MonadPlus</h3>
+<div id="outline-container-org2a8f580" class="outline-3">
+<h3 id="org2a8f580">Monad Transform</h3>
+<div class="outline-text-3" id="text-org2a8f580">
+<p>
+你会发现 RWS 一起用挺好的，能读能写能打 log，但是已经固定好搭配了，只能是 RWS ，如果我还想加入其它的 Monad，该怎么办呢？
+</p>
+
+<p>
+这时候，简单的解决方案是加个 T，比如对于 Reader，我们有 ReaderT，RWS，也有对应的 RWST。其中 T 代表 Transform。
+</p>
 </div>
-<div id="outline-container-orgheadline4" class="outline-3">
-<h3 id="orgheadline4">MonadFix</h3>
+
+<div id="outline-container-org0e8a688" class="outline-4">
+<h4 id="org0e8a688">ReaderT</h4>
+<div class="outline-text-4" id="text-org0e8a688">
+<p>
+让我来通过简单的 ReaderT 来解释到底什么是 T 吧, 首先跟 Reader 一样我们有个 runReaderT
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">newtype</span> <span style="font-weight: bold; text-decoration: underline;">ReaderT</span> e m a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">ReaderT</span> { runReaderT <span style="font-weight: bold; font-style: italic;">::</span> e <span style="font-weight: bold; font-style: italic;">-&gt;</span> m a }
+</code></pre>
+
+<p>
+比较一下 Reader 的定义
+</p>
+<pre class="code"><code><span style="font-weight: bold;">newtype</span> <span style="font-weight: bold; text-decoration: underline;">Reader</span> e a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Reader</span> { runReader <span style="font-weight: bold; font-style: italic;">::</span> (e <span style="font-weight: bold; font-style: italic;">-&gt;</span> a) }
+</code></pre>
+
+<p>
+有没有发现多了一个 m, 也就是说, <code>runReader e</code> 会返回 a, 但是 <code>runReaderT e</code> 则会返回 <code>m a</code>
+</p>
+
+
+<figure>
+<img src="images/p3-ReaderT.png" alt="p3-ReaderT.png">
+
+</figure>
+
+<pre class="code"><code><span style="font-weight: bold;">instance</span> (<span style="font-weight: bold; text-decoration: underline;">Monad</span> m) <span style="font-weight: bold; font-style: italic;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span> (<span style="font-weight: bold; text-decoration: underline;">ReaderT</span> e m) <span style="font-weight: bold;">where</span>
+    return   <span style="font-weight: bold; font-style: italic;">=</span> lift <span style="font-weight: bold; font-style: italic;">.</span> return
+    r <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> k  <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">ReaderT</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; font-style: italic;">\</span> e <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold;">do</span>
+        a <span style="font-weight: bold; font-style: italic;">&lt;-</span> runReaderT r e
+        runReaderT (k a) e
+</code></pre>
+
+<p>
+再看看 monad 的实现, 也是一样的, 先 run 一下 <code>r e</code> 得到结果 <code>a</code>, 应用函数 <code>k</code> 到 <code>a</code>, 再 run 一把.
+</p>
+
+
+<p>
+问题是, 这里的 <code>return</code> 里面的 <code>lift</code> 是哪来的?
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">MonadTrans</span> (<span style="font-weight: bold; text-decoration: underline;">ReaderT</span> e) <span style="font-weight: bold;">where</span>
+  lift m <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">ReaderT</span> (const m)
+</code></pre>
+
+
+<figure>
+<img src="images/p3-MonadTrans-ReaderT-e-m.png" alt="p3-MonadTrans-ReaderT-e-m.png">
+
+</figure>
+
+<p>
+这个函数 <code>lift</code> 被定义在 MonadTrans 的实例中, 简单的把 m 放到 ReaderT 结果中.
+</p>
+
+<p>
+例如, <code>lift (Just 1)</code> 会得到 ReaderT, 其中 e 随意, m 为 Maybe Num
+</p>
+
+<p>
+重点需要体会的是, Reader 可以越过 Maybe 直接操作到 Num, 完了再包回来.
+</p>
+
+<p>
+有了 ReaderT, 搭配 Id Monad 就很容易创建出来 Reader Monad
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">type</span> <span style="font-weight: bold; text-decoration: underline;">Reader</span> r a<span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">ReaderT</span> r <span style="font-weight: bold; text-decoration: underline;">Identity</span> a
+</code></pre>
+
+<p>
+越过 Id read 到 Id 内部, 完了再用 Id 包回来, 不就是 Reader 了么
+</p>
+
+<pre class="code"><code><span style="font-weight: bold; text-decoration: underline;">ReaderT</span> { runReaderT <span style="font-weight: bold; font-style: italic;">::</span> r <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Identity</span> a }
+<span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">Identity a is a</span>
+<span style="font-weight: bold; text-decoration: underline;">ReaderT</span> { runReaderT <span style="font-weight: bold; font-style: italic;">::</span> r <span style="font-weight: bold; font-style: italic;">-&gt;</span> a }
+</code></pre>
 </div>
-<div id="outline-container-orgheadline5" class="outline-3">
-<h3 id="orgheadline5">ST</h3>
 </div>
-<div id="outline-container-orgheadline6" class="outline-3">
-<h3 id="orgheadline6">Free Monad</h3>
 </div>
-<div id="outline-container-orgheadline7" class="outline-3">
-<h3 id="orgheadline7">Eff</h3>
+
+<div id="outline-container-org9fbbef7" class="outline-3">
+<h3 id="org9fbbef7">Alternative</h3>
+<div class="outline-text-3" id="text-org9fbbef7">
+<p>
+这个 typeclass 提供 <code>&lt;|&gt;</code> 函数, 表示要么计算左边, 要么计算右边
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">Applicative</span> f <span style="font-weight: bold; font-style: italic;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Alternative</span> f <span style="font-weight: bold;">where</span>
+    empty <span style="font-weight: bold; font-style: italic;">::</span> f a
+    (<span style="font-weight: bold; font-style: italic;">&lt;|&gt;</span>) <span style="font-weight: bold; font-style: italic;">::</span> f a <span style="font-weight: bold; font-style: italic;">-&gt;</span> f a <span style="font-weight: bold; font-style: italic;">-&gt;</span> f a
+</code></pre>
+
+
+<figure>
+<img src="images/p3-Alternative.png" alt="p3-Alternative.png">
+
+</figure>
+
+<p>
+其实就是 Applicative 的 <code>或</code>
+</p>
+
+<p>
+比如:
+</p>
+<pre class="code"><code><span style="font-weight: bold; text-decoration: underline;">Just</span> 1 <span style="font-weight: bold; font-style: italic;">&lt;|&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Just</span> 2 <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">Just 1</span>
+<span style="font-weight: bold; text-decoration: underline;">Just</span> 1 <span style="font-weight: bold; font-style: italic;">&lt;|&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Nothing</span> <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">Just 1</span>
+<span style="font-weight: bold; text-decoration: underline;">Nothing</span> <span style="font-weight: bold;">&lt;|&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Just</span> 1 <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">Just 1</span>
+<span style="font-weight: bold; text-decoration: underline;">Nothing</span> <span style="font-weight: bold;">&lt;|&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Nothing</span> <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">Nothing</span>
+</code></pre>
+</div>
+</div>
+
+<div id="outline-container-org6c25e05" class="outline-3">
+<h3 id="org6c25e05">MonadPlus</h3>
+<div class="outline-text-3" id="text-org6c25e05">
+<p>
+这跟 Alternative 是一毛一样的, 只是限制的更细, 必须是 Monad才行
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">class</span> (<span style="font-weight: bold; text-decoration: underline;">Alternative</span> m, <span style="font-weight: bold; text-decoration: underline;">Monad</span> m) <span style="font-weight: bold; font-style: italic;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">MonadPlus</span> m <span style="font-weight: bold;">where</span>
+   mzero <span style="font-weight: bold; font-style: italic;">::</span> m a
+   mzero <span style="font-weight: bold; font-style: italic;">=</span> empty
+   mplus <span style="font-weight: bold; font-style: italic;">::</span> m a <span style="font-weight: bold; font-style: italic;">-&gt;</span> m a <span style="font-weight: bold; font-style: italic;">-&gt;</span> m a
+   mplus <span style="font-weight: bold; font-style: italic;">=</span> (<span style="font-weight: bold; font-style: italic;">&lt;|&gt;</span>)
+</code></pre>
+
+<p>
+看, 实现中直接就调用了 Alternative 的 <code>empty</code> 和 <code>&lt;|&gt;</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf3c5abb" class="outline-3">
+<h3 id="orgf3c5abb">ST Monad</h3>
+<div class="outline-text-3" id="text-orgf3c5abb">
+<p>
+ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 immutable 的, 而是 "immutable" 的在原地做修改. 改完之后 runST 又然他回到了 immutable 的 Haskell 世界.
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">sumST</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Num</span> a <span style="font-weight: bold; font-style: italic;">=&gt;</span> [a] <span style="font-weight: bold; font-style: italic;">-&gt;</span> a
+<span style="font-weight: bold;">sumST</span> xs <span style="font-weight: bold; font-style: italic;">=</span> runST <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold;">do</span>           <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">do &#21518;&#38754;&#30340;&#20107;&#24773;&#20250;&#26159;&#19981;&#38169;&#30340;&#20869;&#23384;&#25805;&#20316;, runST &#21487;&#20197;&#25226;&#23427;&#25289;&#20250;&#32431;&#30340;&#19990;&#30028;</span>
+    n <span style="font-weight: bold; font-style: italic;">&lt;-</span> newSTRef 0             <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">&#22312;&#20869;&#23384;&#20013;&#21019;&#24314;&#19968;&#22359;&#24182;&#25351;&#21040; STRef</span>
+    forM_ xs <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; font-style: italic;">\</span>x <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold;">do</span>         <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">&#36825;&#36319;&#21629;&#20196;&#24335;&#30340;for&#24490;&#29615;&#25913;&#20889;&#21464;&#37327;&#26159;&#19968;&#27611;&#19968;&#26679;&#30340;</span>
+        modifySTRef n (<span style="font-weight: bold; font-style: italic;">+</span>x)
+    readSTRef n                 <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">&#36820;&#22238;&#25913;&#23436;&#20043;&#21518;&#30340; n &#30340;&#20540;</span>
+</code></pre>
+</div>
+</div>
+
+<div id="outline-container-org54f188c" class="outline-3">
+<h3 id="org54f188c">Free Monad</h3>
+<div class="outline-text-3" id="text-org54f188c">
+<p>
+上一章说过的 RWS Monad 毕竟是固定搭配，当你的业务需要更多的 Monad 来表示 Effect 时，
+我们就需要有那么个小猪手帮我们定义自己的 Monad。
+</p>
+
+<p>
+那就是 Free, Free 可以将任意 datatype lift 成为 Monad
+</p>
+</div>
+
+<div id="outline-container-org2f59fb8" class="outline-4">
+<h4 id="org2f59fb8">Free</h4>
+<div class="outline-text-4" id="text-org2f59fb8">
+<p>
+先看 Free 什么定义:
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">data</span> <span style="font-weight: bold; text-decoration: underline;">Free</span> f a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> (f (<span style="font-weight: bold; text-decoration: underline;">Free</span> f a)) <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">Return</span> a
+</code></pre>
+
+<p>
+其中 <code>f</code> 就是你业务需要的 effect 类型, <code>a</code> 是这个 effect 所产生的返回值类型。
+</p>
+
+<p>
+右边两种构造函数，如果把 <code>Role</code> 改成 <code>Cons</code>, <code>Return</code> 改成 <code>Nil</code> 的话, 是不是跟 List 其实是 <ruby>同构<rt>isomophic</rt></ruby> 的呢? 所以如果想象成 List, 那么 <code>f</code> 在这里就相当于 List 中的一个元素.
+</p>
+
+<p>
+到那时, <code>&gt;&gt;=</code> 的操作又跟 List 略有不同, 我们都知道 <code>&gt;&gt;=</code> 会把每一个元素 map 成 List, 然后 flatten, 但 Free 其实是用来构建
+顺序的 effect 的, 所以:
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span> f <span style="font-weight: bold; font-style: italic;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span> (<span style="font-weight: bold; text-decoration: underline;">Free</span> f) <span style="font-weight: bold;">where</span>
+  return a        <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Return</span> a
+  <span style="font-weight: bold; text-decoration: underline;">Return</span> a <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> fn <span style="font-weight: bold; font-style: italic;">=</span> fn a
+  <span style="font-weight: bold; text-decoration: underline;">Roll</span> ffa <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> fn <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> fmap (<span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> fn) ffa
+</code></pre>
+
+<p>
+你会发现 <code>&gt;&gt;=</code> 会递归的 <code>fmap</code> 到 <code>Roll</code> 上, 直到最后一个 <code>Return</code>.
+</p>
+
+<p>
+比如, 如果你有一个 program 有三种副作用 Eff1, Eff2, Eff3
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">data</span> <span style="font-weight: bold; text-decoration: underline;">Eff</span> a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> a <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> a <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> a
+<span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold;">do</span>
+ a <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> 1
+ b <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> 2
+ c <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> 3
+ return a <span style="font-weight: bold; font-style: italic;">+</span> b <span style="font-weight: bold; font-style: italic;">+</span> c
+</code></pre>
+
+<p>
+如果我们把 program 展开, 每一步 <code>&gt;&gt;=</code> 大概是这样:
+</p>
+
+<pre class="code"><code>liftF <span style="font-weight: bold;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> 1
+</code></pre>
+
+<p>
+展开既是:
+</p>
+
+<pre class="code"><code><span style="font-weight: bold; text-decoration: underline;">Roll</span> (<span style="font-weight: bold; text-decoration: underline;">Eff1</span> (<span style="font-weight: bold; text-decoration: underline;">Return</span> 1))
+</code></pre>
+
+<p>
+代入到 program 即:
+</p>
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> (<span style="font-weight: bold; text-decoration: underline;">Eff1</span> (<span style="font-weight: bold; text-decoration: underline;">Return</span> 1)) <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> <span style="font-weight: bold; font-style: italic;">\</span>a <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold;">do</span>
+   b <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> 2
+   c <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> 3
+   return a <span style="font-weight: bold; font-style: italic;">+</span> b <span style="font-weight: bold; font-style: italic;">+</span> c
+</code></pre>
+
+<p>
+用 Free 的 <code>&gt;&gt;=</code> 公式 <code>Roll ffa &gt;&gt;= fn = Roll $ fmap (&gt;&gt;= fn) ffa</code> 去展开上面就得到:
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> (<span style="font-weight: bold; text-decoration: underline;">Return</span> 1 <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> fn1)) <span style="font-weight: bold;">where</span>
+  fn1 <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; font-style: italic;">\</span>a <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold;">do</span>
+   b <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> 2
+   c <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> 3
+   return a <span style="font-weight: bold; font-style: italic;">+</span> b <span style="font-weight: bold; font-style: italic;">+</span> c
+</code></pre>
+
+<p>
+<code>Return 1 &gt;&gt;= fn1</code> 我们都知道怎么展开:
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> (fn1 1) <span style="font-weight: bold;">where</span>
+  fn1 <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; font-style: italic;">\</span>a <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold;">do</span>
+   b <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> 2
+   c <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> 3
+   return a <span style="font-weight: bold; font-style: italic;">+</span> b <span style="font-weight: bold; font-style: italic;">+</span> c
+</code></pre>
+
+<p>
+展开 <code>fn1</code>
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> <span style="font-weight: bold;">do</span>
+   b <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> 2
+   c <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> 3
+   return 1 <span style="font-weight: bold; font-style: italic;">+</span> b <span style="font-weight: bold; font-style: italic;">+</span> c
+</code></pre>
+
+
+<p>
+同样的步骤展开 Eff2
+</p>
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> <span style="font-weight: bold;">do</span>
+   c <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> 3
+   return 1 <span style="font-weight: bold; font-style: italic;">+</span> 2 <span style="font-weight: bold; font-style: italic;">+</span> c
+</code></pre>
+
+<p>
+和 Eff3
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> <span style="font-weight: bold;">do</span>
+   return 1 <span style="font-weight: bold; font-style: italic;">+</span> 2 <span style="font-weight: bold; font-style: italic;">+</span> 3
+</code></pre>
+
+<p>
+最后的 program 是不是很像 List 的 Cons 和 Nil 呢?
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Return</span> 1 <span style="font-weight: bold; font-style: italic;">+</span> 2 <span style="font-weight: bold; font-style: italic;">+</span> 3
+</code></pre>
+
+
+<p>
+但是, 细心的你可能早都发现了 <code>Eff</code> 这货必须是个 <code>Functor</code> 才行. 那我们如何随便定义一个 <code>data Eff</code> 直接能生成 <code>Functor Eff</code> 的实例呢?
+</p>
+</div>
+</div>
+
+<div id="outline-container-org519c9d5" class="outline-4">
+<h4 id="org519c9d5">Coyoneda</h4>
+<div class="outline-text-4" id="text-org519c9d5">
+<p>
+希望你还依然记得第一部分的米田 <del>共</del> 引理
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">data</span> <span style="font-weight: bold; text-decoration: underline;">CoYoneda</span> f a <span style="font-weight: bold; font-style: italic;">=</span> forall b<span style="font-weight: bold; font-style: italic;">.</span> <span style="font-weight: bold; text-decoration: underline;">CoYoneda</span> (b <span style="font-weight: bold; font-style: italic;">-&gt;</span> a) (f b)
+</code></pre>
+
+
+<figure>
+<img src="images/p3-CoYoneda.png" alt="p3-CoYoneda.png">
+
+</figure>
+
+<p>
+事实上很简单可以把任何 <code>f</code> 变成 <code>CoYoneda f</code>
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">phi</span> <span style="font-weight: bold; font-style: italic;">::</span> f a <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">CoYoneda</span> f a
+<span style="font-weight: bold;">phi</span> fa <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">CoYoneda</span> id fa
+</code></pre>
+
+
+<figure>
+<img src="images/p3-CoYoneda-phi.png" alt="p3-CoYoneda-phi.png">
+
+</figure>
+
+<p>
+诀窍就是 <code>id</code>, 也就是你把 <code>b</code> 变成 <code>a</code>, 再把 <code>fa</code> 放到 <code>CoYoneda</code> 里就好了
+</p>
+
+<p>
+当 <code>f</code> 是 <code>Functor</code> 时, 又可以把 <code>CoYoneda</code> 变成 <code>f</code>
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">psi</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span> f <span style="font-weight: bold; font-style: italic;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">CoYoneda</span> f a <span style="font-weight: bold; font-style: italic;">-&gt;</span> f a
+<span style="font-weight: bold;">psi</span> (<span style="font-weight: bold; text-decoration: underline;">CoYoneda</span> g fa) <span style="font-weight: bold; font-style: italic;">=</span> fmap g fa
+</code></pre>
+
+
+<figure>
+<img src="images/p3-CoYoneda-psi.png" alt="p3-CoYoneda-psi.png">
+
+</figure>
+
+<p>
+反过来的这个不重要, 重要的是 <code>phi</code>, 因为如果你可以把任何 <code>f</code> 变成 <code>CoYoneda f</code>, 而 <code>CoYoneda f</code> 又是 <code>Functor</code>,
+我们不就免费得到一个 <code>Functor</code>?
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span> (<span style="font-weight: bold; text-decoration: underline;">Coyoneda</span> f) <span style="font-weight: bold;">where</span>
+  fmap f (<span style="font-weight: bold; text-decoration: underline;">Coyoneda</span> g fb) <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Coyoneda</span> (f <span style="font-weight: bold; font-style: italic;">.</span> g) fb
+</code></pre>
+</div>
+</div>
+
+<div id="outline-container-org7244020" class="outline-4">
+<h4 id="org7244020">Free Functor</h4>
+<div class="outline-text-4" id="text-org7244020">
+<p>
+比如我们的 <code>Eff</code> 就可以直接通过 <code>phi</code> 变成 <code>CoYoneda Eff</code>, 从而得到免费的 Functor
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">data</span> <span style="font-weight: bold; text-decoration: underline;">Eff</span> a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> a <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> a <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> a
+<span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> (phi (<span style="font-weight: bold; text-decoration: underline;">Eff1</span> (<span style="font-weight: bold; text-decoration: underline;">Roll</span> (phi (<span style="font-weight: bold; text-decoration: underline;">Eff2</span> (<span style="font-weight: bold; text-decoration: underline;">Return</span> <span style="font-weight: bold; text-decoration: underline;">Int</span>))))))
+</code></pre>
+
+
+<figure>
+<img src="images/p3-Free.png" alt="p3-Free.png">
+
+</figure>
+</div>
+</div>
+
+<div id="outline-container-org9449d12" class="outline-4">
+<h4 id="org9449d12">Interpreter</h4>
+<div class="outline-text-4" id="text-org9449d12">
+<p>
+构造完一个 free program 后,我们得到的是一个嵌套的数据结构, 当我们需要 run 这个 program 时, 我们需要 foldMap 一个
+Interpreter 去一层层拨开 这个 free program.
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">foldMap</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span> m <span style="font-weight: bold; font-style: italic;">=&gt;</span> (<span style="font-weight: bold;">forall</span> x <span style="font-weight: bold; font-style: italic;">.</span> f x <span style="font-weight: bold; font-style: italic;">-&gt;</span> m x) <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Free</span> f a <span style="font-weight: bold; font-style: italic;">-&gt;</span> m a
+<span style="font-weight: bold;">foldMap</span> <span style="font-weight: bold;">_</span> (<span style="font-weight: bold; text-decoration: underline;">Return</span> a)  <span style="font-weight: bold; font-style: italic;">=</span> return a
+<span style="font-weight: bold;">foldMap</span> f (<span style="font-weight: bold; text-decoration: underline;">Roll</span> a) <span style="font-weight: bold; font-style: italic;">=</span> f a <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> foldMap f
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb146a5c" class="outline-3">
+<h3 id="orgb146a5c"><span class="todo TODO">TODO</span> Free Monoid</h3>
+</div>
+<div id="outline-container-org07a0ef8" class="outline-3">
+<h3 id="org07a0ef8"><span class="todo TODO">TODO</span> Eff</h3>
+</div>
+
+<div id="outline-container-org254e01e" class="outline-3">
+<h3 id="org254e01e"><span class="todo TODO">TODO</span> Comonad</h3>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <footer>
   <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2017-06-10 Sat 08:22</p>
-  <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6) x <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
-  <a class="gumroad-button" href="https://gum.co/grokking-monad">我的新书 Grokking Monad 现已发售，请自觉排队装逼</a>
-
-  <a class="github-fork-ribbon right-bottom fixed" href="https://github.com/jcouyang/blog" title="Fork me on GitHub">Fork me on GitHub</a>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
 </footer>
-
-<div id="disqus_thread"></div>
 </div>
 </body>
 </html>

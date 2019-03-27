@@ -1,38 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-<!-- 2017-11-26 Sun 14:17 -->
-<meta  charset="utf-8">
-<meta  name="viewport" content="width=device-width, initial-scale=1">
-<title></title>
-<meta  name="generator" content="Org-mode">
-<meta  name="author" content="Jichao Ouyang">
-<meta  name="description" content="bamboo does not come with native support of github commit status api, but we can still hack it to do the similar thing for our pull request"
+<!-- 2019-03-27 Wed 02:21 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>&lrm;</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="root">
+<meta name="description" content="bamboo does not come with native support of github commit status api, but we can still hack it to do the similar thing for our pull request"
 >
-<meta  name="keywords" content="bamboo,github,status api,commit,pull request,PR,atlassian">
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                                                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                                                                                              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                                                                                                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-NJRFJGX');</script>
-<!-- End Google Tag Manager -->
+<meta name="keywords" content="bamboo,github,status api,commit,pull request,PR,atlassian">
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/style/pixyll.css"/>
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css" />
-<!--[if lt IE 9]>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.ie.min.css" />
-     <![endif]-->
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2013 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -84,9 +74,8 @@ for the JavaScript code in this tag.
     <a accesskey="h" href="/index.html"> HOME </a> |
     <a href="#" id="edit-in-github">EDIT</a> |
     <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
-    <a href="/archive.html">ARCHIVE</a> |
-    <a href="/theindex.html">INDEX</a> |
-    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a>
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
 <div id="content">
@@ -94,32 +83,32 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">what's wrong with Bamboo</a></li>
-<li><a href="#orgheadline2">bamboo magic</a></li>
-<li><a href="#orgheadline3">github webhook</a></li>
-<li><a href="#orgheadline4">but what about the custom variables</a></li>
-<li><a href="#orgheadline5">config Bamboo plan</a>
+<li><a href="#org413ee43">what's wrong with Bamboo</a></li>
+<li><a href="#org57b00ed">bamboo magic</a></li>
+<li><a href="#orgc6fae90">github webhook</a></li>
+<li><a href="#orgdd8c7ed">but what about the custom variables</a></li>
+<li><a href="#org89b07b0">config Bamboo plan</a>
 <ul>
-<li><a href="#orgheadline6">checkout PR code</a></li>
-<li><a href="#orgheadline7">notify github status</a></li>
-<li><a href="#orgheadline8">stop build if PR</a></li>
+<li><a href="#orga4fae78">checkout PR code</a></li>
+<li><a href="#orgada7846">notify github status</a></li>
+<li><a href="#orgae2dc97">stop build if PR</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </nav>
 
-<div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1">what's wrong with Bamboo</h2>
-<div class="outline-text-2" id="text-orgheadline1">
+<div id="outline-container-org413ee43" class="outline-2">
+<h2 id="org413ee43">what's wrong with Bamboo</h2>
+<div class="outline-text-2" id="text-org413ee43">
 <p>
 if you used <i>travis-ci</i> on github, you may familiar with this thing when sending pull request
 </p>
 
 
 <figure>
-<p><img src="https://www.evernote.com/shard/s23/sh/02feb345-c27f-4002-8da2-11ccff9ab738/91cb36568f599ac8f0c4c3ad4e37bed8/deep/0/Screen-Shot-2015-02-17-at-4.19.12-PM.png" alt="Screen-Shot-2015-02-17-at-4.19.12-PM.png">
-</p>
+<img src="https://www.evernote.com/shard/s23/sh/02feb345-c27f-4002-8da2-11ccff9ab738/91cb36568f599ac8f0c4c3ad4e37bed8/deep/0/Screen-Shot-2015-02-17-at-4.19.12-PM.png" alt="Screen-Shot-2015-02-17-at-4.19.12-PM.png">
+
 </figure>
 
 <p>
@@ -136,9 +125,9 @@ but here's some hack you can do to achieve similar thing travis does.
 </div>
 </div>
 
-<div id="outline-container-orgheadline2" class="outline-2">
-<h2 id="orgheadline2">bamboo magic</h2>
-<div class="outline-text-2" id="text-orgheadline2">
+<div id="outline-container-org57b00ed" class="outline-2">
+<h2 id="org57b00ed">bamboo magic</h2>
+<div class="outline-text-2" id="text-org57b00ed">
 <p>
 there's thing in <i>bamboo</i> called <code>custom build</code>, which mean you can custom variable in bamboo's build.
 </p>
@@ -149,18 +138,15 @@ you can simply trigger a custom build via <i>GUI</i>
 
 
 <figure>
-<p><img src="https://www.evernote.com/shard/s23/sh/879a97d4-62f3-4964-805b-22c5d9fe3650/776a3754c17edc1ea3593c734347e301/deep/0/Contracts---Condor-AWS--Plan-summary---Atlassian-Bamboo.png" alt="Contracts---Condor-AWS--Plan-summary---Atlassian-Bamboo.png">
-</p>
+<img src="https://www.evernote.com/shard/s23/sh/879a97d4-62f3-4964-805b-22c5d9fe3650/776a3754c17edc1ea3593c734347e301/deep/0/Contracts---Condor-AWS--Plan-summary---Atlassian-Bamboo.png" alt="Contracts---Condor-AWS--Plan-summary---Atlassian-Bamboo.png">
+
 </figure>
 
 <p>
 or <i>API</i>
 </p>
-<div class="org-src-container">
-
-<pre class="src src-sh">curl -XPOST -u name:password http://your.bamboo.domain/rest/api/latest/queue/:build-key?bamboo.variable.blah=blahblah
-</pre>
-</div>
+<pre class="code"><code>curl -XPOST -u name:password http://your.bamboo.domain/rest/api/latest/queue/:build-key?bamboo.variable.blah=blahblah
+</code></pre>
 
 <p>
 then the custom varibale is available via <code>$bamboo_blah</code>
@@ -172,15 +158,15 @@ and your build will also display a little bit different such as
 
 
 <figure>
-<p><img src="https://www.evernote.com/shard/s23/sh/1fa24fdf-224d-472c-8f4f-6ecd97bcc069/26a3a2c92da01e543d761cdacedbfbb3/deep/0/Contracts---Condor-AWS-113--Build-result-summary---Atlassian-Bamboo.png" alt="Contracts---Condor-AWS-113--Build-result-summary---Atlassian-Bamboo.png">
-</p>
+<img src="https://www.evernote.com/shard/s23/sh/1fa24fdf-224d-472c-8f4f-6ecd97bcc069/26a3a2c92da01e543d761cdacedbfbb3/deep/0/Contracts---Condor-AWS-113--Build-result-summary---Atlassian-Bamboo.png" alt="Contracts---Condor-AWS-113--Build-result-summary---Atlassian-Bamboo.png">
+
 </figure>
 </div>
 </div>
 
-<div id="outline-container-orgheadline3" class="outline-2">
-<h2 id="orgheadline3">github webhook</h2>
-<div class="outline-text-2" id="text-orgheadline3">
+<div id="outline-container-orgc6fae90" class="outline-2">
+<h2 id="orgc6fae90">github webhook</h2>
+<div class="outline-text-2" id="text-orgc6fae90">
 <p>
 now we can config github webhook say, ok, I'd like bamboo to be trigger whenever a pull request is opened.
 </p>
@@ -195,64 +181,57 @@ with the hubot endpoint and variable we need
 
 
 <figure>
-<p><img src="https://www.evernote.com/shard/s23/sh/311a6aad-132c-447f-9fe6-23abaec16252/3f22258fb8b72fc1fd1a7c2ced0db94d/deep/0/Screen-Shot-2015-02-13-at-11.35.29-AM.png" alt="Screen-Shot-2015-02-13-at-11.35.29-AM.png">
-</p>
+<img src="https://www.evernote.com/shard/s23/sh/311a6aad-132c-447f-9fe6-23abaec16252/3f22258fb8b72fc1fd1a7c2ced0db94d/deep/0/Screen-Shot-2015-02-13-at-11.35.29-AM.png" alt="Screen-Shot-2015-02-13-at-11.35.29-AM.png">
+
 </figure>
 </div>
 </div>
 
 
-<div id="outline-container-orgheadline4" class="outline-2">
-<h2 id="orgheadline4">but what about the custom variables</h2>
-<div class="outline-text-2" id="text-orgheadline4">
+<div id="outline-container-orgdd8c7ed" class="outline-2">
+<h2 id="orgdd8c7ed">but what about the custom variables</h2>
+<div class="outline-text-2" id="text-orgdd8c7ed">
 <p>
 bamboo need special form of variables, so we need something middleware to convert webhook payload from github&#x2026; 
 </p>
 
 <p>
-I simply create a <a href="https://hubot.github.com/">hubot</a> and a very simple script<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup> to achieve that.
+I simply create a <a href="https://hubot.github.com">hubot</a> and a very simple script<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+checkout completed source code here <a href="https://gist.github.com/jcouyang/0201a80d4657b000cec7">https://gist.github.com/jcouyang/0201a80d4657b000cec7</a>
+</span> to achieve that.
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript">robot.router.post <span style="color: #8b0000;">"/hubot/trigger-bamboo"</span>, (req, res) -&gt;
+<pre class="code"><code>robot.router.post <span style="font-style: italic;">"/hubot/trigger-bamboo"</span>, (req, res) -&gt;
     query = querystring.parse(url.parse(req.url).query)
     bamboo_url = query.bamboo
     build_key = query.buildKey
     room = query.room
-    res.end <span style="color: #8b0000;">""</span> <span style="color: #00008b;">if</span> !bamboo_url || !room
+    res.end <span style="font-style: italic;">""</span> <span style="font-weight: bold;">if</span> !bamboo_url || !room
     data = req.body
-    eventType = req.headers[<span style="color: #8b0000;">"x-github-event"</span>]
-    console.log <span style="color: #8b0000;">"Processing event type #{eventType}..."</span>
+    eventType = req.headers[<span style="font-style: italic;">"x-github-event"</span>]
+    console.log <span style="font-style: italic;">"Processing event type #{eventType}..."</span>
 
-    <span style="color: #00008b;">try</span>
-      <span style="color: #00008b;">if</span> eventType <span style="color: #00008b;">in</span> eventTypes
-<span id="coderef-post-bamboo-api" class="coderef-off">        robot.http(<span style="color: #8b0000;">"#{bamboo_url}/rest/api/latest/queue/#{build_key}?bamboo.variable.pull_sha=#{data.pull_request.head.sha}&amp;bamboo.variable.pull_num=#{data.number}"</span>) (post-bamboo-api)</span>
+    <span style="font-weight: bold;">try</span>
+      <span style="font-weight: bold;">if</span> eventType <span style="font-weight: bold;">in</span> eventTypes
+<span id="coderef-post-bamboo-api" class="coderef-off">        robot.http(<span style="font-style: italic;">"#{bamboo_url}/rest/api/latest/queue/#{build_key}?bamboo.variable.pull_sha=#{data.pull_request.head.sha}&amp;bamboo.variable.pull_num=#{data.number}"</span>) (post-bamboo-api)</span>
           .post()
-</pre>
-</div>
+</code></pre>
 
 <p>
 you can easily install the script for you hubot
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-sh">npm install hubot-bamboo-pr --save
-</pre>
-</div>
+<pre class="code"><code>npm install hubot-bamboo-pr --save
+</code></pre>
 
 <p>
 andd add it to <code>external-scripts.json</code> file
 </p>
-<div class="org-src-container">
-
-<pre class="src src-diff">[
+<pre class="code"><code>[
   "hubot-something-else",
   + "hubot-bamboo-pr"
 ]
-</pre>
-</div>
+</code></pre>
 
 <p>
 then point your github hook to hubot.
@@ -260,9 +239,9 @@ then point your github hook to hubot.
 </div>
 </div>
 
-<div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5">config Bamboo plan</h2>
-<div class="outline-text-2" id="text-orgheadline5">
+<div id="outline-container-org89b07b0" class="outline-2">
+<h2 id="org89b07b0">config Bamboo plan</h2>
+<div class="outline-text-2" id="text-org89b07b0">
 <p>
 We'd like only run the PR only in testing, and stop build after testing. 
 imaging if your build originally looks like this:
@@ -303,8 +282,8 @@ so when build trigger by hubot with custom variables, ideally your build should 
 
 
 <figure>
-<p><img src="https://www.evernote.com/shard/s23/sh/00c1ee53-b1c3-4238-a83c-a8085e3ee024/b728939aba1996973c1e3879e25cf8d7/deep/0/Screen-Shot-2015-02-26-at-2.48.32-PM.png" alt="Screen-Shot-2015-02-26-at-2.48.32-PM.png">
-</p>
+<img src="https://www.evernote.com/shard/s23/sh/00c1ee53-b1c3-4238-a83c-a8085e3ee024/b728939aba1996973c1e3879e25cf8d7/deep/0/Screen-Shot-2015-02-26-at-2.48.32-PM.png" alt="Screen-Shot-2015-02-26-at-2.48.32-PM.png">
+
 </figure>
 
 
@@ -316,7 +295,7 @@ some credentials you may need
 <li><code>$bamboo_GITHUB_STATUS_API_password</code></li>
 </ul>
 <p>
-you need github status api token <a href="#coderef-githubapi1"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-githubapi1');" onmouseout="CodeHighlightOff(this, 'coderef-githubapi1');">here</a> <a href="#coderef-githubapi2"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-githubapi2');" onmouseout="CodeHighlightOff(this, 'coderef-githubapi2');">there</a> and <del>everywhere</del>
+you need github status api token <a href="#coderef-githubapi1" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-githubapi1');" onmouseout="CodeHighlightOff(this, 'coderef-githubapi1');">here</a> <a href="#coderef-githubapi2" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-githubapi2');" onmouseout="CodeHighlightOff(this, 'coderef-githubapi2');">there</a> and <del>everywhere</del>
 </p>
 
 <p>
@@ -335,44 +314,38 @@ you need <i>bamboo password</i> for stoping build, just create a share user with
 </p>
 </div>
 
-<div id="outline-container-orgheadline6" class="outline-3">
-<h3 id="orgheadline6">checkout PR code</h3>
-<div class="outline-text-3" id="text-orgheadline6">
-<div class="org-src-container">
-
-<pre class="src src-sh"><span style="color: #8c8c8c; font-style: italic;">#</span><span style="color: #8c8c8c; font-style: italic;">!/bin/</span><span style="color: #00008b;">bash</span>
-<span style="color: #b8860b;">GITHUB_API</span>=https://api.github.com
-<span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">if github enterprise https://your.github.domain/api/v3</span>
-<span style="color: #00008b;">if</span> [[ -n ${<span style="color: #b8860b;">bamboo_pull_num</span>} ]]; <span style="color: #00008b;">then</span>
-  <span style="color: #228b22;">echo</span> <span style="color: #8b0000;">"== send pending status =="</span>
-  curl -H <span style="color: #8b0000;">"Authorization: token $bamboo_GITHUB_STATUS_API_password"</span> --request POST -k --data <span style="color: #8b0000;">"{\"state\": \"pending\", \"description\": \"building...\", \"target_url\": \"$bamboo_resultsUrl\"}"</span> https://$<span style="color: #b8860b;">GITHUB_API</span>/repos/the-money/condor/statuses/$<span style="color: #b8860b;">bamboo_pull_sha</span> &gt; /dev/null  
-  <span style="color: #228b22;">echo</span> <span style="color: #8b0000;">"git fetch PR $bamboo_pull_num =="</span>
-  git fetch ${<span style="color: #b8860b;">bamboo</span>.repository.git.repositoryUrl} +refs/pull/$<span style="color: #b8860b;">bamboo_pull_num</span>/merge:
+<div id="outline-container-orga4fae78" class="outline-3">
+<h3 id="orga4fae78">checkout PR code</h3>
+<div class="outline-text-3" id="text-orga4fae78">
+<pre class="code"><code><span style="font-weight: bold; font-style: italic;">#</span><span style="font-weight: bold; font-style: italic;">!/bin/</span><span style="font-weight: bold;">bash</span>
+<span style="font-weight: bold; font-style: italic;">GITHUB_API</span>=https://api.github.com
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">if github enterprise https://your.github.domain/api/v3</span>
+<span style="font-weight: bold;">if</span> [[ -n ${<span style="font-weight: bold; font-style: italic;">bamboo_pull_num</span>} ]]; <span style="font-weight: bold;">then</span>
+  <span style="font-weight: bold;">echo</span> <span style="font-style: italic;">"== send pending status =="</span>
+  curl -H <span style="font-style: italic;">"Authorization: token $bamboo_GITHUB_STATUS_API_password"</span> --request POST -k --data <span style="font-style: italic;">"{\"state\": \"pending\", \"description\": \"building...\", \"target_url\": \"$bamboo_resultsUrl\"}"</span> https://$<span style="font-weight: bold; font-style: italic;">GITHUB_API</span>/repos/the-money/condor/statuses/$<span style="font-weight: bold; font-style: italic;">bamboo_pull_sha</span> &gt; /dev/null  
+  <span style="font-weight: bold;">echo</span> <span style="font-style: italic;">"git fetch PR $bamboo_pull_num =="</span>
+  git fetch ${<span style="font-weight: bold; font-style: italic;">bamboo</span>.repository.git.repositoryUrl} +refs/pull/$<span style="font-weight: bold; font-style: italic;">bamboo_pull_num</span>/merge:
   git checkout FETCH_HEAD
-<span style="color: #00008b;">fi</span>
-</pre>
-</div>
+<span style="font-weight: bold;">fi</span>
+</code></pre>
 </div>
 </div>
 
-<div id="outline-container-orgheadline7" class="outline-3">
-<h3 id="orgheadline7">notify github status</h3>
-<div class="outline-text-3" id="text-orgheadline7">
-<div class="org-src-container">
-
-<pre class="src src-sh"><span class="linenr"> 1: </span><span style="color: #8c8c8c; font-style: italic;">#</span><span style="color: #8c8c8c; font-style: italic;">!/bin/</span><span style="color: #00008b;">bash</span>
-<span class="linenr"> 2: </span><span style="color: #b8860b;">STATUS</span>=$<span style="color: #b8860b;">?</span>
-<span class="linenr"> 3: </span><span style="color: #00008b;">if</span> [[ -n ${<span style="color: #b8860b;">bamboo_pull_sha</span>} ]]; <span style="color: #00008b;">then</span>
-<span class="linenr"> 4: </span>  <span style="color: #00008b;">if</span> [ $<span style="color: #b8860b;">STATUS</span> != 0 ]; <span style="color: #00008b;">then</span>
-<span class="linenr"> 5: </span>    <span style="color: #228b22;">echo</span> <span style="color: #8b0000;">'pull reqeust build failed'</span>
-<span id="coderef-githubapi1" class="coderef-off"><span class="linenr"> 6: </span>    curl -k -H <span style="color: #8b0000;">"Authorization: token $bamboo_GITHUB_STATUS_API_password"</span> --request POST --data <span style="color: #8b0000;">"{\"state\": \"failure\", \"description\": \"failure:(\", \"target_url\": \"${bamboo.buildResultsUrl}\"}"</span> $<span style="color: #b8860b;">GITHUB_API</span>/repos/:user/:repo/statuses/$<span style="color: #b8860b;">bamboo_pull_sha</span> &gt; /dev/null</span>
-<span class="linenr"> 7: </span>  <span style="color: #00008b;">else</span>
-<span class="linenr"> 8: </span>    <span style="color: #228b22;">echo</span> <span style="color: #8b0000;">'pull request build success'</span>
-<span id="coderef-githubapi2" class="coderef-off"><span class="linenr"> 9: </span>    curl -k -H <span style="color: #8b0000;">"Authorization: token $bamboo_GITHUB_STATUS_API_password"</span> --request POST --data <span style="color: #8b0000;">"{\"state\": \"success\", \"description\": \"Success:)\", \"target_url\": \"${bamboo.buildResultsUrl}\"}"</span> $<span style="color: #b8860b;">GITHUB_API</span>/repos/:user/:repo/statuses/$<span style="color: #b8860b;">bamboo_pull_sha</span> &gt; /dev/null</span>
-<span class="linenr">10: </span>  <span style="color: #00008b;">fi</span>
-<span class="linenr">11: </span><span style="color: #00008b;">fi</span>
-</pre>
-</div>
+<div id="outline-container-orgada7846" class="outline-3">
+<h3 id="orgada7846">notify github status</h3>
+<div class="outline-text-3" id="text-orgada7846">
+<pre class="code"><code><span class="linenr"> 1: </span><span style="font-weight: bold; font-style: italic;">#</span><span style="font-weight: bold; font-style: italic;">!/bin/</span><span style="font-weight: bold;">bash</span>
+<span class="linenr"> 2: </span><span style="font-weight: bold; font-style: italic;">STATUS</span>=$<span style="font-weight: bold; font-style: italic;">?</span>
+<span class="linenr"> 3: </span><span style="font-weight: bold;">if</span> [[ -n ${<span style="font-weight: bold; font-style: italic;">bamboo_pull_sha</span>} ]]; <span style="font-weight: bold;">then</span>
+<span class="linenr"> 4: </span>  <span style="font-weight: bold;">if</span> [ $<span style="font-weight: bold; font-style: italic;">STATUS</span> != 0 ]; <span style="font-weight: bold;">then</span>
+<span class="linenr"> 5: </span>    <span style="font-weight: bold;">echo</span> <span style="font-style: italic;">'pull reqeust build failed'</span>
+<span id="coderef-githubapi1" class="coderef-off"><span class="linenr"> 6: </span>    curl -k -H <span style="font-style: italic;">"Authorization: token $bamboo_GITHUB_STATUS_API_password"</span> --request POST --data <span style="font-style: italic;">"{\"state\": \"failure\", \"description\": \"failure:(\", \"target_url\": \"${bamboo.buildResultsUrl}\"}"</span> $<span style="font-weight: bold; font-style: italic;">GITHUB_API</span>/repos/:user/:repo/statuses/$<span style="font-weight: bold; font-style: italic;">bamboo_pull_sha</span> &gt; /dev/null</span>
+<span class="linenr"> 7: </span>  <span style="font-weight: bold;">else</span>
+<span class="linenr"> 8: </span>    <span style="font-weight: bold;">echo</span> <span style="font-style: italic;">'pull request build success'</span>
+<span id="coderef-githubapi2" class="coderef-off"><span class="linenr"> 9: </span>    curl -k -H <span style="font-style: italic;">"Authorization: token $bamboo_GITHUB_STATUS_API_password"</span> --request POST --data <span style="font-style: italic;">"{\"state\": \"success\", \"description\": \"Success:)\", \"target_url\": \"${bamboo.buildResultsUrl}\"}"</span> $<span style="font-weight: bold; font-style: italic;">GITHUB_API</span>/repos/:user/:repo/statuses/$<span style="font-weight: bold; font-style: italic;">bamboo_pull_sha</span> &gt; /dev/null</span>
+<span class="linenr">10: </span>  <span style="font-weight: bold;">fi</span>
+<span class="linenr">11: </span><span style="font-weight: bold;">fi</span>
+</code></pre>
 
 <p>
 place <code>checkout PR</code> and <code>notify github status</code> script in this order
@@ -380,27 +353,24 @@ place <code>checkout PR</code> and <code>notify github status</code> script in t
 
 
 <figure>
-<p><img src="https://www.evernote.com/shard/s23/sh/81f23ebb-35cd-412b-8d5a-2f616df42c98/02a59a2fc34af8bca7797b3454d02b9a/deep/0/Contracts---Condor-AWS---Condor-Jasmine-Tests--Edit-job-configuration---Atlassian-Bamboo.png" alt="Contracts---Condor-AWS---Condor-Jasmine-Tests--Edit-job-configuration---Atlassian-Bamboo.png">
-</p>
+<img src="https://www.evernote.com/shard/s23/sh/81f23ebb-35cd-412b-8d5a-2f616df42c98/02a59a2fc34af8bca7797b3454d02b9a/deep/0/Contracts---Condor-AWS---Condor-Jasmine-Tests--Edit-job-configuration---Atlassian-Bamboo.png" alt="Contracts---Condor-AWS---Condor-Jasmine-Tests--Edit-job-configuration---Atlassian-Bamboo.png">
+
 </figure>
 </div>
 </div>
 
-<div id="outline-container-orgheadline8" class="outline-3">
-<h3 id="orgheadline8">stop build if PR</h3>
-<div class="outline-text-3" id="text-orgheadline8">
+<div id="outline-container-orgae2dc97" class="outline-3">
+<h3 id="orgae2dc97">stop build if PR</h3>
+<div class="outline-text-3" id="text-orgae2dc97">
 <p>
 create new <i>stage</i> for <span class="underline">stop build</span> task
 </p>
-<div class="org-src-container">
-
-<pre class="src src-sh"><span class="linenr">1: </span><span style="color: #8c8c8c; font-style: italic;">#</span><span style="color: #8c8c8c; font-style: italic;">!/bin/</span><span style="color: #00008b;">bash</span><span style="color: #8c8c8c; font-style: italic;"> </span>
-<span class="linenr">2: </span><span style="color: #00008b;">if</span> [[ -n ${<span style="color: #b8860b;">bamboo_pull_num</span>} ]]; <span style="color: #00008b;">then</span>
-<span class="linenr">3: </span>  <span style="color: #228b22;">echo</span> <span style="color: #8b0000;">'stoping bamboo'</span>
-<span class="linenr">4: </span>  curl <span style="color: #8b0000;">"http://${bamboo_BAMBOO_USER}:${bamboo_BAMBOO_password}@your.bamboo.domain/build/admin/stopPlan.action?${bamboo.planResultKey}-${bamboo.buildNumber}"</span>
-<span class="linenr">5: </span><span style="color: #00008b;">fi</span>
-</pre>
-</div>
+<pre class="code"><code><span class="linenr">1: </span><span style="font-weight: bold; font-style: italic;">#</span><span style="font-weight: bold; font-style: italic;">!/bin/</span><span style="font-weight: bold;">bash</span><span style="font-weight: bold; font-style: italic;"> </span>
+<span class="linenr">2: </span><span style="font-weight: bold;">if</span> [[ -n ${<span style="font-weight: bold; font-style: italic;">bamboo_pull_num</span>} ]]; <span style="font-weight: bold;">then</span>
+<span class="linenr">3: </span>  <span style="font-weight: bold;">echo</span> <span style="font-style: italic;">'stoping bamboo'</span>
+<span class="linenr">4: </span>  curl <span style="font-style: italic;">"http://${bamboo_BAMBOO_USER}:${bamboo_BAMBOO_password}@your.bamboo.domain/build/admin/stopPlan.action?${bamboo.planResultKey}-${bamboo.buildNumber}"</span>
+<span class="linenr">5: </span><span style="font-weight: bold;">fi</span>
+</code></pre>
 </div>
 </div>
 </div>
@@ -417,17 +387,15 @@ checkout completed source code here <a href="https://gist.github.com/jcouyang/02
 </div></div>
 <div id="postamble" class="status">
 <footer>
-  <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2017-06-10 Sat 08:22</p>
-  <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6) x <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Author: root <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
+  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
-  <a class="gumroad-button" href="https://gum.co/grokking-monad">我的新书 Grokking Monad 现已发售，请自觉排队装逼</a>
-
-  <a class="github-fork-ribbon right-bottom fixed" href="https://github.com/jcouyang/blog" title="Fork me on GitHub">Fork me on GitHub</a>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
 </footer>
-
-<div id="disqus_thread"></div>
 </div>
 </body>
 </html>

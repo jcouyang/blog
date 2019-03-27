@@ -1,35 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-<!-- 2017-06-10 Sat 09:09 -->
-<meta  charset="utf-8">
-<meta  name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2019-03-27 Wed 02:21 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>范畴论完全装逼手册 / Grokking Monad</title>
-<meta  name="generator" content="Org-mode">
-<meta  name="author" content="欧阳继超">
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                                                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                                                                                              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                                                                                                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-NJRFJGX');</script>
-<!-- End Google Tag Manager -->
+<meta name="generator" content="Org mode">
+<meta name="author" content="欧阳继超">
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/style/pixyll.css"/>
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css" />
-<!--[if lt IE 9]>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.ie.min.css" />
-     <![endif]-->
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2013 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -81,9 +71,8 @@ for the JavaScript code in this tag.
     <a accesskey="h" href="/index.html"> HOME </a> |
     <a href="#" id="edit-in-github">EDIT</a> |
     <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
-    <a href="/archive.html">ARCHIVE</a> |
-    <a href="/theindex.html">INDEX</a> |
-    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a>
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
 <div id="content">
@@ -93,7 +82,83 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">References</a></li>
+<li><a href="#org0c3ceed">1. 第一部分：<ruby>猫论<rt>Catergory Theory</rt></ruby></a>
+<ul>
+<li><a href="#org93f5572">1.1. <i>Category</i></a>
+<ul>
+<li><a href="#org69b4b2c">1.1.1. <i>Hask</i></a></li>
+<li><a href="#org05e163c">1.1.2. <i>Duel</i></a></li>
+</ul>
+</li>
+<li><a href="#org055bf38">1.2. <i><ruby>函子<rt> Functor</rt></ruby></i></a></li>
+<li><a href="#orgb7dbdf7">1.3. <i><ruby>Cat<rt> +猫+</rt></ruby></i></a></li>
+<li><a href="#org13458bf">1.4. /<ruby>自然变换<rt>Natural Transformations</rt></ruby>/</a></li>
+<li><a href="#org3adffdf">1.5. String Diagram</a></li>
+<li><a href="#orgeeeb4c8">1.6. <i>Adjunction Functor</i> 伴随函子</a></li>
+<li><a href="#org0e1b1db">1.7. 从伴随函子到 <ruby>单子<rt> Monad</rt></ruby></a>
+<ul>
+<li><a href="#org45105e4">1.7.1. 三角等式</a></li>
+<li><a href="#orgd4b0200">1.7.2. 结合律</a></li>
+</ul>
+</li>
+<li><a href="#org0146684">1.8. Yoneda lemma / <del>米田共</del> 米田引理</a>
+<ul>
+<li><a href="#org3b8a153">1.8.1. Rank N Type</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org8111665">2. 第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></a>
+<ul>
+<li><a href="#orgece5e2d">2.1. Identity</a></li>
+<li><a href="#orgd9a0d52">2.2. Maybe</a></li>
+<li><a href="#org94fdd96">2.3. Either</a>
+<ul>
+<li><a href="#org87914b3">2.3.1. Product &amp; Coproduct</a></li>
+<li><a href="#orgee4670e">2.3.2. Either Monad</a></li>
+</ul>
+</li>
+<li><a href="#org9f7b549">2.4. Reader</a>
+<ul>
+<li><a href="#org0864d73">2.4.1. do notation</a></li>
+</ul>
+</li>
+<li><a href="#orga55bf5c">2.5. Writer</a></li>
+<li><a href="#orgfe89e6f">2.6. State</a></li>
+<li><a href="#org1db0a19">2.7. Validation</a>
+<ul>
+<li><a href="#org4a696cb">2.7.1. <ruby>含幺半群<rt>Monoid</rt></ruby></a></li>
+<li><a href="#orgbe08a66">2.7.2. 回到 Validation</a></li>
+</ul>
+</li>
+<li><a href="#org25a1881">2.8. Cont</a></li>
+</ul>
+</li>
+<li><a href="#org9bafa0f">3. 第三部分:<ruby>搞基猫呢<rt>Advanced Monads</rt></ruby></a>
+<ul>
+<li><a href="#orgc4dbc11">3.1. RWS</a></li>
+<li><a href="#org20dd439">3.2. Monad Transform</a>
+<ul>
+<li><a href="#org7b440b1">3.2.1. ReaderT</a></li>
+</ul>
+</li>
+<li><a href="#orga2de3f7">3.3. Alternative</a></li>
+<li><a href="#org3293a7e">3.4. MonadPlus</a></li>
+<li><a href="#org2af42cd">3.5. ST Monad</a></li>
+<li><a href="#org5ad914e">3.6. Free Monad</a>
+<ul>
+<li><a href="#orgf822c1d">3.6.1. Free</a></li>
+<li><a href="#orgb93cf85">3.6.2. Coyoneda</a></li>
+<li><a href="#org7b58063">3.6.3. Free Functor</a></li>
+<li><a href="#orgcdf210d">3.6.4. Interpreter</a></li>
+</ul>
+</li>
+<li><a href="#org9bdb909">3.7. Free Monoid</a></li>
+<li><a href="#org0d748aa">3.8. Eff</a></li>
+<li><a href="#orge7b1558">3.9. Comonad</a></li>
+</ul>
+</li>
+<li><a href="#orgcf68728">4. References</a></li>
 </ul>
 </div>
 </nav>
@@ -114,19 +179,1950 @@ FBI Warning
 
 <script src="https://gumroad.com/js/gumroad-embed.js"></script><div class="gumroad-product-embed" data-gumroad-product-id="grokking-monad"><a href="https://gumroad.com/l/grokking-monad"><img src="https://blog.oyanglul.us/grokking-monad/cover.jpg"></img></a></div>
 
+
+<div id="outline-container-org0c3ceed" class="outline-2">
+<h2 id="org0c3ceed"><span class="section-number-2">1</span> 第一部分：<ruby>猫论<rt>Catergory Theory</rt></ruby></h2>
+<div class="outline-text-2" id="text-1">
 <p>
-👇免费在线阅读
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/De_Alice%27s_Abenteuer_im_Wunderland_Carroll_pic_23_edited_1_of_2.png/1920px-De_Alice%27s_Abenteuer_im_Wunderland_Carroll_pic_23_edited_1_of_2.png" alt="1920px-De_Alice%27s_Abenteuer_im_Wunderland_Carroll_pic_23_edited_1_of_2.png"> <label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+<a href="https://en.wikipedia.org/wiki/Cheshire_Cat">https://en.wikipedia.org/wiki/Cheshire_Cat</a>
+</span>
+</p>
+
+<div class="epigraph"><blockquote>
+<p>
+`But I don’t want to go among mad people,’ Alice remarked.
+</p>
+
+<p>
+`Oh, you can’t help that,’ said the Cat: `we’re all mad here. I’m mad. You’re mad.’
+</p>
+
+<p>
+`How do you know I’m mad?’ said Alice.
+`You must be,’ said the Cat, `or you wouldn’t have come here.’
+</p>
+
+<p>
+Alice didn’t think that proved it at all; however, she went on `And how do you know that you’re mad?’
+</p>
+
+<p>
+&#x2013; Alice's Adventures in Wonderland
+</p>
+
+</blockquote></div>
+
+<p>
+<ruby>单子<rt>Monad</rt></ruby>是什么? 你也不懂, 我也不懂, 我们都不懂.
+</p>
+
+<p>
+话说, 我又怎么知道你不懂呢?
+</p>
+
+<p>
+当然不懂, 不然, 你怎么会来到这里?
+</p>
+
+<p>
+我又是怎么知道自己不懂呢?
+</p>
+
+<p>
+因为, 我知道懂的人什么样子. 显然, 我不是.
+</p>
+
+<p>
+懂的人一定知道<ruby>猫论<rt> Category Theory</rt></ruby>.
+</p>
+
+<p>
+懂猫论的人又不一定知道编程. 但是懂编程的人可以略懂猫论.
+</p>
+
+<p>
+编程是项技术, 即理论的降维. 所以要降低门槛, 比如我在书中也<a href="https://book.douban.com/subject/26883736/">写过一章</a>用JavaScript来解释，某人也尝试过<a href="http://www.ruanyifeng.com/blog/2017/02/fp-tutorial.html">写博客解释</a>，<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
+如果没看就刚好不要看了, 确实有些误导
+</span>没想到那些也不知道会不会 Haskell/Scala 的人就跑出来喷你们前端<label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
+等等, 写前端怎么了? JavaScript 只是我觉得顺手的若干语言之一, JS用户那么多, 写书当然要用 JS 啦, 难道用 Idris 那还能卖得掉吗? <del>当然最后用JS也没怎么卖掉&#x2026;</del>
+</span>这些不懂函数式的渣渣乱搞出来的东西根本就不是单子。
+</p>
+
+<p>
+我也画过一些图来解释，又会被嫌弃画风不好。但是，作为灵魂画师，我只 <del>是觉得自己萌萌的啊</del> 在乎画的灵魂是否能够给你一点启发。好吧，讲这么学术的东西，还是用dot来画吧，看起来好正规呢。
+</p>
+
+<p>
+好了，安全带系好，我真的要开车了。为了防止<ruby>解释的不到位<rt>又被喷</rt></ruby>，就用 Haskell/Scala 好了<label for="4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="4" class="margin-toggle"/><span class="sidenote">
+并不是说这两门语言一定在鄙视链顶端, 而是拥有强大类型系统的语言才能体现出范畴论的内容
+</span>，其实也不难解释清楚 <del>才怪</del> 。
+</p>
+
+<p>
+这里面很多很装逼的单词，它们都是 <i>斜体</i> ，就算没看懂，把这些词背下来也足够<ruby>装好一阵子逼了<rt>买一阵子萌了</rt></ruby>。
+</p>
+
+<p>
+这里还有很多代码, 它们都成对出现, 第一段是 Haskell, 第二段是 Scala.
+</p>
+</div>
+
+<div id="outline-container-org93f5572" class="outline-3">
+<h3 id="org93f5572"><span class="section-number-3">1.1</span> <i>Category</i></h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+一个 <i><ruby>范畴<rt>Category</rt></ruby></i> 包含两个玩意
+</p>
+<ul class="org-ul">
+<li>东西 <code>O</code> （Object）</li>
+<li>两个东西的关系，箭头 <code>~&gt;</code> （ <i><ruby>态射<rt>Morphism</rt></ruby></i> ）</li>
+</ul>
+
+<p>
+还必须带上一些属性: 
+</p>
+<ul class="org-ul">
+<li>一定有一个叫 id 的箭头，也叫做 1</li>
+<li>箭头可以 <i><ruby>组合<rt> compose</rt></ruby></i></li>
+</ul>
+
+<p>
+恩, 就是这么简单!
+</p>
+
+
+<figure>
+<object type="image/svg+xml" data="images/category.svg" class="org-svg">
+Sorry, your browser does not support SVG.</object>
+
+<figcaption><span class="figure-number">Figure 1: </span>有东西 a, b, c 和箭头 f, g 的 Category，其中 f . g 表示 compose f 和 g</figcaption>
+</figure>
+
+
+<div class="epigraph"><blockquote>
+<p>
+注意到为什么我会箭头从右往左，接着看代码, 你会发现这个方向跟 compose 的方向刚好一致!
+</p>
+
+</blockquote></div>
+
+<p>
+这些玩意对应到 haskell 的 typeclass 大致就是这样:
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">Category</span> (c <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; font-style: italic;">*</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; font-style: italic;">*</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; font-style: italic;">*</span>) <span style="font-weight: bold;">where</span>
+  id <span style="font-weight: bold; font-style: italic;">::</span> c a a
+  (<span style="font-weight: bold; font-style: italic;">.</span>) <span style="font-weight: bold; font-style: italic;">::</span> c y z <span style="font-weight: bold; font-style: italic;">-&gt;</span> c x y <span style="font-weight: bold; font-style: italic;">-&gt;</span> c x z
+</code></pre>
+
+
+<p>
+而 Scala 可以用 trait 来表示这个 typeclass:
+</p>
+<pre class="code"><code><span style="font-weight: bold;">trait</span> <span style="font-weight: bold; text-decoration: underline;">Category</span>[<span style="font-weight: bold; text-decoration: underline;">C</span>[<span style="font-weight: bold;">_</span>, <span style="font-weight: bold;">_</span>]] {
+  <span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">id</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">C</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>, <span style="font-weight: bold; text-decoration: underline;">A</span>]
+  <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">&lt;&lt;&lt;</span>(a<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">C</span>[<span style="font-weight: bold; text-decoration: underline;">Y</span>, <span style="font-weight: bold; text-decoration: underline;">Z</span>], b<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">C</span>[<span style="font-weight: bold; text-decoration: underline;">X</span>, <span style="font-weight: bold; text-decoration: underline;">Y</span>])<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">C</span>[<span style="font-weight: bold; text-decoration: underline;">X</span>, <span style="font-weight: bold; text-decoration: underline;">Z</span>] 
+}
+</code></pre>
+
+<p>
+如果这是你第一次见到 Haskell 代码，没有关系，语法真的很简单 <del>才怪</del>
+</p>
+<ul class="org-ul">
+<li><code>class</code> 定义了一个 TypeClass， <code>Category</code> 是这个 TypeClass 的名字</li>
+<li>Type class 类似于定义类型的规范，规范为 <code>where</code> 后面那一坨</li>
+<li>类型规范的对象是参数 <code>(c:: * -&gt; * -&gt; *)</code> ， <code>::</code> 后面是c的类型</li>
+<li>c 是 <i>higher kind</i> <code>* -&gt; *</code> ，跟higher order function的定义差不多，它是接收类型，构造新类型的类型。这里的 c 接收一个类型，再接收一个类型，就可以返回个类型。</li>
+</ul>
+<ul class="org-ul">
+<li><code>id:: c a a</code> 表示 c 范畴上的 a 到 a 的箭头</li>
+<li><code>.</code> 的意思 c 范畴上，如果喂一个 y 到 z 的箭头，再喂一个 x 到 y 的箭头，那么就返回 x 到 z 的箭头。</li>
+</ul>
+
+<p>
+另外 compose 在 haskell 中直接是句号 <code>.</code>
+</p>
+
+<p>
+scala 中用 <code>&lt;&lt;&lt;</code> 或者 <code>compose</code>
+</p>
+
+<p>
+总之, 用文字再读一遍上面这些代码就了然了.
+</p>
+
+<p>
+范畴 C 其实就包含
+</p>
+<ol class="org-ol">
+<li>返回 A 对象到 A 对象的 id 箭头</li>
+<li>可以组合 Y 对象到 Z 对象 和 X 对象到 Y 对象的箭头 compose</li>
+</ol>
+
+<p>
+<ruby>简单吧<rt>hen nan ba</rt></ruby>?还没有高数抽象呢。
+</p>
+</div>
+
+<div id="outline-container-org69b4b2c" class="outline-4">
+<h4 id="org69b4b2c"><span class="section-number-4">1.1.1</span> <i>Hask</i></h4>
+<div class="outline-text-4" id="text-1-1-1">
+<p>
+Haskell 类型系统范畴叫做 Hask
+</p>
+<p>
+在 Hask 范畴上：
 </p>
 
 <ul class="org-ul">
-<li><a href="./part1.html">第一部分：猫论</a></li>
-<li><a href="./part2.html">第二部分：食用猫呢</a></li>
-<li><a href="./part3.html">第三部分：搞基猫呢</a></li>
+<li>东西就是类型</li>
+<li>箭头是类型的变换，即 <code>-&gt;</code></li>
+<li>id 就是 id 函数的类型 <code>a -&gt; a</code></li>
+<li>compose 当然就是函数组合的类型</li>
 </ul>
 
-<div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1">References</h2>
-<div class="outline-text-2" id="text-orgheadline1">
+<pre class="code"><code><span style="font-weight: bold;">type</span> <span style="font-weight: bold; text-decoration: underline;">Hask</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">(-&gt;)</span>
+<span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Category</span> (<span style="font-weight: bold; text-decoration: underline;">Hask</span><span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; font-style: italic;">*</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; font-style: italic;">*</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; font-style: italic;">*</span>) <span style="font-weight: bold;">where</span>
+  (f <span style="font-weight: bold; font-style: italic;">.</span> g) x <span style="font-weight: bold; font-style: italic;">=</span> f (g x)
+</code></pre>
+
+<p>
+我们看见新的关键字 <code>instance</code> ，这表示 Hask 是 Type class Category 的实例类型，也就是说对任意Hask类型, 那么就能找到它的 id 和 compose
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">implicit</span> <span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">haskCat</span><span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Category</span>[<span style="font-weight: bold; text-decoration: underline;">Hask</span>[<span style="font-weight: bold;">_</span>, <span style="font-weight: bold;">_</span>]] <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Category</span>[<span style="font-weight: bold; text-decoration: underline;">Hask</span>] {
+  <span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">id</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>] <span style="font-weight: bold;">=</span> identity[<span style="font-weight: bold; text-decoration: underline;">A</span>]
+  <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">&lt;&lt;&lt;</span>[<span style="font-weight: bold; text-decoration: underline;">X</span>, <span style="font-weight: bold; text-decoration: underline;">Y</span>, <span style="font-weight: bold; text-decoration: underline;">Z</span>](a<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Hask</span>[<span style="font-weight: bold; text-decoration: underline;">Y</span>, <span style="font-weight: bold; text-decoration: underline;">Z</span>], b<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Hask</span>[<span style="font-weight: bold; text-decoration: underline;">X</span>, <span style="font-weight: bold; text-decoration: underline;">Y</span>]) <span style="font-weight: bold;">=</span> a compose b
+}
+</code></pre>
+
+<p>
+Scala 中, 只需要 new 这个 trait 就可以实现这个 typeclass
+</p>
+
+<p>
+其中: identity <code>Hask a a</code> 就是
+</p>
+<pre class="code"><code><span style="font-weight: bold; text-decoration: underline;">(-&gt;)</span> a a <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">or</span>
+a <span style="font-weight: bold; font-style: italic;">-&gt;</span> a <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">&#22240;&#20026; -&gt; &#26159;&#20013;&#32512;&#26500;&#36896;&#22120;</span>
+</code></pre>
+
+<pre class="code"><code><span style="font-weight: bold; text-decoration: underline;">A</span> <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">A</span>
+</code></pre>
+</div>
+</div>
+
+
+<div id="outline-container-org05e163c" class="outline-4">
+<h4 id="org05e163c"><span class="section-number-4">1.1.2</span> <i>Duel</i></h4>
+<div class="outline-text-4" id="text-1-1-2">
+<p>
+每个 Category 还有一个镜像，什么都一样，除了箭头是反的
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org055bf38" class="outline-3">
+<h3 id="org055bf38"><span class="section-number-3">1.2</span> <i><ruby>函子<rt> Functor</rt></ruby></i></h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+两个范畴中间可以用叫 Functor 的东西来连接起来，简称 T。
+</p>
+
+
+<figure>
+<object type="image/svg+xml" data="images/functor.svg" class="org-svg">
+Sorry, your browser does not support SVG.</object>
+
+<figcaption><span class="figure-number">Figure 2: </span>Functor C D T, 从 C 到 D 范畴的Functor T</figcaption>
+</figure>
+
+<p>
+所以大部分把 Functor/Monad 比喻成盒子其实在定义上是错的，虽然这样比喻比较容易理解，在使用上问题也不大。但是，Functor 只是从一个范畴到另一个范畴的映射关系而已。
+</p>
+
+<ul class="org-ul">
+<li>范畴间 东西的 Functor 标记为 <code>T(O)</code></li>
+<li>范畴间 箭头的 Functor 标记为 <code>T(~&gt;)</code></li>
+<li>任何范畴C上存在一个 T 把所有的 O 和 ~&gt; 都映射到自己，标记为id functor 1<sub>C</sub>
+<ul class="org-ul">
+<li>1<sub>C</sub>(O) = O</li>
+<li>1<sub>C</sub>(~&gt;) = ~&gt;</li>
+</ul></li>
+</ul>
+
+<pre class="code"><code><span style="font-weight: bold;">class</span> (<span style="font-weight: bold; text-decoration: underline;">Category</span> c, <span style="font-weight: bold; text-decoration: underline;">Category</span> d) <span style="font-weight: bold; font-style: italic;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span> c d t <span style="font-weight: bold;">where</span>
+  fmap <span style="font-weight: bold; font-style: italic;">::</span> c a b <span style="font-weight: bold; font-style: italic;">-&gt;</span> d (t a) (t b)
+</code></pre>
+
+<pre class="code"><code><span style="font-weight: bold;">trait</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span>[<span style="font-weight: bold; text-decoration: underline;">C</span>[<span style="font-weight: bold;">_</span>, <span style="font-weight: bold;">_</span>], <span style="font-weight: bold; text-decoration: underline;">D</span>[<span style="font-weight: bold;">_</span>, <span style="font-weight: bold;">_</span>], <span style="font-weight: bold; text-decoration: underline;">T</span>[<span style="font-weight: bold;">_</span>]] {
+  <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">fmap</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>, <span style="font-weight: bold; text-decoration: underline;">B</span>](c<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">C</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>, <span style="font-weight: bold; text-decoration: underline;">B</span>])<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">D</span>[<span style="font-weight: bold; text-decoration: underline;">T</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>], <span style="font-weight: bold; text-decoration: underline;">T</span>[<span style="font-weight: bold; text-decoration: underline;">B</span>]]
+}
+</code></pre>
+
+<p>
+<code>Functor c d t</code> 这表示从范畴 c 到范畴 d 的一个 Functor t
+</p>
+
+<p>
+如果把范畴 c 和 d 都限制到 Hask 范畴
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span> <span style="font-weight: bold; text-decoration: underline;">(-&gt;)</span> <span style="font-weight: bold; text-decoration: underline;">(-&gt;)</span> t <span style="font-weight: bold;">where</span>
+  fmap <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">(-&gt;)</span> a b <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">(-&gt;)</span> (t a) (t b)
+</code></pre>
+
+<pre class="code"><code><span style="font-weight: bold;">trait</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span>[<span style="font-weight: bold;">=&gt;</span>[<span style="font-weight: bold;">_</span>, <span style="font-weight: bold;">_</span>], <span style="font-weight: bold;">=&gt;</span>[<span style="font-weight: bold;">_</span>, <span style="font-weight: bold;">_</span>], <span style="font-weight: bold; text-decoration: underline;">T</span>[<span style="font-weight: bold;">_</span>]] {
+ <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">fmap</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>, <span style="font-weight: bold; text-decoration: underline;">B</span>](c<span style="font-weight: bold;">:</span> <span style="font-weight: bold;">=&gt;</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>, <span style="font-weight: bold; text-decoration: underline;">B</span>])<span style="font-weight: bold;">:</span> <span style="font-weight: bold;">=&gt;</span>[<span style="font-weight: bold; text-decoration: underline;">T</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>], <span style="font-weight: bold; text-decoration: underline;">T</span>[<span style="font-weight: bold; text-decoration: underline;">B</span>]]
+}
+</code></pre>
+<p>
+<code>-&gt;</code> 在 Haskell 中是中缀类型构造器，所以是可以写在中间的
+</p>
+
+<p>
+这样就会变成我们熟悉的 Funtor 的 Typeclass<label for="5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="5" class="margin-toggle"/><span class="sidenote">
+这里可以把 Functor 的第一第二个参数消掉, 因为已经知道是在 Hask 范畴了
+</span>
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span> t <span style="font-weight: bold;">where</span>
+  fmap <span style="font-weight: bold; font-style: italic;">::</span> (a <span style="font-weight: bold; font-style: italic;">-&gt;</span> b) <span style="font-weight: bold; font-style: italic;">-&gt;</span> (t a <span style="font-weight: bold; font-style: italic;">-&gt;</span> t b)
+</code></pre>
+
+<pre class="code"><code><span style="font-weight: bold;">trait</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span>[<span style="font-weight: bold; text-decoration: underline;">T</span>[<span style="font-weight: bold;">_</span>]] {
+ <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">fmap</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>, <span style="font-weight: bold; text-decoration: underline;">B</span>](c<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">A</span> <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">B</span>)<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">T</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>] <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">T</span>[<span style="font-weight: bold; text-decoration: underline;">B</span>]
+}
+</code></pre>
+
+<p>
+而 <i><ruby>自函子<rt>endofunctor</rt></ruby></i> 就是这种连接相同范畴的 Functor，因为它从范畴 Hask 到达同样的范畴 Hask
+</p>
+<p>
+这回看代码就很容易对应上图和概念了, 这里的自函子只是映射范畴 <code>-&gt;</code> 到 <code>-&gt;</code>, 箭头函数那个箭头, 类型却变成了 t a
+</p>
+
+<p>
+这里的 fmap 就是 T(~&gt;)，在 Hask 范畴上，所以是 T(-&gt;), 这个箭头是函数，所以也能表示成 T(f) 如果 <code>f:: a -&gt; b</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb7dbdf7" class="outline-3">
+<h3 id="orgb7dbdf7"><span class="section-number-3">1.3</span> <i><ruby>Cat<rt> +猫+</rt></ruby></i></h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+递归的, 当我们可以把一个 Category 看成一个 object，functor 看成箭头，那么我们又得到了一个 Category，这种 object 是 category 的 category 我们叫它 &#x2013; <i>Cat</i>
+</p>
+
+<p>
+已经<ruby>没<rt> meow</rt></ruby>的办法用语言描述这么高维度的事情了，看图吧&#x2026;
+</p>
+</div>
+</div>
+
+<div id="outline-container-org13458bf" class="outline-3">
+<h3 id="org13458bf"><span class="section-number-3">1.4</span> /<ruby>自然变换<rt>Natural Transformations</rt></ruby>/<a id="orgb1d4978"></a></h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+Functor 是范畴间的映射，所以在这个 Cat 范畴中, 把范畴看成是对象, 那么 Functor 在 Cat 范畴又是个箭头
+</p>
+
+
+<figure>
+<object type="image/svg+xml" data="images/natrual-transformation.svg" class="org-svg">
+Sorry, your browser does not support SVG.</object>
+
+<figcaption><span class="figure-number">Figure 3: </span>Functor F和G，以及 F 到 G 的自然变化 &eta;</figcaption>
+</figure>
+
+<p>
+而 Functor 间也有映射，叫做 <del>喵的变换</del> <i>自然变换</i>
+</p>
+
+<p>
+范畴 c 上的函子 f 到 g 的自然变化就可以表示成
+</p>
+<pre class="code"><code><span style="font-weight: bold;">type</span> <span style="font-weight: bold; text-decoration: underline;">Nat</span> c f g <span style="font-weight: bold; font-style: italic;">=</span> c (f a) (g a)
+</code></pre>
+
+<p>
+Scala 没有 rank n type<label for="6" class="margin-toggle sidenote-number"></label><input type="checkbox" id="6" class="margin-toggle"/><span class="sidenote">
+别急, 后面马上讲到
+</span>, 只能靠 apply 来 meme 了
+</p>
+<pre class="code"><code><span style="font-weight: bold;">trait</span> <span style="font-weight: bold; text-decoration: underline;">Nat</span>[<span style="font-weight: bold; text-decoration: underline;">C</span>[<span style="font-weight: bold;">_</span>, <span style="font-weight: bold;">_</span>], <span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>], <span style="font-weight: bold; text-decoration: underline;">G</span>[<span style="font-weight: bold;">_</span>]] {
+  <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">apply</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">C</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>], <span style="font-weight: bold; text-decoration: underline;">G</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]]
+}
+</code></pre>
+
+<p>
+Hask 范畴上的自然变化就变成了
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">type</span> <span style="font-weight: bold; text-decoration: underline;">NatHask</span> f g <span style="font-weight: bold; font-style: italic;">=</span> f a <span style="font-weight: bold; font-style: italic;">-&gt;</span> g a
+</code></pre>
+
+<pre class="code"><code><span style="font-weight: bold;">trait</span> <span style="font-weight: bold; text-decoration: underline;">NatHask</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>], <span style="font-weight: bold; text-decoration: underline;">G</span>[<span style="font-weight: bold;">_</span>]] {
+  <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">apply</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>] <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">G</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]
+}
+
+</code></pre>
+
+<p>
+有趣的是, 还可以继续升维度, 比如
+</p>
+
+<ul class="org-ul">
+<li>东西是函子</li>
+<li>箭头是自然变换</li>
+</ul>
+
+<p>
+恭喜你到达 Functor 范畴.
+</p>
+
+<p>
+当然, 要成为范畴，还有两个属性:
+</p>
+<ul class="org-ul">
+<li>id 为 f a 到 f a 的自然变换</li>
+<li>自然变换的组合</li>
+</ul>
+
+
+<figure>
+<object type="image/svg+xml" data="images/functor-category.svg" class="org-svg">
+Sorry, your browser does not support SVG.</object>
+
+</figure>
+
+<p>
+别着急, 我们来梳理一下，如果已经不知道升了几个维度了，我们假设类型所在范畴是第一维度
+</p>
+<ul class="org-ul">
+<li>一维： Hask， 东西是类型，箭头是 -&gt;</li>
+<li>二维： Cat， 东西是 Hask， 箭头是 Functor</li>
+<li>三维： Functor范畴， 东西是Functor， 箭头是自然变换</li>
+</ul>
+
+<p>
+感觉到达三维已经是极限了，尼玛还有完没完了，每升一个维度还要起这么多装逼的名字，再升维度老子就画不出来了
+</p>
+
+<p>
+所以这时候, 需要引入 String Diagram。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3adffdf" class="outline-3">
+<h3 id="org3adffdf"><span class="section-number-3">1.5</span> String Diagram</h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+String Diagram 的概念很简单，就是点变线线变点。
+</p>
+
+<p>
+还记得当有了自然变换之后，三个维度已经没法表示了，那原来的点和线都升一维度，变成线和面，这样，就腾出一个点来表示自然变换了。
+</p>
+
+
+<figure>
+<img src="images/p1-string-diagram.png" alt="p1-string-diagram.png">
+
+<figcaption><span class="figure-number">Figure 5: </span>String Diagram：自然变换是点，Functor是线，范畴是面</figcaption>
+</figure>
+
+<p>
+compose的方向是从右往左，从下到上。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgeeeb4c8" class="outline-3">
+<h3 id="orgeeeb4c8"><span class="section-number-3">1.6</span> <i>Adjunction Functor</i> 伴随函子</h3>
+<div class="outline-text-3" id="text-1-6">
+<p>
+范畴C和D直接有来有回的函子，为什么要介绍这个，因为它直接可以推出 Monad
+</p>
+
+<p>
+让我们来看看什么叫有来回。
+</p>
+
+
+<figure>
+<img src="images/p1-adjunction-functor.png" alt="p1-adjunction-functor.png">
+
+</figure>
+
+<p>
+其中：
+</p>
+
+<ul class="org-ul">
+<li>一个范畴 C 可以通过函子 G 到 D，再通过函子 F 回到 C，那么 F 和 G 就是伴随函子。</li>
+<li>&eta; 是 GF 到 1<sub>D</sub> 的自然变换</li>
+<li>&epsilon; 是 1<sub>C</sub> 到 FG 的自然变换</li>
+</ul>
+
+<p>
+同时根据同构的定义，G 与 F 是 <i>同构</i> 的。
+</p>
+<p>
+同构指的是若是有
+</p>
+<pre class="code"><code><span style="font-weight: bold;">f</span> <span style="font-weight: bold; font-style: italic;">::</span> a <span style="font-weight: bold; font-style: italic;">-&gt;</span> b
+f'<span style="font-weight: bold; font-style: italic;">::</span> b <span style="font-weight: bold; font-style: italic;">-&gt;</span> a
+</code></pre>
+
+<p>
+那么 f 与 f' 同构，因为 f . f' = id = f' . f
+</p>
+
+<p>
+伴随函子的 FG 组合是 C 范畴的 id 函子 F . G = 1<sub>c</sub>
+</p>
+
+
+<figure>
+<img src="images/p1-ajunction-functor-compose.png" alt="p1-ajunction-functor-compose.png">
+
+<figcaption><span class="figure-number">Figure 7: </span>伴随函子的两个Functor组合, 左侧为 F &eta;, 右侧为 &epsilon; F</figcaption>
+</figure>
+
+<p>
+Functor 不仅横着可以组合，竖着(自然变换维度)也是可以组合的，因为自然变换是 Functor 范畴的箭头。
+</p>
+
+
+<figure>
+<img src="images/p1-ajunction-functor-compose-nat.png" alt="p1-ajunction-functor-compose-nat.png">
+
+<figcaption><span class="figure-number">Figure 8: </span>F &eta; . &epsilon; F  = F</figcaption>
+</figure>
+
+<p>
+当到组合 F &eta; . &epsilon; F 得到一个弯弯曲曲的 F 时，我们可以拽着F的两段一拉，就得到了直的 F。
+</p>
+
+<p>
+String Diagram 神奇的地方是所有线都可以拉上下两端，这个技巧非常有用，在之后的单子推导还需要用到。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0e1b1db" class="outline-3">
+<h3 id="org0e1b1db"><span class="section-number-3">1.7</span> 从伴随函子到 <ruby>单子<rt> Monad</rt></ruby></h3>
+<div class="outline-text-3" id="text-1-7">
+<p>
+有了伴随函子，很容易推出单子，让我们先来看看什么是单子
+</p>
+
+<ul class="org-ul">
+<li>首先，它是一个 endofunctor T</li>
+<li>有一个从 i<sub>c</sub> 到 T 的自然变化 &eta; (eta)</li>
+<li>有一个从 T<sup>2</sup> 到 T 的自然变化 &mu; (mu)</li>
+</ul>
+
+
+<figure>
+<img src="images/p1-monad-properties.png" alt="p1-monad-properties.png">
+
+</figure>
+
+<pre class="code"><code><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">Endofunctor</span> c t <span style="font-weight: bold; font-style: italic;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span> c t <span style="font-weight: bold;">where</span>
+  eta <span style="font-weight: bold; font-style: italic;">::</span> c a (t a)
+  mu  <span style="font-weight: bold; font-style: italic;">::</span> c (t (t a)) (t a)
+</code></pre>
+
+<pre class="code"><code><span style="font-weight: bold;">trait</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span>[<span style="font-weight: bold; text-decoration: underline;">C</span>[<span style="font-weight: bold;">_</span>, <span style="font-weight: bold;">_</span>], <span style="font-weight: bold; text-decoration: underline;">T</span>[<span style="font-weight: bold;">_</span>]]] <span style="font-weight: bold;">extends</span> <span style="font-weight: bold; text-decoration: underline;">Endofunctor</span>[<span style="font-weight: bold; text-decoration: underline;">C</span>, <span style="font-weight: bold; text-decoration: underline;">T</span>] {
+  <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">eta</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">C</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>, <span style="font-weight: bold; text-decoration: underline;">T</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]]
+  <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">mu</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">C</span>[<span style="font-weight: bold; text-decoration: underline;">T</span>[<span style="font-weight: bold; text-decoration: underline;">T</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]], <span style="font-weight: bold; text-decoration: underline;">T</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]]
+}
+</code></pre>
+<p>
+同样，把 c = Hask 替换进去，就得到更类似我们 Haskell 中 Monad 的定义
+</p>
+<pre class="code"><code><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">Endofunctor</span> m <span style="font-weight: bold; font-style: italic;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span> m <span style="font-weight: bold;">where</span>
+  eta <span style="font-weight: bold; font-style: italic;">::</span> a <span style="font-weight: bold; font-style: italic;">-&gt;</span> (m a)
+  mu <span style="font-weight: bold; font-style: italic;">::</span> m m a <span style="font-weight: bold; font-style: italic;">-&gt;</span> m a
+</code></pre>
+
+<pre class="code"><code><span style="font-weight: bold;">trait</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span>[<span style="font-weight: bold; text-decoration: underline;">M</span>[<span style="font-weight: bold;">_</span>]] <span style="font-weight: bold;">extends</span> <span style="font-weight: bold; text-decoration: underline;">Endofunctor</span>[<span style="font-weight: bold; text-decoration: underline;">M</span>] {
+  <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">eta</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">A</span> <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">M</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]
+  <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">mu</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">M</span>[<span style="font-weight: bold; text-decoration: underline;">M</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]] <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">M</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]
+}
+</code></pre>
+<p>
+要推出单子的 &eta; 变换，只需要让 FG = T
+</p>
+
+<figure>
+<img src="images/p1-ajunction-functor-to-monad-eta.png" alt="p1-ajunction-functor-to-monad-eta.png">
+
+<figcaption><span class="figure-number">Figure 10: </span>伴随函子的 &epsilon; 就是单子的 &eta;</figcaption>
+</figure>
+
+<p>
+同样的，当 FG = T, F &eta; G 就可以变成 &mu;
+</p>
+
+<figure>
+<img src="images/p1-ajunction-functor-to-monad-mu.png" alt="p1-ajunction-functor-to-monad-mu.png">
+
+<figcaption><span class="figure-number">Figure 11: </span>伴随函子的 F &eta; G 是函子的 &mu;</figcaption>
+</figure>
+</div>
+
+<div id="outline-container-org45105e4" class="outline-4">
+<h4 id="org45105e4"><span class="section-number-4">1.7.1</span> 三角等式</h4>
+<div class="outline-text-4" id="text-1-7-1">
+<p>
+三角等式是指 &mu; . T &eta; = T = &mu; . &eta; T
+</p>
+
+<p>
+要推出三角等式只需要组合 F &eta; G 和 &epsilon; F G
+</p>
+
+<figure>
+<img src="images/p1-adjunction-functor-triangle.png" alt="p1-adjunction-functor-triangle.png">
+
+<figcaption><span class="figure-number">Figure 12: </span>F &eta; G  . &epsilon; F G = F G</figcaption>
+</figure>
+
+<figure>
+<img src="images/p1-monad-triangle.png" alt="p1-monad-triangle.png">
+
+<figcaption><span class="figure-number">Figure 13: </span>F &eta; G  . &epsilon; F G= F G 对应到Monad就是 &mu; . &eta; T = T</figcaption>
+</figure>
+
+<p>
+换到代码上来说
+</p>
+<pre class="code"><code>(mu <span style="font-weight: bold; font-style: italic;">.</span> eta) m <span style="font-weight: bold; font-style: italic;">=</span> m
+</code></pre>
+
+<p>
+同样的，左右翻转也成立
+</p>
+
+
+<figure>
+<img src="images/p1-adjunction-functor-triangle-reverse.png" alt="p1-adjunction-functor-triangle-reverse.png">
+
+<figcaption><span class="figure-number">Figure 14: </span>F &eta; G . F G &epsilon; = F G</figcaption>
+</figure>
+<p>
+<img src="images/p1-monad-triangle-reverse.png" alt="p1-monad-triangle-reverse.png">
+T &eta; 就是 fmap eta
+</p>
+<pre class="code"><code>(mu <span style="font-weight: bold; font-style: italic;">.</span> fmap eta) m <span style="font-weight: bold; font-style: italic;">=</span> m
+</code></pre>
+
+<p>
+如果把 <code>mu . fmap</code> 写成 <code>&gt;&gt;=</code> , 就有了
+</p>
+
+<pre class="code"><code>m <span style="font-weight: bold;">&gt;&gt;=</span> eta <span style="font-weight: bold; font-style: italic;">=</span> m
+</code></pre>
+</div>
+</div>
+
+<div id="outline-container-orgd4b0200" class="outline-4">
+<h4 id="orgd4b0200"><span class="section-number-4">1.7.2</span> 结合律</h4>
+<div class="outline-text-4" id="text-1-7-2">
+<p>
+单子另一大定律是结合律，让我们从伴随函子推起
+</p>
+
+<p>
+假设我们现在有函子 F &eta; G 和 函子 F &eta; G F G, compose 起来会变成  F &eta; G . F &eta; G F G
+<img src="images/p1-ajunction-functor-monad-laws-1.png" alt="p1-ajunction-functor-monad-laws-1.png">
+</p>
+
+<p>
+用 F G = T ， F &eta; G = &mu; 代换那么就得到了单子的 &mu; . &mu; T
+<img src="images/p1-ajunction-functor-monad-laws-2.png" alt="p1-ajunction-functor-monad-laws-2.png">
+</p>
+
+<p>
+当组合 F &eta; G 和 F G F &mu; G 后，会得到一个镜像的图
+<img src="images/p1-ajunction-functor-monad-laws-3.png" alt="p1-ajunction-functor-monad-laws-3.png">
+</p>
+
+<p>
+对应到单子的 &mu; . T &mu;
+</p>
+
+<p>
+结合律是说 &mu; . &mu; T = &mu; . T &mu; , 即图左右翻转结果是相等的，为什么呢？看单子的String Diagram 不太好看出来，我们来看伴随函子
+</p>
+
+<p>
+如果把左图的左边的 &mu; 往上挪一点，右边的 &mu; 往下挪一点，是不是跟右图就一样了
+<img src="images/p1-ajunction-functor-monad-laws-4.png" alt="p1-ajunction-functor-monad-laws-4.png">
+</p>
+
+<p>
+结合律反映到代码中就是
+</p>
+<pre class="code"><code>mu <span style="font-weight: bold;">.</span> fmap mu <span style="font-weight: bold; font-style: italic;">=</span> mu <span style="font-weight: bold; font-style: italic;">.</span> mu
+</code></pre>
+
+<p>
+代码很难看出结合在哪里，因为正常的结合律应该是这样的 (1+2)+3 = 1+(2+3)，但是不想加法的维度不一样，这里说的是自然变换维度的结合，可以通过String Diagram 很清楚的看见结合的过程，即 &mu; 左边的两个T和先 &mu; 右边两个 T 是相等的。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0146684" class="outline-3">
+<h3 id="org0146684"><span class="section-number-3">1.8</span> Yoneda lemma / <del>米田共</del> 米田引理</h3>
+<div class="outline-text-3" id="text-1-8">
+<p>
+米田引理是说所有Functor <code>f a</code> 一定存在 embed 和 unembed，使得 <code>f a</code> 和 <code>(a -&gt; b) -&gt; F b</code> isomorphic 同构
+</p>
+
+<p>
+haskell还要先打开 RankNTypes 的 feature
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">{-# LANGUAGE RankNTypes #-}</span>
+
+<span style="font-weight: bold;">embed</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span> f <span style="font-weight: bold; font-style: italic;">=&gt;</span> f a <span style="font-weight: bold; font-style: italic;">-&gt;</span> (<span style="font-weight: bold;">forall</span> b <span style="font-weight: bold; font-style: italic;">.</span> (a <span style="font-weight: bold; font-style: italic;">-&gt;</span> b) <span style="font-weight: bold; font-style: italic;">-&gt;</span> f b)
+<span style="font-weight: bold;">embed</span> x f <span style="font-weight: bold; font-style: italic;">=</span> fmap f x
+
+<span style="font-weight: bold;">unembed</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span> f <span style="font-weight: bold; font-style: italic;">=&gt;</span> (<span style="font-weight: bold;">forall</span> b <span style="font-weight: bold; font-style: italic;">.</span> (a <span style="font-weight: bold; font-style: italic;">-&gt;</span> b) <span style="font-weight: bold; font-style: italic;">-&gt;</span> f b) <span style="font-weight: bold; font-style: italic;">-&gt;</span> f a
+<span style="font-weight: bold;">unembed</span> f <span style="font-weight: bold; font-style: italic;">=</span> f id
+</code></pre>
+
+<p>
+Scala 语言没有 Rank N Type支持, 但是 <a href="#orgb1d4978"><ruby>自然变换<rt>Natural Transformations</rt></ruby></a> 提到过可以用 <code>apply</code> 来模拟. 其实可以使用 Cats 的 <a href="https://typelevel.org/cats/datatypes/functionk.html">FunctionK(~&gt;)</a> 更方便:
+</p>
+<pre class="code"><code><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">embed</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>], <span style="font-weight: bold; text-decoration: underline;">A</span>](fa<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>])(<span style="font-weight: bold;">implicit</span> f<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>])<span style="font-weight: bold;">:</span> (<span style="font-weight: bold; text-decoration: underline;">A</span> <span style="font-weight: bold;">=&gt;</span> ?) ~&gt; <span style="font-weight: bold; text-decoration: underline;">F</span> <span style="font-weight: bold;">=</span>
+  <span style="font-weight: bold; text-decoration: underline;">Lambda</span>[(<span style="font-weight: bold; text-decoration: underline;">A</span> <span style="font-weight: bold;">=&gt;</span> ?) ~&gt; <span style="font-weight: bold; text-decoration: underline;">F</span>](f.fmap(<span style="font-weight: bold;">_</span>)(fa))
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">unembed</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]](fnk<span style="font-weight: bold;">:</span> (<span style="font-weight: bold; text-decoration: underline;">A</span> <span style="font-weight: bold;">=&gt;</span> ?) ~&gt; <span style="font-weight: bold; text-decoration: underline;">F</span>)<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>] <span style="font-weight: bold;">=</span>
+  fnk(identity)
+</code></pre>
+
+<p>
+embed 可以把 functor <code>f a</code> 变成 <code>(a -&gt; b) -&gt; f b</code>
+</p>
+
+<p>
+unembed 是反过来， <code>(a -&gt; b) -&gt; f b</code> 变成 <code>f a</code>
+</p>
+
+<p>
+上个图就明白了
+</p>
+
+<figure>
+<object type="image/svg+xml" data="images/yoneda-lemma.svg" class="org-svg">
+Sorry, your browser does not support SVG.</object>
+
+<figcaption><span class="figure-number">Figure 15: </span>也就是说，图中无论知道a-&gt;b 再加上任意一个 F x，都能推出另外一个 F</figcaption>
+</figure>
+</div>
+
+<div id="outline-container-org3b8a153" class="outline-4">
+<h4 id="org3b8a153"><span class="section-number-4">1.8.1</span> Rank N Type</h4>
+</div>
+</div>
+</div>
+<div id="outline-container-org8111665" class="outline-2">
+<h2 id="org8111665"><span class="section-number-2">2</span> 第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></h2>
+<div class="outline-text-2" id="text-2">
+<p>
+第一部分理论部分都讲完了， 如果你读到这里还没有被这些吊炸天的概念搞daze，接下来可以看看它到底跟我们编程有鸟关系呢？
+</p>
+
+<p>
+第二部分将介绍由这些概念产生的一些实用的monad instances，这些 monad 都通过同样的抽象方式，解决了分离计算与副作用的工作。
+</p>
+
+<p>
+最后一部分，我们还可以像 IO monad 一样，通过 free 或者 Eff 自定义自己的计算，和可能带副作用的解释器。
+</p>
+</div>
+
+<div id="outline-container-orgece5e2d" class="outline-3">
+<h3 id="orgece5e2d"><span class="section-number-3">2.1</span> Identity</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+这可能是最简单的 monad 了。不包含任何计算
+</p>
+<pre class="code"><code><span style="font-weight: bold;">newtype</span> <span style="font-weight: bold; text-decoration: underline;">Identity</span> a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Identity</span> { runIdentity <span style="font-weight: bold; font-style: italic;">::</span> a }
+</code></pre>
+
+<p>
+这里使用 <code>newtype</code> 而不是 <code>data</code> 是因为 <code>Identity</code> 与 <code>runIdentity</code> 是 isomorphic （同构，忘了的话回去翻第一部分）
+</p>
+
+<pre class="code"><code><span style="font-weight: bold; text-decoration: underline;">Identity</span> <span style="font-weight: bold; font-style: italic;">::</span> a <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Identity</span> a
+<span style="font-weight: bold;">runIdentity</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Identity</span> a <span style="font-weight: bold; font-style: italic;">-&gt;</span> a
+</code></pre>
+
+<p>
+所以 <code>runIdentity . Identity = id</code> ，所以他们是同构的。
+</p>
+
+<p>
+左边的 <code>Identity</code> 是类型构造器, 接收类型 <code>a</code> 返回 <code>Identity a</code> 类型
+</p>
+
+<p>
+如果 a 是 Int，那么就得到一个 <code>Identity Int</code> 类型。
+</p>
+
+<p>
+右边的 <code>Identity</code> 是数据构造器，也就是构造值，比如 <code>Identity 1</code> 会构造出一个值，其类型为 <code>Identity Int</code>
+</p>
+
+<p>
+大括号比较诡异，可以想象成给 <code>a</code> 一个 key，同过这个 key 可以把 a 取出来，比如
+</p>
+<pre class="code"><code><span style="font-weight: bold;">runIdentity</span> (<span style="font-weight: bold; text-decoration: underline;">Identity</span> 1)
+</code></pre>
+
+<p>
+会返回 1
+</p>
+
+<p>
+Identity 可以实现 Functor 和 Monad，就得到 Identity functor 和 Identity monad
+</p>
+<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span> <span style="font-weight: bold; text-decoration: underline;">Identity</span> <span style="font-weight: bold;">where</span>
+  fmap f (<span style="font-weight: bold; text-decoration: underline;">Identity</span> a) <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Identity</span> (f a)
+
+<span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span> <span style="font-weight: bold; text-decoration: underline;">Identity</span> <span style="font-weight: bold;">where</span>
+  return a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Identity</span> a
+  <span style="font-weight: bold; text-decoration: underline;">Identity</span> a <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> f <span style="font-weight: bold; font-style: italic;">=</span> f a
+</code></pre>
+
+<p>
+可以看到 Identity 即是构造器，也是解构器，在模式匹配是可以 destructure 值。例如上面Functor 实现中的 <code>fmap f (Identity a)</code> , 假如fmap的是 <code>Identity 1</code>, 那么这个模式匹配到 <code>(Identity a)</code> 时会把 <code>1</code> 放到 <code>a</code> 的位置。
+</p>
+
+<p>
+Identity 看起来什么也没有干，就跟 identity 函数一样，但是在后面讲到 State monad时你会发现他的价值。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd9a0d52" class="outline-3">
+<h3 id="orgd9a0d52"><span class="section-number-3">2.2</span> Maybe</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+这是一个超级简单的 Monad，首先，需要定义这个一个 <ruby>代数数据类型<rt> Algebra Data Type(ADT)</rt></ruby>
+</p>
+<pre class="code"><code><span style="font-weight: bold;">data</span> <span style="font-weight: bold; text-decoration: underline;">Maybe</span> a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Just</span> a <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">Nothing</span>
+</code></pre>
+<p>
+Haskell中定义一个ADT十分简单，不像Scala那么啰嗦。左边是类型构造器，右边有数据构造器，你会发现有一根竖线 <code>|</code> ， 它分隔着两个构造器
+</p>
+<ul class="org-ul">
+<li>Just</li>
+<li>Nothing</li>
+</ul>
+<p>
+其中 a （一定要小写）可以是任意类型
+</p>
+
+<p>
+所以 <code>Just 1</code> 会得到一个 <code>Num a =&gt; Mabye a</code> 类型（意思就是 <code>Maybe a</code> 但是 <code>a</code> 的类型约束为 <code>Num</code> ）， <code>Nothing</code> 也会得到一个 <code>Maybe a</code> 只不过 <code>a</code> 没有类型约束。
+</p>
+
+<p>
+总之我们有了构造器可以构造出 Maybe 类型，而这个类型能做的事情，就要取决它实现了哪些 class 的 instance 了。比如它可以是一个 Functor
+</p>
+<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span> <span style="font-weight: bold; text-decoration: underline;">Maybe</span> <span style="font-weight: bold;">where</span>
+  fmap f (<span style="font-weight: bold; text-decoration: underline;">Just</span> a) <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Just</span> (f a)
+</code></pre>
+
+
+<figure>
+<img src="images/p2-maybe-functor.png" alt="p2-maybe-functor.png">
+
+<figcaption><span class="figure-number">Figure 16: </span>fmap :: (a -&gt; b) -&gt; f a -&gt; f b</figcaption>
+</figure>
+
+<p>
+然后，还实现 Monad
+</p>
+<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span> <span style="font-weight: bold; text-decoration: underline;">Maybe</span> <span style="font-weight: bold;">where</span>
+  return a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Just</span> a
+  (<span style="font-weight: bold; text-decoration: underline;">Just</span> a) <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> f <span style="font-weight: bold; font-style: italic;">=</span> f a
+  <span style="font-weight: bold; text-decoration: underline;">Nothing</span> <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> f <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Nothing</span>
+</code></pre>
+
+
+<figure>
+<img src="images/p2-maybe-kleisli.png" alt="p2-maybe-kleisli.png">
+
+<figcaption><span class="figure-number">Figure 17: </span>还记得第一部分提到的 Kleisli 范畴吗？</figcaption>
+</figure>
+
+<p>
+Maybe 有用在于能合适的处理 <i><ruby>偏函数<rt> Partial Function</rt></ruby></i> 的返回值。偏函数相对于<ruby>全函数<rt> Total Function</rt></ruby>，是指只能对部分输入返回输出的函数。
+</p>
+
+<p>
+比如一个取数组某一位上的值的函数，就是偏函数，因为假设你想取第4位的值，但不是所有数组长度都大于4，就会有获取不了的尴尬情况。
+</p>
+<pre class="code"><code>[1,2,3] <span style="font-weight: bold; font-style: italic;">!!</span> 4
+</code></pre>
+
+<p>
+如果使用 Maybe 把偏函数处理不了的输入都返回成 Nothing，这样结果依然保持 Maybe 类型，不影响后面的计算。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org94fdd96" class="outline-3">
+<h3 id="org94fdd96"><span class="section-number-3">2.3</span> Either</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+Either 的定义也很简单
+</p>
+<pre class="code"><code><span style="font-weight: bold;">data</span> <span style="font-weight: bold; text-decoration: underline;">Either</span> a b <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Left</span> a <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">Right</span> b
+</code></pre>
+</div>
+
+<div id="outline-container-org87914b3" class="outline-4">
+<h4 id="org87914b3"><span class="section-number-4">2.3.1</span> Product &amp; Coproduct</h4>
+<div class="outline-text-4" id="text-2-3-1">
+<p>
+看过第一部分应该还能记得有一个东西叫 Duel，所以见到如果范畴上有 Coproduct 那么肯定在duel范畴上会有同样的东西叫 Product。
+</p>
+
+<p>
+那么我们先来看看什么是 Coproduct
+</p>
+
+
+<figure>
+<img src="images/p2-coproduct.png" alt="p2-coproduct.png">
+
+<figcaption><span class="figure-number">Figure 18: </span>Coproduct</figcaption>
+</figure>
+
+<p>
+像这样，能通过两个箭头到达同一个东西，就是 Coproduct。这里箭头 <code>Left</code> 能让 <code>a</code> 到 <code>Either a b</code> ， 箭头 <code>Right</code> 也能让 <code>b</code> 到达 <code>Either a b</code>
+</p>
+
+<p>
+有意思的是还肯定存在一个 Coproduct 和 箭头，使得下图成立
+<img src="images/p2-coproduct-law.png" alt="p2-coproduct-law.png">
+</p>
+
+<p>
+箭头反过来，就是 Product, 比如 Tuple
+</p>
+
+
+<figure>
+<img src="images/p2-product.png" alt="p2-product.png">
+
+<figcaption><span class="figure-number">Figure 19: </span>Product</figcaption>
+</figure>
+
+<p>
+Tuple 的 <code>fst</code> 箭头能让 <code>(a, b)</code> 到达 <code>a</code> 对象，而箭头 <code>snd</code> 能让其到达 <code>b</code> 对象。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgee4670e" class="outline-4">
+<h4 id="orgee4670e"><span class="section-number-4">2.3.2</span> Either Monad</h4>
+<div class="outline-text-4" id="text-2-3-2">
+<p>
+确切的说，Either 不是 monad， <code>Either a</code> 才是。还记得 monad 的 class 定义吗？
+</p>
+<pre class="code"><code><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">Endofunctor</span> m <span style="font-weight: bold; font-style: italic;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span> m <span style="font-weight: bold;">where</span>
+  eta <span style="font-weight: bold; font-style: italic;">::</span> a <span style="font-weight: bold; font-style: italic;">-&gt;</span> (m a)
+  mu <span style="font-weight: bold; font-style: italic;">::</span> m m a <span style="font-weight: bold; font-style: italic;">-&gt;</span> m a
+</code></pre>
+<p>
+所以 m 必须是个 Endofunctor，也就是要满足Functor
+</p>
+<pre class="code"><code><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span> t <span style="font-weight: bold;">where</span>
+  fmap <span style="font-weight: bold; font-style: italic;">::</span> (a <span style="font-weight: bold; font-style: italic;">-&gt;</span> b) <span style="font-weight: bold; font-style: italic;">-&gt;</span> (t a <span style="font-weight: bold; font-style: italic;">-&gt;</span> t b)
+</code></pre>
+<p>
+t a 的 kind 是 *，所以 t 必须是 kind * -&gt; *
+也就是说，m 必须是接收一个类型参数的类型构造器
+</p>
+
+<p>
+而 Either 的 kind 是 * -&gt; * -&gt; *, Either a 才是 * -&gt; *
+</p>
+
+<p>
+所以只能定义 Either a 的 Monad
+</p>
+<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span> (<span style="font-weight: bold; text-decoration: underline;">Either</span> a) <span style="font-weight: bold;">where</span>
+  <span style="font-weight: bold; text-decoration: underline;">Left</span>  l <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> <span style="font-weight: bold;">_</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Left</span> l
+  <span style="font-weight: bold; text-decoration: underline;">Right</span> r <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> k <span style="font-weight: bold; font-style: italic;">=</span> k r
+</code></pre>
+
+<p>
+很明显的，&gt;&gt;= 任何函数到<ruby>左边<rt> Left</rt></ruby> 都不会改变，只有 &gt;&gt;= 右边才能产生新的计算。
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org9f7b549" class="outline-3">
+<h3 id="org9f7b549"><span class="section-number-3">2.4</span> Reader</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+Reader 的作用是给一个计算喂数据。
+</p>
+
+<p>
+在描述计算的时候，并不需要关心输入时什么，只需要 asks 就可以拿到输入值
+</p>
+
+<p>
+而真正的输入，会在运行计算时给予。
+</p>
+
+<p>
+跟 Identity 一样，我们用 newtype 来定义一个同构的 Reader 类型
+</p>
+<pre class="code"><code><span style="font-weight: bold;">newtype</span> <span style="font-weight: bold; text-decoration: underline;">Reader</span> e a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Reader</span> { runReader <span style="font-weight: bold; font-style: italic;">::</span> (e <span style="font-weight: bold; font-style: italic;">-&gt;</span> a) }
+</code></pre>
+
+<p>
+其中
+</p>
+<ul class="org-ul">
+<li>e 是输入</li>
+<li>a 是结果</li>
+<li>构造 Reader 类型需要确定 输入的类型 e 与输出的类型 a</li>
+<li><code>runReader</code> 的类型是 <code>runReader:: (Reader e a) -&gt; (e -&gt; a)</code></li>
+</ul>
+
+<p>
+也就是说在描述完一个 Reader 的计算后，使用 runReader 可以得到一个 e -&gt; a 的函数，使用这个函数，就可以接收输入，通过构造好的计算，算出结果 a 返回。
+</p>
+
+<p>
+那么，让我们来实现 Reader 的 monad instance，就可以描述一个可以 ask 的计算了。
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span> (<span style="font-weight: bold; text-decoration: underline;">Reader</span> e) <span style="font-weight: bold;">where</span>
+    return a         <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Reader</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; font-style: italic;">\</span><span style="font-weight: bold;">_</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> a
+    (<span style="font-weight: bold; text-decoration: underline;">Reader</span> g) <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> f <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Reader</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; font-style: italic;">\</span>e <span style="font-weight: bold; font-style: italic;">-&gt;</span> runReader (f (g e)) e
+</code></pre>
+
+<p>
+跟Either一样，我们只能定义 Reader e 的 monad instance。
+</p>
+
+<p>
+注意这里的
+</p>
+<ul class="org-ul">
+<li>f 类型是 <code>(a -&gt; Reader e a)</code></li>
+<li>g 其实就是是 destructure 出来的 runReader，也就是 e -&gt; a</li>
+<li>所以 (g e) 返回 a</li>
+<li>f (g e) 就是 <code>Reader e a</code></li>
+<li>再 run 一把最后得到 a</li>
+</ul>
+
+
+<figure>
+<img src="images/p2-reader-monad.png" alt="p2-reader-monad.png">
+
+<figcaption><span class="figure-number">Figure 20: </span>f 函数，接收 a 返回一个 从 e 到 a 的 Reader</figcaption>
+</figure>
+
+<p>
+让我们来看看如何使用 Reader
+</p>
+<pre class="code"><code><span style="font-weight: bold;">import</span> <span style="font-weight: bold; text-decoration: underline;">Control.Monad.Reader</span>
+
+<span style="font-weight: bold;">data</span> <span style="font-weight: bold; text-decoration: underline;">Environment</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Env</span>
+  { fistName <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">String</span>
+  , lastName <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">String</span>
+  } <span style="font-weight: bold;">deriving</span> (<span style="font-weight: bold; text-decoration: underline;">Show</span>)
+
+<span style="font-weight: bold;">helloworld</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Reader</span> <span style="font-weight: bold; text-decoration: underline;">Environment</span> <span style="font-weight: bold; text-decoration: underline;">String</span>
+<span style="font-weight: bold;">helloworld</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold;">do</span>
+  f <span style="font-weight: bold; font-style: italic;">&lt;-</span> asks firstName
+  l <span style="font-weight: bold; font-style: italic;">&lt;-</span> asks lastName
+  return <span style="font-style: italic;">"Hello "</span> <span style="font-weight: bold; font-style: italic;">++</span> f <span style="font-weight: bold; font-style: italic;">++</span> l
+
+<span style="font-weight: bold;">runHelloworld</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">String</span>
+<span style="font-weight: bold;">runHelloworld</span> <span style="font-weight: bold; font-style: italic;">=</span> runReader helloworld <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Env</span> <span style="font-style: italic;">"Jichao"</span> <span style="font-style: italic;">"Ouyang"</span>
+</code></pre>
+
+<p>
+这段代码很简单，helloworld 负责打招呼，也就是在名字前面加个 "Hello"，而跟谁打招呼，这个函数并不关心，而单纯的是向 Environment <ruby>问<rt>asks</rt></ruby> 就好。
+</p>
+
+
+<figure>
+<img src="images/p2-reader-monad-ask.png" alt="p2-reader-monad-ask.png">
+
+<figcaption><span class="figure-number">Figure 21: </span>asks 可以将 e -&gt; a 的函数变换成 Reader e a</figcaption>
+</figure>
+
+<p>
+在运行时，可以提供给 Reader 的输入 Env fistname lastname。
+<img src="images/p2-reader-monad-run.png" alt="p2-reader-monad-run.png">
+</p>
+</div>
+
+<div id="outline-container-org0864d73" class="outline-4">
+<h4 id="org0864d73"><span class="section-number-4">2.4.1</span> do notation</h4>
+<div class="outline-text-4" id="text-2-4-1">
+<p>
+这可能是你第一次见到 <code>do</code> 和 <code>&lt;-</code>. 如果不是，随意跳过这节。
+</p>
+
+<ul class="org-ul">
+<li>do 中所有 &lt;- 的右边都是 <code>Reader Environment String</code> 类型</li>
+<li>do 中的 return 返回类型也必须为  <code>Reader Environment String</code></li>
+<li><code>asks firstName</code> 返回的是 <code>Reader Environment String</code> 类型， <code>&lt;-</code> 可以理解成吧 monad <code>Reader Environment</code> 的内容放到左边的 f, 所以 f 的类型是 String。</li>
+</ul>
+
+<p>
+看起来像命令式的语句，其实只是 <code>&gt;&gt;=</code> 的语法糖，但是明显用do可读性要高很多。
+</p>
+<pre class="code"><code><span style="font-weight: bold;">helloworld</span> <span style="font-weight: bold; font-style: italic;">=</span> (asks firstName) <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span>
+  <span style="font-weight: bold; font-style: italic;">\</span>f <span style="font-weight: bold; font-style: italic;">-&gt;</span> (asks lastName) <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span>
+       <span style="font-weight: bold; font-style: italic;">\</span>l <span style="font-weight: bold; font-style: italic;">-&gt;</span> return <span style="font-style: italic;">"Hello "</span> <span style="font-weight: bold; font-style: italic;">++</span> f <span style="font-weight: bold; font-style: italic;">++</span> l
+</code></pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orga55bf5c" class="outline-3">
+<h3 id="orga55bf5c"><span class="section-number-3">2.5</span> Writer</h3>
+<div class="outline-text-3" id="text-2-5">
+<p>
+除了返回值，计算会需要产生一些额外的数据，比如 log
+</p>
+
+<p>
+此时就需要一个 Writter，其返回值会是一个这样 <code>(result, log)</code> 的 tuple
+</p>
+
+<p>
+限制是 log 的类型必须是个 <ruby>含幺半群<rt>monoid</rt></ruby>
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">example</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Writer</span> <span style="font-weight: bold; text-decoration: underline;">String</span> <span style="font-weight: bold; text-decoration: underline;">String</span>
+<span style="font-weight: bold;">example</span>  <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold;">do</span>
+  tell <span style="font-style: italic;">"How are you?"</span>
+  tell <span style="font-style: italic;">"I'm fine thank you, and you?"</span>
+  return <span style="font-style: italic;">"Hehe Da~"</span>
+
+<span style="font-weight: bold;">output</span> <span style="font-weight: bold; font-style: italic;">::</span> (<span style="font-weight: bold; text-decoration: underline;">String</span>, <span style="font-weight: bold; text-decoration: underline;">String</span>)
+<span style="font-weight: bold;">output</span> <span style="font-weight: bold; font-style: italic;">=</span> runWriter example
+<span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">("Hehe Da~", "How are you?I'm fine thank you, and you?")</span>
+</code></pre>
+
+<p>
+Writer 的定义更简单
+</p>
+<pre class="code"><code><span style="font-weight: bold;">newtype</span> <span style="font-weight: bold; text-decoration: underline;">Writer</span> l a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Writer</span> { runWriter <span style="font-weight: bold; font-style: italic;">::</span> (a,l) }
+</code></pre>
+<p>
+里面只是一个 tuple 而已
+</p>
+<ul class="org-ul">
+<li>w 是 log</li>
+<li>a 是 返回值</li>
+</ul>
+
+<p>
+看看如何实现 Writer monad
+</p>
+<pre class="code"><code><span style="font-weight: bold;">instance</span> (<span style="font-weight: bold; text-decoration: underline;">Monoid</span> w) <span style="font-weight: bold; font-style: italic;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span> (<span style="font-weight: bold; text-decoration: underline;">Writer</span> w) <span style="font-weight: bold;">where</span>
+    return a             <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Writer</span> (a,mempty)
+    (<span style="font-weight: bold; text-decoration: underline;">Writer</span> (a,l)) <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> f <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold;">let</span> (a',l') <span style="font-weight: bold; font-style: italic;">=</span> runWriter <span style="font-weight: bold; font-style: italic;">$</span> f a <span style="font-weight: bold;">in</span>
+                           <span style="font-weight: bold; text-decoration: underline;">Writer</span> (a',l <span style="font-weight: bold; font-style: italic;">`mappend`</span> l')
+</code></pre>
+
+<ul class="org-ul">
+<li>return 不会有任何 log，l 是 monoid 的 mempty</li>
+<li>f 的类型为 <code>a -&gt; Writer l a</code></li>
+<li><code>runWriter $ f a</code> 返回 <code>(a, l)</code></li>
+</ul>
+
+
+<figure>
+<img src="images/p2-writer-monad.png" alt="p2-writer-monad.png">
+
+</figure>
+
+<p>
+所以在 &gt;&gt;= 时，我们先把 f a 返回的 Writer run了，然后把两次 log <code>mappend</code> 起来。
+<img src="images/p2-writer-monad-bind.png" alt="p2-writer-monad-bind.png">
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgfe89e6f" class="outline-3">
+<h3 id="orgfe89e6f"><span class="section-number-3">2.6</span> State</h3>
+<div class="outline-text-3" id="text-2-6">
+<p>
+跟名字就看得出来 State monad 是为了处理状态。虽然函数式编程不应该有状态，不然会引用透明性。但是，state monad并不是在计算过程中修改状态，而是通过描述这种变化，然后需要时在运行返回最终结果。这一点跟 Reader 和 Writer 这两个看起来是副作用的 IO 是一样的。
+</p>
+
+<p>
+先看下 State 类型的定义
+</p>
+<pre class="code"><code><span style="font-weight: bold;">newtype</span> <span style="font-weight: bold; text-decoration: underline;">State</span> s a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">State</span> { runState <span style="font-weight: bold; font-style: italic;">::</span> s <span style="font-weight: bold; font-style: italic;">-&gt;</span> (a, s) }
+</code></pre>
+
+<p>
+可以看到 State 只包含一个 从旧状态 s 到新状态 s 和返回值 a 的 Tuple 的函数。
+</p>
+
+<p>
+通过实现 Monad，State 就可以实现命令式编程中的变量的功能。
+</p>
+<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span> (<span style="font-weight: bold; text-decoration: underline;">State</span> s) <span style="font-weight: bold;">where</span>
+  return a        <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">State</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; font-style: italic;">\</span>s <span style="font-weight: bold; font-style: italic;">-&gt;</span> (a,s)
+  (<span style="font-weight: bold; text-decoration: underline;">State</span> x) <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> f <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">State</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; font-style: italic;">\</span>s <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold;">let</span> (v,s') <span style="font-weight: bold; font-style: italic;">=</span> x s <span style="font-weight: bold;">in</span>
+                                 runState (f v) s'
+</code></pre>
+<p>
+return 很简单，就不用解释了。
+</p>
+
+
+<figure>
+<img src="images/p2-state-monad.png" alt="p2-state-monad.png">
+
+</figure>
+
+<p>
+x 类型是 <code>s -&gt; (a, s)</code> ,所以 x s 之后会返回 结果和状态。也就是运行当前 State，把结果 v 传给函数 f，返回的 State 再接着上次状态运行。
+</p>
+
+
+<figure>
+<img src="images/p2-state-monad-bind.png" alt="p2-state-monad-bind.png">
+
+<figcaption><span class="figure-number">Figure 24: </span>State x &gt;&gt;= f 后runState的数据流（啊啊啊，画歪了，感觉需要脉动一下）</figcaption>
+</figure>
+
+<p>
+使用起来也很方便，State 提供 <code>get</code> <code>put</code> <code>moidfy</code> 三个方便的函数可以生成修改状态的State monad
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">import</span> <span style="font-weight: bold; text-decoration: underline;">Control.Monad.Trans.State.Strict</span>
+<span style="font-weight: bold;">test</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">State</span> <span style="font-weight: bold; text-decoration: underline;">Int</span> <span style="font-weight: bold; text-decoration: underline;">Int</span>
+<span style="font-weight: bold;">test</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold;">do</span>
+  a <span style="font-weight: bold; font-style: italic;">&lt;-</span> get
+  modify (<span style="font-weight: bold; font-style: italic;">+</span>1)
+  b <span style="font-weight: bold; font-style: italic;">&lt;-</span> get
+  return (a <span style="font-weight: bold; font-style: italic;">+</span> b)
+
+<span style="font-weight: bold;">main</span> <span style="font-weight: bold; font-style: italic;">=</span> print <span style="font-weight: bold; font-style: italic;">$</span> show <span style="font-weight: bold; font-style: italic;">$</span> runState test 3
+<span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">(7, 4)</span>
+</code></pre>
+</div>
+</div>
+
+
+<div id="outline-container-org1db0a19" class="outline-3">
+<h3 id="org1db0a19"><span class="section-number-3">2.7</span> Validation</h3>
+<div class="outline-text-3" id="text-2-7">
+<p>
+如果你有注意到，前面的 Either 可以用在处理错误和正确的路径分支，但是问题是错误只发生一次。
+</p>
+
+<div class="epigraph"><blockquote>
+<p>
+Validation 没有在标准库中，但是我觉得好有用啊，你可以在 ekmett 的 <a href="https://github.com/ekmett/either">github</a> 中找到源码
+</p>
+
+</blockquote></div>
+
+<p>
+想象一下这种场景，用户提交一个表单，我们需要对每一个field进行验证，如果有错误，需要把错误的哪几个field的错误消息返回。显然如果使用 Either 来做，只能返回第一个field的错误信息，后面的计算都会被跳过。
+</p>
+
+<p>
+针对这种情况， Validation 更适合
+</p>
+<pre class="code"><code><span style="font-weight: bold;">data</span> <span style="font-weight: bold; text-decoration: underline;">Validation</span> e a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Failure</span> e <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">Success</span> a
+</code></pre>
+
+<p>
+ADT定义看起来跟 Either 是一样的，不同的是 <ruby>左边<rt>Left</rt></ruby> Failure 是 <ruby>含幺半群<rt>Monoid</rt></ruby>
+</p>
+</div>
+
+<div id="outline-container-org4a696cb" class="outline-4">
+<h4 id="org4a696cb"><span class="section-number-4">2.7.1</span> <ruby>含幺半群<rt>Monoid</rt></ruby></h4>
+<div class="outline-text-4" id="text-2-7-1">
+<p>
+monoid 首先得是 <ruby>半群<rt>Semigroup</rt></ruby> ，然后再 含幺。
+</p>
+<pre class="code"><code><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">Semigroup</span> a <span style="font-weight: bold;">where</span>
+  (<span style="font-weight: bold; font-style: italic;">&lt;&gt;</span>) <span style="font-weight: bold; font-style: italic;">::</span> a <span style="font-weight: bold; font-style: italic;">-&gt;</span> a <span style="font-weight: bold; font-style: italic;">-&gt;</span> a
+  (<span style="font-weight: bold; font-style: italic;">&lt;&gt;</span>) <span style="font-weight: bold; font-style: italic;">=</span> mappend
+</code></pre>
+
+<p>
+半群非常简单，只要是可以 <code>&lt;&gt;</code> (mappend) 的类型就是了。
+</p>
+
+<p>
+含幺只需要有一个 <code>mempty</code> 的 幺元就行
+</p>
+<pre class="code"><code><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">Monoid</span> a <span style="font-weight: bold;">where</span>
+  mempty  <span style="font-weight: bold; font-style: italic;">::</span> a
+  mappend <span style="font-weight: bold; font-style: italic;">::</span> a <span style="font-weight: bold; font-style: italic;">-&gt;</span> a <span style="font-weight: bold; font-style: italic;">-&gt;</span> a
+</code></pre>
+
+<p>
+比如 List 就是 Semigroup
+</p>
+<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Semigroup</span> [a] <span style="font-weight: bold;">where</span>
+  (<span style="font-weight: bold; font-style: italic;">&lt;&gt;</span>) <span style="font-weight: bold; font-style: italic;">=</span> (<span style="font-weight: bold; font-style: italic;">++</span>)
+</code></pre>
+<p>
+也是 Monoid
+</p>
+<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Monoid</span> [a] <span style="font-weight: bold;">where</span>
+  mempty  <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">[]</span>
+  mappend <span style="font-weight: bold; font-style: italic;">=</span> (<span style="font-weight: bold; font-style: italic;">++</span>)
+</code></pre>
+
+<p>
+Monoid 的 <code>&lt;&gt;</code> 满足：
+</p>
+<ul class="org-ul">
+<li>mempty &lt;&gt; a = a</li>
+<li>a &lt;&gt; b &lt;&gt; c = a &lt;&gt; (b &lt;&gt; c)</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgbe08a66" class="outline-4">
+<h4 id="orgbe08a66"><span class="section-number-4">2.7.2</span> 回到 Validation</h4>
+<div class="outline-text-4" id="text-2-7-2">
+<p>
+现在让 Failure e 满足 Monoid，就可以 <code>mappend</code> 错误信息了。
+</p>
+<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Semigroup</span> e <span style="font-weight: bold; font-style: italic;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Semigroup</span> (<span style="font-weight: bold; text-decoration: underline;">Validation</span> e a) <span style="font-weight: bold;">where</span>
+  <span style="font-weight: bold; text-decoration: underline;">Failure</span> e1 <span style="font-weight: bold; font-style: italic;">&lt;&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Failure</span> e2 <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Failure</span> (e1 <span style="font-weight: bold; font-style: italic;">&lt;&gt;</span> e2)
+  <span style="font-weight: bold; text-decoration: underline;">Failure</span> <span style="font-weight: bold;">_</span>  <span style="font-weight: bold; font-style: italic;">&lt;&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Success</span> a2 <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Success</span> a2
+  <span style="font-weight: bold; text-decoration: underline;">Success</span> a1 <span style="font-weight: bold; font-style: italic;">&lt;&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Failure</span> <span style="font-weight: bold;">_</span>  <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Success</span> a1
+  <span style="font-weight: bold; text-decoration: underline;">Success</span> a1 <span style="font-weight: bold; font-style: italic;">&lt;&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Success</span> <span style="font-weight: bold;">_</span>  <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Success</span> a1
+</code></pre>
+
+<p>
+下来，我们用一个简单的例子来看看 Validation 与 Either 有什么区别。
+</p>
+
+<p>
+假设我们有一个form，需要输入姓名与电话，验证需要姓名是非空而电话是11位数字。
+</p>
+
+<p>
+首先，我们需要有一个函数去创建包含姓名和电话的model
+</p>
+<pre class="code"><code><span style="font-weight: bold;">data</span> <span style="font-weight: bold; text-decoration: underline;">Info</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Info</span> {name<span style="font-weight: bold; text-decoration: underline;">:</span> <span style="font-weight: bold; text-decoration: underline;">String</span>, phone<span style="font-weight: bold; text-decoration: underline;">:</span> <span style="font-weight: bold; text-decoration: underline;">String</span>} <span style="font-weight: bold;">deriving</span> <span style="font-weight: bold; text-decoration: underline;">Show</span>
+</code></pre>
+
+<p>
+然后我们需要验证函数
+</p>
+<pre class="code"><code><span style="font-weight: bold;">notEmpty</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">String</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">String</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Validation</span> [<span style="font-weight: bold; text-decoration: underline;">String</span>] <span style="font-weight: bold; text-decoration: underline;">String</span>
+<span style="font-weight: bold;">notEmpty</span> desc <span style="font-style: italic;">""</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Failure</span> [desc <span style="font-weight: bold; font-style: italic;">&lt;&gt;</span> <span style="font-style: italic;">" cannot be empty!"</span>]
+<span style="font-weight: bold;">notEmpty</span> <span style="font-weight: bold;">_</span> field <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Success</span> field
+</code></pre>
+<p>
+notEmpty 检查字符是否为空，如果是空返回 Failure 包含错误信息，若是非空则返回 Success 包含 field
+</p>
+
+<p>
+同样的可以创建 11位数字的验证函数
+</p>
+<pre class="code"><code><span style="font-weight: bold;">phoneNumberLength</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">String</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">String</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Validation</span> [<span style="font-weight: bold; text-decoration: underline;">String</span>] <span style="font-weight: bold; text-decoration: underline;">String</span>
+<span style="font-weight: bold;">phoneNumberLength</span> desc field <span style="font-weight: bold; font-style: italic;">|</span> (length field) <span style="font-weight: bold; font-style: italic;">==</span> 11 <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Success</span> field
+                             <span style="font-weight: bold; font-style: italic;">|</span> otherwise <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Failure</span> [desc <span style="font-weight: bold; font-style: italic;">&lt;&gt;</span> <span style="font-style: italic;">"'s length is not 11"</span>]
+</code></pre>
+<p>
+实现 Validation 的 Applicative instance，这样就可以把函数调用lift成带有验证的 Applicative
+</p>
+<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Semigroup</span> e <span style="font-weight: bold; font-style: italic;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Applicative</span> (<span style="font-weight: bold; text-decoration: underline;">Validation</span> e) <span style="font-weight: bold;">where</span>
+  pure <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Success</span>
+  <span style="font-weight: bold; text-decoration: underline;">Failure</span> e1 <span style="font-weight: bold; font-style: italic;">&lt;*&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Failure</span> e2 <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Failure</span> e1 <span style="font-weight: bold; font-style: italic;">&lt;&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Failure</span> e2
+  <span style="font-weight: bold; text-decoration: underline;">Failure</span> e1 <span style="font-weight: bold; font-style: italic;">&lt;*&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Success</span> <span style="font-weight: bold;">_</span>  <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Failure</span> e1
+  <span style="font-weight: bold; text-decoration: underline;">Success</span> <span style="font-weight: bold;">_</span>  <span style="font-weight: bold; font-style: italic;">&lt;*&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Failure</span> e2 <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Failure</span> e2
+  <span style="font-weight: bold; text-decoration: underline;">Success</span> f <span style="font-weight: bold; font-style: italic;">&lt;*&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Success</span> a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Success</span> (f a)
+</code></pre>
+<ul class="org-ul">
+<li>失败应用到失败会 concat 起来</li>
+<li>失败跟应用或被成功应用还是失败</li>
+<li>只有成功应用到成功才能成功，这很符合验证的逻辑，一旦验证中发生任何错误，都应该返回失败。</li>
+</ul>
+
+<pre class="code"><code><span style="font-weight: bold;">createInfo</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">String</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">String</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Validation</span> [<span style="font-weight: bold; text-decoration: underline;">String</span>] <span style="font-weight: bold; text-decoration: underline;">Info</span>
+<span style="font-weight: bold;">createInfo</span> name phone <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Info</span> <span style="font-weight: bold; font-style: italic;">&lt;$&gt;</span> notEmpty <span style="font-style: italic;">"name"</span> name <span style="font-weight: bold; font-style: italic;">&lt;*&gt;</span> phoneNumberLength <span style="font-style: italic;">"phone"</span> phone
+</code></pre>
+
+<p>
+现在我们就可以使用带validation的 createInfo 来安全的创建 Info 了
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">createInfo</span> <span style="font-style: italic;">"jichao"</span> <span style="font-style: italic;">"12345678910"</span> <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">Success Info "jichao" "12345678910"</span>
+<span style="font-weight: bold;">createInfo</span> <span style="font-style: italic;">""</span> <span style="font-style: italic;">"123"</span> <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">Failure ["name cannot be empty!", "phone's length is not 11"]</span>
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org25a1881" class="outline-3">
+<h3 id="org25a1881"><span class="section-number-3">2.8</span> Cont</h3>
+<div class="outline-text-3" id="text-2-8">
+<p>
+Cont 是 <ruby>Continuation Passing Style<rt>CPS</rt></ruby> 的 monad，也就是说，它是包含 cps 计算 monad。
+</p>
+
+<p>
+先看一下什么是 CPS，比如有一个加法
+</p>
+<pre class="code"><code><span style="font-weight: bold;">add</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Int</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Int</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Int</span>
+<span style="font-weight: bold;">add</span> <span style="font-weight: bold; font-style: italic;">=</span> (<span style="font-weight: bold; font-style: italic;">+</span>)
+</code></pre>
+
+<p>
+但是如果你想在算法加法后，能够继续进行一个其他的计算，那么就可以写一个 cps版本的加法
+</p>
+<pre class="code"><code><span style="font-weight: bold;">addCPS</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Int</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Int</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> (<span style="font-weight: bold; text-decoration: underline;">Int</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> r) <span style="font-weight: bold; font-style: italic;">-&gt;</span> r
+<span style="font-weight: bold;">addCPS</span> a b k <span style="font-weight: bold; font-style: italic;">=</span> k (a <span style="font-weight: bold; font-style: italic;">+</span> b)
+</code></pre>
+
+<p>
+非常简单，现在我们可以看看为什么需要一个 Cont monad 来包住 CPS 计算，首先，来看 ADT 定义
+</p>
+<pre class="code"><code><span style="font-weight: bold;">newtype</span> <span style="font-weight: bold; text-decoration: underline;">Cont</span> r a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Cont</span> { runCont <span style="font-weight: bold; font-style: italic;">::</span> ((a <span style="font-weight: bold; font-style: italic;">-&gt;</span> r) <span style="font-weight: bold; font-style: italic;">-&gt;</span> r) }
+</code></pre>
+
+<p>
+又是一个同构的类型，Cont 构造器只需要一个 runCount，也就是让他能继续计算的一个函数。
+</p>
+
+<p>
+完了之后来把之前的 addCPS 改成 Cont
+</p>
+<pre class="code"><code><span style="font-weight: bold;">add</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Int</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Int</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Cont</span> k <span style="font-weight: bold; text-decoration: underline;">Int</span>
+<span style="font-weight: bold;">add</span> a b <span style="font-weight: bold; font-style: italic;">=</span> return (a <span style="font-weight: bold; font-style: italic;">+</span> b)
+</code></pre>
+
+<p>
+注意到 addCPS 接收到 a 和 b 之后返回的类型是 <code>(Int -&gt; r) -&gt; r</code> ，而 Cont 版本的 <code>add</code> 返回 <code>Cont k Int</code>
+</p>
+
+<p>
+明显构造 <code>Cont k Int</code> 也正是需要 <code>(Int -&gt; r) -&gt; r</code> ，所以 Cont 就是算了 k 的抽象了。
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span> (<span style="font-weight: bold; text-decoration: underline;">Cont</span> r) <span style="font-weight: bold;">where</span>
+    return a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Cont</span> (<span style="font-weight: bold; font-style: italic;">$</span> a)
+    m <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> k  <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Cont</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; font-style: italic;">\</span>c <span style="font-weight: bold; font-style: italic;">-&gt;</span> runCont m <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; font-style: italic;">\</span>a <span style="font-weight: bold; font-style: italic;">-&gt;</span> runCont (k a) c
+</code></pre>
+
+<p>
+<code>($ a)</code> 比较有意思, 我们都知道 <code>f $ g a</code> 其实就是 <code>f(g a)</code>, 所以 <code>$</code> 其实就是一个 apply 左边的函数到右边表达式的中缀函数, 如果写成前缀则是
+<code>($ (g a) f)</code>. 是反的是因为 <code>$</code> 是有结合, 需要右边表达式先求值, 所以只给一个 a 就相当于 <code>($ a) = \f -&gt; f a</code>
+</p>
+
+<p>
+回到 Monad Cont&#x2026;
+</p>
+<pre class="example">
+ob-haskell
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9bafa0f" class="outline-2">
+<h2 id="org9bafa0f"><span class="section-number-2">3</span> 第三部分:<ruby>搞基猫呢<rt>Advanced Monads</rt></ruby></h2>
+<div class="outline-text-2" id="text-3">
+<p>
+第二部分介绍了一些实用的monad instances，这些 monad 都通过同样的抽象方式，解决了分离计算与副作用的工作。
+</p>
+
+<p>
+通过它们可以解决大多数的基本问题，但是正对于复杂业务逻辑，我们可能还需要一些更高阶的 monad 或者 pattern。
+</p>
+
+<p>
+当有了第一部分的理论基础和第二部分的实践，这部分要介绍的猫呢其实并不是很搞基。通过这一部分介绍的搞基猫呢，
+我们还可以像 IO monad 一样，通过 free 或者 Eff 自定义自己的计算，和可能带副作用的解释器。
+</p>
+</div>
+
+<div id="outline-container-orgc4dbc11" class="outline-3">
+<h3 id="orgc4dbc11"><span class="section-number-3">3.1</span> RWS</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。如果已经忘记 Reader Writer 或者 State，请到第二部分复习一下。
+</p>
+
+<p>
+一旦把三个 monad 合体，意味着可以在同一个 monad 使用三个 monad 的方法，比如，可以同时使用 Reader 的 ask, State 的 get, put, 和 Writer 的 tell
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">readWriteState</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold;">do</span>
+  e <span style="font-weight: bold; font-style: italic;">&lt;-</span> ask
+  a <span style="font-weight: bold; font-style: italic;">&lt;-</span> get
+  <span style="font-weight: bold;">let</span> res <span style="font-weight: bold; font-style: italic;">=</span> a <span style="font-weight: bold; font-style: italic;">+</span> e
+  put res
+  tell [res]
+  return res
+<span style="font-weight: bold;">runRWS</span> readWriteState 1 2
+<span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">(3 3 [3])</span>
+</code></pre>
+
+<p>
+注意到跟 Reader 和 State 一样，run的时候输入初始值
+</p>
+
+<p>
+其中 1 为 Reader 的值，2 为 State 的初始状态.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org20dd439" class="outline-3">
+<h3 id="org20dd439"><span class="section-number-3">3.2</span> Monad Transform</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+你会发现 RWS 一起用挺好的，能读能写能打 log，但是已经固定好搭配了，只能是 RWS ，如果我还想加入其它的 Monad，该怎么办呢？
+</p>
+
+<p>
+这时候，简单的解决方案是加个 T，比如对于 Reader，我们有 ReaderT，RWS，也有对应的 RWST。其中 T 代表 Transform。
+</p>
+</div>
+
+<div id="outline-container-org7b440b1" class="outline-4">
+<h4 id="org7b440b1"><span class="section-number-4">3.2.1</span> ReaderT</h4>
+<div class="outline-text-4" id="text-3-2-1">
+<p>
+让我来通过简单的 ReaderT 来解释到底什么是 T 吧, 首先跟 Reader 一样我们有个 runReaderT
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">newtype</span> <span style="font-weight: bold; text-decoration: underline;">ReaderT</span> e m a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">ReaderT</span> { runReaderT <span style="font-weight: bold; font-style: italic;">::</span> e <span style="font-weight: bold; font-style: italic;">-&gt;</span> m a }
+</code></pre>
+
+<p>
+比较一下 Reader 的定义
+</p>
+<pre class="code"><code><span style="font-weight: bold;">newtype</span> <span style="font-weight: bold; text-decoration: underline;">Reader</span> e a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Reader</span> { runReader <span style="font-weight: bold; font-style: italic;">::</span> (e <span style="font-weight: bold; font-style: italic;">-&gt;</span> a) }
+</code></pre>
+
+<p>
+有没有发现多了一个 m, 也就是说, <code>runReader e</code> 会返回 a, 但是 <code>runReaderT e</code> 则会返回 <code>m a</code>
+</p>
+
+
+<figure>
+<img src="images/p3-ReaderT.png" alt="p3-ReaderT.png">
+
+</figure>
+
+<pre class="code"><code><span style="font-weight: bold;">instance</span> (<span style="font-weight: bold; text-decoration: underline;">Monad</span> m) <span style="font-weight: bold; font-style: italic;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span> (<span style="font-weight: bold; text-decoration: underline;">ReaderT</span> e m) <span style="font-weight: bold;">where</span>
+    return   <span style="font-weight: bold; font-style: italic;">=</span> lift <span style="font-weight: bold; font-style: italic;">.</span> return
+    r <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> k  <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">ReaderT</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; font-style: italic;">\</span> e <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold;">do</span>
+        a <span style="font-weight: bold; font-style: italic;">&lt;-</span> runReaderT r e
+        runReaderT (k a) e
+</code></pre>
+
+<p>
+再看看 monad 的实现, 也是一样的, 先 run 一下 <code>r e</code> 得到结果 <code>a</code>, 应用函数 <code>k</code> 到 <code>a</code>, 再 run 一把.
+</p>
+
+
+<p>
+问题是, 这里的 <code>return</code> 里面的 <code>lift</code> 是哪来的?
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">MonadTrans</span> (<span style="font-weight: bold; text-decoration: underline;">ReaderT</span> e) <span style="font-weight: bold;">where</span>
+  lift m <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">ReaderT</span> (const m)
+</code></pre>
+
+
+<figure>
+<img src="images/p3-MonadTrans-ReaderT-e-m.png" alt="p3-MonadTrans-ReaderT-e-m.png">
+
+</figure>
+
+<p>
+这个函数 <code>lift</code> 被定义在 MonadTrans 的实例中, 简单的把 m 放到 ReaderT 结果中.
+</p>
+
+<p>
+例如, <code>lift (Just 1)</code> 会得到 ReaderT, 其中 e 随意, m 为 Maybe Num
+</p>
+
+<p>
+重点需要体会的是, Reader 可以越过 Maybe 直接操作到 Num, 完了再包回来.
+</p>
+
+<p>
+有了 ReaderT, 搭配 Id Monad 就很容易创建出来 Reader Monad
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">type</span> <span style="font-weight: bold; text-decoration: underline;">Reader</span> r a<span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">ReaderT</span> r <span style="font-weight: bold; text-decoration: underline;">Identity</span> a
+</code></pre>
+
+<p>
+越过 Id read 到 Id 内部, 完了再用 Id 包回来, 不就是 Reader 了么
+</p>
+
+<pre class="code"><code><span style="font-weight: bold; text-decoration: underline;">ReaderT</span> { runReaderT <span style="font-weight: bold; font-style: italic;">::</span> r <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Identity</span> a }
+<span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">Identity a is a</span>
+<span style="font-weight: bold; text-decoration: underline;">ReaderT</span> { runReaderT <span style="font-weight: bold; font-style: italic;">::</span> r <span style="font-weight: bold; font-style: italic;">-&gt;</span> a }
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga2de3f7" class="outline-3">
+<h3 id="orga2de3f7"><span class="section-number-3">3.3</span> Alternative</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+这个 typeclass 提供 <code>&lt;|&gt;</code> 函数, 表示要么计算左边, 要么计算右边
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">Applicative</span> f <span style="font-weight: bold; font-style: italic;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Alternative</span> f <span style="font-weight: bold;">where</span>
+    empty <span style="font-weight: bold; font-style: italic;">::</span> f a
+    (<span style="font-weight: bold; font-style: italic;">&lt;|&gt;</span>) <span style="font-weight: bold; font-style: italic;">::</span> f a <span style="font-weight: bold; font-style: italic;">-&gt;</span> f a <span style="font-weight: bold; font-style: italic;">-&gt;</span> f a
+</code></pre>
+
+
+<figure>
+<img src="images/p3-Alternative.png" alt="p3-Alternative.png">
+
+</figure>
+
+<p>
+其实就是 Applicative 的 <code>或</code>
+</p>
+
+<p>
+比如:
+</p>
+<pre class="code"><code><span style="font-weight: bold; text-decoration: underline;">Just</span> 1 <span style="font-weight: bold; font-style: italic;">&lt;|&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Just</span> 2 <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">Just 1</span>
+<span style="font-weight: bold; text-decoration: underline;">Just</span> 1 <span style="font-weight: bold; font-style: italic;">&lt;|&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Nothing</span> <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">Just 1</span>
+<span style="font-weight: bold; text-decoration: underline;">Nothing</span> <span style="font-weight: bold;">&lt;|&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Just</span> 1 <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">Just 1</span>
+<span style="font-weight: bold; text-decoration: underline;">Nothing</span> <span style="font-weight: bold;">&lt;|&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Nothing</span> <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">Nothing</span>
+</code></pre>
+</div>
+</div>
+
+<div id="outline-container-org3293a7e" class="outline-3">
+<h3 id="org3293a7e"><span class="section-number-3">3.4</span> MonadPlus</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+这跟 Alternative 是一毛一样的, 只是限制的更细, 必须是 Monad才行
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">class</span> (<span style="font-weight: bold; text-decoration: underline;">Alternative</span> m, <span style="font-weight: bold; text-decoration: underline;">Monad</span> m) <span style="font-weight: bold; font-style: italic;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">MonadPlus</span> m <span style="font-weight: bold;">where</span>
+   mzero <span style="font-weight: bold; font-style: italic;">::</span> m a
+   mzero <span style="font-weight: bold; font-style: italic;">=</span> empty
+   mplus <span style="font-weight: bold; font-style: italic;">::</span> m a <span style="font-weight: bold; font-style: italic;">-&gt;</span> m a <span style="font-weight: bold; font-style: italic;">-&gt;</span> m a
+   mplus <span style="font-weight: bold; font-style: italic;">=</span> (<span style="font-weight: bold; font-style: italic;">&lt;|&gt;</span>)
+</code></pre>
+
+<p>
+看, 实现中直接就调用了 Alternative 的 <code>empty</code> 和 <code>&lt;|&gt;</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2af42cd" class="outline-3">
+<h3 id="org2af42cd"><span class="section-number-3">3.5</span> ST Monad</h3>
+<div class="outline-text-3" id="text-3-5">
+<p>
+ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 immutable 的, 而是 "immutable" 的在原地做修改. 改完之后 runST 又然他回到了 immutable 的 Haskell 世界.
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">sumST</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Num</span> a <span style="font-weight: bold; font-style: italic;">=&gt;</span> [a] <span style="font-weight: bold; font-style: italic;">-&gt;</span> a
+<span style="font-weight: bold;">sumST</span> xs <span style="font-weight: bold; font-style: italic;">=</span> runST <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold;">do</span>           <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">do &#21518;&#38754;&#30340;&#20107;&#24773;&#20250;&#26159;&#19981;&#38169;&#30340;&#20869;&#23384;&#25805;&#20316;, runST &#21487;&#20197;&#25226;&#23427;&#25289;&#20250;&#32431;&#30340;&#19990;&#30028;</span>
+    n <span style="font-weight: bold; font-style: italic;">&lt;-</span> newSTRef 0             <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">&#22312;&#20869;&#23384;&#20013;&#21019;&#24314;&#19968;&#22359;&#24182;&#25351;&#21040; STRef</span>
+    forM_ xs <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; font-style: italic;">\</span>x <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold;">do</span>         <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">&#36825;&#36319;&#21629;&#20196;&#24335;&#30340;for&#24490;&#29615;&#25913;&#20889;&#21464;&#37327;&#26159;&#19968;&#27611;&#19968;&#26679;&#30340;</span>
+        modifySTRef n (<span style="font-weight: bold; font-style: italic;">+</span>x)
+    readSTRef n                 <span style="font-weight: bold; font-style: italic;">-- </span><span style="font-weight: bold; font-style: italic;">&#36820;&#22238;&#25913;&#23436;&#20043;&#21518;&#30340; n &#30340;&#20540;</span>
+</code></pre>
+</div>
+</div>
+
+<div id="outline-container-org5ad914e" class="outline-3">
+<h3 id="org5ad914e"><span class="section-number-3">3.6</span> Free Monad</h3>
+<div class="outline-text-3" id="text-3-6">
+<p>
+上一章说过的 RWS Monad 毕竟是固定搭配，当你的业务需要更多的 Monad 来表示 Effect 时，
+我们就需要有那么个小猪手帮我们定义自己的 Monad。
+</p>
+
+<p>
+那就是 Free, Free 可以将任意 datatype lift 成为 Monad
+</p>
+</div>
+
+<div id="outline-container-orgf822c1d" class="outline-4">
+<h4 id="orgf822c1d"><span class="section-number-4">3.6.1</span> Free</h4>
+<div class="outline-text-4" id="text-3-6-1">
+<p>
+先看 Free 什么定义:
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">data</span> <span style="font-weight: bold; text-decoration: underline;">Free</span> f a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> (f (<span style="font-weight: bold; text-decoration: underline;">Free</span> f a)) <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">Return</span> a
+</code></pre>
+
+<p>
+其中 <code>f</code> 就是你业务需要的 effect 类型, <code>a</code> 是这个 effect 所产生的返回值类型。
+</p>
+
+<p>
+右边两种构造函数，如果把 <code>Role</code> 改成 <code>Cons</code>, <code>Return</code> 改成 <code>Nil</code> 的话, 是不是跟 List 其实是 <ruby>同构<rt>isomophic</rt></ruby> 的呢? 所以如果想象成 List, 那么 <code>f</code> 在这里就相当于 List 中的一个元素.
+</p>
+
+<p>
+到那时, <code>&gt;&gt;=</code> 的操作又跟 List 略有不同, 我们都知道 <code>&gt;&gt;=</code> 会把每一个元素 map 成 List, 然后 flatten, 但 Free 其实是用来构建
+顺序的 effect 的, 所以:
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span> f <span style="font-weight: bold; font-style: italic;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span> (<span style="font-weight: bold; text-decoration: underline;">Free</span> f) <span style="font-weight: bold;">where</span>
+  return a        <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Return</span> a
+  <span style="font-weight: bold; text-decoration: underline;">Return</span> a <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> fn <span style="font-weight: bold; font-style: italic;">=</span> fn a
+  <span style="font-weight: bold; text-decoration: underline;">Roll</span> ffa <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> fn <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> fmap (<span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> fn) ffa
+</code></pre>
+
+<p>
+你会发现 <code>&gt;&gt;=</code> 会递归的 <code>fmap</code> 到 <code>Roll</code> 上, 直到最后一个 <code>Return</code>.
+</p>
+
+<p>
+比如, 如果你有一个 program 有三种副作用 Eff1, Eff2, Eff3
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">data</span> <span style="font-weight: bold; text-decoration: underline;">Eff</span> a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> a <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> a <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> a
+<span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold;">do</span>
+ a <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> 1
+ b <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> 2
+ c <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> 3
+ return a <span style="font-weight: bold; font-style: italic;">+</span> b <span style="font-weight: bold; font-style: italic;">+</span> c
+</code></pre>
+
+<p>
+如果我们把 program 展开, 每一步 <code>&gt;&gt;=</code> 大概是这样:
+</p>
+
+<pre class="code"><code>liftF <span style="font-weight: bold;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> 1
+</code></pre>
+
+<p>
+展开既是:
+</p>
+
+<pre class="code"><code><span style="font-weight: bold; text-decoration: underline;">Roll</span> (<span style="font-weight: bold; text-decoration: underline;">Eff1</span> (<span style="font-weight: bold; text-decoration: underline;">Return</span> 1))
+</code></pre>
+
+<p>
+代入到 program 即:
+</p>
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> (<span style="font-weight: bold; text-decoration: underline;">Eff1</span> (<span style="font-weight: bold; text-decoration: underline;">Return</span> 1)) <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> <span style="font-weight: bold; font-style: italic;">\</span>a <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold;">do</span>
+   b <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> 2
+   c <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> 3
+   return a <span style="font-weight: bold; font-style: italic;">+</span> b <span style="font-weight: bold; font-style: italic;">+</span> c
+</code></pre>
+
+<p>
+用 Free 的 <code>&gt;&gt;=</code> 公式 <code>Roll ffa &gt;&gt;= fn = Roll $ fmap (&gt;&gt;= fn) ffa</code> 去展开上面就得到:
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> (<span style="font-weight: bold; text-decoration: underline;">Return</span> 1 <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> fn1)) <span style="font-weight: bold;">where</span>
+  fn1 <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; font-style: italic;">\</span>a <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold;">do</span>
+   b <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> 2
+   c <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> 3
+   return a <span style="font-weight: bold; font-style: italic;">+</span> b <span style="font-weight: bold; font-style: italic;">+</span> c
+</code></pre>
+
+<p>
+<code>Return 1 &gt;&gt;= fn1</code> 我们都知道怎么展开:
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> (fn1 1) <span style="font-weight: bold;">where</span>
+  fn1 <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; font-style: italic;">\</span>a <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold;">do</span>
+   b <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> 2
+   c <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> 3
+   return a <span style="font-weight: bold; font-style: italic;">+</span> b <span style="font-weight: bold; font-style: italic;">+</span> c
+</code></pre>
+
+<p>
+展开 <code>fn1</code>
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> <span style="font-weight: bold;">do</span>
+   b <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> 2
+   c <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> 3
+   return 1 <span style="font-weight: bold; font-style: italic;">+</span> b <span style="font-weight: bold; font-style: italic;">+</span> c
+</code></pre>
+
+
+<p>
+同样的步骤展开 Eff2
+</p>
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> <span style="font-weight: bold;">do</span>
+   c <span style="font-weight: bold; font-style: italic;">&lt;-</span> liftF <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> 3
+   return 1 <span style="font-weight: bold; font-style: italic;">+</span> 2 <span style="font-weight: bold; font-style: italic;">+</span> c
+</code></pre>
+
+<p>
+和 Eff3
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> <span style="font-weight: bold;">do</span>
+   return 1 <span style="font-weight: bold; font-style: italic;">+</span> 2 <span style="font-weight: bold; font-style: italic;">+</span> 3
+</code></pre>
+
+<p>
+最后的 program 是不是很像 List 的 Cons 和 Nil 呢?
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">Return</span> 1 <span style="font-weight: bold; font-style: italic;">+</span> 2 <span style="font-weight: bold; font-style: italic;">+</span> 3
+</code></pre>
+
+
+<p>
+但是, 细心的你可能早都发现了 <code>Eff</code> 这货必须是个 <code>Functor</code> 才行. 那我们如何随便定义一个 <code>data Eff</code> 直接能生成 <code>Functor Eff</code> 的实例呢?
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb93cf85" class="outline-4">
+<h4 id="orgb93cf85"><span class="section-number-4">3.6.2</span> Coyoneda</h4>
+<div class="outline-text-4" id="text-3-6-2">
+<p>
+希望你还依然记得第一部分的米田 <del>共</del> 引理
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">data</span> <span style="font-weight: bold; text-decoration: underline;">CoYoneda</span> f a <span style="font-weight: bold; font-style: italic;">=</span> forall b<span style="font-weight: bold; font-style: italic;">.</span> <span style="font-weight: bold; text-decoration: underline;">CoYoneda</span> (b <span style="font-weight: bold; font-style: italic;">-&gt;</span> a) (f b)
+</code></pre>
+
+
+<figure>
+<img src="images/p3-CoYoneda.png" alt="p3-CoYoneda.png">
+
+</figure>
+
+<p>
+事实上很简单可以把任何 <code>f</code> 变成 <code>CoYoneda f</code>
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">phi</span> <span style="font-weight: bold; font-style: italic;">::</span> f a <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">CoYoneda</span> f a
+<span style="font-weight: bold;">phi</span> fa <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">CoYoneda</span> id fa
+</code></pre>
+
+
+<figure>
+<img src="images/p3-CoYoneda-phi.png" alt="p3-CoYoneda-phi.png">
+
+</figure>
+
+<p>
+诀窍就是 <code>id</code>, 也就是你把 <code>b</code> 变成 <code>a</code>, 再把 <code>fa</code> 放到 <code>CoYoneda</code> 里就好了
+</p>
+
+<p>
+当 <code>f</code> 是 <code>Functor</code> 时, 又可以把 <code>CoYoneda</code> 变成 <code>f</code>
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">psi</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span> f <span style="font-weight: bold; font-style: italic;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">CoYoneda</span> f a <span style="font-weight: bold; font-style: italic;">-&gt;</span> f a
+<span style="font-weight: bold;">psi</span> (<span style="font-weight: bold; text-decoration: underline;">CoYoneda</span> g fa) <span style="font-weight: bold; font-style: italic;">=</span> fmap g fa
+</code></pre>
+
+
+<figure>
+<img src="images/p3-CoYoneda-psi.png" alt="p3-CoYoneda-psi.png">
+
+</figure>
+
+<p>
+反过来的这个不重要, 重要的是 <code>phi</code>, 因为如果你可以把任何 <code>f</code> 变成 <code>CoYoneda f</code>, 而 <code>CoYoneda f</code> 又是 <code>Functor</code>,
+我们不就免费得到一个 <code>Functor</code>?
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span> (<span style="font-weight: bold; text-decoration: underline;">Coyoneda</span> f) <span style="font-weight: bold;">where</span>
+  fmap f (<span style="font-weight: bold; text-decoration: underline;">Coyoneda</span> g fb) <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Coyoneda</span> (f <span style="font-weight: bold; font-style: italic;">.</span> g) fb
+</code></pre>
+</div>
+</div>
+
+<div id="outline-container-org7b58063" class="outline-4">
+<h4 id="org7b58063"><span class="section-number-4">3.6.3</span> Free Functor</h4>
+<div class="outline-text-4" id="text-3-6-3">
+<p>
+比如我们的 <code>Eff</code> 就可以直接通过 <code>phi</code> 变成 <code>CoYoneda Eff</code>, 从而得到免费的 Functor
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">data</span> <span style="font-weight: bold; text-decoration: underline;">Eff</span> a <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Eff1</span> a <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">Eff2</span> a <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">Eff3</span> a
+<span style="font-weight: bold;">program</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Roll</span> (phi (<span style="font-weight: bold; text-decoration: underline;">Eff1</span> (<span style="font-weight: bold; text-decoration: underline;">Roll</span> (phi (<span style="font-weight: bold; text-decoration: underline;">Eff2</span> (<span style="font-weight: bold; text-decoration: underline;">Return</span> <span style="font-weight: bold; text-decoration: underline;">Int</span>))))))
+</code></pre>
+
+
+<figure>
+<img src="images/p3-Free.png" alt="p3-Free.png">
+
+</figure>
+</div>
+</div>
+
+<div id="outline-container-orgcdf210d" class="outline-4">
+<h4 id="orgcdf210d"><span class="section-number-4">3.6.4</span> Interpreter</h4>
+<div class="outline-text-4" id="text-3-6-4">
+<p>
+构造完一个 free program 后,我们得到的是一个嵌套的数据结构, 当我们需要 run 这个 program 时, 我们需要 foldMap 一个
+Interpreter 去一层层拨开 这个 free program.
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">foldMap</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span> m <span style="font-weight: bold; font-style: italic;">=&gt;</span> (<span style="font-weight: bold;">forall</span> x <span style="font-weight: bold; font-style: italic;">.</span> f x <span style="font-weight: bold; font-style: italic;">-&gt;</span> m x) <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Free</span> f a <span style="font-weight: bold; font-style: italic;">-&gt;</span> m a
+<span style="font-weight: bold;">foldMap</span> <span style="font-weight: bold;">_</span> (<span style="font-weight: bold; text-decoration: underline;">Return</span> a)  <span style="font-weight: bold; font-style: italic;">=</span> return a
+<span style="font-weight: bold;">foldMap</span> f (<span style="font-weight: bold; text-decoration: underline;">Roll</span> a) <span style="font-weight: bold; font-style: italic;">=</span> f a <span style="font-weight: bold; font-style: italic;">&gt;&gt;=</span> foldMap f
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9bdb909" class="outline-3">
+<h3 id="org9bdb909"><span class="section-number-3">3.7</span> Free Monoid</h3>
+</div>
+<div id="outline-container-org0d748aa" class="outline-3">
+<h3 id="org0d748aa"><span class="section-number-3">3.8</span> Eff</h3>
+</div>
+
+<div id="outline-container-orge7b1558" class="outline-3">
+<h3 id="orge7b1558"><span class="section-number-3">3.9</span> Comonad</h3>
+</div>
+</div>
+
+<div id="outline-container-orgcf68728" class="outline-2">
+<h2 id="orgcf68728"><span class="section-number-2">4</span> References</h2>
+<div class="outline-text-2" id="text-4">
 <ul class="org-ul">
 <li><a href="http://dev.stephendiehl.com/hask">http://dev.stephendiehl.com/hask</a></li>
 <li><a href="https://en.wikibooks.org/wiki/Haskell/Category_theory">https://en.wikibooks.org/wiki/Haskell/Category_theory</a></li>
@@ -136,20 +2132,48 @@ FBI Warning
 </ul>
 </div>
 </div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://en.wikipedia.org/wiki/Cheshire_Cat">https://en.wikipedia.org/wiki/Cheshire_Cat</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+如果没看就刚好不要看了, 确实有些误导
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+等等, 写前端怎么了? JavaScript 只是我觉得顺手的若干语言之一, JS用户那么多, 写书当然要用 JS 啦, 难道用 Idris 那还能卖得掉吗? <del>当然最后用JS也没怎么卖掉&#x2026;</del>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara">
+并不是说这两门语言一定在鄙视链顶端, 而是拥有强大类型系统的语言才能体现出范畴论的内容
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5">5</a></sup> <div class="footpara"><p class="footpara">
+这里可以把 Functor 的第一第二个参数消掉, 因为已经知道是在 Hask 范畴了
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.6" class="footnum" href="#fnr.6">6</a></sup> <div class="footpara"><p class="footpara">
+别急, 后面马上讲到
+</p></div></div>
+
+
 </div>
+</div></div>
 <div id="postamble" class="status">
 <footer>
   <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2017-06-10 Sat 09:07</p>
-  <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6) x <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
-  <a class="gumroad-button" href="https://gum.co/grokking-monad">我的新书 Grokking Monad 现已发售，请自觉排队装逼</a>
-
-  <a class="github-fork-ribbon right-bottom fixed" href="https://github.com/jcouyang/blog" title="Fork me on GitHub">Fork me on GitHub</a>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
 </footer>
-
-<div id="disqus_thread"></div>
 </div>
 </body>
 </html>

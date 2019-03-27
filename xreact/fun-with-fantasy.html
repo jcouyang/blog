@@ -1,35 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-<!-- 2017-09-12 Tue 12:01 -->
-<meta  charset="utf-8">
-<meta  name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2019-03-27 Wed 02:21 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>xReact Fantasy</title>
-<meta  name="generator" content="Org-mode">
-<meta  name="author" content="欧阳继超">
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                                                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                                                                                              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                                                                                                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-NJRFJGX');</script>
-<!-- End Google Tag Manager -->
+<meta name="generator" content="Org mode">
+<meta name="author" content="欧阳继超">
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/style/pixyll.css"/>
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css" />
-<!--[if lt IE 9]>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.ie.min.css" />
-     <![endif]-->
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2013 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -81,9 +71,8 @@ for the JavaScript code in this tag.
     <a accesskey="h" href="/index.html"> HOME </a> |
     <a href="#" id="edit-in-github">EDIT</a> |
     <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
-    <a href="/archive.html">ARCHIVE</a> |
-    <a href="/theindex.html">INDEX</a> |
-    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a>
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
 <div id="content">
@@ -93,17 +82,17 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline5">Counter 例子</a>
+<li><a href="#orge3a0886">Counter 例子</a>
 <ul>
-<li><a href="#orgheadline1">Transform</a></li>
-<li><a href="#orgheadline2">View</a></li>
-<li><a href="#orgheadline3">Component</a></li>
-<li><a href="#orgheadline4">render</a></li>
+<li><a href="#orgf6b3071">Transform</a></li>
+<li><a href="#orgb86d711">View</a></li>
+<li><a href="#org00b183c">Component</a></li>
+<li><a href="#org6197a28">render</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline6">多个参数</a></li>
-<li><a href="#orgheadline7">Asynchronous</a></li>
-<li><a href="#orgheadline8">小结</a></li>
+<li><a href="#org7cc499e">多个参数</a></li>
+<li><a href="#org4b0313d">Asynchronous</a></li>
+<li><a href="#org3040bcf">小结</a></li>
 </ul>
 </div>
 </nav>
@@ -115,27 +104,25 @@ xReact 从 2.3 版本之后多了一种模式, 纯函数式的 FantasyX. 大概�
 如果听起来太奇怪, 让我们来看一个不是那么简单的 Counter 计数器实现.
 </p>
 
-<div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5">Counter 例子</h2>
-<div class="outline-text-2" id="text-orgheadline5">
-</div><div id="outline-container-orgheadline1" class="outline-3">
-<h3 id="orgheadline1">Transform</h3>
-<div class="outline-text-3" id="text-orgheadline1">
+<div id="outline-container-orge3a0886" class="outline-2">
+<h2 id="orge3a0886">Counter 例子</h2>
+<div class="outline-text-2" id="text-orge3a0886">
+</div>
+<div id="outline-container-orgf6b3071" class="outline-3">
+<h3 id="orgf6b3071">Transform</h3>
+<div class="outline-text-3" id="text-orgf6b3071">
 <p>
 要知道计数器的核心逻辑其实非常简单:
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">import</span> {lift, xinput} from <span style="color: #8b0000;">'xreact'</span>
-<span style="color: #00008b;">export</span> <span style="color: #00008b;">function</span> inc(<span style="color: #b8860b;">state</span>) {
-  <span style="color: #00008b;">return</span> {count: state.count + 1}
+<pre class="code"><code><span style="font-weight: bold;">import</span> {lift, xinput} from <span style="font-style: italic;">'xreact'</span>
+<span style="font-weight: bold;">export</span> <span style="font-weight: bold;">function</span> inc(<span style="font-weight: bold; font-style: italic;">state</span>) {
+  <span style="font-weight: bold;">return</span> {count: state.count + 1}
 }
-<span style="color: #00008b;">export</span> <span style="color: #00008b;">function</span> dec(<span style="color: #b8860b;">state</span>) {
-  <span style="color: #00008b;">return</span> {count: state.count -1 }
+<span style="font-weight: bold;">export</span> <span style="font-weight: bold;">function</span> dec(<span style="font-weight: bold; font-style: italic;">state</span>) {
+  <span style="font-weight: bold;">return</span> {count: state.count -1 }
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 要么加1, 要么减1, 这个不那么简单计数器还多一个功能,可以改数字, 来来, 免费试玩一下:
@@ -146,19 +133,16 @@ xReact 从 2.3 版本之后多了一种模式, 纯函数式的 FantasyX. 大概�
 <p>
 先让我们看看如何把加减法lift起来
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">XInc</span> = lift(inc)(xinput(<span style="color: #8b0000;">'inc'</span>))
-<span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">XDec</span> = lift(dec)(xinput(<span style="color: #8b0000;">'dec'</span>))
-</pre>
-</div>
+<pre class="code"><code><span style="font-weight: bold;">export</span> <span style="font-weight: bold;">const</span> <span style="font-weight: bold; font-style: italic;">XInc</span> = lift(inc)(xinput(<span style="font-style: italic;">'inc'</span>))
+<span style="font-weight: bold;">export</span> <span style="font-weight: bold;">const</span> <span style="font-weight: bold; font-style: italic;">XDec</span> = lift(dec)(xinput(<span style="font-style: italic;">'dec'</span>))
+</code></pre>
 
 <p>
 注意, <code>lift(inc)</code> 免费得到了个从 FantasyX 到 FantasyX 的函数, 再接收一个 FantasyX 类型的 <code>xinput('inc')</code>, 得到我们需要的带有加一逻辑的FantasyX实例.
 </p>
 
 <p>
-这里的 <code>xinput</code> 则免费创建一个带有名字为 ="inc"= 的输入框的值的 FantasyX.
+这里的 <code>xinput</code> 则免费创建一个带有名字为 <code>"inc"</code> 的输入框的值的 FantasyX.
 </p>
 
 <p>
@@ -181,11 +165,8 @@ xReact 从 2.3 版本之后多了一种模式, 纯函数式的 FantasyX. 大概�
 <p>
 对了我们还忘了可以改的计数器输入框
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">XCount</span> = xinput(<span style="color: #8b0000;">'count'</span>).map(state =&gt; ({count: ~~state.count}))
-</pre>
-</div>
+<pre class="code"><code><span style="font-weight: bold;">export</span> <span style="font-weight: bold;">const</span> <span style="font-weight: bold; font-style: italic;">XCount</span> = xinput(<span style="font-style: italic;">'count'</span>).map(state =&gt; ({count: ~~state.count}))
+</code></pre>
 
 <p>
 就像我说过的 <code>xinput('count')</code> 会免费得到一个 FantasyX, 一旦有了这个类型, 我们是可以map的.
@@ -197,25 +178,22 @@ xReact 从 2.3 版本之后多了一种模式, 纯函数式的 FantasyX. 大概�
 </div>
 </div>
 
-<div id="outline-container-orgheadline2" class="outline-3">
-<h3 id="orgheadline2">View</h3>
-<div class="outline-text-3" id="text-orgheadline2">
+<div id="outline-container-orgb86d711" class="outline-3">
+<h3 id="orgb86d711">View</h3>
+<div class="outline-text-3" id="text-orgb86d711">
 <p>
 View 层是一个简单的 React stateless component
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">import</span> * as React from <span style="color: #8b0000;">'react'</span>
-<span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">View</span> = props =&gt; (
+<pre class="code"><code><span style="font-weight: bold;">import</span> * as React from <span style="font-style: italic;">'react'</span>
+<span style="font-weight: bold;">export</span> <span style="font-weight: bold;">const</span> <span style="font-weight: bold; font-style: italic;">View</span> = props =&gt; (
  &lt;div&gt;
-    &lt;input type=<span style="color: #8b0000;">"button"</span> name=<span style="color: #8b0000;">"dec"</span> onClick={(e)=&gt;props.actions.fromEvent(e)} value=<span style="color: #8b0000;">"-"</span> /&gt;
-    &lt;input type=<span style="color: #8b0000;">"number"</span> name=<span style="color: #8b0000;">"count"</span> value={props.count} onChange={props.actions.fromEvent} /&gt;
-    &lt;input type=<span style="color: #8b0000;">"button"</span> name=<span style="color: #8b0000;">"inc"</span> onClick={(e)=&gt;props.actions.fromEvent(e)} value=<span style="color: #8b0000;">"+"</span> /&gt;
+    &lt;input type=<span style="font-style: italic;">"button"</span> name=<span style="font-style: italic;">"dec"</span> onClick={(e)=&gt;props.actions.fromEvent(e)} value=<span style="font-style: italic;">"-"</span> /&gt;
+    &lt;input type=<span style="font-style: italic;">"number"</span> name=<span style="font-style: italic;">"count"</span> value={props.count} onChange={props.actions.fromEvent} /&gt;
+    &lt;input type=<span style="font-style: italic;">"button"</span> name=<span style="font-style: italic;">"inc"</span> onClick={(e)=&gt;props.actions.fromEvent(e)} value=<span style="font-style: italic;">"+"</span> /&gt;
  &lt;/div&gt;
 )
 View.defaultProps = {count: 0}
-</pre>
-</div>
+</code></pre>
 
 <p>
 只需要把事件都 hook 到 <code>props.actions</code> 上
@@ -227,23 +205,20 @@ View.defaultProps = {count: 0}
 </div>
 </div>
 
-<div id="outline-container-orgheadline3" class="outline-3">
-<h3 id="orgheadline3">Component</h3>
-<div class="outline-text-3" id="text-orgheadline3">
+<div id="outline-container-org00b183c" class="outline-3">
+<h3 id="org00b183c">Component</h3>
+<div class="outline-text-3" id="text-org00b183c">
 <p>
 现在我们有了几个 FantasyX 类型, <code>XInc</code>, <code>XDec</code> 和 <code>XCounter</code>, 然后根据业务逻辑的需要, 将这三个功能拼起来, 再应用到我们写好的 View 上.
 </p>
 
-<div class="org-src-container">
+<pre class="code"><code><span style="font-weight: bold;">import</span> {xinput,pure} from <span style="font-style: italic;">'xreact'</span>
+<span style="font-weight: bold;">import</span> {XInc, XDec, XCount} from <span style="font-style: italic;">'../transforms/counter'</span>
+<span style="font-weight: bold;">import</span> {View} from <span style="font-style: italic;">'../views/counter'</span>
 
-<pre class="src src-js"><span style="color: #00008b;">import</span> {xinput,pure} from <span style="color: #8b0000;">'xreact'</span>
-<span style="color: #00008b;">import</span> {XInc, XDec, XCount} from <span style="color: #8b0000;">'../transforms/counter'</span>
-<span style="color: #00008b;">import</span> {View} from <span style="color: #8b0000;">'../views/counter'</span>
-
-<span style="color: #00008b;">const</span> <span style="color: #b8860b;">XCounter</span> = XInc.concat(XDec).concat(XCount)
-<span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">Counter</span> = XCounter.apply(View)
-</pre>
-</div>
+<span style="font-weight: bold;">const</span> <span style="font-weight: bold; font-style: italic;">XCounter</span> = XInc.concat(XDec).concat(XCount)
+<span style="font-weight: bold;">export</span> <span style="font-weight: bold;">const</span> <span style="font-weight: bold; font-style: italic;">Counter</span> = XCounter.apply(View)
+</code></pre>
 
 <p>
 <code>concat</code> 是 Monoid 的操作, 类似于两个数组的 <code>concat</code>, 两个数组的内容会合到一起. 在 FantasyX 的概念里, concat 也是将内容合到一起, 而 FantasyX 的内容就是 reactive 的 state. 
@@ -255,20 +230,17 @@ concat 到一起的 <code>XCounter</code> 依然是 FantasyX 类型, 我们可�
 </div>
 </div>
 
-<div id="outline-container-orgheadline4" class="outline-3">
-<h3 id="orgheadline4">render</h3>
-<div class="outline-text-3" id="text-orgheadline4">
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">import</span> * as React from <span style="color: #8b0000;">'react'</span>
-<span style="color: #00008b;">import</span> { render } from <span style="color: #8b0000;">'react-dom'</span>;
-<span style="color: #00008b;">import</span> {Counter} from <span style="color: #8b0000;">'./components/counter'</span>
-<span style="color: #00008b;">import</span> {X} from <span style="color: #8b0000;">'xreact'</span>
-<span style="color: #00008b;">import</span> * as RX from <span style="color: #8b0000;">'xreact/lib/xs/rx'</span>
-<span style="color: #00008b;">const</span> <span style="color: #b8860b;">xmount</span> = (component, dom) =&gt; render(React.createFactory(X)({ x: RX }, component), dom)
-xmount(&lt;Counter /&gt;, document.getElementById(<span style="color: #8b0000;">'counter-app'</span>))
-</pre>
-</div>
+<div id="outline-container-org6197a28" class="outline-3">
+<h3 id="org6197a28">render</h3>
+<div class="outline-text-3" id="text-org6197a28">
+<pre class="code"><code><span style="font-weight: bold;">import</span> * as React from <span style="font-style: italic;">'react'</span>
+<span style="font-weight: bold;">import</span> { render } from <span style="font-style: italic;">'react-dom'</span>;
+<span style="font-weight: bold;">import</span> {Counter} from <span style="font-style: italic;">'./components/counter'</span>
+<span style="font-weight: bold;">import</span> {X} from <span style="font-style: italic;">'xreact'</span>
+<span style="font-weight: bold;">import</span> * as RX from <span style="font-style: italic;">'xreact/lib/xs/rx'</span>
+<span style="font-weight: bold;">const</span> <span style="font-weight: bold; font-style: italic;">xmount</span> = (component, dom) =&gt; render(React.createFactory(X)({ x: RX }, component), dom)
+xmount(&lt;Counter /&gt;, document.getElementById(<span style="font-style: italic;">'counter-app'</span>))
+</code></pre>
 
 <p>
 最后, 当然是将这个 Counter component render 到 dom 上, 为了获得 Observable 引擎的选择, rxjs 或 mostjs, 需要给 xReact 的稍加配置.
@@ -278,9 +250,9 @@ xmount(&lt;Counter /&gt;, document.getElementById(<span style="color: #8b0000;">
 </div>
 
 
-<div id="outline-container-orgheadline6" class="outline-2">
-<h2 id="orgheadline6">多个参数</h2>
-<div class="outline-text-2" id="text-orgheadline6">
+<div id="outline-container-org7cc499e" class="outline-2">
+<h2 id="org7cc499e">多个参数</h2>
+<div class="outline-text-2" id="text-org7cc499e">
 <p>
 一个简单的计数器就这么写完了, 但是如果你够仔细, 会发现 <code>inc</code> 和 <code>dec</code> 都是单参数的函数, 但比如一个计算肥胖的 BMI Calculate, 需要同时有两个输入, 身高与体重, 才能计算出结果. 这时候怎么办呢?
 </p>
@@ -288,49 +260,43 @@ xmount(&lt;Counter /&gt;, document.getElementById(<span style="color: #8b0000;">
 <p>
 比如我们的 View 是这样的
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">import</span> * as React from <span style="color: #8b0000;">'react'</span>
-<span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">View</span> = props =&gt; (
+<pre class="code"><code><span style="font-weight: bold;">import</span> * as React from <span style="font-style: italic;">'react'</span>
+<span style="font-weight: bold;">export</span> <span style="font-weight: bold;">const</span> <span style="font-weight: bold; font-style: italic;">View</span> = props =&gt; (
 &lt;div&gt;
   &lt;label&gt;Height: {props.height} cm
-    &lt;input type=<span style="color: #8b0000;">"range"</span> name=<span style="color: #8b0000;">"height"</span> onChange={props.actions.fromEvent} min=<span style="color: #8b0000;">"150"</span> max=<span style="color: #8b0000;">"200"</span> defaultValue={props.height} /&gt;
+    &lt;input type=<span style="font-style: italic;">"range"</span> name=<span style="font-style: italic;">"height"</span> onChange={props.actions.fromEvent} min=<span style="font-style: italic;">"150"</span> max=<span style="font-style: italic;">"200"</span> defaultValue={props.height} /&gt;
   &lt;/label&gt;
   &lt;label&gt;Weight: {props.weight} kg
-    &lt;input type=<span style="color: #8b0000;">"range"</span> name=<span style="color: #8b0000;">"weight"</span> onChange={props.actions.fromEvent} min=<span style="color: #8b0000;">"40"</span> max=<span style="color: #8b0000;">"100"</span> defaultValue={props.weight} /&gt;
+    &lt;input type=<span style="font-style: italic;">"range"</span> name=<span style="font-style: italic;">"weight"</span> onChange={props.actions.fromEvent} min=<span style="font-style: italic;">"40"</span> max=<span style="font-style: italic;">"100"</span> defaultValue={props.weight} /&gt;
   &lt;/label&gt;
   &lt;p&gt;HEALTH: &lt;span&gt;{props.health}&lt;/span&gt;&lt;/p&gt;
   &lt;p&gt;BMI: &lt;span&gt;{props.bmi}&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 )
-View.defaultProps = {health: <span style="color: #8b0000;">''</span>, bmi: 0, height: 175, weight: 70}
-</pre>
-</div>
+View.defaultProps = {health: <span style="font-style: italic;">''</span>, bmi: 0, height: 175, weight: 70}
+</code></pre>
 
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">import</span> {lift2, xinput} from <span style="color: #8b0000;">'xreact'</span>
-<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">bmiCalc</span>({weight}, {height}) {
-  <span style="color: #00008b;">let</span> <span style="color: #b8860b;">health</span> = <span style="color: #8b0000;">'N/A'</span>
-  <span style="color: #00008b;">let</span> <span style="color: #b8860b;">bmi</span> = weight * 10000 / (height * height) 
-  <span style="color: #00008b;">if</span> (bmi &lt; 18.5) health = <span style="color: #8b0000;">'underweight'</span>
-  <span style="color: #00008b;">else</span> <span style="color: #00008b;">if</span> (bmi &lt; 24.9) health = <span style="color: #8b0000;">'normal'</span>
-  <span style="color: #00008b;">else</span> <span style="color: #00008b;">if</span> (bmi &lt; 30) health = <span style="color: #8b0000;">'Overweight'</span>
-  <span style="color: #00008b;">else</span> <span style="color: #00008b;">if</span> (bmi &gt;= 30) health = <span style="color: #8b0000;">'Obese'</span>
-  <span style="color: #00008b;">return</span> { bmi: bmi.toFixed(2), health }
+<pre class="code"><code><span style="font-weight: bold;">import</span> {lift2, xinput} from <span style="font-style: italic;">'xreact'</span>
+<span style="font-weight: bold;">function</span> <span style="font-weight: bold;">bmiCalc</span>({weight}, {height}) {
+  <span style="font-weight: bold;">let</span> <span style="font-weight: bold; font-style: italic;">health</span> = <span style="font-style: italic;">'N/A'</span>
+  <span style="font-weight: bold;">let</span> <span style="font-weight: bold; font-style: italic;">bmi</span> = weight * 10000 / (height * height) 
+  <span style="font-weight: bold;">if</span> (bmi &lt; 18.5) health = <span style="font-style: italic;">'underweight'</span>
+  <span style="font-weight: bold;">else</span> <span style="font-weight: bold;">if</span> (bmi &lt; 24.9) health = <span style="font-style: italic;">'normal'</span>
+  <span style="font-weight: bold;">else</span> <span style="font-weight: bold;">if</span> (bmi &lt; 30) health = <span style="font-style: italic;">'Overweight'</span>
+  <span style="font-weight: bold;">else</span> <span style="font-weight: bold;">if</span> (bmi &gt;= 30) health = <span style="font-style: italic;">'Obese'</span>
+  <span style="font-weight: bold;">return</span> { bmi: bmi.toFixed(2), health }
 }
-<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">strToInt</span>(<span style="color: #b8860b;">field</span>) {
-  <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">s</span>) {
+<span style="font-weight: bold;">function</span> <span style="font-weight: bold;">strToInt</span>(<span style="font-weight: bold; font-style: italic;">field</span>) {
+  <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">s</span>) {
     s[field] = ~~s[field]
-    <span style="color: #00008b;">return</span> s
+    <span style="font-weight: bold;">return</span> s
   }
 }
-<span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">XWeight</span> = xinput(<span style="color: #8b0000;">'weight'</span>).map(strToInt(<span style="color: #8b0000;">'weight'</span>))
-<span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">XHeight</span> = xinput(<span style="color: #8b0000;">'height'</span>).map(strToInt(<span style="color: #8b0000;">'height'</span>))
-<span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">XBMI</span> = lift2(bmiCalc)(XWeight, XHeight)
-</pre>
-</div>
+<span style="font-weight: bold;">export</span> <span style="font-weight: bold;">const</span> <span style="font-weight: bold; font-style: italic;">XWeight</span> = xinput(<span style="font-style: italic;">'weight'</span>).map(strToInt(<span style="font-style: italic;">'weight'</span>))
+<span style="font-weight: bold;">export</span> <span style="font-weight: bold;">const</span> <span style="font-weight: bold; font-style: italic;">XHeight</span> = xinput(<span style="font-style: italic;">'height'</span>).map(strToInt(<span style="font-style: italic;">'height'</span>))
+<span style="font-weight: bold;">export</span> <span style="font-weight: bold;">const</span> <span style="font-weight: bold; font-style: italic;">XBMI</span> = lift2(bmiCalc)(XWeight, XHeight)
+</code></pre>
 <p>
 主要的逻辑也没什么不同, 把输入框 height 和 weight 都变成 FantasyX, lift bmiCalc, 然后应用到 height 和 weight 上.
 </p>
@@ -352,20 +318,17 @@ render 到页面上, 大概就能工作了
 如果想拖动第一个滑块时 height 数字会跟着变, 我们只需要将 height 拖动的动作 concat 到一起就好了.
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">import</span> {XBMI, XWeight, XHeight} from <span style="color: #8b0000;">'./transforms/bmi.js'</span>
-<span style="color: #00008b;">const</span> <span style="color: #b8860b;">BMI2</span> = XBMI.concat(XWeight).concat(XHeight).apply(BV)
-xmount(&lt;BMI2 /&gt;, document.getElementById(<span style="color: #8b0000;">'bmi-app-2'</span>))
-</pre>
-</div>
+<pre class="code"><code><span style="font-weight: bold;">import</span> {XBMI, XWeight, XHeight} from <span style="font-style: italic;">'./transforms/bmi.js'</span>
+<span style="font-weight: bold;">const</span> <span style="font-weight: bold; font-style: italic;">BMI2</span> = XBMI.concat(XWeight).concat(XHeight).apply(BV)
+xmount(&lt;BMI2 /&gt;, document.getElementById(<span style="font-style: italic;">'bmi-app-2'</span>))
+</code></pre>
 
 <p><div id="bmi-app-2"></div></p>
 </div>
 </div>
-<div id="outline-container-orgheadline7" class="outline-2">
-<h2 id="orgheadline7">Asynchronous</h2>
-<div class="outline-text-2" id="text-orgheadline7">
+<div id="outline-container-org4b0313d" class="outline-2">
+<h2 id="org4b0313d">Asynchronous</h2>
+<div class="outline-text-2" id="text-org4b0313d">
 <p>
 异步一直是前端头疼的问题, 想想你用 redux, 或需要 saga 的帮助, 框架的胶水代码和 verbose 的命令式设计, 让你不但需要了解他们的概念和原理, 还需要写大量跟业务逻辑无关的多余的代码.
 </p>
@@ -382,20 +345,17 @@ xmount(&lt;BMI2 /&gt;, document.getElementById(<span style="color: #8b0000;">'bm
 假设还是这个例子, 但是 bmi 的计算逻辑发生在后端. 这时, 异步需求就来了.
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">import</span> {lift2, xinput} from <span style="color: #8b0000;">'xreact'</span>
-<span style="color: #00008b;">import</span> {XWeight, XHeight} from <span style="color: #8b0000;">'./bmi'</span>
-<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">bmiCalc</span>({weight}, {height}) {
-    <span style="color: #00008b;">return</span> {
-        result:fetch(`https:<span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">gist.github.com.ru/jcouyang/edc3d175769e893b39e6c5be12a8526f?height=${height}&amp;weight=${weight}`)</span>
+<pre class="code"><code><span style="font-weight: bold;">import</span> {lift2, xinput} from <span style="font-style: italic;">'xreact'</span>
+<span style="font-weight: bold;">import</span> {XWeight, XHeight} from <span style="font-style: italic;">'./bmi'</span>
+<span style="font-weight: bold;">function</span> <span style="font-weight: bold;">bmiCalc</span>({weight}, {height}) {
+    <span style="font-weight: bold;">return</span> {
+        result:fetch(<span style="font-style: italic;">`https://gist.github.com.ru/jcouyang/edc3d175769e893b39e6c5be12a8526f?height=${height}&amp;weight=${weight}`</span>)
             .then(resp =&gt; resp.json())
       .then(resp =&gt; resp.result)
     }
 }
-<span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">XBMI</span> = lift2(bmiCalc)(XWeight, XHeight)
-</pre>
-</div>
+<span style="font-weight: bold;">export</span> <span style="font-weight: bold;">const</span> <span style="font-weight: bold; font-style: italic;">XBMI</span> = lift2(bmiCalc)(XWeight, XHeight)
+</code></pre>
 
 <p>
 跟一般的函数一样,我们返回一个 state 的 patch, 不同的是, state 的 value 是个 promise.
@@ -405,13 +365,10 @@ xmount(&lt;BMI2 /&gt;, document.getElementById(<span style="color: #8b0000;">'bm
 一点也不用担心这个 promise, 它只是一个 lazy 的值, 在最后会 eval, 其结果 patch 到 state 上.
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">import</span> {XBMI as XASYNCBMI} from <span style="color: #8b0000;">'./transforms/async-bmi.js'</span>
-<span style="color: #00008b;">const</span> <span style="color: #b8860b;">BMI3</span> = XASYNCBMI.concat(XWeight).concat(XHeight).apply(BV)
-xmount(&lt;BMI3 /&gt;, document.getElementById(<span style="color: #8b0000;">'bmi-app-3'</span>))
-</pre>
-</div>
+<pre class="code"><code><span style="font-weight: bold;">import</span> {XBMI as XASYNCBMI} from <span style="font-style: italic;">'./transforms/async-bmi.js'</span>
+<span style="font-weight: bold;">const</span> <span style="font-weight: bold; font-style: italic;">BMI3</span> = XASYNCBMI.concat(XWeight).concat(XHeight).apply(BV)
+xmount(&lt;BMI3 /&gt;, document.getElementById(<span style="font-style: italic;">'bmi-app-3'</span>))
+</code></pre>
 
 <p>
 我们render 到页面上就是这个效果了. 点击后本地不会发生计算, 注意看network 会发送请求到 github.com.ru 然后结果返回后页面会update.
@@ -420,14 +377,15 @@ xmount(&lt;BMI3 /&gt;, document.getElementById(<span style="color: #8b0000;">'bm
 <p><div id="bmi-app-3"></div></p>
 </div>
 </div>
-<div id="outline-container-orgheadline8" class="outline-2">
-<h2 id="orgheadline8">小结</h2>
-<div class="outline-text-2" id="text-orgheadline8">
-<blockquote>
+<div id="outline-container-org3040bcf" class="outline-2">
+<h2 id="org3040bcf">小结</h2>
+<div class="outline-text-2" id="text-org3040bcf">
+<div class="epigraph"><blockquote>
 <p>
 文章中的代码都是可以跑的, orgmode tangle 出来的代码见 <a href="https://github.com/jcouyang/blog/tree/master/org/xreact/">这里</a>
 </p>
-</blockquote>
+
+</blockquote></div>
 
 <p>
 通过这两个例子, 你会发现使用 FantasyX 的原因非常简单, 明显代码中不需要像 redux 和 saga 一样命令式的 verbose 代码, 完全减掉了 reactive programming 的概念, 并不需要理解如何去filter map merge什么 Observable, 只需要简单的把一般函数(aka reducer 如果你喜欢redux的话)lift起来就好了.
@@ -443,16 +401,14 @@ xmount(&lt;BMI3 /&gt;, document.getElementById(<span style="color: #8b0000;">'bm
 <div id="postamble" class="status">
 <footer>
   <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2017-09-12 Tue 11:59</p>
-  <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6) x <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
-  <a class="gumroad-button" href="https://gum.co/grokking-monad">我的新书 Grokking Monad 现已发售，请自觉排队装逼</a>
-
-  <a class="github-fork-ribbon right-bottom fixed" href="https://github.com/jcouyang/blog" title="Fork me on GitHub">Fork me on GitHub</a>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
 </footer>
-
-<div id="disqus_thread"></div>
 </div>
 </body>
 </html>

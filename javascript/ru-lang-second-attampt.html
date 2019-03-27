@@ -1,38 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-<!-- 2017-11-26 Sun 14:17 -->
-<meta  charset="utf-8">
-<meta  name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2019-03-27 Wed 02:21 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>入语言第二试: readtable 与 core.async</title>
-<meta  name="generator" content="Org-mode">
-<meta  name="author" content="Jichao Ouyang">
-<meta  name="description" content="ru-lang version 0.2.1 新特性，引入 core.async 及 readtable"
+<meta name="generator" content="Org mode">
+<meta name="author" content="root">
+<meta name="description" content="ru-lang version 0.2.1 新特性，引入 core.async 及 readtable"
 >
-<meta  name="keywords" content="macro, core.async, goroutine, coroutine, javascript, clojure, lisp, sweetjs, meta programming">
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                                                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                                                                                              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                                                                                                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-NJRFJGX');</script>
-<!-- End Google Tag Manager -->
+<meta name="keywords" content="macro, core.async, goroutine, coroutine, javascript, clojure, lisp, sweetjs, meta programming">
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/style/pixyll.css"/>
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css" />
-<!--[if lt IE 9]>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.ie.min.css" />
-     <![endif]-->
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2013 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -84,9 +74,8 @@ for the JavaScript code in this tag.
     <a accesskey="h" href="/index.html"> HOME </a> |
     <a href="#" id="edit-in-github">EDIT</a> |
     <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
-    <a href="/archive.html">ARCHIVE</a> |
-    <a href="/theindex.html">INDEX</a> |
-    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a>
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
 <div id="content">
@@ -96,8 +85,8 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">Readtable</a></li>
-<li><a href="#orgheadline2">core.async</a></li>
+<li><a href="#orgc0da412">Readtable</a></li>
+<li><a href="#orgc2a3e5e">core.async</a></li>
 </ul>
 </div>
 </nav>
@@ -111,8 +100,8 @@ for the JavaScript code in this tag.
 
 
 <figure>
-<p><img src="./images/shit-bricks.gif" alt="shit-bricks.gif">
-</p>
+<img src="./images/shit-bricks.gif" alt="shit-bricks.gif">
+
 </figure>
 
 <p>
@@ -124,86 +113,76 @@ for the JavaScript code in this tag.
 <li>core.async</li>
 </ul>
 
-<div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1">Readtable</h2>
-<div class="outline-text-2" id="text-orgheadline1">
+<div id="outline-container-orgc0da412" class="outline-2">
+<h2 id="orgc0da412">Readtable</h2>
+<div class="outline-text-2" id="text-orgc0da412">
 <p>
 readtable 在 clojure 中的意义是说 macro 可以按照几种 readtable 进行扩展，比如遇到特殊符号‘#’，就可以用另一张 table 中的 macro 来扩展了。
 </p>
 
-<div class="org-src-container">
+<pre class="code"><code>(+ 1 2) <span style="font-weight: bold; font-style: italic;">; a list</span>
+#(+ 1 2) <span style="font-weight: bold; font-style: italic;">; =&gt; (fn (+ 1 2))</span>
 
-<pre class="src src-clojure">(+ 1 2) <span style="color: #8c8c8c; font-style: italic;">; a list</span>
-#(+ 1 2) <span style="color: #8c8c8c; font-style: italic;">; =&gt; (fn (+ 1 2))</span>
-
-{<span style="color: #6b8e23;">:a</span> 1 <span style="color: #6b8e23;">:b</span> 2} <span style="color: #8c8c8c; font-style: italic;">; hash map</span>
-#{<span style="color: #6b8e23;">:a</span> 1 <span style="color: #6b8e23;">:b</span> 2} <span style="color: #8c8c8c; font-style: italic;">; set</span>
-</pre>
-</div>
+{<span style="font-weight: bold; text-decoration: underline;">:a</span> 1 <span style="font-weight: bold; text-decoration: underline;">:b</span> 2} <span style="font-weight: bold; font-style: italic;">; hash map</span>
+#{<span style="font-weight: bold; text-decoration: underline;">:a</span> 1 <span style="font-weight: bold; text-decoration: underline;">:b</span> 2} <span style="font-weight: bold; font-style: italic;">; set</span>
+</code></pre>
 
 <p>
 由于 sweet.js 也支持 readtable，虽然并不是很完美，我就尝试了一下让 ru-lang  也能在遇到‘#’的时候做一些特俗的扩展。比如这是我想要实现的功能，让这几种 literal 的写法遇到‘#’后扩展成 mori 对应的数据结构：
 </p>
-<div class="org-src-container">
+<pre class="code"><code>#[bar, he] <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">=&gt; mori.vector(bar,he)</span>
+#{a: 1, b: 2} <span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">=&gt; mori.hashMap('a', 1, 'b', 2)</span>
+##{1, 2, 3} <span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">=&gt; mori.set([1,2,3])</span>
+</code></pre>
 
-<pre class="src src-javascript">#[bar, he] <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; mori.vector(bar,he)</span>
-#{a: 1, b: 2} <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; mori.hashMap('a', 1, 'b', 2)</span>
-##{1, 2, 3} <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; mori.set([1,2,3])</span>
-</pre>
-</div>
-
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 我还抽空做了一个 ru-lang repl,  所有 ru-lang 都可以在这里试运行 <a href="http://ru-lang.org/try/">http://ru-lang.org/try/</a>
 </p>
-</blockquote>
+
+</blockquote></div>
 
 <p>
 实现再简单不过了，先创建一个 readtable，挂上‘#’
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">sweet.currentReadtable().extend({
-<span style="color: #8b0000;">'#'</span>: <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">ch</span>, <span style="color: #b8860b;">reader</span>) {
+<pre class="code"><code>sweet.currentReadtable().extend({
+<span style="font-style: italic;">'#'</span>: <span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">ch</span>, <span style="font-weight: bold; font-style: italic;">reader</span>) {
 ...
 }
 })
-</pre>
-</div>
+</code></pre>
 
 <p>
 以 vector 为例，当遇到‘#’后边为 <code>()</code> 时，将它变成 mori.vector&#x2026;就好了：
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">module.exports = sweet.currentReadtable().extend({
-  <span style="color: #8b0000;">'#'</span>: <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">ch</span>, <span style="color: #b8860b;">reader</span>) {
-    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">hashtag</span> = reader.readIdentifier();
-    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">pun</span> = reader.readToken();
-    <span style="color: #00008b;">switch</span>(pun.value){
-    <span style="color: #00008b;">case</span> <span style="color: #8b0000;">'[]'</span>:
-      <span style="color: #00008b;">return</span> [reader.makeIdentifier(<span style="color: #8b0000;">'mori.vector'</span>)].concat(
-        reader.makeDelimiter(<span style="color: #8b0000;">'()'</span>,pun.inner)
+<pre class="code"><code>module.exports = sweet.currentReadtable().extend({
+  <span style="font-style: italic;">'#'</span>: <span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">ch</span>, <span style="font-weight: bold; font-style: italic;">reader</span>) {
+    <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">hashtag</span> = reader.readIdentifier();
+    <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">pun</span> = reader.readToken();
+    <span style="font-weight: bold;">switch</span>(pun.value){
+    <span style="font-weight: bold;">case</span> <span style="font-style: italic;">'[]'</span>:
+      <span style="font-weight: bold;">return</span> [reader.makeIdentifier(<span style="font-style: italic;">'mori.vector'</span>)].concat(
+        reader.makeDelimiter(<span style="font-style: italic;">'()'</span>,pun.inner)
       );
 ...
-</pre>
-</div>
+</code></pre>
 
 <p>
 这样一来，我们就可以像原生 literal 创建数据结构一样使用到 mori 的persistent data structure(可持久性数据结构)了。
 </p>
 
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 这里引入的 mori 是我 fork 的版本（swannodette 好像最近忙着实现 <a href="https://github.com/omcljs/om">om next</a> 并没有心思维护 mori 的样子），暂且叫做 conjs，当然完全兼容 mori 重要的是我加入了一些其他 clojurescript 的函数以及 core.async，你可以通过 npm install <a href="http://github.com/jcouyang/conjs">con.js</a> 安装使用。
 </p>
-</blockquote>
+
+</blockquote></div>
 </div>
 </div>
 
-<div id="outline-container-orgheadline2" class="outline-2">
-<h2 id="orgheadline2">core.async</h2>
-<div class="outline-text-2" id="text-orgheadline2">
+<div id="outline-container-orgc2a3e5e" class="outline-2">
+<h2 id="orgc2a3e5e">core.async</h2>
+<div class="outline-text-2" id="text-orgc2a3e5e">
 <p>
 首先，不知道这是什么的童鞋请回到<a href="./clojure-core.async-essence-in-native-javascript.html">这一篇</a>，然后，感谢 clojurescript 的实现，使得这次移植这么顺利。懂得童鞋就会怀疑，clojurescript 不是还是用得 clojure 的 macro 来生成对应的状态机么？怎么可能轻松移植到 javascript？
 </p>
@@ -214,8 +193,8 @@ readtable 在 clojure 中的意义是说 macro 可以按照几种 readtable 进�
 
 
 <figure>
-<p><img src="./images/applause.jpg" alt="applause.jpg">
-</p>
+<img src="./images/applause.jpg" alt="applause.jpg">
+
 </figure>
 
 <p>
@@ -225,16 +204,13 @@ readtable 在 clojure 中的意义是说 macro 可以按照几种 readtable 进�
 <p>
 移植了以后看我怎么用（更多测试在<a href="https://github.com/jcouyang/conjs/blob/c8af05791befa230ed73125804fa29cc0f3201fc/spec/mori-spec.js#L196">这里</a>）
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">c</span> = async.chan()
-async.take$(c ,<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">x</span>){
-    expect(x).toBe(<span style="color: #8b0000;">'something in channel'</span>)
+<pre class="code"><code><span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">c</span> = <span style="font-weight: bold;">async</span>.chan()
+<span style="font-weight: bold;">async</span>.take$(c ,<span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">x</span>){
+    expect(x).toBe(<span style="font-style: italic;">'something in channel'</span>)
     done()
 })
-async.put$(c, <span style="color: #8b0000;">'something in channel'</span>)
-</pre>
-</div>
+<span style="font-weight: bold;">async</span>.put$(c, <span style="font-style: italic;">'something in channel'</span>)
+</code></pre>
 
 <p>
 等一下，这怎么是回调的 take， <code>go block</code> 在哪里？ <code>&lt;! &gt;!</code> 在哪里？
@@ -244,60 +220,52 @@ async.put$(c, <span style="color: #8b0000;">'something in channel'</span>)
 那些都是 macro，当然我还要实现对应的 macro 了，先来看下加了  go block macro 后的效果:
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">channel1</span> = mori.async.chan();
-<span style="color: #00008b;">var</span> <span style="color: #b8860b;">channel2</span> = mori.async.chan();
-<span style="color: #00008b;">var</span> <span style="color: #b8860b;">data2</span> = [1,2,3];
+<pre class="code"><code><span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">channel1</span> = mori.<span style="font-weight: bold;">async</span>.chan();
+<span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">channel2</span> = mori.<span style="font-weight: bold;">async</span>.chan();
+<span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">data2</span> = [1,2,3];
 go {
-  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span> &lt;! channel1;
-  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">b</span> &lt;! channel2;
-  expect(a).toBe(<span style="color: #8b0000;">"data1"</span>);
+  <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">a</span> &lt;! channel1;
+  <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">b</span> &lt;! channel2;
+  expect(a).toBe(<span style="font-style: italic;">"data1"</span>);
   expect(b).toEqual([1,2,3]);
   done();
 };
 go {data2 &gt;! channel2};
-go {<span style="color: #8b0000;">'data1'</span> &gt;! channel1};
-</pre>
-</div>
+go {<span style="font-style: italic;">'data1'</span> &gt;! channel1};
+</code></pre>
 
 <p>
 当然还支持 alts
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">channela</span> = mori.async.chan();
-<span style="color: #00008b;">var</span> <span style="color: #b8860b;">channelb</span> = mori.async.chan();
-<span style="color: #00008b;">var</span> <span style="color: #b8860b;">data2</span> = [1,2,3];    
+<pre class="code"><code><span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">channela</span> = mori.<span style="font-weight: bold;">async</span>.chan();
+<span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">channelb</span> = mori.<span style="font-weight: bold;">async</span>.chan();
+<span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">data2</span> = [1,2,3];    
 go {
-  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">anywho</span> &lt;!alts [channela, channelb];
-  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">vector.a(0) is equals to nth(vector, 0)</span>
+  <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">anywho</span> &lt;!alts [channela, channelb];
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">vector.a(0) is equals to nth(vector, 0)</span>
   expect(anywho.a(0)).toEqual([1,2,3]);
   expect(anywho.a(1)).toBe(channelb);
   done();
 };
 go {data2 &gt;! channelb};
-go {<span style="color: #8b0000;">'data1'</span> &gt;! channela};
-</pre>
-</div>
+go {<span style="font-style: italic;">'data1'</span> &gt;! channela};
+</code></pre>
 
 <p>
 go block macro 的实现其实也没有花<a href="https://github.com/jcouyang/ru/blob/master/macro/async.sjs">太多的代码</a>， 以 take 为例，只需要把后面的句子都放入 take 的 callback 中好了，通过我的 <a href="./clojure-essence-in-javascript-macro.html">sweet macro 简介</a> 我想这里应该能看懂的：
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">let</span> (&lt;!) = macro {
-    rule infix { <span style="color: #00008b;">var</span> <span style="color: #b8860b;">$left</span>:ident |  $right:expr $rest $[...] } =&gt; {
-        <span style="color: #00008b;">return</span> mori.async.take$($right, <span style="color: #00008b;">function</span> (<span style="color: #b8860b;">value</span>) {
+<pre class="code"><code><span style="font-weight: bold;">let</span> (&lt;!) = macro {
+    rule infix { <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">$left</span>:ident |  $right:expr $rest $[...] } =&gt; {
+        <span style="font-weight: bold;">return</span> mori.<span style="font-weight: bold;">async</span>.take$($right, <span style="font-weight: bold;">function</span> (<span style="font-weight: bold; font-style: italic;">value</span>) {
             $left = value
             $rest $[...]
         })
     }
     ...
 }
-</pre>
-</div>
+
+</code></pre>
 
 <ul class="org-ul">
 <li>一个 infix macro，左边是take应该付给的变量，右边是 take 的 channel</li>
@@ -307,22 +275,20 @@ go block macro 的实现其实也没有花<a href="https://github.com/jcouyang/r
 <p>
 所以，上面的 take 测试放到 <a href="http://ru-lang.org/try/#%20%20%20%20var%20channel1%20=%20mori.async.chan%28%29;%0A%20%20%20%20var%20channel2%20=%20mori.async.chan%28%29;%0A%20%20%20%20var%20data2%20=%20%5B1,2,3%5D;%0A%20%20%20%20go%20%7B%0A%20%20%20%20%20%20var%20a%20%3C!%20channel1;%0A%20%20%20%20%20%20var%20b%20%3C!%20channel2;%0A%20%20%20%20%20%20expect%28a%29.toBe%28%22data1%22%29;%0A%20%20%20%20%20%20expect%28b%29.toEqual%28%5B1,2,3%5D%29;%0A%20%20%20%20%20%20done%28%29;%0A%20%20%20%20%7D;%0A%20%20%20%20go%20%7Bdata2%20%3E!%20channel2%7D;%0A%20%20%20%20go%20%7B%27data1%27%20%3E!%20channel1%7D;">ru-lang repl</a> 中会编译成
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">go {
-  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span> &lt;! channel1;
-  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">b</span> &lt;! channel2;
-  expect(a).toBe(<span style="color: #8b0000;">"data1"</span>);
+<pre class="code"><code>go {
+  <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">a</span> &lt;! channel1;
+  <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">b</span> &lt;! channel2;
+  expect(a).toBe(<span style="font-style: italic;">"data1"</span>);
   expect(b).toEqual([1,2,3]);
   done();
 };
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; </span>
-(<span style="color: #00008b;">function</span> () {
-    <span style="color: #00008b;">return</span> mori.async.take$(channel1, <span style="color: #00008b;">function</span> (<span style="color: #b8860b;">value</span>) {
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">=&gt; </span>
+(<span style="font-weight: bold;">function</span> () {
+    <span style="font-weight: bold;">return</span> mori.<span style="font-weight: bold;">async</span>.take$(channel1, <span style="font-weight: bold;">function</span> (<span style="font-weight: bold; font-style: italic;">value</span>) {
         a = value;
-        <span style="color: #00008b;">return</span> mori.async.take$(channel2, <span style="color: #00008b;">function</span> (<span style="color: #b8860b;">value$2</span>) {
+        <span style="font-weight: bold;">return</span> mori.<span style="font-weight: bold;">async</span>.take$(channel2, <span style="font-weight: bold;">function</span> (<span style="font-weight: bold; font-style: italic;">value$2</span>) {
             b = value$2;
-            expect(a).toBe(<span style="color: #8b0000;">'data1'</span>);
+            expect(a).toBe(<span style="font-style: italic;">'data1'</span>);
             expect(b).toEqual([
                 1,
                 2,
@@ -332,13 +298,12 @@ go block macro 的实现其实也没有花<a href="https://github.com/jcouyang/r
         });
     });
 }());
-</pre>
-</div>
+</code></pre>
 
 
 <figure>
-<p><img src="./images/what.gif" alt="what.gif">
-</p>
+<img src="./images/what.gif" alt="what.gif">
+
 </figure>
 
 <p>
@@ -353,7 +318,7 @@ go block macro 的实现其实也没有花<a href="https://github.com/jcouyang/r
 <p>
 最后，小广告
 </p>
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 如果对这个项目有兴趣, 不妨接着在hacker news
 </p>
@@ -365,23 +330,22 @@ go block macro 的实现其实也没有花<a href="https://github.com/jcouyang/r
 <p>
 也是极好的.
 </p>
-</blockquote>
+
+</blockquote></div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <footer>
-  <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2017-06-10 Sat 08:22</p>
-  <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6) x <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Author: root <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
+  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
-  <a class="gumroad-button" href="https://gum.co/grokking-monad">我的新书 Grokking Monad 现已发售，请自觉排队装逼</a>
-
-  <a class="github-fork-ribbon right-bottom fixed" href="https://github.com/jcouyang/blog" title="Fork me on GitHub">Fork me on GitHub</a>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
 </footer>
-
-<div id="disqus_thread"></div>
 </div>
 </body>
 </html>

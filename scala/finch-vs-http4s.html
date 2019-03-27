@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2019-03-27 Wed 02:21 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finch vs Http4s, which is FPer</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Jichao Ouyang">
+<link rel="icon" href="/favicon.ico">
+<meta name="theme-color" content="#ffffff">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
+<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="preamble" class="status">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJRFJGX"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header>
+    <a accesskey="h" href="/index.html"> HOME </a> |
+    <a href="#" id="edit-in-github">EDIT</a> |
+    <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
+</header>
+</div>
+<div id="content">
+<header>
+<h1 class="title">Finch vs Http4s, which is FPer</h1>
+</header><nav id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org1312a0a">Finch</a>
+<ul>
+<li><a href="#orgbc3e50c">composible: 🍎 🍎 🍎 🍎</a></li>
+<li><a href="#orgf8644ea">extensible: 🍎 🍎</a></li>
+<li><a href="#org84de08d">joy of FP: 🍎 🍎 🍎</a></li>
+</ul>
+</li>
+<li><a href="#org6bf3324">Http4s</a>
+<ul>
+<li><a href="#org82cb660">composible: 🍎 🍎 🍎 🍎 🍎</a></li>
+<li><a href="#org13dea0e">extensible: 🍎 🍎 🍎 🍎 🍎</a></li>
+<li><a href="#org8f5dc0a">joy of FP: 🍎 🍎 🍎 🍎 🍎</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav>
+<p>
+This is purely personal overall comparation from Functional Programming point of view, which only
+consider composible, extensible, and joy of FP. Performance and eco system are out of the scope.
+</p>
+
+<p>
+The explicit version that I'm comparing here is finch 0.26.1 and Http4s 0.20-M4
+</p>
+
+<p>
+Definition:
+</p>
+
+<ul class="org-ul">
+<li><i>composible</i>: how easy to build blocks from existing components</li>
+<li><i>extensible</i>: how easy to add support for new type</li>
+<li><i>joy of FP</i>: how many FP knowledges are actually practiced</li>
+</ul>
+
+<p>
+Scale from 1 to 5:
+</p>
+
+<div id="outline-container-org1312a0a" class="outline-2">
+<h2 id="org1312a0a">Finch</h2>
+<div class="outline-text-2" id="text-org1312a0a">
+</div>
+<div id="outline-container-orgbc3e50c" class="outline-3">
+<h3 id="orgbc3e50c">composible: 🍎 🍎 🍎 🍎</h3>
+<div class="outline-text-3" id="text-orgbc3e50c">
+<p>
+finch takes full advantage of shapeless' product and coproduct to routes <b>Matcher</b>
+</p>
+<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">getApples</span> <span style="font-weight: bold;">=</span> get(<span style="font-style: italic;">"apple"</span>) { <span style="font-weight: bold; text-decoration: underline;">Ok</span>(<span style="font-style: italic;">"&#127822;&#127822;"</span>)} 
+<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">getApple</span> <span style="font-weight: bold;">=</span> get(<span style="font-style: italic;">"apple"</span> :: path[<span style="font-weight: bold; text-decoration: underline;">Int</span>]) { (id<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Int</span>) <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Ok</span>(<span style="font-style: italic;">"&#127822;"</span>)}
+
+<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">routes</span> <span style="font-weight: bold;">=</span> getApples :+: getApple
+</code></pre>
+
+<p>
+<code>::</code> here is a product, means the path will match if there is an <code>"apple"</code> and an Int in the path <code>path[Int]</code>
+</p>
+
+<p>
+<code>:+:</code> constructs a coproduct, which means either getApples or getApple matched route will match
+</p>
+
+<p>
+About <b>Middleware</b>, finch need to mix finagle filter to do the job. so it will end up very ugly and inconsistent from the routes above
+</p>
+<pre class="code"><code><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">AuthFilter</span>(<span style="font-weight: bold;">implicit</span> ttf<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">ToTwitterFuture</span>[<span style="font-weight: bold; text-decoration: underline;">ProgramF</span>]) <span style="font-weight: bold;">extends</span> <span style="font-weight: bold; text-decoration: underline;">SimpleFilter</span>[<span style="font-weight: bold; text-decoration: underline;">Request</span>, <span style="font-weight: bold; text-decoration: underline;">Response</span>] {
+  <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">apply</span>(req<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Request</span>, service<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Service</span>[<span style="font-weight: bold; text-decoration: underline;">Request</span>, <span style="font-weight: bold; text-decoration: underline;">Response</span>])<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Future</span>[<span style="font-weight: bold; text-decoration: underline;">Response</span>] <span style="font-weight: bold;">=</span> {
+    (req.path, req.headerMap.get(<span style="font-style: italic;">"TOKEN"</span>)) <span style="font-weight: bold;">match</span> {
+      <span style="font-weight: bold;">case</span> (<span style="font-style: italic;">"/login"</span>, <span style="font-weight: bold;">_</span>)        <span style="font-weight: bold;">=&gt;</span> service(req)
+      <span style="font-weight: bold;">case</span> (<span style="font-weight: bold; font-style: italic;">url</span>, <span style="font-weight: bold; text-decoration: underline;">Some</span>(<span style="font-weight: bold; font-style: italic;">token</span>)) <span style="font-weight: bold;">=&gt;</span> ??? <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">fetch user info and pass to service</span>
+</code></pre>
+
+<p>
+and then compose filter and service
+</p>
+<pre class="code"><code><span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">AuthFilter</span> andThen routes.toServiceAs[<span style="font-weight: bold; text-decoration: underline;">Application</span>.<span style="font-weight: bold; text-decoration: underline;">Json</span>]
+</code></pre>
+
+<p>
+you may have notice that the finangle filter is more lower level verbose code and inconsistent with the previous shapeless DSL.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf8644ea" class="outline-3">
+<h3 id="orgf8644ea">extensible: 🍎 🍎</h3>
+<div class="outline-text-3" id="text-orgf8644ea">
+<p>
+finch has a lot of internal custom types, e.g. the magic happen behind the DSL above:
+</p>
+<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">getApples</span> <span style="font-weight: bold;">=</span> get(<span style="font-style: italic;">"apple"</span>) { <span style="font-weight: bold; text-decoration: underline;">Ok</span>(<span style="font-style: italic;">"&#127822;&#127822;"</span>)} 
+</code></pre>
+<p>
+is:
+</p>
+
+<ol class="org-ol">
+<li>string "apple" will implicitly convert into <code>Endpoint[Unit]</code></li>
+<li><code>get("apple")</code> will covert <code>Endpoint[Unit]</code> into function <code>Mapper[F, In] =&gt; Endpoint[F, Out]</code></li>
+</ol>
+<p>
+basically just <code>Cont</code>, taking Mapper as parameter and wrapping itself.
+</p>
+<ol class="org-ol">
+<li>Another implicit conversion will take place in <code>Ok("")</code>, from <code>Output[String] =&gt; Mapper[F, String]</code></li>
+</ol>
+
+<p>
+If you didn't follow, that's fine, because there is so many implicit conversion and internal custom types
+took place here.
+</p>
+
+<p>
+But think about it, because all implicit conversion was well-defined in finch internally
+we've restricted to the types they provided.
+</p>
+
+<p>
+For example my controller will actually return me a <a href="https://typelevel.org/cats/datatypes/freemonad.html">Free Monad</a> i.e. <code>Free[Program, Output[String]]</code>
+</p>
+
+<p>
+How can I get it to work with the router?
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">getApples</span> <span style="font-weight: bold;">=</span> get(<span style="font-style: italic;">"apple"</span>) { <span style="font-weight: bold; text-decoration: underline;">Free</span>[<span style="font-weight: bold; text-decoration: underline;">Program</span>, <span style="font-weight: bold; text-decoration: underline;">Output</span>[<span style="font-weight: bold; text-decoration: underline;">String</span>]].pure(<span style="font-weight: bold; text-decoration: underline;">Ok</span>(<span style="font-style: italic;">"&#127822;&#127822;"</span>))} 
+</code></pre>
+
+<p>
+it won't compile because the implicit conversion expecting an <code>Output[_]</code> type
+</p>
+
+<p>
+actually it only supports <code>IO[_]</code>, <code>Output[_]</code>, <code>Response</code>
+</p>
+
+<p>
+UPDATE: from <a href="https://github.com/finagle/finch/pull/1045">0.27.0</a> it supports custom converter to convert any user custom type to IO
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">implicit</span> <span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">conv</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">ToEffect</span>[<span style="font-weight: bold; text-decoration: underline;">Free</span>[<span style="font-weight: bold; text-decoration: underline;">Program</span>, ?], <span style="font-weight: bold; text-decoration: underline;">IO</span>] {
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">apply</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>](a<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Free</span>[<span style="font-weight: bold; text-decoration: underline;">Program</span>, <span style="font-weight: bold; text-decoration: underline;">A</span>])<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>] <span style="font-weight: bold;">=</span> ???
+}
+<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">getApples</span> <span style="font-weight: bold;">=</span> get(<span style="font-style: italic;">"apple"</span>) { <span style="font-weight: bold; text-decoration: underline;">Free</span>[<span style="font-weight: bold; text-decoration: underline;">Program</span>, <span style="font-weight: bold; text-decoration: underline;">Output</span>[<span style="font-weight: bold; text-decoration: underline;">String</span>]].pure(<span style="font-weight: bold; text-decoration: underline;">Ok</span>(<span style="font-style: italic;">"&#127822;&#127822;"</span>))} 
+</code></pre>
+
+<p>
+But still, it's so many implicits magic happen behind and the journey wasn't so fun.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org84de08d" class="outline-3">
+<h3 id="org84de08d">joy of FP: 🍎 🍎 🍎</h3>
+<div class="outline-text-3" id="text-org84de08d">
+<p>
+except some funs from shapeless there aren't actually any cats interop during composition of routes
+</p>
+
+<p>
+While that could be much more attractive to beginner friendly though, since user don't have to have
+any knowledge about cats before using finch.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6bf3324" class="outline-2">
+<h2 id="org6bf3324">Http4s</h2>
+<div class="outline-text-2" id="text-org6bf3324">
+</div>
+<div id="outline-container-org82cb660" class="outline-3">
+<h3 id="org82cb660">composible: 🍎 🍎 🍎 🍎 🍎</h3>
+<div class="outline-text-3" id="text-org82cb660">
+<p>
+meanwhile, http4s takes advantage of cats to achieve path <b>Matcher</b>
+</p>
+<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">getApples</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">HttpRoutes</span>.of[<span style="font-weight: bold; text-decoration: underline;">IO</span>] {
+  <span style="font-weight: bold;">case</span> <span style="font-weight: bold; text-decoration: underline;">GET</span> <span style="font-weight: bold; text-decoration: underline;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Root</span> <span style="font-weight: bold; text-decoration: underline;">/</span> <span style="font-style: italic;">"apple"</span> <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Ok</span>(<span style="font-style: italic;">"&#127822;&#127822;"</span>)
+}
+<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">getApple</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">HttpRoutes</span>.of[<span style="font-weight: bold; text-decoration: underline;">IO</span>] {
+  <span style="font-weight: bold;">case</span> <span style="font-weight: bold; text-decoration: underline;">GET</span> <span style="font-weight: bold; text-decoration: underline;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Root</span> <span style="font-weight: bold; text-decoration: underline;">/</span> <span style="font-style: italic;">"apple"</span> <span style="font-weight: bold; text-decoration: underline;">/</span> <span style="font-weight: bold; text-decoration: underline;">id</span> <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Ok</span>(<span style="font-style: italic;">"&#127822;"</span>)
+}
+
+<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">routes</span> <span style="font-weight: bold;">=</span> getApples &lt;+&gt; getApple
+</code></pre>
+
+<p>
+what happen here is <code>HttpRoutes.of[IO] {...}</code> return a data type <a href="https://typelevel.org/cats/datatypes/kleisli.html"><code>Kleisli{OptionT{F, ?}, Request{F}, F{Response{F}}}</code></a>
+</p>
+
+<p>
+<code>&lt;+&gt;</code> is <a href="https://typelevel.org/cats/typeclasses/semigroupk.html">combindK</a> of <code>SemigroupK[Kleisli[OptionT[F, ?], Request[F], ?]]</code>
+</p>
+
+<p>
+You may already realize that nothing of above make any sense to you if you aren't
+familiar with data types and typeclasses defined in cats or scalaz.
+</p>
+
+<p>
+It requires some knowledge background from cats, just like you should know some sort of shapeless to fully understand what the hell is <code>::</code> and <code>:+:</code> about.
+</p>
+
+<p>
+Short story, <i>Kleisli</i> is a generic data type representing a function <code>A =&gt; F[B]</code>
+</p>
+
+<p>
+so you could imagine that <code>Kleisli[OptionT[F, ?], Request[F], F[Response[F]]]</code> is just something like
+<code>Request[F] =&gt; OptionT[F, F[Response[F]]]</code>
+</p>
+
+<p>
+while <code>&lt;+&gt;</code> is very like <code>:+:</code>, it combines these Kleisli, but any of these match, it will
+return that matched Kleisli
+</p>
+
+<p>
+About <b>Middleware</b>, it's nothing more just compose a Kleisli of type <code>Kleisli[Option[F,?], Request[F], F[Request[F]]]</code> before
+or compose a Kleisli of type <code>Kleisli[Option[F,?], Response[F], F[Response[F]]]</code> after
+</p>
+
+<p>
+e.g. auth user before <code>getApple</code>
+</p>
+<pre class="code"><code><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">auth</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">Kleisli</span> { req<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Request</span>[<span style="font-weight: bold; text-decoration: underline;">IO</span>] <span style="font-weight: bold;">=&gt;</span>
+  findUserInDatabase(req) <span style="font-weight: bold;">match</span> {
+    <span style="font-weight: bold;">case</span> <span style="font-weight: bold; text-decoration: underline;">true</span> <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">OptionT</span>(<span style="font-weight: bold; text-decoration: underline;">IO</span>(<span style="font-weight: bold; text-decoration: underline;">Some</span>(req)))
+    <span style="font-weight: bold;">case</span> <span style="font-weight: bold; text-decoration: underline;">false</span> <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">OptionT</span>.fromOption[<span style="font-weight: bold; text-decoration: underline;">IO</span>](<span style="font-weight: bold; text-decoration: underline;">None</span>)
+  }
+}
+
+auth andThen getApple
+</code></pre>
+</div>
+</div>
+<div id="outline-container-org13dea0e" class="outline-3">
+<h3 id="org13dea0e">extensible: 🍎 🍎 🍎 🍎 🍎</h3>
+<div class="outline-text-3" id="text-org13dea0e">
+<p>
+Since route matcher is simply just Kleisli, extending http4s to support types other than <code>F[Response[F]]</code> will
+be much simpler.
+</p>
+
+<p>
+For the same example as above in finch, that my controller will return a free program <code>Free[Program, IO[Response[IO]]]</code> instead of <code>IO[Response[IO]]</code>
+</p>
+
+<pre class="code"><code><span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">type alias for route that return free monad</span>
+<span style="font-weight: bold;">type</span> <span style="font-weight: bold; text-decoration: underline;">FreeRoute</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]] <span style="font-weight: bold;">=</span>
+  <span style="font-weight: bold; text-decoration: underline;">Kleisli</span>[<span style="font-weight: bold; text-decoration: underline;">OptionT</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>, ?], <span style="font-weight: bold; text-decoration: underline;">Request</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>], <span style="font-weight: bold; text-decoration: underline;">ProgramF</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold; text-decoration: underline;">Response</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>]]]]
+
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">custom dsl</span>
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">route</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span>](
+  pf<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">PartialFunction</span>[<span style="font-weight: bold; text-decoration: underline;">Request</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>], <span style="font-weight: bold; text-decoration: underline;">ProgramF</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold; text-decoration: underline;">Response</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>]]]])<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">FreeRoute</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>] <span style="font-weight: bold;">=</span>
+  <span style="font-weight: bold; text-decoration: underline;">Kleisli</span>(
+    (req<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Request</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>]) <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">OptionT</span>(implicitly[<span style="font-weight: bold; text-decoration: underline;">Monad</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>]].pure(pf.lift(req))))
+
+<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">getApples</span> <span style="font-weight: bold;">=</span> route {
+  <span style="font-weight: bold;">case</span> <span style="font-weight: bold; text-decoration: underline;">GET</span> <span style="font-weight: bold; text-decoration: underline;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Root</span> <span style="font-weight: bold; text-decoration: underline;">/</span> <span style="font-style: italic;">"apple"</span> <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Ok</span>(<span style="font-style: italic;">"&#127822;&#127822;"</span>).pure[<span style="font-weight: bold; text-decoration: underline;">Free</span>[<span style="font-weight: bold; text-decoration: underline;">Program</span>,?]]
+}
+</code></pre>
+
+<p>
+since getApples is still Kleisli, all the methods such as <code>&lt;+&gt;</code> are still available
+</p>
+
+<p>
+to hook it back to http4s route, simply map interpreter to <code>getApples</code>
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">interp</span><span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Program</span> ~&gt; <span style="font-weight: bold; text-decoration: underline;">IO</span> <span style="font-weight: bold;">=</span> ???
+
+<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">router</span> <span style="font-weight: bold;">=</span> getApples flatMapF interp
+</code></pre>
+
+<p>
+here I used flatMapF because interp will give it another <code>IO</code>, which need to be flatten
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org8f5dc0a" class="outline-3">
+<h3 id="org8f5dc0a">joy of FP: 🍎 🍎 🍎 🍎 🍎</h3>
+<div class="outline-text-3" id="text-org8f5dc0a">
+<p>
+Since Http4s takes full power of data type Kleisli, since Kleisli at the end is just a function, it's much more composable and extensible in every way.
+</p>
+
+<p>
+Once you have some knowledge around cats data types and typeclasses, you'll be able to enable all cats power in http4s for free. Since Kleisli has instances
+for:
+</p>
+<ul class="org-ul">
+<li>Functor</li>
+<li>Applicative</li>
+<li>Monad</li>
+<li>Alternative</li>
+<li>Choice</li>
+<li>Arrow</li>
+<li>Parallel</li>
+<li>Monoid</li>
+<li>MonoidK</li>
+</ul>
+<p>
+&#x2026;
+</p>
+
+
+<figure>
+<object type="image/svg+xml" data="https://cdn.rawgit.com/tpolecat/cats-infographic/master/cats.svg" class="org-svg">
+Sorry, your browser does not support SVG.</object>
+
+</figure>
+
+<p>
+As you can see it already cover most of the cats typeclasses, plus, those typeclasses are almost the most popular typeclasses in FP and cats. 
+</p>
+
+<p>
+And you will get all the chance to practiceall thee fun in your http4s server
+by just using Kleisli data type.
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<footer>
+  <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
+  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
+  <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
+</footer>
+</div>
+</body>
+</html>

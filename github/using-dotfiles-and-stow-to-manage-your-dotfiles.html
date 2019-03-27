@@ -1,35 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-<!-- 2017-11-26 Sun 14:17 -->
-<meta  charset="utf-8">
-<meta  name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2019-03-27 Wed 02:21 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>使用 dotfiles 和 stow 管理你的 dotfiles</title>
-<meta  name="generator" content="Org-mode">
-<meta  name="author" content="欧阳继超">
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                                                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                                                                                              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                                                                                                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-NJRFJGX');</script>
-<!-- End Google Tag Manager -->
+<meta name="generator" content="Org mode">
+<meta name="author" content="欧阳继超">
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/style/pixyll.css"/>
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css" />
-<!--[if lt IE 9]>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.ie.min.css" />
-     <![endif]-->
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2013 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -81,9 +71,8 @@ for the JavaScript code in this tag.
     <a accesskey="h" href="/index.html"> HOME </a> |
     <a href="#" id="edit-in-github">EDIT</a> |
     <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
-    <a href="/archive.html">ARCHIVE</a> |
-    <a href="/theindex.html">INDEX</a> |
-    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a>
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
 <div id="content">
@@ -93,15 +82,15 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">使用 stow 管理 symlink</a>
+<li><a href="#orgb45da43">使用 stow 管理 symlink</a>
 <ul>
-<li><a href="#orgheadline2">stow 文件</a></li>
-<li><a href="#orgheadline3">stow 目录</a></li>
+<li><a href="#orgfa97a59">stow 文件</a></li>
+<li><a href="#org5ce47b6">stow 目录</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline4">push to github</a></li>
-<li><a href="#orgheadline5">submodule vs subtree</a></li>
-<li><a href="#orgheadline6">㊙ Sensitive dotfiles</a></li>
+<li><a href="#orgd461425">push to github</a></li>
+<li><a href="#orgae849e9">submodule vs subtree</a></li>
+<li><a href="#org1207f16">㊙ Sensitive dotfiles</a></li>
 </ul>
 </div>
 </nav>
@@ -118,27 +107,25 @@ for the JavaScript code in this tag.
 因此我们希望的是用 github 版本管理这些 <b>配置</b> ，而不是 <b>状态</b> 。
 </p>
 
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 下面例子中的 dotfiles repo 在<a href="https://github.com/jcouyang/dotfiles">这里</a>
 </p>
-</blockquote>
+
+</blockquote></div>
 
 <p>
 好吧，让我们来看看到底如何版本管理这些 “dotfiles”。
 </p>
 
-<div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1">使用 stow 管理 symlink</h2>
-<div class="outline-text-2" id="text-orgheadline1">
+<div id="outline-container-orgb45da43" class="outline-2">
+<h2 id="orgb45da43">使用 stow 管理 symlink</h2>
+<div class="outline-text-2" id="text-orgb45da43">
 <p>
 GNU stow 是管理符号链接（symlink）的一个小公举。只需要
 </p>
-<div class="org-src-container">
-
-<pre class="src src-shell-script">brew install stow
-</pre>
-</div>
+<pre class="code"><code>brew install stow
+</code></pre>
 <p>
 或者如果你非 mac 机器，请访问<a href="http://www.gnu.org/software/stow/">官网</a>看看如何安装
 </p>
@@ -160,9 +147,9 @@ GNU stow 是管理符号链接（symlink）的一个小公举。只需要
 </pre>
 </div>
 
-<div id="outline-container-orgheadline2" class="outline-3">
-<h3 id="orgheadline2">stow 文件</h3>
-<div class="outline-text-3" id="text-orgheadline2">
+<div id="outline-container-orgfa97a59" class="outline-3">
+<h3 id="orgfa97a59">stow 文件</h3>
+<div class="outline-text-3" id="text-orgfa97a59">
 <p>
  注意看我们需要版本管理文件应该是 config.fish 和 omf 下的所有文件，于是，我将这些文件考到我新建
 的 <code>~/dotfiles</code> 目录下
@@ -179,11 +166,8 @@ ls fish/.config/fish/
 <p>
 现在可以使用 stow 创建 symlink 了。
 </p>
-<div class="org-src-container">
-
-<pre class="src src-shell-script">stow fish
-</pre>
-</div>
+<pre class="code"><code>stow fish
+</code></pre>
 
 <p>
 瞅瞅 现在 <code>~/.config</code> 变什么样了
@@ -208,9 +192,9 @@ ls fish/.config/fish/
 </div>
 </div>
 
-<div id="outline-container-orgheadline3" class="outline-3">
-<h3 id="orgheadline3">stow 目录</h3>
-<div class="outline-text-3" id="text-orgheadline3">
+<div id="outline-container-org5ce47b6" class="outline-3">
+<h3 id="org5ce47b6">stow 目录</h3>
+<div class="outline-text-3" id="text-org5ce47b6">
 <p>
 另外我们在试试管理 omf(oh-my-fish)，似乎 omf下面没有什么状态，bundle 和 theme 都是配置，所以
 与其 symlink 文件，不如 symlink 整个 omf 目录。同样在 <code>~/dotfiles</code>  目录下运行
@@ -239,9 +223,9 @@ stow omf
 </div>
 </div>
 
-<div id="outline-container-orgheadline4" class="outline-2">
-<h2 id="orgheadline4">push to github</h2>
-<div class="outline-text-2" id="text-orgheadline4">
+<div id="outline-container-orgd461425" class="outline-2">
+<h2 id="orgd461425">push to github</h2>
+<div class="outline-text-2" id="text-orgd461425">
 <p>
 下面看如何用 github 来管理这些 dotfiles
 </p>
@@ -249,15 +233,12 @@ stow omf
 <p>
 强烈推荐先安装 <a href="http://hub.github.com/">hub</a>
 </p>
-<div class="org-src-container">
-
-<pre class="src src-shell-script">brew install hub
+<pre class="code"><code>brew install hub
 hub create dotfiles
 git add .
-git commit -m <span style="color: #8b0000;">"my awesome dotfiles"</span>
+git commit -m <span style="font-style: italic;">"my awesome dotfiles"</span>
 git push origin master
-</pre>
-</div>
+</code></pre>
 
 <p>
 就这么简单，你的配置文件就安全的放到了 github 上，并且以后每一次改动都再也不怕改挂了。
@@ -265,9 +246,9 @@ git push origin master
 </div>
 </div>
 
-<div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5">submodule vs subtree</h2>
-<div class="outline-text-2" id="text-orgheadline5">
+<div id="outline-container-orgae849e9" class="outline-2">
+<h2 id="orgae849e9">submodule vs subtree</h2>
+<div class="outline-text-2" id="text-orgae849e9">
 <p>
 但是我有些配置文件其实在另外一个 repo 上，这时候我怎么能跟这个 <code>dotfiles</code> repo 合到一起呢？
 </p>
@@ -281,11 +262,8 @@ git push origin master
 为什么不适用，网上有<a href="http://blogs.atlassian.com/2013/05/alternatives-to-git-submodule-git-subtree/">大量文章</a>解释，我就懒得翻译了。
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-shell-script">&#8906;&gt; ~/dotfiles on master &#10799; git subtree add --prefix emacs/.emacs.d git@github.com:jcouyang/.emacs.d.git master --squash
-</pre>
-</div>
+<pre class="code"><code>&#8906;&gt; ~/dotfiles on master &#10799; git subtree add --prefix emacs/.emacs.d git@github.com:jcouyang/.emacs.d.git master --squash
+</code></pre>
 <p>
 这行 subtree 命令把我的 emacs 配置从我的 repo 下下来作为 subtree，并 squash(合成一个) commits
 </p>
@@ -329,9 +307,9 @@ git subtree push --prefix emacs/.emacs.d emacs master
 </div>
 
 
-<div id="outline-container-orgheadline6" class="outline-2">
-<h2 id="orgheadline6">㊙ Sensitive dotfiles</h2>
-<div class="outline-text-2" id="text-orgheadline6">
+<div id="outline-container-org1207f16" class="outline-2">
+<h2 id="org1207f16">㊙ Sensitive dotfiles</h2>
+<div class="outline-text-2" id="text-org1207f16">
 <p>
 有些 dotfiles  中可能涉及一些 token 或者密码，如果把他们 push 到 public 的 github 上， <del>有可能</del> 肯定会对你个人或者公司造成巨大的损失（最近公司就开始扫描个人 github 账户了🙀 好紧张）。于是我们需要对这些敏感的 dotfiles 做加密。
 </p>
@@ -343,20 +321,14 @@ git subtree push --prefix emacs/.emacs.d emacs master
 <p>
 目前最广泛使用的加密手段是 Gnupg，简称 gpg，一样使用 brew 装就好了
 </p>
-<div class="org-src-container">
-
-<pre class="src src-sh">brew install gnupg
-</pre>
-</div>
+<pre class="code"><code>brew install gnupg
+</code></pre>
 
 <p>
 安装完之后需要生成一个 keypair
 </p>
-<div class="org-src-container">
-
-<pre class="src src-sh">gpg --gen-key
-</pre>
-</div>
+<pre class="code"><code>gpg --gen-key
+</code></pre>
 
 <p>
 输入名字，邮箱，密码之后，就 ok 了
@@ -377,15 +349,12 @@ git subtree push --prefix emacs/.emacs.d emacs master
 <p>
 关键在于见 remote 的时候。当我在 home 目录建了一个 <code>dotfiles-private</code> 的文件夹，stow 完各种敏感 dotfiles 之后
 </p>
-<div class="org-src-container">
-
-<pre class="src src-sh">git init
+<pre class="code"><code>git init
 git add .
-git commit -m <span style="color: #8b0000;">"some private dotfiles"</span>
+git commit -m <span style="font-style: italic;">"some private dotfiles"</span>
 git remote add dropbox gcrypt::rsync:///Users/jcouyang/Dropbox/dotfiles-private.git
 git push
-</pre>
-</div>
+</code></pre>
 
 <p>
 你会被问到刚才创建 gpg keypair 时输入的密码，然后&#x2026;
@@ -405,16 +374,14 @@ git push
 <div id="postamble" class="status">
 <footer>
   <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2017-06-10 Sat 08:22</p>
-  <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6) x <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
-  <a class="gumroad-button" href="https://gum.co/grokking-monad">我的新书 Grokking Monad 现已发售，请自觉排队装逼</a>
-
-  <a class="github-fork-ribbon right-bottom fixed" href="https://github.com/jcouyang/blog" title="Fork me on GitHub">Fork me on GitHub</a>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
 </footer>
-
-<div id="disqus_thread"></div>
 </div>
 </body>
 </html>

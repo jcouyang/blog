@@ -1,38 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-<!-- 2017-11-26 Sun 14:17 -->
-<meta  charset="utf-8">
-<meta  name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2019-03-27 Wed 02:21 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>JavaScript玩转Clojure大法之 - Trampoline</title>
-<meta  name="generator" content="Org-mode">
-<meta  name="author" content="Jichao Ouyang">
-<meta  name="description" content="在函数式编程中, 递归可以说是最关健甚至唯一的循环手段, Clojure的recur可以保证得到 /尾递归/ 优化, 而相互递归则不能用recur来保证得到优化, 因此, 另一个大法出现了 -- /Trampoline/"
+<meta name="generator" content="Org mode">
+<meta name="author" content="Jichao Ouyang">
+<meta name="description" content="在函数式编程中, 递归可以说是最关健甚至唯一的循环手段, Clojure的recur可以保证得到 /尾递归/ 优化, 而相互递归则不能用recur来保证得到优化, 因此, 另一个大法出现了 -- /Trampoline/"
 >
-<meta  name="keywords" content="clojure, javascript,js, trampoline, functional, fp, recursive, recur, mutual">
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                                                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                                                                                              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                                                                                                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-NJRFJGX');</script>
-<!-- End Google Tag Manager -->
+<meta name="keywords" content="clojure, javascript,js, trampoline, functional, fp, recursive, recur, mutual">
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/style/pixyll.css"/>
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css" />
-<!--[if lt IE 9]>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.ie.min.css" />
-     <![endif]-->
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2013 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -84,9 +74,8 @@ for the JavaScript code in this tag.
     <a accesskey="h" href="/index.html"> HOME </a> |
     <a href="#" id="edit-in-github">EDIT</a> |
     <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
-    <a href="/archive.html">ARCHIVE</a> |
-    <a href="/theindex.html">INDEX</a> |
-    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a>
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
 <div id="content">
@@ -96,16 +85,20 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline2">尾递归(tail recursion)</a></li>
-<li><a href="#orgheadline1">相互递归(mutual recursion)</a>
+<li><a href="#org3dd6f52">尾递归(tail recursion)</a></li>
+<li><a href="#orge9bd791">相互递归(mutual recursion)</a>
 <ul>
-<li><a href="#orgheadline3">DFA</a></li>
-<li><a href="#orgheadline4">Trampoline</a></li>
+<li><a href="#org1046eeb">DFA</a></li>
+<li><a href="#org05d7f98">Trampoline</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </nav>
+<p>
+<a href="https://blog.oyanglul.us/shutting-down-gulugulu">📣 不要再找了, 弹幕功能已关闭</a>
+</p>
+
 <ul class="org-ul">
 <li><a href="./clojure-core.async-essence-in-native-javascript.html">JavaScript玩转Clojure大法之 - 并发编程</a></li>
 <li><a href="./clojure-essence-in-javascript-transducer.html">JavaScript玩转Clojure大法之 - Transducer</a></li>
@@ -124,8 +117,8 @@ Clojure的recur可以保证得到 <i>尾递归</i> 优化, 而相互递归则不
 
 
 <figure>
-<p><img src="./images/multi-recur.gif" alt="multi-recur.gif">
-</p>
+<img src="./images/multi-recur.gif" alt="multi-recur.gif">
+
 </figure>
 
 <p>
@@ -136,7 +129,7 @@ Trampoline 翻译成中文是蹦床, <i>蹦~蹦蹦蹦蹦</i> (自己脑补intel 
 如果你看过老友记这集(Friends: The One with Ross's New Girlfriend), 应该记得这个梗
 </p>
 
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 Ross: you hang up first
 </p>
@@ -149,7 +142,8 @@ Julie: No, you hang up first
 Ross: No, you hang up first
 &#x2026;
 </p>
-</blockquote>
+
+</blockquote></div>
 
 <p>
 ok, 这就是相互递归(mutual recursion)
@@ -157,12 +151,12 @@ ok, 这就是相互递归(mutual recursion)
 
 <p>
 在继续解释trampoline是如何优化相互递归之前, 可能有些同学不太清楚什么是尾递归优化, 当然嫌我啰嗦的可以直接坐
-<a href="#orgheadline1">电梯</a>直达.
+<a href="#orge9bd791">电梯</a>直达.
 </p>
 
-<div id="outline-container-orgheadline2" class="outline-2">
-<h2 id="orgheadline2">尾递归(tail recursion)</h2>
-<div class="outline-text-2" id="text-orgheadline2">
+<div id="outline-container-org3dd6f52" class="outline-2">
+<h2 id="org3dd6f52">尾递归(tail recursion)</h2>
+<div class="outline-text-2" id="text-org3dd6f52">
 <p>
 又要拿一个被举烂了的例子 - 求n的阶乘
 </p>
@@ -170,14 +164,11 @@ ok, 这就是相互递归(mutual recursion)
 <p>
 很容易就可以写出来
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">fact</span>(<span style="color: #b8860b;">n</span>){
-    <span style="color: #00008b;">if</span>(n==0)<span style="color: #00008b;">return</span> 1;
-    <span style="color: #00008b;">return</span> n*fact(n-1);
+<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">fact</span>(<span style="font-weight: bold; font-style: italic;">n</span>){
+    <span style="font-weight: bold;">if</span>(n==0)<span style="font-weight: bold;">return</span> 1;
+    <span style="font-weight: bold;">return</span> n*fact(n-1);
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 好吧, 这就是典型的非尾递归, 因为最后一个操作并不是调用自己, 而是 <b>乘法</b>
@@ -191,14 +182,11 @@ ok, 这就是相互递归(mutual recursion)
 那么怎么才是尾递归, 当然是最后一个操作一定是调用自己.
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">fact</span>(<span style="color: #b8860b;">n</span>, <span style="color: #b8860b;">acc</span>){
-    <span style="color: #00008b;">if</span>(n==0)<span style="color: #00008b;">return</span> acc;
-    <span style="color: #00008b;">return</span> fact(n-1, acc*n)
+<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">fact</span>(<span style="font-weight: bold; font-style: italic;">n</span>, <span style="font-weight: bold; font-style: italic;">acc</span>){
+    <span style="font-weight: bold;">if</span>(n==0)<span style="font-weight: bold;">return</span> acc;
+    <span style="font-weight: bold;">return</span> fact(n-1, acc*n)
 }
-</pre>
-</div>
+</code></pre>
 <p>
 两个地方值得注意
 </p>
@@ -210,18 +198,15 @@ ok, 这就是相互递归(mutual recursion)
 <p>
 由于tail recur非常容易改写成循环, 编译器容易对其进行优化
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">fact</span>(<span style="color: #b8860b;">n</span>){
-    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">acc</span>=1,<span style="color: #b8860b;">i</span>=n
-    <span style="color: #00008b;">while</span>(i!=0){
+<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">fact</span>(<span style="font-weight: bold; font-style: italic;">n</span>){
+    <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">acc</span>=1,<span style="font-weight: bold; font-style: italic;">i</span>=n
+    <span style="font-weight: bold;">while</span>(i!=0){
         acc=acc*i;
         i-=1;
     }
-    <span style="color: #00008b;">return</span> acc
+    <span style="font-weight: bold;">return</span> acc
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 有没有觉得尾递归和循环非常像, 唯一的区别是
@@ -237,7 +222,7 @@ ok, 这就是相互递归(mutual recursion)
 但思路是一模一样的
 </p>
 
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 在clojure里, 尾递归是用 <code>recur</code> 来保证(scalar貌似是@tail annotation), 好处是
 </p>
@@ -245,19 +230,20 @@ ok, 这就是相互递归(mutual recursion)
 <li>用recur的一定是尾递归, 直接优化</li>
 <li>编译器可以检查recur出现的位置是否为tail</li>
 </ol>
-</blockquote>
+
+</blockquote></div>
 </div>
 </div>
-<div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1">相互递归(mutual recursion)</h2>
-<div class="outline-text-2" id="text-orgheadline1">
+<div id="outline-container-orge9bd791" class="outline-2">
+<h2 id="orge9bd791">相互递归(mutual recursion)</h2>
+<div class="outline-text-2" id="text-orge9bd791">
 <p>
 相互递归由于是函数之间的互相调用, 则不能像尾递归一样直接优化成循环就完事.
 </p>
 </div>
-<div id="outline-container-orgheadline3" class="outline-3">
-<h3 id="orgheadline3">DFA</h3>
-<div class="outline-text-3" id="text-orgheadline3">
+<div id="outline-container-org1046eeb" class="outline-3">
+<h3 id="org1046eeb">DFA</h3>
+<div class="outline-text-3" id="text-org1046eeb">
 <p>
 举个最简单的例子, 相互递归经常用于状态机的实现, 比如自动贩卖机, 假设这台贩卖机非常简单, 只吃五块,只卖巧克力
 </p>
@@ -273,36 +259,33 @@ ok, 这就是相互递归(mutual recursion)
 <p>
 好吧, 我们来实现一把
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">eat_money</span>(<span style="color: #b8860b;">input_seq</span>){
-    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">input</span> = input_seq.shift()
-    <span style="color: #00008b;">if</span>(input== <span style="color: #8b0000;">'&#20116;&#22359;'</span>)
-        console.log(<span style="color: #8b0000;">'&#25910;&#21040;&#21602;,&#36873;&#20010;&#24039;&#20811;&#21147;&#21543;^_^'</span>)
+<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">eat_money</span>(<span style="font-weight: bold; font-style: italic;">input_seq</span>){
+    <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">input</span> = input_seq.shift()
+    <span style="font-weight: bold;">if</span>(input== <span style="font-style: italic;">'&#20116;&#22359;'</span>)
+        console.log(<span style="font-style: italic;">'&#25910;&#21040;&#21602;,&#36873;&#20010;&#24039;&#20811;&#21147;&#21543;^_^'</span>)
         choose(input_seq)
-    <span style="color: #00008b;">else</span>
+    <span style="font-weight: bold;">else</span>
         eat_money(input_seq)
 }
 
-<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">choose</span>(<span style="color: #b8860b;">input_seq</span>){
-    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">input</span> = input_seq.shift()
-    <span style="color: #00008b;">if</span>(input== <span style="color: #8b0000;">'&#24039;&#20811;&#21147;'</span>)
-        console.log(<span style="color: #8b0000;">'&#36873;&#20102;&#24039;&#20811;&#21147;, &#25353;&#19979;&#25214;&#38646;&#25353;&#38062;, &#25105;&#36824;&#27424;&#20320;&#20004;&#22359;&#38065;&#21734;'</span>)
+<span style="font-weight: bold;">function</span> <span style="font-weight: bold;">choose</span>(<span style="font-weight: bold; font-style: italic;">input_seq</span>){
+    <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">input</span> = input_seq.shift()
+    <span style="font-weight: bold;">if</span>(input== <span style="font-style: italic;">'&#24039;&#20811;&#21147;'</span>)
+        console.log(<span style="font-style: italic;">'&#36873;&#20102;&#24039;&#20811;&#21147;, &#25353;&#19979;&#25214;&#38646;&#25353;&#38062;, &#25105;&#36824;&#27424;&#20320;&#20004;&#22359;&#38065;&#21734;'</span>)
         changes(input_seq)
-    <span style="color: #00008b;">else</span>
+    <span style="font-weight: bold;">else</span>
         choose(input_seq)
 }
 
-<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">changes</span>(<span style="color: #b8860b;">input_seq</span>){
-    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">input</span> = input_seq.shift()
-    <span style="color: #00008b;">if</span>(input==<span style="color: #8b0000;">'&#25214;&#38646;'</span>)
-        console.log(<span style="color: #8b0000;">'&#27426;&#36814;&#20877;&#27425;&#20809;&#20020;'</span>)
+<span style="font-weight: bold;">function</span> <span style="font-weight: bold;">changes</span>(<span style="font-weight: bold; font-style: italic;">input_seq</span>){
+    <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">input</span> = input_seq.shift()
+    <span style="font-weight: bold;">if</span>(input==<span style="font-style: italic;">'&#25214;&#38646;'</span>)
+        console.log(<span style="font-style: italic;">'&#27426;&#36814;&#20877;&#27425;&#20809;&#20020;'</span>)
         eat_money(input_seq)
-    <span style="color: #00008b;">else</span>
+    <span style="font-weight: bold;">else</span>
         changes(input_seq)
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 假设我是个怪蜀黍QA,来到这个贩卖机上怒点这样以系列操作, 看我们的贩卖机有没有疯掉
@@ -321,14 +304,11 @@ ok, 这就是相互递归(mutual recursion)
 <p>
 现在问题来了, 如果我的 <code>input_seq</code> 非常长, 比如
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">for</span>(<span style="color: #00008b;">var</span> <span style="color: #b8860b;">n</span>=15;n&gt;0;n--){
+<pre class="code"><code><span style="font-weight: bold;">for</span>(<span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">n</span>=15;n&gt;0;n--){
   input_seq=input_seq.concat(input_seq)
 }
-input_seq.length <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; 294912</span>
-</pre>
-</div>
+input_seq.length <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">=&gt; 294912</span>
+</code></pre>
 <p>
 现在 <code>input_seq</code> 非常大, 再试试(请到node上试)
 </p>
@@ -346,9 +326,9 @@ RangeError: Maximum call stack size exceeded
 </div>
 </div>
 
-<div id="outline-container-orgheadline4" class="outline-3">
-<h3 id="orgheadline4">Trampoline</h3>
-<div class="outline-text-3" id="text-orgheadline4">
+<div id="outline-container-org05d7f98" class="outline-3">
+<h3 id="org05d7f98">Trampoline</h3>
+<div class="outline-text-3" id="text-org05d7f98">
 <p>
 Trampoline就是用来解决相互递归爆栈的问题, 等等, 什么是Trampoline
 </p>
@@ -364,27 +344,24 @@ trampoline是一个函数:
 </ol>
 
 <p>
-比如可以把贩卖机简单的改造一下, 让他返回函数, 而不是直接调用其他函数, 注意第<a href="#coderef-trampoline"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-trampoline');" onmouseout="CodeHighlightOff(this, 'coderef-trampoline');">6</a>行
+比如可以把贩卖机简单的改造一下, 让他返回函数, 而不是直接调用其他函数, 注意第<a href="#coderef-trampoline" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-trampoline');" onmouseout="CodeHighlightOff(this, 'coderef-trampoline');">6</a>行
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span class="linenr"> 1: </span><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">eat_money</span>(<span style="color: #b8860b;">input_seq</span>){
-<span class="linenr"> 2: </span>  <span style="color: #00008b;">if</span>(input_seq.length==0)<span style="color: #00008b;">return</span>
-<span class="linenr"> 3: </span>  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">input</span> = input_seq.shift()
-<span class="linenr"> 4: </span>  <span style="color: #00008b;">if</span>(input== <span style="color: #8b0000;">'&#20116;&#22359;'</span>){
-<span class="linenr"> 5: </span>    console.log(<span style="color: #8b0000;">'&#25910;&#21040;&#21602;,&#36873;&#20010;&#24039;&#20811;&#21147;&#21543;^_^'</span>)
-<span id="coderef-trampoline" class="coderef-off"><span class="linenr"> 6: </span>    <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(){</span>
-<span class="linenr"> 7: </span>      <span style="color: #00008b;">return</span> choose(input_seq)
+<pre class="code"><code><span class="linenr"> 1: </span><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">eat_money</span>(<span style="font-weight: bold; font-style: italic;">input_seq</span>){
+<span class="linenr"> 2: </span>  <span style="font-weight: bold;">if</span>(input_seq.length==0)<span style="font-weight: bold;">return</span>
+<span class="linenr"> 3: </span>  <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">input</span> = input_seq.shift()
+<span class="linenr"> 4: </span>  <span style="font-weight: bold;">if</span>(input== <span style="font-style: italic;">'&#20116;&#22359;'</span>){
+<span class="linenr"> 5: </span>    console.log(<span style="font-style: italic;">'&#25910;&#21040;&#21602;,&#36873;&#20010;&#24039;&#20811;&#21147;&#21543;^_^'</span>)
+<span id="coderef-trampoline" class="coderef-off"><span class="linenr"> 6: </span>    <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">function</span>(){</span>
+<span class="linenr"> 7: </span>      <span style="font-weight: bold;">return</span> choose(input_seq)
 <span class="linenr"> 8: </span>    }
-<span class="linenr"> 9: </span>  }<span style="color: #00008b;">else</span>{
-<span class="linenr">10: </span>    <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(){
-<span class="linenr">11: </span>      <span style="color: #00008b;">return</span> eat_money(input_seq)
+<span class="linenr"> 9: </span>  }<span style="font-weight: bold;">else</span>{
+<span class="linenr">10: </span>    <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">function</span>(){
+<span class="linenr">11: </span>      <span style="font-weight: bold;">return</span> eat_money(input_seq)
 <span class="linenr">12: </span>    }
 <span class="linenr">13: </span>  } 
 <span class="linenr">14: </span>}
-</pre>
-</div>
+</code></pre>
 <p>
 这样每次调用eat_money其实返回一个闭包, 需要再调用一下才能真的执行 <code>choose</code> 函数.
 </p>
@@ -392,11 +369,8 @@ trampoline是一个函数:
 <p>
 经过这样的改造以后(当然其他函数也要类似的加闭包), 就可以用 <code>trampoline</code> 来执行他们了
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">mori.trampoline(eat_money,input_seq)
-</pre>
-</div>
+<pre class="code"><code>mori.trampoline(eat_money,input_seq)
+</code></pre>
 
 <p>
 由于eat_money返回一个闭包,也就是函数, trampoline会继续执行这个返回的闭包,直到返回的不是函数为止
@@ -409,20 +383,17 @@ trampoline是一个函数:
 
 
 <figure>
-<p><img src="./images/stack.gif" alt="stack.gif">
-</p>
-</figure>
-<div class="org-src-container">
+<img src="./images/stack.gif" alt="stack.gif">
 
-<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">eat_money</span>(<span style="color: #b8860b;">input_seq</span>){
-    <span style="color: #00008b;">return</span> choose(input_seq){
-        <span style="color: #00008b;">return</span> changes(input_seq){
-            <span style="color: #00008b;">return</span> ...
+</figure>
+<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">eat_money</span>(<span style="font-weight: bold; font-style: italic;">input_seq</span>){
+    <span style="font-weight: bold;">return</span> choose(input_seq){
+        <span style="font-weight: bold;">return</span> changes(input_seq){
+            <span style="font-weight: bold;">return</span> ...
         }
     }
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 所以如果压入的函数个数超过栈的容量, 栈 <del>菊花</del> 就被爆了
@@ -431,20 +402,17 @@ trampoline是一个函数:
 
 
 <figure>
-<p><img src="./images/conga.jpg" alt="conga.jpg">
-</p>
+<img src="./images/conga.jpg" alt="conga.jpg">
+
 </figure>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">res</span> = eat_money(input_seq)
-<span style="color: #00008b;">while</span>(<span style="color: #6b8e23;">true</span>){
-    <span style="color: #00008b;">if</span>(<span style="color: #00008b;">typeof</span> res ==<span style="color: #8b0000;">'function'</span>)res = res()
-    <span style="color: #00008b;">else</span>
-        <span style="color: #00008b;">break</span>
+<pre class="code"><code><span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">res</span> = eat_money(input_seq)
+<span style="font-weight: bold;">while</span>(<span style="font-weight: bold; text-decoration: underline;">true</span>){
+    <span style="font-weight: bold;">if</span>(<span style="font-weight: bold;">typeof</span> res ==<span style="font-style: italic;">'function'</span>)res = res()
+    <span style="font-weight: bold;">else</span>
+        <span style="font-weight: bold;">break</span>
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 优化成循环了不是.
@@ -461,16 +429,14 @@ trampoline是一个函数:
 <div id="postamble" class="status">
 <footer>
   <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2017-06-10 Sat 08:22</p>
-  <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6) x <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
-  <a class="gumroad-button" href="https://gum.co/grokking-monad">我的新书 Grokking Monad 现已发售，请自觉排队装逼</a>
-
-  <a class="github-fork-ribbon right-bottom fixed" href="https://github.com/jcouyang/blog" title="Fork me on GitHub">Fork me on GitHub</a>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
 </footer>
-
-<div id="disqus_thread"></div>
 </div>
 </body>
 </html>

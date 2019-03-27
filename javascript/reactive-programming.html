@@ -1,37 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-<!-- 2017-11-26 Sun 14:17 -->
-<meta  charset="utf-8">
-<meta  name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2019-03-27 Wed 02:21 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Monadic Reactive Programming in JavaScript</title>
-<meta  name="generator" content="Org-mode">
-<meta  name="author" content="Jichao Ouyang">
-<meta  name="description" content="当我们都用习惯 Promise Monad 之后，我再来介绍一个跟时间相关的 Monad reactive prograaming 中的 Stream"
+<meta name="generator" content="Org mode">
+<meta name="author" content="root">
+<meta name="description" content="当我们都用习惯 Promise Monad 之后，我再来介绍一个跟时间相关的 Monad reactive prograaming 中的 Stream"
 >
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                                                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                                                                                              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                                                                                                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-NJRFJGX');</script>
-<!-- End Google Tag Manager -->
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/style/pixyll.css"/>
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css" />
-<!--[if lt IE 9]>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.ie.min.css" />
-     <![endif]-->
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2013 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -83,9 +73,8 @@ for the JavaScript code in this tag.
     <a accesskey="h" href="/index.html"> HOME </a> |
     <a href="#" id="edit-in-github">EDIT</a> |
     <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
-    <a href="/archive.html">ARCHIVE</a> |
-    <a href="/theindex.html">INDEX</a> |
-    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a>
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
 <div id="content">
@@ -95,10 +84,10 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">Stream</a></li>
-<li><a href="#orgheadline2">Functor</a></li>
-<li><a href="#orgheadline3">Applicative</a></li>
-<li><a href="#orgheadline4">Monad</a></li>
+<li><a href="#orgeaf9d25">Stream</a></li>
+<li><a href="#org8eeb9fb">Functor</a></li>
+<li><a href="#org77565c6">Applicative</a></li>
+<li><a href="#orgf83035a">Monad</a></li>
 </ul>
 </div>
 </nav>
@@ -108,22 +97,19 @@ for the JavaScript code in this tag.
 
 
 <figure>
-<p><img src="./images/stream.gif" alt="stream.gif">
-</p>
+<img src="./images/stream.gif" alt="stream.gif">
+
 </figure>
 
-<div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1">Stream</h2>
-<div class="outline-text-2" id="text-orgheadline1">
+<div id="outline-container-orgeaf9d25" class="outline-2">
+<h2 id="orgeaf9d25">Stream</h2>
+<div class="outline-text-2" id="text-orgeaf9d25">
 <p>
 如果说数组是空间维度，那么 Stream 则是时间维度版本的数组。比如我们有一个数组，需要 reduce 一下再打印出结果，是非常容易做到的：
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript">[1,2,3,4].reduce((acc,x)=&gt;acc+x)
-</pre>
-</div>
+<pre class="code"><code>[1,2,3,4].reduce((acc,x)=&gt;acc+x)
+</code></pre>
 
 <p>
 那么问题是，我们操作在一个空间上已经存在的数组，是非常容易的，但是如果我们的输入是随着时间变化的，该如何处理？
@@ -133,12 +119,9 @@ for the JavaScript code in this tag.
 而在前端世界，这种情况非常常见，比如一个简单的用户输入框 input，同样的，我想得到输的总和，似乎是有些棘手的一件事情，只是，对于函数式编程来说，对于状态的保存就非常头疼。当然如果不考虑函数式，弄一个全局变量来保存 acc 也是最直接的思路了。
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">acc</span> = 0;
-$(<span style="color: #8b0000;">'input'</span>).onChange(_=&gt;acc+=_)
-</pre>
-</div>
+<pre class="code"><code><span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">acc</span> = 0;
+$(<span style="font-style: italic;">'input'</span>).onChange(_=&gt;acc+=_)
+</code></pre>
 
 <p>
 这样每次在 input 中修改数字，都会加入到 acc 中。
@@ -152,13 +135,10 @@ $(<span style="color: #8b0000;">'input'</span>).onChange(_=&gt;acc+=_)
 下面开始用 <a href="https://github.com/cujojs/most">cujojs/most</a> :
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript">most.fromEvent(<span style="color: #8b0000;">'input'</span>, document.querySelector(<span style="color: #8b0000;">'input'</span>))
+<pre class="code"><code>most.fromEvent(<span style="font-style: italic;">'input'</span>, document.querySelector(<span style="font-style: italic;">'input'</span>))
 .reduce((acc,x)=&gt;acc+x)
 .then(_=&gt;console.log(_))
-</pre>
-</div>
+</code></pre>
 
 <p>
 而这样的一组随时间变化的输入，就变成了输入流，使用 reactive programming 的技巧，我们可以像操作空间上的数组一样操作流， 从而可以使用上我们对待数组一样的奇淫巧计，这就是 reactive programming，另外如果还符合 monad 的一些公理，就会变成 monadic reactive programming。
@@ -166,75 +146,63 @@ $(<span style="color: #8b0000;">'input'</span>).onChange(_=&gt;acc+=_)
 </div>
 </div>
 
-<div id="outline-container-orgheadline2" class="outline-2">
-<h2 id="orgheadline2">Functor</h2>
-<div class="outline-text-2" id="text-orgheadline2">
+<div id="outline-container-org8eeb9fb" class="outline-2">
+<h2 id="org8eeb9fb">Functor</h2>
+<div class="outline-text-2" id="text-org8eeb9fb">
 <p>
 每个 most 的 Stream 都是一个 functor，因此我们可以 map 一个函数到流上。
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span id="coderef-mostfrom" class="coderef-off">most.from([1,2,3,4]) <span style="color: #8c8c8c; font-style: italic;">//</span> (mostfrom)</span>
+<pre class="code"><code><span id="coderef-mostfrom" class="coderef-off">most.from([1,2,3,4]) <span style="font-weight: bold; font-style: italic;">//</span> (mostfrom)</span>
     .map(_=&gt;_*2)
-<span id="coderef-observe" class="coderef-off">    .observe(_=&gt;console.log(_)); <span style="color: #8c8c8c; font-style: italic;">//</span> (observe)</span>
-</pre>
-</div>
+<span id="coderef-observe" class="coderef-off">    .observe(_=&gt;console.log(_)); <span style="font-weight: bold; font-style: italic;">//</span> (observe)</span>
+</code></pre>
 
 <p>
 这段代码会依次输出 =2 4 6 8=。
 </p>
 <ul class="org-ul">
-<li><a href="#coderef-mostfrom"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-mostfrom');" onmouseout="CodeHighlightOff(this, 'coderef-mostfrom');">most.from</a> 会从一个数组生成一个 most 流，跟之前的 most.fromEvent  生成一个输入流一样。</li>
-<li><a href="#coderef-observe"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-observe');" onmouseout="CodeHighlightOff(this, 'coderef-observe');">observe</a> 用于观察流内的数据，每次流的数据变化，都会触发 observe 上的回调。</li>
+<li><a href="#coderef-mostfrom" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-mostfrom');" onmouseout="CodeHighlightOff(this, 'coderef-mostfrom');">most.from</a> 会从一个数组生成一个 most 流，跟之前的 most.fromEvent  生成一个输入流一样。</li>
+<li><a href="#coderef-observe" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-observe');" onmouseout="CodeHighlightOff(this, 'coderef-observe');">observe</a> 用于观察流内的数据，每次流的数据变化，都会触发 observe 上的回调。</li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgheadline3" class="outline-2">
-<h2 id="orgheadline3">Applicative</h2>
-<div class="outline-text-2" id="text-orgheadline3">
+<div id="outline-container-org77565c6" class="outline-2">
+<h2 id="org77565c6">Applicative</h2>
+<div class="outline-text-2" id="text-org77565c6">
 <p>
 不仅如此，Stream 还是 Applicative Functor，希望之前的概念还记得，Applicative 可以把含有函数的容器应用到另一个含有值的容器上，所以上例可以用 Applicative 这样做：
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript">most.of(_=&gt;_*2)
+<pre class="code"><code>most.of(_=&gt;_*2)
   .ap(most.from([1,2,3,4]))
   .observe(_=&gt;console.log(_))
-</pre>
-</div>
+</code></pre>
 
 <p>
 除了使用 Applicative 之外，我们还可以把函数 lift 起来，这样在使用上跟一般的函数就没有什么区别了，只是现在 lifted 的函数可以操作 most 流。(虽然不知道为什么官网并没有推荐（deprecated） 使用 lift，反倒我觉得是用 lift 更适合函数的重用。)
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">multiple2</span> = <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">x</span>){<span style="color: #00008b;">return</span> x*2};
-<span style="color: #00008b;">var</span> <span style="color: #b8860b;">lifedMultiple2</span> = most.lift(multiple2);
+<pre class="code"><code><span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">multiple2</span> = <span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">x</span>){<span style="font-weight: bold;">return</span> x*2};
+<span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">lifedMultiple2</span> = most.lift(multiple2);
 lifedMultiple2(most.of(3))
-  .observe(_=&gt;console.log(_))
-</pre>
-</div>
+  .observe(_=&gt;console.log(_)) 
+</code></pre>
 </div>
 </div>
 
-<div id="outline-container-orgheadline4" class="outline-2">
-<h2 id="orgheadline4">Monad</h2>
-<div class="outline-text-2" id="text-orgheadline4">
+<div id="outline-container-orgf83035a" class="outline-2">
+<h2 id="orgf83035a">Monad</h2>
+<div class="outline-text-2" id="text-orgf83035a">
 <p>
 当然，most 的 Stream 同时也是 Monad，因此可以方便的 flatmap 一个返回 stream 的函数。
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript">most.from([1, 2])
+<pre class="code"><code>most.from([1, 2])
     .flatMap(x=&gt;most.periodic(x * 1000).take(5).constant(x))
     .observe(_=&gt;console.log(_));
-</pre>
-</div>
+</code></pre>
 
 <p>
 思考一下这里如果是一个数组 <code>[1,2]</code> ，比如 flatMap <code>x=&gt;[x*2]</code> 会得到一个展开的数组 <code>[2,4]</code> ，而不是 <code>[[2],[4]]</code> 。 同样的，flatMap 一个流，得到应该是 flat 过的流，那么这里产生的两个流， <code>1-1-1-1-1</code> ，和 <code>2---2---2---2---2</code> ，想象一下要把两个流展开放到一个流里，空间的元素放到数组中是可以按空间排列，那么元素放到流中则是应该按照时间排列，我们做一个简单的对齐：
@@ -256,17 +224,15 @@ lifedMultiple2(most.of(3))
 </div>
 <div id="postamble" class="status">
 <footer>
-  <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2017-06-10 Sat 08:22</p>
-  <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6) x <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Author: root <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
+  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
-  <a class="gumroad-button" href="https://gum.co/grokking-monad">我的新书 Grokking Monad 现已发售，请自觉排队装逼</a>
-
-  <a class="github-fork-ribbon right-bottom fixed" href="https://github.com/jcouyang/blog" title="Fork me on GitHub">Fork me on GitHub</a>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
 </footer>
-
-<div id="disqus_thread"></div>
 </div>
 </body>
 </html>

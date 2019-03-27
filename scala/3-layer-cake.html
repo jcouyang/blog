@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2019-03-27 Wed 02:21 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3 Layer Scala Cake</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Jichao Ouyang">
+<meta name="description" content="I've been using Free Monad in production for a while, as the projects scale and more members contribute, the boundary of different layer reveal them self more clearly."
+>
+<meta name="keywords" content="Scala, Free, Monad, MTL, ReaderT">
+<link rel="icon" href="/favicon.ico">
+<meta name="theme-color" content="#ffffff">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
+<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="preamble" class="status">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJRFJGX"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header>
+    <a accesskey="h" href="/index.html"> HOME </a> |
+    <a href="#" id="edit-in-github">EDIT</a> |
+    <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
+</header>
+</div>
+<div id="content">
+<header>
+<h1 class="title">3 Layer Scala Cake</h1>
+</header><nav id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgdfab53c">The Program</a></li>
+<li><a href="#org042ae9f">Refactor</a>
+<ul>
+<li><a href="#org7830b64">Take 1: IO</a></li>
+<li><a href="#org05ba95f">Take 2: ReaderT Pattern</a></li>
+<li><a href="#org9c99081">Retro</a>
+<ul>
+<li><a href="#orgcbb5496">Imperative</a></li>
+<li><a href="#org63493dc">IO</a></li>
+<li><a href="#org0d369e0">ReaderT</a></li>
+</ul>
+</li>
+<li><a href="#org2e22b67"><b>Tagless Final</b> is nothing but a fancy name of <b>ReaderT</b></a></li>
+</ul>
+</li>
+<li><a href="#org495c5a4">3 Layer Cake</a>
+<ul>
+<li><a href="#orgff372b6">The Needs of State</a></li>
+<li><a href="#orgbed6c47">MTL</a></li>
+<li><a href="#orgc2c1908">Free Monad</a></li>
+<li><a href="#org01afbc4">ReaderT + MTL + Free</a>
+<ul>
+<li><a href="#org1a8b4cd">Layer 3: Business (Free)</a></li>
+<li><a href="#orgf0220b3">Layer 2: MTL + Interpreter</a></li>
+<li><a href="#orgb0adc77">Layer 1: ReaderT</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</nav>
+
+<div id="outline-container-orgdfab53c" class="outline-2">
+<h2 id="orgdfab53c">The Program</h2>
+<div class="outline-text-2" id="text-orgdfab53c">
+<p>
+It will read output a log, query a data base, and do the calculation.
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">xa</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">Transactor</span>.fromDriverManager[<span style="font-weight: bold; text-decoration: underline;">IO</span>](<span style="font-style: italic;">"org.postgresql.Driver"</span>, <span style="font-style: italic;">"jdbc:postgresql:postgres"</span>, <span style="font-style: italic;">"postgres"</span>)
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">program</span> <span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Int</span> <span style="font-weight: bold;">=</span> {
+  <span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">initState</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">1</span>
+  getLogger.log(s<span style="font-style: italic;">"init state is </span><span style="font-weight: bold; font-style: italic;">$initState</span><span style="font-style: italic;">"</span>)
+  <span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">valueInDatabase</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">try</span>{
+    sql<span style="font-style: italic;">"select 32"</span>.query[<span style="font-weight: bold; text-decoration: underline;">Int</span>].unique.transact(xa) unsafeRunSyn ()
+  } <span style="font-weight: bold;">catch</span> { <span style="font-weight: bold;">case</span> <span style="font-weight: bold;">_:</span> <span style="font-weight: bold; text-decoration: underline;">Throwable</span> <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">0</span>}
+  initState + valueInDatabase
+}
+</code></pre>
+
+<p>
+Your real business logic might be fancier, but basically this is the most common case
+</p>
+
+<ol class="org-ol">
+<li>Something to ask</li>
+<li>Something to write</li>
+<li>Some effects on dependencies</li>
+<li>Some error to handle</li>
+<li>Some business computation</li>
+</ol>
+
+<p>
+Anyway, this is really awful piece code in production.
+</p>
+
+<p>
+First of all, how do you unit test such thing? Oh, wait, maybe not that awful, we just mock <code>getLogger</code> and stub it's <code>log</code> method
+and then mock doobie's <code>ConnectionIO</code> and stub <code>transact</code> method.
+</p>
+
+<p>
+Sounds reasonable, just 2 mocks and 2 stubs.
+</p>
+
+<p>
+But think about it, here is just 2 line of effectful operation, count again such effectful code in production,
+how many mocks and stub you will need then?
+</p>
+
+<p>
+Such way of unit testing is definitely not gonna scale.
+</p>
+
+<p>
+Let us refactor in a baby step, with <code>IO</code>
+</p>
+</div>
+</div>
+<div id="outline-container-org042ae9f" class="outline-2">
+<h2 id="org042ae9f">Refactor</h2>
+<div class="outline-text-2" id="text-org042ae9f">
+</div>
+<div id="outline-container-org7830b64" class="outline-3">
+<h3 id="org7830b64">Take 1: IO</h3>
+<div class="outline-text-3" id="text-org7830b64">
+<p>
+modeling your problem with <code>IO</code> is easy, just wrap everything in IO
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">program</span> <span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>[<span style="font-weight: bold; text-decoration: underline;">Int</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span> {
+  initState <span style="font-weight: bold;">&lt;-</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>(<span style="font-weight: bold; text-decoration: underline;">1</span>)
+  <span style="font-weight: bold;">_</span> <span style="font-weight: bold;">&lt;-</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>(getLogger.log(s<span style="font-style: italic;">"init state is </span><span style="font-weight: bold; font-style: italic;">$initState</span><span style="font-style: italic;">"</span>))
+  valueInDatabase <span style="font-weight: bold;">&lt;-</span> sql<span style="font-style: italic;">"select 32"</span>.query[<span style="font-weight: bold; text-decoration: underline;">Int</span>].unique.transact(xa)
+    .handleError{<span style="font-weight: bold;">_=&gt;</span><span style="font-weight: bold; text-decoration: underline;">0</span>}
+} <span style="font-weight: bold;">yield</span> initState + valueInDatabase
+</code></pre>
+
+<p>
+How the hell this is better than previous one?
+</p>
+
+<p>
+Yes and No.
+</p>
+
+<p>
+It's not better in the sense of testable, but, it's <i>Pure</i>
+</p>
+
+<p>
+When we mention something that is Pure, it means that thing is Referential Transparent.
+</p>
+
+<p>
+In human words, it means I can do this:
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">logState</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>(getLogger.log(s<span style="font-style: italic;">"log something"</span>))
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">program</span> <span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>[<span style="font-weight: bold; text-decoration: underline;">Unit</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span> {
+  <span style="font-weight: bold;">_</span> <span style="font-weight: bold;">&lt;-</span> logState
+  <span style="font-weight: bold;">_</span> <span style="font-weight: bold;">&lt;-</span> logState
+  <span style="font-weight: bold;">_</span> <span style="font-weight: bold;">&lt;-</span> logState
+} <span style="font-weight: bold;">yield</span> ()
+</code></pre>
+
+<p>
+But you can't do:
+</p>
+<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">logState</span> <span style="font-weight: bold;">=</span> getLogger.log(s<span style="font-style: italic;">"log something"</span>)
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">program</span> <span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Int</span> <span style="font-weight: bold;">=</span> {
+  logState
+  logState
+  logState
+}
+</code></pre>
+
+<p>
+Probably not the best example but you should get the idea, that I can place IO anywhere
+and that won't change the semantic and behavior of your program.
+</p>
+
+<p>
+Fine, let's place those IO else where, so we can inject them into program
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">program</span>(getState<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>[<span style="font-weight: bold; text-decoration: underline;">Int</span>], log<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">String</span> <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>[<span style="font-weight: bold; text-decoration: underline;">Unit</span>], queryDB<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>[<span style="font-weight: bold; text-decoration: underline;">Int</span>])<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>[<span style="font-weight: bold; text-decoration: underline;">Int</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span> {
+  initState <span style="font-weight: bold;">&lt;-</span> getState
+  <span style="font-weight: bold;">_</span> <span style="font-weight: bold;">&lt;-</span> log(s<span style="font-style: italic;">"initState is: </span><span style="font-weight: bold; font-style: italic;">$initState</span><span style="font-style: italic;">"</span>)
+  valueInDatabase <span style="font-weight: bold;">&lt;-</span> queryDB
+} <span style="font-weight: bold;">yield</span> initState + valueInDatabase
+</code></pre>
+
+<p>
+Now it's better, in our test, we could simply test <code>program</code> like
+</p>
+<pre class="code"><code>program(<span style="font-weight: bold; text-decoration: underline;">IO</span>(<span style="font-weight: bold; text-decoration: underline;">1</span>), (msg<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">String</span>)<span style="font-weight: bold;">=&gt;</span><span style="font-weight: bold; text-decoration: underline;">IO</span>(()), <span style="font-weight: bold; text-decoration: underline;">IO</span>(<span style="font-weight: bold; text-decoration: underline;">10</span>)) must_== <span style="font-weight: bold; text-decoration: underline;">11</span>
+</code></pre>
+
+<p>
+To verify our program can do the math.
+</p>
+
+<p>
+But still, it won't scale, e.g. we need to query 3 value from db
+</p>
+<pre class="code"><code><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">program</span>(getState<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>[<span style="font-weight: bold; text-decoration: underline;">Int</span>], log<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">String</span> <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>[<span style="font-weight: bold; text-decoration: underline;">Unit</span>], queryDB<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>[<span style="font-weight: bold; text-decoration: underline;">Int</span>], queryDB2<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>[<span style="font-weight: bold; text-decoration: underline;">Int</span>], queryDB3<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>[<span style="font-weight: bold; text-decoration: underline;">Int</span>])<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>[<span style="font-weight: bold; text-decoration: underline;">Int</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span> {
+    initState <span style="font-weight: bold;">&lt;-</span> getState
+    <span style="font-weight: bold;">_</span> <span style="font-weight: bold;">&lt;-</span> log(s<span style="font-style: italic;">"initState is: </span><span style="font-weight: bold; font-style: italic;">$initState</span><span style="font-style: italic;">"</span>)
+    valueInDatabase1 <span style="font-weight: bold;">&lt;-</span> queryDB1
+    valueInDatabase2 <span style="font-weight: bold;">&lt;-</span> queryDB2
+    valueInDatabase3 <span style="font-weight: bold;">&lt;-</span> queryDB3
+  } <span style="font-weight: bold;">yield</span> initState + valueInDatabase1 + valueInDatabase2 + valueInDatabase3
+</code></pre>
+
+<p>
+our program will end up very long parameters
+</p>
+
+<p>
+Clearly IO isn't enough for more complex scenario, let's see what we can improve by adding another layer of abstraction
+</p>
+</div>
+</div>
+
+<div id="outline-container-org05ba95f" class="outline-3">
+<h3 id="org05ba95f">Take 2: ReaderT Pattern</h3>
+<div class="outline-text-3" id="text-org05ba95f">
+<p>
+The problem of Dependent Injection via parameters is limited and not scalable, when your program get bigger,
+eventually you will need to have sub programs and then you will find the dependency has to be passed all the way down
+to each sub program.
+</p>
+
+<p>
+Here's the ReaderT pattern to help.
+</p>
+
+<p>
+First we move all dependency out, let's model it as <code>trait Env</code>
+</p>
+<pre class="code"><code><span style="font-weight: bold;">trait</span> <span style="font-weight: bold; text-decoration: underline;">Env</span>{
+  <span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">state</span><span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Int</span>
+  <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">log</span>(msg<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">String</span>)<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>(<span style="font-weight: bold; text-decoration: underline;">Unit</span>)
+  <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">query</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>](c<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">ConnectionIO</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>])<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]
+}
+</code></pre>
+
+<p>
+Then we can move parameters of <code>program</code> out as standalone methods:
+</p>
+<pre class="code"><code><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">log</span>(msg<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">String</span>)<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">ReaderT</span>[<span style="font-weight: bold; text-decoration: underline;">IO</span>, <span style="font-weight: bold; text-decoration: underline;">Env</span>, <span style="font-weight: bold; text-decoration: underline;">Unit</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span> {
+  env <span style="font-weight: bold;">&lt;-</span> <span style="font-weight: bold; text-decoration: underline;">Kleisli</span>.ask[<span style="font-weight: bold; text-decoration: underline;">IO</span>, <span style="font-weight: bold; text-decoration: underline;">Env</span>]
+  <span style="font-weight: bold;">_</span> <span style="font-weight: bold;">&lt;-</span> <span style="font-weight: bold; text-decoration: underline;">Kleisli</span>.liftF(env.log(msg))
+} <span style="font-weight: bold;">yield</span> ()
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">doobieQuery</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>](query<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">ConnectionIO</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>])<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">ReaderT</span>[<span style="font-weight: bold; text-decoration: underline;">IO</span>, <span style="font-weight: bold; text-decoration: underline;">Env</span>, <span style="font-weight: bold; text-decoration: underline;">A</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span> {
+  env <span style="font-weight: bold;">&lt;-</span> <span style="font-weight: bold; text-decoration: underline;">Kleisli</span>.ask[<span style="font-weight: bold; text-decoration: underline;">IO</span>, <span style="font-weight: bold; text-decoration: underline;">Env</span>]
+  res <span style="font-weight: bold;">&lt;-</span> <span style="font-weight: bold; text-decoration: underline;">Kleisli</span>.liftF(env.query(query))
+} <span style="font-weight: bold;">yield</span> res
+</code></pre>
+
+<p>
+These methods just return data type that describe that they need a <code>Env</code> but not provided yet,
+so you could put it anywhere you want, without knowing where exactly the instance of <code>Env</code> is.
+</p>
+
+<p>
+Finally, the program, without any parameters!!!
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">program</span><span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">ReaderT</span>[<span style="font-weight: bold; text-decoration: underline;">IO</span>, <span style="font-weight: bold; text-decoration: underline;">Env</span>, <span style="font-weight: bold; text-decoration: underline;">Int</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span> {
+  env <span style="font-weight: bold;">&lt;-</span> <span style="font-weight: bold; text-decoration: underline;">Kleisli</span>.ask[<span style="font-weight: bold; text-decoration: underline;">IO</span>, <span style="font-weight: bold; text-decoration: underline;">Int</span>]
+  initState <span style="font-weight: bold;">=</span> env.state
+  <span style="font-weight: bold;">_</span> <span style="font-weight: bold;">&lt;-</span> log(s<span style="font-style: italic;">"initState is: </span><span style="font-weight: bold; font-style: italic;">$state</span><span style="font-style: italic;">"</span>)
+  valueInDatabase <span style="font-weight: bold;">&lt;-</span> doobieQuery(sql<span style="font-style: italic;">"select 32"</span>.query[<span style="font-weight: bold; text-decoration: underline;">Int</span>].unique)
+} <span style="font-weight: bold;">yield</span> initState + valueInDatabase
+</code></pre>
+</div>
+</div>
+
+<div id="outline-container-org9c99081" class="outline-3">
+<h3 id="org9c99081">Retro</h3>
+<div class="outline-text-3" id="text-org9c99081">
+<p>
+Let us retro the evolving progress of the type of <code>program</code>
+</p>
+</div>
+
+<div id="outline-container-orgcbb5496" class="outline-4">
+<h4 id="orgcbb5496">Imperative</h4>
+<div class="outline-text-4" id="text-orgcbb5496">
+<pre class="code"><code><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">program</span><span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Int</span>
+</code></pre>
+<p>
+I'd name this layer <b>Bare Metal</b>. Here only exists raw values, 0 abstraction.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org63493dc" class="outline-4">
+<h4 id="org63493dc">IO</h4>
+<div class="outline-text-4" id="text-org63493dc">
+<pre class="code"><code><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">program</span>(deps...)<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>[<span style="font-weight: bold; text-decoration: underline;">Int</span>]
+</code></pre>
+
+<p>
+Introduce a new layer of abstraction <code>IO</code>, and I'd like to name it <b>VM</b> layer
+</p>
+
+<p>
+It's better than Bare metal, but still low level abstraction.
+</p>
+
+<p>
+when we need value, just run the IO layer
+</p>
+<pre class="code"><code>program(deps...).unsafeRunSync()
+</code></pre>
+
+<p>
+Effects are now Referential Transparent, but the way to inject and use effects is not scalable.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0d369e0" class="outline-4">
+<h4 id="org0d369e0">ReaderT</h4>
+<div class="outline-text-4" id="text-org0d369e0">
+<pre class="code"><code><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">program</span><span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">ReaderT</span>[<span style="font-weight: bold; text-decoration: underline;">IO</span>, <span style="font-weight: bold; text-decoration: underline;">Env</span>, <span style="font-weight: bold; text-decoration: underline;">Int</span>]
+</code></pre>
+
+<p>
+<code>ReaderT[IO, Env, Int]</code> consists 2 layers, <code>IO</code> and <code>Reader[Env, Int]</code>, this is the layer of <b>Functional Programming</b>
+</p>
+
+<p>
+pure business, 0 effect, lazy
+</p>
+
+<pre class="code"><code>program <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&lt;- ReaderT[IO, Env, Int]</span>
+.run(<span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Env</span>{
+  <span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">state</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">1</span>
+  <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">log</span>(msg<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">String</span>) <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>(getLogger.log(msg))
+  <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">query</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>](c<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">ConnectionIO</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]) <span style="font-weight: bold;">=</span> c.transact(xa)
+}) <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&lt;- IO[Int]</span>
+.unsafeRunSync() <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&lt;- Int</span>
+</code></pre>
+
+<p>
+We need to run this layer by layer, first <code>Reader</code>, and then <code>IO</code>
+</p>
+
+<p>
+And the time we run <code>Reader</code> can provide all the dependencies.
+</p>
+
+<p>
+ReaderT is pretty good "pattern" after all:
+</p>
+<ul class="org-ul">
+<li><b>Pure</b>: effectful part is factor out of program into Env (Bare Metal), so program can be Pure and RT</li>
+<li><b>Modular</b>: Dependency Injections are happened in Monad context, scalable in sense of easy to break program into smaller sub program</li>
+<li><b>Data Type</b>: since ReaderT is just a Data Type, lots of benefits for free from ReaderT's typeclasses instances, such as <code>Monoid</code>, <code>Applicative</code>, <code>MonadError</code>&#x2026;</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2e22b67" class="outline-3">
+<h3 id="org2e22b67"><b>Tagless Final</b> is nothing but a fancy name of <b>ReaderT</b></h3>
+<div class="outline-text-3" id="text-org2e22b67">
+<p>
+if we make some type alias for readerT, it's pretty much the same thing as the recent trending "design pattern" - <i>Tagless Final</i>
+</p>
+<pre class="code"><code> <span style="font-weight: bold;">trait</span> <span style="font-weight: bold; text-decoration: underline;">AlgInterp</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]] {
+   <span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">state</span><span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold; text-decoration: underline;">Int</span>]
+   <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">log</span>(msg<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">String</span>)<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold; text-decoration: underline;">Unit</span>]
+   <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">query</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>](c<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">ConnectionIO</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>])<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]
+ }
+
+ <span style="font-weight: bold;">type</span> <span style="font-weight: bold; text-decoration: underline;">Alg</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>], <span style="font-weight: bold; text-decoration: underline;">A</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">ReaderT</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>, <span style="font-weight: bold; text-decoration: underline;">AlgInterp</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>], <span style="font-weight: bold; text-decoration: underline;">A</span>]
+
+ <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">state</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]]<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Alg</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>, <span style="font-weight: bold; text-decoration: underline;">Int</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">Kleisli</span>(<span style="font-weight: bold;">_</span>.state)
+ <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">log</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]](msg<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">String</span>)<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Alg</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>, <span style="font-weight: bold; text-decoration: underline;">Unit</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">Kleisli</span>(<span style="font-weight: bold;">_</span>.log(msg))
+
+ <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">doobieQuery</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>], <span style="font-weight: bold; text-decoration: underline;">A</span>](query<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">ConnectionIO</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>])<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Alg</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>, <span style="font-weight: bold; text-decoration: underline;">A</span>]
+
+ <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">program</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]]<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Alg</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>, <span style="font-weight: bold; text-decoration: underline;">Int</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span> {
+   env <span style="font-weight: bold;">&lt;-</span> state
+   <span style="font-weight: bold;">_</span> <span style="font-weight: bold;">&lt;-</span> log(s<span style="font-style: italic;">"initState is: </span><span style="font-weight: bold; font-style: italic;">$state</span><span style="font-style: italic;">"</span>)
+   valueInDatabase <span style="font-weight: bold;">&lt;-</span> doobieQuery(sql<span style="font-style: italic;">"select 32"</span>.query[<span style="font-weight: bold; text-decoration: underline;">Int</span>].unique).handleError{<span style="font-weight: bold;">_=&gt;</span><span style="font-weight: bold; text-decoration: underline;">0</span>}
+ } <span style="font-weight: bold;">yield</span> initState + valueInDatabase
+
+<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">interp</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">AlgInterp</span>[<span style="font-weight: bold; text-decoration: underline;">IO</span>]{
+   <span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">state</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>(<span style="font-weight: bold; text-decoration: underline;">1</span>)
+   <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">log</span>(msg<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">String</span>) <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>(getLogger.log(msg))
+   <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">query</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>](c<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">ConnectionIO</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>]) <span style="font-weight: bold;">=</span> c.transact(xa)
+ }
+ program[<span style="font-weight: bold; text-decoration: underline;">IO</span>].run(interp).unsafeRunSync()
+</code></pre>
+
+<p>
+If you look close enough, here it actually becomes 3 layers:
+</p>
+<ul class="org-ul">
+<li>Layer 1: IO (AlgInterp)</li>
+<li>Layer 2: IO ~&gt; Alg (state, log, doobieQuery)</li>
+<li>Layer 3: Alg (program)</li>
+</ul>
+
+<p>
+both layer 2 and 3 are pure, but the different is,
+</p>
+<ul class="org-ul">
+<li>Layer 2 is just 1-1 mapping from IO to Alg</li>
+<li>Layer 3 is orchestration of Layer 2 for pure business</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org495c5a4" class="outline-2">
+<h2 id="org495c5a4">3 Layer Cake</h2>
+<div class="outline-text-2" id="text-org495c5a4">
+<p>
+We now have a solid 3 Layer Scala Cake base made of <code>ReaderT</code>
+</p>
+
+<p>
+But you know, single flavor of cake won't satisfy everyone's taste.
+</p>
+</div>
+
+<div id="outline-container-orgff372b6" class="outline-3">
+<h3 id="orgff372b6">The Needs of State</h3>
+<div class="outline-text-3" id="text-orgff372b6">
+<p>
+remember the 5 factors that compose our program?
+</p>
+<ol class="org-ol">
+<li>Something to ask</li>
+<li>Something to write</li>
+<li>Some effects on dependencies</li>
+<li>Some error to handle</li>
+<li>Some business computation</li>
+</ol>
+
+<p>
+It has a missing part - Some <b>state</b>!
+</p>
+
+<p>
+In a 5 lines of code program, you won't see a state is necessary.
+</p>
+
+<p>
+In the real world, there are so many scenario needed a state
+</p>
+
+<p>
+i.e. a user's login info
+</p>
+
+<p>
+supposed that our program has a middleware, controller, repository layer
+</p>
+
+<p>
+Usually we will need to get user's info in middleware, and use the user info in repository layer for some database query.
+</p>
+
+<p>
+So, here is the case, since I want a modular code base, so these 3 layers should not be just single <code>Alg[F]</code>, but 3
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">middleware</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]]<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Alg</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>, <span style="font-weight: bold; text-decoration: underline;">User</span>] <span style="font-weight: bold;">=</span> ???
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">controller</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]]<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Alg</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>, <span style="font-weight: bold; text-decoration: underline;">Response</span>] <span style="font-weight: bold;">=</span> ???
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">repository</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]](user<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">User</span>)<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Alg</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>, <span style="font-weight: bold; text-decoration: underline;">DBResult</span>] <span style="font-weight: bold;">=</span> ???
+
+<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">program</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span> {
+  user <span style="font-weight: bold;">&lt;-</span> middleware
+  dbresult <span style="font-weight: bold;">&lt;-</span> respository(user)
+  response <span style="font-weight: bold;">&lt;-</span> controller
+} <span style="font-weight: bold;">yield</span> response
+</code></pre>
+
+<p>
+someday your controller become bigger and bigger and tech lead said there should be another layer - service, between controller and repository
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">program</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span> {
+  user <span style="font-weight: bold;">&lt;-</span> middleware
+  dbresult <span style="font-weight: bold;">&lt;-</span> service(user)
+  response <span style="font-weight: bold;">&lt;-</span> controller
+} <span style="font-weight: bold;">yield</span> response
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">service</span>(user) <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span> {
+  dbresult <span style="font-weight: bold;">&lt;-</span> respository(user)
+  result <span style="font-weight: bold;">&lt;-</span> doSomthingWith(dbresult)
+} <span style="font-weight: bold;">yield</span> result
+</code></pre>
+<p>
+then it will become a nightmare that you have to pass such thing all over your code base.
+</p>
+
+<p>
+But that's exactly State Monad solved, no matter how many State monad you split, every piece always can share the exactly same state.
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">middleware</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]]<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">StateT</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>, <span style="font-weight: bold; text-decoration: underline;">User</span>, <span style="font-weight: bold; text-decoration: underline;">Unit</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">StateT</span>.set[<span style="font-weight: bold; text-decoration: underline;">F</span>, <span style="font-weight: bold; text-decoration: underline;">User</span>](<span style="font-weight: bold; text-decoration: underline;">User</span>(<span style="font-style: italic;">"abc"</span>))
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">controller</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]]<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">StateT</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>, <span style="font-weight: bold; text-decoration: underline;">User</span>, <span style="font-weight: bold; text-decoration: underline;">Response</span>] <span style="font-weight: bold;">=</span> ???
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">repository</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]]<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">StateT</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>, <span style="font-weight: bold; text-decoration: underline;">User</span>, <span style="font-weight: bold; text-decoration: underline;">DBResult</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span> {
+  user <span style="font-weight: bold;">&lt;-</span> <span style="font-weight: bold; text-decoration: underline;">StateT</span>.get[<span style="font-weight: bold; text-decoration: underline;">F</span>, <span style="font-weight: bold; text-decoration: underline;">User</span>]
+  dbResult <span style="font-weight: bold;">&lt;-</span> findResourceInDB(user)
+} <span style="font-weight: bold;">yield</span> dbResult
+</code></pre>
+
+<p>
+So our program don't have to passing around user as parameter everywhere
+</p>
+<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">program</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span> {
+  <span style="font-weight: bold;">_</span> <span style="font-weight: bold;">&lt;-</span> middleware
+  dbresult <span style="font-weight: bold;">&lt;-</span> service
+  response <span style="font-weight: bold;">&lt;-</span> controller
+} <span style="font-weight: bold;">yield</span> response
+
+<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">service</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span> {
+  dbresult <span style="font-weight: bold;">&lt;-</span> respository
+  result <span style="font-weight: bold;">&lt;-</span> doSomthingWith(dbresult)
+} <span style="font-weight: bold;">yield</span> result
+</code></pre>
+
+<p>
+The new problem introduced by <code>StateT</code> is, everything else(controller, repository, service) need to be <code>StateT</code> as well. If we change them
+to <code>StateT</code>, then we will lose the effects of <code>ReaderT</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbed6c47" class="outline-3">
+<h3 id="orgbed6c47">MTL</h3>
+<div class="outline-text-3" id="text-orgbed6c47">
+<p>
+To able to use both <code>ReaderT</code> and <code>StateT</code>, <a href="https://typelevel.org/cats-mtl/">MTL</a> <label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+Monad Transformer Library
+</span>is an elegant solution though.
+</p>
+
+<p>
+MTL is like stacking those transformers together to <code>F</code>, at the end, you will get something very nice:
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">middleware</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]](<span style="font-weight: bold;">implicit</span> <span style="font-weight: bold; text-decoration: underline;">S</span><span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">MonadState</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>, <span style="font-weight: bold; text-decoration: underline;">User</span>])<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold; text-decoration: underline;">Unit</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">S</span>.set(<span style="font-weight: bold; text-decoration: underline;">User</span>(<span style="font-style: italic;">"abc"</span>))
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">controller</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]]<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold; text-decoration: underline;">Response</span>] <span style="font-weight: bold;">=</span> ???
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">repository</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]](<span style="font-weight: bold;">implicit</span> <span style="font-weight: bold; text-decoration: underline;">S</span><span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">MonadState</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>, <span style="font-weight: bold; text-decoration: underline;">User</span>])<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold; text-decoration: underline;">DBResult</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span> {
+  user <span style="font-weight: bold;">&lt;-</span> <span style="font-weight: bold; text-decoration: underline;">S</span>.get
+  dbResult <span style="font-weight: bold;">&lt;-</span> findResourceInDB(user)
+} <span style="font-weight: bold;">yield</span> dbResult
+</code></pre>
+
+<p>
+Such DSL is nearly ideal, where
+</p>
+
+<ul class="org-ul">
+<li>if you look closer to <code>contorller</code>'s type, it doesn't have any info about <code>User</code> or <code>MonadState</code>, because it shouldn't care about such things.</li>
+<li><code>middleware</code> and <code>respository</code> connected to each other via the implicit instance of</li>
+</ul>
+<p>
+<code>MonadState[F, User]</code>, which is perfect as well, no need to passing state around, request the implicit instance just in the place you need
+it.
+</p>
+
+<p>
+At the very end, provide the monad transformer stacks, so <code>F</code> is finally:
+</p>
+
+<pre class="code"><code>program[<span style="font-weight: bold; text-decoration: underline;">Alg</span>[<span style="font-weight: bold; text-decoration: underline;">StateT</span>[<span style="font-weight: bold; text-decoration: underline;">IO</span>, <span style="font-weight: bold; text-decoration: underline;">User</span>,? ], <span style="font-weight: bold; text-decoration: underline;">A</span>]]
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">which expended to..</span>
+program[<span style="font-weight: bold; text-decoration: underline;">ReaderT</span>[<span style="font-weight: bold; text-decoration: underline;">StateT</span>[<span style="font-weight: bold; text-decoration: underline;">IO</span>, <span style="font-weight: bold; text-decoration: underline;">User</span>,? ], <span style="font-weight: bold; text-decoration: underline;">AlgInterp</span>[<span style="font-weight: bold; text-decoration: underline;">StateT</span>[<span style="font-weight: bold; text-decoration: underline;">IO</span>, <span style="font-weight: bold; text-decoration: underline;">User</span>,? ]], <span style="font-weight: bold; text-decoration: underline;">A</span>]]
+</code></pre>
+
+
+<p>
+There's no perfect solution for all, only perfect solution for particular case. For these example, MTL is perfect. But when you
+have more effects, e.g. WriterT(to output something Monoid), EitherT(to provide MonadError) &#x2026; the MTL stack is not very easy to reason about, DSL is still nice though.
+</p>
+
+<pre class="code"><code>program[<span style="font-weight: bold; text-decoration: underline;">ReaderT</span>[<span style="font-weight: bold; text-decoration: underline;">WriterT</span>[<span style="font-weight: bold; text-decoration: underline;">StateT</span>[<span style="font-weight: bold; text-decoration: underline;">IO</span>, <span style="font-weight: bold; text-decoration: underline;">User</span>,? ], <span style="font-weight: bold; text-decoration: underline;">Chain</span>[<span style="font-weight: bold; text-decoration: underline;">String</span>], ?], <span style="font-weight: bold; text-decoration: underline;">AlgInterp</span>[<span style="font-weight: bold; text-decoration: underline;">WriterT</span>[<span style="font-weight: bold; text-decoration: underline;">StateT</span>[<span style="font-weight: bold; text-decoration: underline;">IO</span>, <span style="font-weight: bold; text-decoration: underline;">User</span>,? ], <span style="font-weight: bold; text-decoration: underline;">Chain</span>[<span style="font-weight: bold; text-decoration: underline;">String</span>], ?]], <span style="font-weight: bold; text-decoration: underline;">A</span>]]
+</code></pre>
+</div>
+</div>
+
+<div id="outline-container-orgc2c1908" class="outline-3">
+<h3 id="orgc2c1908">Free Monad</h3>
+<div class="outline-text-3" id="text-orgc2c1908">
+<p>
+Thus, the <a href="https://typelevel.org/cats/datatypes/freemonad.html">Free Monad</a> will save your ass by providing monad for free if you have a Functor<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
+via <a href="https://blog.oyanglul.us/grokking-monad/scala/en/part3#orgd67ff11">CoYoneda Lema</a> you just need to provide a data type(case class) <code>F[A]</code>, and you will get Functor for free.
+</span>.
+</p>
+
+<p>
+The advantage of Free Monad is providing ability to create your own custom Monad Transformer, and it helps you stack them in a nicer way.
+</p>
+
+<p>
+But let's try rewrite previous example first, since <code>State</code> and <code>Reader</code> are already data type, we could just stack(inject) them into a Free Monad.
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">import</span> <span style="font-weight: bold; text-decoration: underline;">Free</span>.{liftInject <span style="font-weight: bold;">=&gt;</span> free}
+<span style="font-weight: bold;">type</span> <span style="font-weight: bold; text-decoration: underline;">Program</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">EitherK</span>[<span style="font-weight: bold; text-decoration: underline;">Reader</span>[<span style="font-weight: bold; text-decoration: underline;">AlgoInterp</span>[<span style="font-weight: bold; text-decoration: underline;">IO</span>], ?], <span style="font-weight: bold; text-decoration: underline;">State</span>[<span style="font-weight: bold; text-decoration: underline;">User</span>, ?], <span style="font-weight: bold; text-decoration: underline;">A</span>]
+<span style="font-weight: bold;">type</span> <span style="font-weight: bold; text-decoration: underline;">ProgramF</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">Free</span>[<span style="font-weight: bold; text-decoration: underline;">Program</span>, <span style="font-weight: bold; text-decoration: underline;">A</span>]
+</code></pre>
+
+<p>
+Oh, since we have Free Monad, we don't need a reader monad to inject Interpreter, we can provide interpreter later for <code>foldMap</code>. 
+Great, we save one effect then. Let's have another effect for demonstration i.e. Writer
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">type</span> <span style="font-weight: bold; text-decoration: underline;">Program</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">EitherK</span>[<span style="font-weight: bold; text-decoration: underline;">Writer</span>[<span style="font-weight: bold; text-decoration: underline;">Chain</span>[<span style="font-weight: bold; text-decoration: underline;">String</span>], ?], <span style="font-weight: bold; text-decoration: underline;">State</span>[<span style="font-weight: bold; text-decoration: underline;">User</span>, ?], <span style="font-weight: bold; text-decoration: underline;">A</span>]
+<span style="font-weight: bold;">type</span> <span style="font-weight: bold; text-decoration: underline;">ProgramF</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">Free</span>[<span style="font-weight: bold; text-decoration: underline;">Program</span>, <span style="font-weight: bold; text-decoration: underline;">A</span>]
+</code></pre>
+
+<p>
+Next you'll need to create two interpreters correspond to <code>Writer</code> and <code>State</code> effect.
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">stateInterp</span>(initState<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">User</span>) <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">Lambda</span>[<span style="font-weight: bold; text-decoration: underline;">State</span>[<span style="font-weight: bold; text-decoration: underline;">User</span>, ?] ~&gt; <span style="font-weight: bold; text-decoration: underline;">IO</span>[(<span style="font-weight: bold; text-decoration: underline;">Int</span>, ?)]] { <span style="font-weight: bold;">_</span>.run(initState).value}
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">writerInterp</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">Lambda</span>[<span style="font-weight: bold; text-decoration: underline;">Writer</span>[<span style="font-weight: bold; text-decoration: underline;">Chain</span>[<span style="font-weight: bold; text-decoration: underline;">String</span>], ?] ~&gt; <span style="font-weight: bold; text-decoration: underline;">IO</span>] { <span style="font-weight: bold;">_</span>.run(<span style="font-weight: bold; text-decoration: underline;">Chain</span>.empty[<span style="font-weight: bold; text-decoration: underline;">String</span>])}
+</code></pre>
+
+<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">program</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span>{
+  initState <span style="font-weight: bold;">&lt;-</span> free[<span style="font-weight: bold; text-decoration: underline;">Program</span>](<span style="font-weight: bold; text-decoration: underline;">State</span>.get[<span style="font-weight: bold; text-decoration: underline;">User</span>])
+  <span style="font-weight: bold;">_</span> <span style="font-weight: bold;">&lt;-</span> free[<span style="font-weight: bold; text-decoration: underline;">Program</span>](<span style="font-weight: bold; text-decoration: underline;">Chain</span>.one(s<span style="font-style: italic;">"init state: </span><span style="font-weight: bold; font-style: italic;">$initState</span><span style="font-style: italic;">"</span>).tell)
+  <span style="font-weight: bold;">_</span> <span style="font-weight: bold;">&lt;-</span> free[<span style="font-weight: bold; text-decoration: underline;">Program</span>](<span style="font-weight: bold; text-decoration: underline;">State</span>.set(<span style="font-weight: bold; text-decoration: underline;">User</span>(<span style="font-style: italic;">"jcoy"</span>)))
+  res <span style="font-weight: bold;">&lt;-</span> free[<span style="font-weight: bold; text-decoration: underline;">Program</span>](<span style="font-weight: bold; text-decoration: underline;">State</span>.get[<span style="font-weight: bold; text-decoration: underline;">User</span>])
+  logs <span style="font-weight: bold;">&lt;-</span> free[<span style="font-weight: bold; text-decoration: underline;">Program</span>](<span style="font-weight: bold; text-decoration: underline;">Chain</span>.one(s<span style="font-style: italic;">"next state: </span><span style="font-weight: bold; font-style: italic;">$res</span><span style="font-style: italic;">"</span>).tell)
+} <span style="font-weight: bold;">yield</span> (res, logs)
+program foldMap (writerInterp or stateInterp(<span style="font-weight: bold; text-decoration: underline;">User</span>(<span style="font-style: italic;">"anonymous"</span>)))
+</code></pre>
+<p>
+Guess what, the output will not be <code>User("jcoy")</code>, instead, <code>User("anounymous")</code>, also writer will only contain the second log.
+</p>
+
+<p>
+Sorry I choose a bad example for Free Monad on purpose, in Monad Transformer, we need to run only once <code>StateT</code> or <code>WriterT</code> at
+the end, thus the state maintained across all monads in program. But here each Free Monad in program will be mapped with interpreter.
+So <code>State</code> and <code>Writer</code> run many times. Aach time they start with empty value in the interpreter.
+</p>
+
+<p>
+Cats provide us <a href="https://typelevel.org/cats/datatypes/freemonad.html#freet">FreeT</a> to cater such scenario, but again, transform one effect is OK, transfrom multiple effect is nightmare, it will bring the same
+problem of Monad Transformer, then what's the whole point of using Free again?
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org01afbc4" class="outline-3">
+<h3 id="org01afbc4">ReaderT + MTL + Free</h3>
+<div class="outline-text-3" id="text-org01afbc4">
+<p>
+Now that we know all approach has their own pros and cons, to eliminate their cons and magnify pros, the ultimate solution for
+abstracting effects is <b>Why not all of them</b>
+</p>
+
+<p>
+recall the 3 layers from ReaderT patter:
+</p>
+
+<ul class="org-ul">
+<li>Layer 1: IO (AlgInterp)</li>
+<li>Layer 2: IO ~&gt; Alg (state, log, doobieQuery)</li>
+<li>Layer 3: Alg (program)</li>
+</ul>
+
+<p>
+The ideal solution is to apply these approaches in different layers where they are good at.
+</p>
+
+<p>
+Free Monad is good at providing nice DSL so it naturally serves well in Layer 3.
+</p>
+
+<p>
+We also need MTL to transform some stateful effects in, so it's best place should be Layer 2, to provide various combination to provide
+support for domain models.
+</p>
+
+<p>
+Finally instead of interpreting Free Monad into IO directly, we can interpret Free Monad into ReaderT, so we get all pros from
+ReaderT pattern to inject dependencies seamlessly.
+</p>
+
+<p>
+To ultilize all these approaches together, we can use <a href="https://github.com/jcouyang/luci">luci</a> to apply ReaderT, MTL and Free in the following 3 layer
+</p>
+
+<ul class="org-ul">
+<li>Layer 1: <b>Binary</b> <code>ReaderT[IO, Env, ?]</code></li>
+<li>Layer 2: <b>Compiler</b> <code>Effects ~&gt; ReaderT[IO, Env, ?]</code></li>
+<li>Layer 3: <b>Program</b> <code>Free[Program, ?]</code></li>
+</ul>
+
+<p>
+Similar to a real world program, we need to go through the same 3 layer to execute our program:
+</p>
+
+<ol class="org-ol">
+<li>write program in scala</li>
+<li>compile scala code to binary(jar file)</li>
+<li>run the jar in JVM with some parameters</li>
+</ol>
+
+<p>
+But here we just keep doing the same thing to our EDSL<label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
+Embedded Domain Specific Language
+</span>
+</p>
+
+<p>
+For demonstrating the power of ReaderT + MTL + Free, here we compose a program that contains all 6 factors:
+</p>
+
+<ol class="org-ol">
+<li>Something to ask</li>
+<li>Something to write</li>
+<li>Some effects on dependencies</li>
+<li>Some error to handle</li>
+<li>Some business computation</li>
+<li>Something stateful</li>
+</ol>
+</div>
+
+
+<div id="outline-container-org1a8b4cd" class="outline-4">
+<h4 id="org1a8b4cd">Layer 3: Business (Free)</h4>
+<div class="outline-text-4" id="text-org1a8b4cd">
+<p>
+to create a EDSL for Business, just use the Effects
+</p>
+<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">program</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span> {
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">1. Somthing to read</span>
+  config <span style="font-weight: bold;">&lt;-</span> free[<span style="font-weight: bold; text-decoration: underline;">Program</span>](<span style="font-weight: bold; text-decoration: underline;">Reader</span>(identity[<span style="font-weight: bold; text-decoration: underline;">Config</span>]))
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">2. Something to write</span>
+  <span style="font-weight: bold;">_</span> <span style="font-weight: bold;">&lt;-</span> free[<span style="font-weight: bold; text-decoration: underline;">Program</span>]((<span style="font-weight: bold; text-decoration: underline;">Chain</span>.one(<span style="font-style: italic;">"config: "</span> + config.token)).tell)
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">3. Some effects on dependencies</span>
+  response <span style="font-weight: bold;">&lt;-</span> free[<span style="font-weight: bold; text-decoration: underline;">Program</span>](
+    <span style="font-weight: bold; text-decoration: underline;">GetStatus</span>[<span style="font-weight: bold; text-decoration: underline;">IO</span>](<span style="font-weight: bold; text-decoration: underline;">GET</span>(<span style="font-weight: bold; text-decoration: underline;">Uri</span>.uri(<span style="font-style: italic;">"https://blog.oyanglul.us"</span>))))
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">4. Some error to handle, response is Either[Throwable, Response[IO]], hence MonadError instance</span>
+  <span style="font-weight: bold;">_</span> <span style="font-weight: bold;">&lt;-</span> free[<span style="font-weight: bold; text-decoration: underline;">Program</span>](response.ensure(<span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span>(<span style="font-style: italic;">"oops my website is down"</span>))(<span style="font-weight: bold;">_</span>.status == <span style="font-weight: bold; text-decoration: underline;">Status</span>.<span style="font-weight: bold; text-decoration: underline;">Ok</span>))
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">6. Something stateful</span>
+  <span style="font-weight: bold;">_</span> <span style="font-weight: bold;">&lt;-</span> free[<span style="font-weight: bold; text-decoration: underline;">Program</span>](<span style="font-weight: bold; text-decoration: underline;">State</span>.modify[<span style="font-weight: bold; text-decoration: underline;">Int</span>](<span style="font-weight: bold; text-decoration: underline;">1</span> + <span style="font-weight: bold;">_</span>))
+  state <span style="font-weight: bold;">&lt;-</span> free[<span style="font-weight: bold; text-decoration: underline;">Program</span>](<span style="font-weight: bold; text-decoration: underline;">State</span>.modify[<span style="font-weight: bold; text-decoration: underline;">Int</span>](<span style="font-weight: bold; text-decoration: underline;">1</span> + <span style="font-weight: bold;">_</span>))
+} <span style="font-weight: bold;">yield</span> state
+</code></pre>
+
+<p>
+from here we can easily tell that <code>Program</code> should contain following effects:
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">type</span> <span style="font-weight: bold; text-decoration: underline;">Program</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>] <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">Eff5</span>[
+      <span style="font-weight: bold; text-decoration: underline;">Http4sClient</span>[<span style="font-weight: bold; text-decoration: underline;">IO</span>, ?],
+      <span style="font-weight: bold; text-decoration: underline;">Writer</span>[<span style="font-weight: bold; text-decoration: underline;">Chain</span>[<span style="font-weight: bold; text-decoration: underline;">String</span>], ?],
+      <span style="font-weight: bold; text-decoration: underline;">Reader</span>[<span style="font-weight: bold; text-decoration: underline;">Config</span>, ?],
+      <span style="font-weight: bold; text-decoration: underline;">State</span>[<span style="font-weight: bold; text-decoration: underline;">Int</span>, ?],
+      <span style="font-weight: bold; text-decoration: underline;">Either</span>[<span style="font-weight: bold; text-decoration: underline;">Throwable</span>, ?],
+      <span style="font-weight: bold; text-decoration: underline;">A</span>
+    ]
+</code></pre>
+
+<p>
+<code>EffX</code> is predefined alias of type to construct multiple kind in EitherK in luci.
+</p>
+
+<p>
+This is the Layer 3, which only has business DSL no IO<label for="4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="4" class="margin-toggle"/><span class="sidenote">
+Http4sClient is exception since the effect itself is a Tagless Final
+</span> thanks to the <b>Abstraction Barrier</b> provided by Layer 2.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf0220b3" class="outline-4">
+<h4 id="orgf0220b3">Layer 2: MTL + Interpreter</h4>
+<div class="outline-text-4" id="text-orgf0220b3">
+<p>
+Layer 2 is like a VM, it connects the business and bare metal, here we can deal with stateful effect with transformer
+</p>
+
+<p>
+i.e. the state compiler
+</p>
+<pre class="code"><code><span style="font-weight: bold;">implicit</span> <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">stateCompiler</span>[<span style="font-weight: bold; text-decoration: underline;">L</span>](<span style="font-weight: bold;">implicit</span> ev<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span>[<span style="font-weight: bold; text-decoration: underline;">E</span>]) <span style="font-weight: bold;">=</span>
+  <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Compiler</span>[<span style="font-weight: bold; text-decoration: underline;">State</span>[<span style="font-weight: bold; text-decoration: underline;">L</span>, ?], <span style="font-weight: bold; text-decoration: underline;">E</span>] {
+    <span style="font-weight: bold;">type</span> <span style="font-weight: bold; text-decoration: underline;">Env</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">MonadState</span>[<span style="font-weight: bold; text-decoration: underline;">E</span>, <span style="font-weight: bold; text-decoration: underline;">L</span>] :: <span style="font-weight: bold; text-decoration: underline;">HNil</span>
+    <span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">compile</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">Lambda</span>[<span style="font-weight: bold; text-decoration: underline;">State</span>[<span style="font-weight: bold; text-decoration: underline;">L</span>, ?] ~&gt; <span style="font-weight: bold; text-decoration: underline;">Bin</span>](state <span style="font-weight: bold;">=&gt;</span>
+      <span style="font-weight: bold; text-decoration: underline;">ReaderT</span>(env <span style="font-weight: bold;">=&gt;</span>
+        <span style="font-weight: bold;">for</span> {
+          currentState <span style="font-weight: bold;">&lt;-</span> env.head.get
+          (nextState, value) <span style="font-weight: bold;">=</span> state.run(currentState).value
+          <span style="font-weight: bold;">_</span> <span style="font-weight: bold;">&lt;-</span> env.head.set(nextState)
+        } <span style="font-weight: bold;">yield</span> value))
+  }
+</code></pre>
+
+<p>
+the original MTL way is to implicitly find <code>MonadState</code> from context
+</p>
+
+<pre class="code"><code>- implicit def stateCompiler[L](implicit ev: Monad[E]) =
++ implicit def stateCompiler[L](implicit ev: Monad[E], S: MonadState[E, L]) =
+    new Compiler[State[L, ?], E] {
+-     type Env = MonadState[E, L] :: HNil
+      val compile = Lambda[State[L, ?] ~&gt; Bin](state =&gt;
+        ReaderT(env =&gt;
+          for {
+-           currentState &lt;- env.head.get
++           currentState &lt;- S.get
+            (nextState, value) = state.run(currentState).value
+-           _ &lt;- env.head.set(nextState)
++           _ &lt;- S.set(nextState)            
+          } yield value))
+    }
+</code></pre>
+
+<p>
+But since we have ReaderT, I'll prefer 
+explicitly inject <code>MonadState</code> to have everything explicitly managed in one place.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb0adc77" class="outline-4">
+<h4 id="orgb0adc77">Layer 1: ReaderT</h4>
+<div class="outline-text-4" id="text-orgb0adc77">
+<p>
+Once we compile the program, a binary is produced.
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">import</span> us.oyanglul.luci.compilers.io.<span style="font-weight: bold;">_</span>
+<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">binary</span> <span style="font-weight: bold;">=</span> compile(program)
+</code></pre>
+
+<p>
+Everything is automatically infer thanks to <a href="https://github.com/milessabin/shapeless/">Shapeless</a>, so you don't need to figure out what type <code>binary</code> has, just follow the compiler.
+</p>
+
+<p>
+Now we can safely run the binary with all dependencies explicitly
+</p>
+<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">args</span> <span style="font-weight: bold;">=</span> (httpclient ::
+    logRef.tellInstance ::
+    config ::
+    stateRef.stateInstance ::
+    <span style="font-weight: bold; text-decoration: underline;">Unit</span> ::
+    <span style="font-weight: bold; text-decoration: underline;">HNil</span>).map(coflatten)
+
+binary.run(args)
+</code></pre>
+
+<p>
+Don't worry about types and order since compiler will tell you where exactly the type of args you provided is wrong.
+</p>
+
+<p>
+Anyway It's very easy to explain and compose args though!
+</p>
+
+<ol class="org-ol">
+<li>binary for <code>Http4sClient[IO, ?]</code> needs <code>Client[IO]</code> to run, so here <code>httpclient</code> is instance of <code>Client[IO]</code></li>
+<li>binary for <code>Writer[Chain[String], ?]</code> needs <code>FuntorTell[IO, Chain[String]]</code> to run, presented by meow-mtl <code>.tellInstance</code></li>
+<li>binary for <code>Reader[Config, ?]</code> needs <code>Config</code> to run</li>
+<li>binary for <code>State[Int, ?]</code> needs <code>MonadState[IO, Int]</code> to run, which presented here by meow-mtl from <code>.stateInstance</code></li>
+<li>binary for <code>Either[Throwable, ?]</code> needs nothing so <code>Unit</code> is provided</li>
+</ol>
+
+<p>
+Of course there is one more layer missing - <b>Layer 0</b>, if you focus enough you will find out <code>binary.run(args)</code> will return <code>IO</code>
+</p>
+
+<p>
+Run the last layer 0 <code>binary.run(args).unsafeRunSync()</code> then all effects will be touching your bare metal.
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+Monad Transformer Library
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+via <a href="https://blog.oyanglul.us/grokking-monad/scala/en/part3#orgd67ff11">CoYoneda Lema</a> you just need to provide a data type(case class) <code>F[A]</code>, and you will get Functor for free.
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+Embedded Domain Specific Language
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara">
+Http4sClient is exception since the effect itself is a Tagless Final
+</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<footer>
+  <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
+  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
+  <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
+</footer>
+</div>
+</body>
+</html>

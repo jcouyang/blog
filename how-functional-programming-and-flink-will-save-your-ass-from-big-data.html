@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2019-03-27 Wed 02:21 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>使用 Flink 解救多线程 Scala 应用</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="root">
+<link rel="icon" href="/favicon.ico">
+<meta name="theme-color" content="#ffffff">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
+<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="preamble" class="status">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJRFJGX"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header>
+    <a accesskey="h" href="/index.html"> HOME </a> |
+    <a href="#" id="edit-in-github">EDIT</a> |
+    <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
+</header>
+</div>
+<div id="content">
+<header>
+<h1 class="title">使用 Flink 解救多线程 Scala 应用</h1>
+</header><nav id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org6bd373e">问题</a></li>
+<li><a href="#orgdb6ff44">Scala</a></li>
+<li><a href="#orga82f3a4">Flink Scala</a></li>
+<li><a href="#orge665f99">Flink Cluster in Docker</a></li>
+<li><a href="#org76a6d2a">Flink Cluster on K8s</a></li>
+</ul>
+</div>
+</nav>
+
+<div id="outline-container-org6bd373e" class="outline-2">
+<h2 id="org6bd373e">问题</h2>
+<div class="outline-text-2" id="text-org6bd373e">
+<p>
+从 Zipkin<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+Zipkin 是 twitter 用的分布式系统 tracing 收集服务 <a href="https://zipkin.io/">https://zipkin.io/</a>
+</span> 读取 Traces 信息然后计算 pXX<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
+pecentile XX <a href="https://en.wikipedia.org/wiki/Percentile">https://en.wikipedia.org/wiki/Percentile</a>
+</span> 数据
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgdb6ff44" class="outline-2">
+<h2 id="orgdb6ff44">Scala</h2>
+<div class="outline-text-2" id="text-orgdb6ff44">
+<p>
+看似很简单, 拿所有traces算就好了啊?
+</p>
+
+<p>
+比如这样的过程
+</p>
+
+<ol class="org-ol">
+<li>拿到数据源</li>
+<li>按数据源从 zipkin 抓 traces</li>
+<li>计算 pXX</li>
+<li>结果写入某个数据存储</li>
+</ol>
+
+<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">datasources</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">CollectorService</span>.datasources
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">singleProcess</span>(datasource) <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">for</span> {
+  traces <span style="font-weight: bold;">&lt;-</span> <span style="font-weight: bold; text-decoration: underline;">ZipkinService</span>.getTraces(source)
+  metrics <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">MetricService</span>.calculateMetrics(traces, source)
+  <span style="font-weight: bold;">_</span> <span style="font-weight: bold;">&lt;-</span> <span style="font-weight: bold; text-decoration: underline;">CollectorService</span>.writeMetrics(metrics, source)
+} <span style="font-weight: bold;">yield</span> ()
+
+<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">program</span> <span style="font-weight: bold;">=</span> datasources.map(<span style="font-weight: bold;">_</span> map singleProcess)
+</code></pre>
+
+<p>
+<code>datasoures</code> 和 <code>singleProcess</code> 都是 <code>Free[Program, ?]</code> <label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
+Free Monad, 免费获得自定义数据类型的 Monad, 好将副作用与业务逻辑分开  <a href="https://typelevel.org/cats/datatypes/freemonad.html">https://typelevel.org/cats/datatypes/freemonad.html</a>
+</span>
+</p>
+
+<p>
+由于是函数式, 很简单的可以多线程跑起来.
+</p>
+
+<p>
+这里我用 Natural Transformation <code>Program ~&gt; IO</code> 将代码翻译成 Cats Effect的 IO, 然后再
+<a href="https://typelevel.org/cats-effect/datatypes/io.html#parsequence"><code>parSequence</code></a> 多线程并发执行计算.<label for="4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="4" class="margin-toggle"/><span class="sidenote">
+并行化代码基本上只需要这么一行
+
+(program unsafeRunSync ()).parSequence
+</code></span>
+</p>
+
+<p>
+但是当拿超级大流量的 api 的一天时间的 traces 时, 会发现内存短缺, 也就是说, 对于大数据量计算
+显然这样是不 scalable 的.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga82f3a4" class="outline-2">
+<h2 id="orga82f3a4">Flink Scala</h2>
+<div class="outline-text-2" id="text-orga82f3a4">
+<p>
+要想应用能处理一天的大流量 api 的 traces, 自然直接的想法当然是找一个 MapReduce 的 Cluster
+将一天的数据 map 成多份来进行处理, 最后 reduce 到一起来算 pXX.
+</p>
+
+<pre class="code"><code><span id="coderef-environment" class="coderef-off"><span class="linenr"> 1: </span><span style="font-weight: bold;">lazy</span> <span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">env</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">ExecutionEnvironment</span>.getExecutionEnvironment <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&lt;= 1</span></span>
+<span class="linenr"> 2: </span>
+<span class="linenr"> 3: </span><span style="font-weight: bold;">lazy</span> <span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">rawSources</span> <span style="font-weight: bold;">=</span> (<span style="font-weight: bold; text-decoration: underline;">ZipkinClient</span>.datasources foldMap interp) unsafeRunSync ()
+<span class="linenr"> 4: </span>
+<span class="linenr"> 5: </span><span style="font-weight: bold;">lazy</span> <span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">datasources</span> <span style="font-weight: bold;">=</span>
+<span id="coderef-dataset" class="coderef-off"><span class="linenr"> 6: </span>  env.fromCollection(rawSources.toList) <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&lt;= 2</span></span>
+<span class="linenr"> 7: </span>
+<span class="linenr"> 8: </span><span style="font-weight: bold;">lazy</span> <span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">program</span><span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">DataSet</span>[<span style="font-weight: bold; text-decoration: underline;">Vector</span>[<span style="font-weight: bold; text-decoration: underline;">String</span>]] <span style="font-weight: bold;">=</span> datasources
+<span id="coderef-split" class="coderef-off"><span class="linenr"> 9: </span>  .faltMap(splitByHour <span style="font-weight: bold;">_</span>)        <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&lt;= 3</span></span>
+<span id="coderef-rebalance" class="coderef-off"><span class="linenr">10: </span>  .rebalance()                   <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&lt;= 4</span></span>
+<span class="linenr">11: </span>  .map(source <span style="font-weight: bold;">=&gt;</span>
+<span id="coderef-fetch" class="coderef-off"><span class="linenr">12: </span>    (<span style="font-weight: bold; text-decoration: underline;">ZipkinClient</span>.fetchTraces(source) foldMap interp) unsafeRunSync ()) <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&lt;= 5</span></span>
+<span id="coderef-group" class="coderef-off"><span class="linenr">13: </span>  .groupBy(<span style="font-weight: bold;">_</span>._1.endpoint.id)   <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&lt;= 6</span></span>
+<span id="coderef-reduce" class="coderef-off"><span class="linenr">14: </span>  .reduce((s1, s2) <span style="font-weight: bold;">=&gt;</span> s1 |+| s2) <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&lt;= 7</span></span>
+<span class="linenr">15: </span>  .map((traces<span style="font-weight: bold;">:</span> (<span style="font-weight: bold; text-decoration: underline;">DataSource</span>, <span style="font-weight: bold; text-decoration: underline;">Vector</span>[<span style="font-weight: bold; text-decoration: underline;">Trace</span>])) <span style="font-weight: bold;">=&gt;</span>
+<span id="coderef-aggregate" class="coderef-off"><span class="linenr">16: </span>    (<span style="font-weight: bold; text-decoration: underline;">ZipkinClient</span>.aggregate(traces) foldMap interp) unsafeRunSync ())  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&lt;= 8</span></span>
+<span class="linenr">17: </span>  .map((metrics<span style="font-weight: bold;">:</span> (<span style="font-weight: bold; text-decoration: underline;">Vector</span>[<span style="font-weight: bold; text-decoration: underline;">LatencyMetrics</span>], <span style="font-weight: bold; text-decoration: underline;">DataSource</span>)) <span style="font-weight: bold;">=&gt;</span>
+<span class="linenr">18: </span>    (<span style="font-weight: bold; text-decoration: underline;">CollectorService</span>
+<span class="linenr">19: </span>      .writeMetrics(metrics._1, <span style="font-weight: bold; text-decoration: underline;">Vector</span>(metrics._2)) foldMap interp) unsafeRunSync ())
+<span class="linenr">20: </span>
+</code></pre>
+
+<ol class="org-ol">
+<li><a href="#coderef-environment" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-environment');" onmouseout="CodeHighlightOff(this, 'coderef-environment');">当前执行环境</a>, 例如跑在 cluster 上, 还是 jvm 里</li>
+<li><a href="#coderef-dataset" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-dataset');" onmouseout="CodeHighlightOff(this, 'coderef-dataset');">初始化DataSet</a>, DataSet是 flink batch job 的数据结果, DataSet 中的数据意味着可以并行跑在 cluster 中</li>
+<li><a href="#coderef-split" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-split');" onmouseout="CodeHighlightOff(this, 'coderef-split');">拆分数据源</a>, 类似大数据的 helloworld 计算字符个数例子, 你得先把句子拆成字符</li>
+<li><a href="#coderef-rebalance" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-rebalance');" onmouseout="CodeHighlightOff(this, 'coderef-rebalance');">负载均衡</a></li>
+<li><a href="#coderef-group" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-group');" onmouseout="CodeHighlightOff(this, 'coderef-group');">合并</a>, 类似于把同样的字符都归到一组, 方便下来计算</li>
+<li><a href="#coderef-reduce" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-reduce');" onmouseout="CodeHighlightOff(this, 'coderef-reduce');">reduce</a>, 把每一组数据合并成一条数据</li>
+<li><a href="#coderef-aggregate" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-aggregate');" onmouseout="CodeHighlightOff(this, 'coderef-aggregate');">计算pXX</a></li>
+</ol>
+
+
+<figure>
+<img src="https://user-images.githubusercontent.com/1235045/46709689-8d226a80-cc90-11e8-9f7c-5c110d48302c.png" alt="46709689-8d226a80-cc90-11e8-9f7c-5c110d48302c.png">
+
+</figure>
+
+<p>
+有意思的是, 你是可以本地直接 <code>sbt run</code> 的, 此时 flink 的 cluster 会跑在 jvm 中.
+</p>
+
+<p>
+<b>但是</b> 跑cluster 在单个 jvm 中会耗费大量资源, 所以最佳实践其实是根据运行环境, 选择不同的 <code>ExecutionEnvironment</code>
+</p>
+
+<pre class="code"><code><span style="font-weight: bold;">lazy</span> <span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">env</span> <span style="font-weight: bold;">=</span> envOrNone(<span style="font-style: italic;">"EXECUTION_IN_LOCAL"</span>)
+  .map(<span style="font-weight: bold;">_</span> <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">ExecutionEnvironment</span>.createCollectionsEnvironment)
+  .getOrElse(<span style="font-weight: bold; text-decoration: underline;">ExecutionEnvironment</span>.getExecutionEnvironment)
+</code></pre>
+
+<p>
+若是在本地运行, 比如跑功能测试或集成测试, 使用 <code>CollectionsEnvironment</code> 会省不少资源
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge665f99" class="outline-2">
+<h2 id="orge665f99">Flink Cluster in Docker</h2>
+<div class="outline-text-2" id="text-orge665f99">
+<p>
+若是想要把 cluster 运行在 docker 中, 也是十分简易的事情
+</p>
+<pre class="code"><code>flink:
+  image: flink
+  volumes:
+    - ./target:/target
+  working_dir: /target
+  command: flink run -m jobmanager:8081 -p 4 /target/scala-2.11/app.jar
+  depends_on:
+    - taskmanager
+jobmanager:
+  image: flink:1.6.1-scala_2.11
+  expose:
+    - "6123"
+  ports:
+    - "8082:8081"
+  command: jobmanager
+  environment:
+    - JOB_MANAGER_RPC_ADDRESS=jobmanager
+taskmanager:
+  image: flink:1.6.1-scala_2.11
+  expose:
+    - "6121"
+    - "6122"
+  depends_on:
+    - jobmanager
+  command: taskmanager
+  links:
+    - "jobmanager:jobmanager"
+  environment:
+    - JOB_MANAGER_RPC_ADDRESS=jobmanager
+</code></pre>
+
+<p>
+其中 flink 是启动 flink job 的服务, 里面跑 <code>flink run</code> 命令
+</p>
+
+<p>
+jobmanager 相当于 zookeeper, taskmanager 是真正跑任务的 slave
+</p>
+</div>
+</div>
+
+<div id="outline-container-org76a6d2a" class="outline-2">
+<h2 id="org76a6d2a">Flink Cluster on K8s</h2>
+<div class="outline-text-2" id="text-org76a6d2a">
+<p>
+当然可以在docker中跑起来意味着部署到 k8s 也就是一个配置文件的事情
+</p>
+
+<p>
+基本上, 照着 <a href="https://ci.apache.org/projects/flink/flink-docs-stable/ops/deployment/kubernetes.html#session-cluster-resource-definitions">官方的 yaml</a> 部署就好了
+</p>
+
+<p>
+通常部署一个jobmanager, 两个 taskmanager 这样就有 8 个 slots
+</p>
+
+
+<figure>
+<img src="https://screenshotscdn.firefoxusercontent.com/images/4279a294-bbb8-4367-980b-f542b063709e.png" alt="4279a294-bbb8-4367-980b-f542b063709e.png">
+
+</figure>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+Zipkin 是 twitter 用的分布式系统 tracing 收集服务 <a href="https://zipkin.io/">https://zipkin.io/</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+pecentile XX <a href="https://en.wikipedia.org/wiki/Percentile">https://en.wikipedia.org/wiki/Percentile</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+Free Monad, 免费获得自定义数据类型的 Monad, 好将副作用与业务逻辑分开  <a href="https://typelevel.org/cats/datatypes/freemonad.html">https://typelevel.org/cats/datatypes/freemonad.html</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara">
+并行化代码基本上只需要这么一行
+</p>
+<pre class="code"><code>(program unsafeRunSync ()).parSequence
+</code></pre></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<footer>
+  <p>Author: root <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
+  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
+  <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
+</footer>
+</div>
+</body>
+</html>

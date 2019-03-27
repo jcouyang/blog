@@ -1,38 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-<!-- 2017-11-26 Sun 14:17 -->
-<meta  charset="utf-8">
-<meta  name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2019-03-27 Wed 02:21 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>理解JavaScript的原型链和继承</title>
-<meta  name="generator" content="Org-mode">
-<meta  name="author" content="Jichao Ouyang">
-<meta  name="description" content="这是一篇JavaScript的“基础”阅读，解释最黑暗的的JavaScript原型链和继承"
+<meta name="generator" content="Org mode">
+<meta name="author" content="root">
+<meta name="description" content="这是一篇JavaScript的“基础”阅读，解释最黑暗的的JavaScript原型链和继承"
 >
-<meta  name="keywords" content="javascript, prototype, __proto__, constructor">
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                                                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                                                                                              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                                                                                                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-NJRFJGX');</script>
-<!-- End Google Tag Manager -->
+<meta name="keywords" content="javascript, prototype, __proto__, constructor">
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/style/pixyll.css"/>
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css" />
-<!--[if lt IE 9]>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.ie.min.css" />
-     <![endif]-->
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2013 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -84,9 +74,8 @@ for the JavaScript code in this tag.
     <a accesskey="h" href="/index.html"> HOME </a> |
     <a href="#" id="edit-in-github">EDIT</a> |
     <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
-    <a href="/archive.html">ARCHIVE</a> |
-    <a href="/theindex.html">INDEX</a> |
-    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a>
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
 <div id="content">
@@ -96,23 +85,26 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">instanceof 引发的问题</a></li>
-<li><a href="#orgheadline2">prototype属性是原型链吗？</a></li>
-<li><a href="#orgheadline3"><code>__proto__</code> 才是原型链</a></li>
-<li><a href="#orgheadline4">也没什么卵用得 contructor</a></li>
-<li><a href="#orgheadline5">Bonus 继承</a></li>
+<li><a href="#orgdf3478f">instanceof 引发的问题</a></li>
+<li><a href="#org6003016">prototype属性是原型链吗？</a></li>
+<li><a href="#orgff66036"><code>__proto__</code> 才是原型链</a></li>
+<li><a href="#org946d51d">也没什么卵用得 contructor</a></li>
+<li><a href="#orga5cd2eb">Bonus 继承</a></li>
 </ul>
 </div>
 </nav>
 
-<div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1">instanceof 引发的问题</h2>
-<div class="outline-text-2" id="text-orgheadline1">
-<blockquote>
+<div id="outline-container-orgdf3478f" class="outline-2">
+<h2 id="orgdf3478f">instanceof 引发的问题</h2>
+<div class="outline-text-2" id="text-orgdf3478f">
+<div class="epigraph"><blockquote>
 <p>
-instanceof 运算符可以用来判断某个构造函数的prototype属性是否存在另外一个要检测对象的原型链上<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>。
+instanceof 运算符可以用来判断某个构造函数的prototype属性是否存在另外一个要检测对象的原型链上<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+<a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/instanceof">https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/instanceof</a>
+</span>。
 </p>
-</blockquote>
+
+</blockquote></div>
 <p>
 什么意思呢？
 </p>
@@ -120,83 +112,75 @@ instanceof 运算符可以用来判断某个构造函数的prototype属性是否
 <p>
 来个题
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">Function <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">Object</span>;
-</pre>
-</div>
+<pre class="code"><code>Function <span style="font-weight: bold;">instanceof</span> <span style="font-weight: bold; text-decoration: underline;">Object</span>;
+</code></pre>
 
 <p>
 用高中数学的话就是把x,y代入公式得：
 </p>
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 instanceof 运算符可以用来判断Object的 <i>prototype属性</i> 是否存在Function的 <i>原型链</i> 上。
 </p>
-</blockquote>
+
+</blockquote></div>
 <p>
 等等，斜体字的这俩到底是什么鬼意思？
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgheadline2" class="outline-2">
-<h2 id="orgheadline2">prototype属性是原型链吗？</h2>
-<div class="outline-text-2" id="text-orgheadline2">
+<div id="outline-container-org6003016" class="outline-2">
+<h2 id="org6003016">prototype属性是原型链吗？</h2>
+<div class="outline-text-2" id="text-org6003016">
 <p>
 JS是基于原型链面向对象语言，也就是说所有对象都是以对象为模板创建实例的。如果是其他oo语言的背景比如Java或Ruby，都习惯于创建一个class模板，class创建object实例。比如ruby：
 </p>
-<div class="org-src-container">
-
-<pre class="src src-ruby">  <span style="color: #00008b;">class</span> <span style="color: #36648b;">A</span>
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">initialize</span> name
-      <span style="color: #b8860b;">@name</span> = name
-    <span style="color: #00008b;">end</span>
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">to_s</span>
-      <span style="color: #b8860b;">@name</span>
-    <span style="color: #00008b;">end</span>
-  <span style="color: #00008b;">end</span>
-<span style="color: #228b22;">puts</span> <span style="color: #36648b;">A</span>.new(<span style="color: #8b0000;">'hehe'</span>) <span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">=&gt; hehe</span>
-</pre>
-</div>
+<pre class="code"><code>  <span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">A</span>
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">initialize</span> name
+      <span style="font-weight: bold; font-style: italic;">@name</span> = name
+    <span style="font-weight: bold;">end</span>
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">to_s</span>
+      <span style="font-weight: bold; font-style: italic;">@name</span>
+    <span style="font-weight: bold;">end</span>
+  <span style="font-weight: bold;">end</span>
+<span style="font-weight: bold;">puts</span> <span style="font-weight: bold; text-decoration: underline;">A</span>.new(<span style="font-style: italic;">'hehe'</span>) <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">=&gt; hehe</span>
+</code></pre>
 <p>
 这里的类A就是所有 <code>A.new</code> 创建出来的实例的模板而已。而对于原型链语言JS来说，同意的事情要这样做
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">A</span>(<span style="color: #b8860b;">name</span>){
-  <span style="color: #6b8e23;">this</span>.name = name
+<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">A</span>(<span style="font-weight: bold; font-style: italic;">name</span>){
+  <span style="font-weight: bold; text-decoration: underline;">this</span>.name = name
 }
-A.<span style="color: #6b8e23;">prototype</span>.toString = <span style="color: #00008b;">function</span>(){
-  <span style="color: #00008b;">return</span> <span style="color: #6b8e23;">this</span>.name
+A.<span style="font-weight: bold; text-decoration: underline;">prototype</span>.toString = <span style="font-weight: bold;">function</span>(){
+  <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">this</span>.name
 }
-<span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span> = <span style="color: #00008b;">new</span> <span style="color: #36648b;">A</span>(<span style="color: #8b0000;">'hehe'</span>)
-console.log(<span style="color: #8b0000;">'object name is:'</span> + <span style="color: #00008b;">new</span> <span style="color: #36648b;">A</span> (<span style="color: #8b0000;">'hehe'</span>)) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; object name is: hehe</span>
-</pre>
-</div>
+<span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">a</span> = <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">A</span>(<span style="font-style: italic;">'hehe'</span>)
+console.log(<span style="font-style: italic;">'object name is:'</span> + <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">A</span> (<span style="font-style: italic;">'hehe'</span>)) <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">=&gt; object name is: hehe</span>
+</code></pre>
 
 <ol class="org-ol">
 <li>这里的怪怪的函数其实就是constructor,相当于ruby例子里的initialize</li>
 <li>而prototype上的方法toString也就是类似class模板上的方法。</li>
 </ol>
 
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 为什么要把方法绑到prototype上？直接 <code>A.toString</code>&#x2026;= 不行吗？
 </p>
-</blockquote>
+
+</blockquote></div>
 
 <p>
-在解释prototype之前，先解释一下 <code>new A</code> 到底发生了什么<sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup>：
+在解释prototype之前，先解释一下 <code>new A</code> 到底发生了什么<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
+这里只是意思，但是如果真的改变 <code>__proto__</code> 是非常低效的 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto</a>
+</span>：
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span class="linenr">1: </span><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">var a = new A('hehe') =&gt;</span>
-<span class="linenr">2: </span><span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span> = <span style="color: #00008b;">new</span> <span style="color: #36648b;">Object</span>();
-<span class="linenr">3: </span>a.__proto__ = A.<span style="color: #6b8e23;">prototype</span>; (proto)
-<span class="linenr">4: </span>A.call(a, <span style="color: #8b0000;">'hehe'</span>);
-</pre>
-</div>
+<pre class="code"><code><span class="linenr">1: </span><span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">var a = new A('hehe') =&gt;</span>
+<span class="linenr">2: </span><span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">a</span> = <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Object</span>();
+<span class="linenr">3: </span>a.__proto__ = A.<span style="font-weight: bold; text-decoration: underline;">prototype</span>; (proto)
+<span class="linenr">4: </span>A.call(a, <span style="font-style: italic;">'hehe'</span>);
+</code></pre>
 
 <p>
 其中 <code>A.call</code> 的意思是先把A的this设置为a，然后执行A的body也就是 <code>this.name=name</code>
@@ -208,111 +192,95 @@ console.log(<span style="color: #8b0000;">'object name is:'</span> + <span style
 </div>
 </div>
 
-<div id="outline-container-orgheadline3" class="outline-2">
-<h2 id="orgheadline3"><code>__proto__</code> 才是原型链</h2>
-<div class="outline-text-2" id="text-orgheadline3">
+<div id="outline-container-orgff66036" class="outline-2">
+<h2 id="orgff66036"><code>__proto__</code> 才是原型链</h2>
+<div class="outline-text-2" id="text-orgff66036">
 <p>
-<code>__proto__</code> 是内部 [ [Prototype ]] （说了半天原型链这就是牛逼闪闪的 <b>原型链</b>, 指向对象或者null）的getter和setter方法（已加入ES6规范<sup><a id="fnr.3" class="footref" href="#fn.3">3</a></sup>，但是还是建议只使用Object.getPrototypeOf()）
+<code>__proto__</code> 是内部 [ [Prototype ]] （说了半天原型链这就是牛逼闪闪的 <b>原型链</b>, 指向对象或者null）的getter和setter方法（已加入ES6规范<label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
+<a href="http://www.ecma-international.org/ecma-262/6.0/#sec-additional-properties-of-the-object.prototype-object">http://www.ecma-international.org/ecma-262/6.0/#sec-additional-properties-of-the-object.prototype-object</a>
+</span>，但是还是建议只使用Object.getPrototypeOf()）
 </p>
 
 <p>
 JS对象能使用它原型链对象的所有方法，比如所有的对象的原型链（的原型链的原型链的原型链&#x2026;）都最终会指向Object(或null)。因此，所有的对象都能使用Object.prototype上的方法，比如我之前覆盖掉的 <code>toString</code> 本身就是Object.prototype上的方法，如果没有覆盖，它是可以拿到所有Object上的方法的：
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript">a.toString === A.<span style="color: #6b8e23;">prototype</span>.toString <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">true</span>
-a.toLocalString === Object.<span style="color: #6b8e23;">prototype</span>.toLocalString <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">true</span>
-a.__proto__ === A.<span style="color: #6b8e23;">prototype</span> <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">true</span>
-</pre>
-</div>
+<pre class="code"><code>a.toString === A.<span style="font-weight: bold; text-decoration: underline;">prototype</span>.toString <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">true</span>
+a.toLocalString === Object.<span style="font-weight: bold; text-decoration: underline;">prototype</span>.toLocalString <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">true</span>
+a.__proto__ === A.<span style="font-weight: bold; text-decoration: underline;">prototype</span> <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">true</span>
+</code></pre>
 
 <p>
 所以，现在是否可以理解这句话了呢
 </p>
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 instanceof 运算符可以用来判断Object的 <i>prototype属性</i> 是否存在Function的 <i>原型链</i> 上。
 </p>
-</blockquote>
+
+</blockquote></div>
 <p>
 所以instanceof其实就是
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">Function.__proto__ === Object.<span style="color: #6b8e23;">prototype</span>
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">false</span>
-</pre>
-</div>
+<pre class="code"><code>Function.__proto__ === Object.<span style="font-weight: bold; text-decoration: underline;">prototype</span>
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">false</span>
+</code></pre>
 <p>
 擦，假设失败了呢，让我们来看看为什么不对，Function.__proto__到底指哪去了
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">Function.__proto__ === Function.<span style="color: #6b8e23;">prototype</span>
-<span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">true</span>
-</pre>
-</div>
+<pre class="code"><code>Function.__proto__ === Function.<span style="font-weight: bold; text-decoration: underline;">prototype</span>
+<span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">true</span>
+</code></pre>
 <p>
 原来指向自己的prototype了呢，那就意味着&#x2026;
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">Function <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">Function</span>
-<span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">true</span>
-</pre>
-</div>
+<pre class="code"><code>Function <span style="font-weight: bold;">instanceof</span> <span style="font-weight: bold; text-decoration: underline;">Function</span>
+<span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">true</span>
+</code></pre>
 <p>
 yes，然而 Function instanceof Object似乎也能解释了
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">Function.__proto__ === Function.<span style="color: #6b8e23;">prototype</span>
-Function.__proto__.__proto__ === Object.<span style="color: #6b8e23;">prototype</span>
-</pre>
-</div>
+<pre class="code"><code>Function.__proto__ === Function.<span style="font-weight: bold; text-decoration: underline;">prototype</span>
+Function.__proto__.__proto__ === Object.<span style="font-weight: bold; text-decoration: underline;">prototype</span>
+</code></pre>
 
 <p>
 所以如果我们让
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">Function.__proto__.__proto__ = <span style="color: #6b8e23;">null</span>
-Function <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">Object</span>
-<span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">false</span>
-</pre>
-</div>
+<pre class="code"><code>Function.__proto__.__proto__ = <span style="font-weight: bold; text-decoration: underline;">null</span>
+Function <span style="font-weight: bold;">instanceof</span> <span style="font-weight: bold; text-decoration: underline;">Object</span>
+<span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">false</span>
+</code></pre>
 
 <p>
 这回知道为什么不要用 <code>__proto__</code> 了吧，一不小心重写了会导致所有继承自它的对象都受影响。
 </p>
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 为了养成良好的习惯，实际项目最好使用 <code>getPrototypeOf</code> 取原型链，这里只是为了方便我采用__proto__
 </p>
-</blockquote>
+
+</blockquote></div>
 
 
 <p>
 下面来看第二个题
 </p>
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 Object instanceof Function
 </p>
-</blockquote>
+
+</blockquote></div>
 
 <p>
 难道可以互相链吗？这意味着
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">Object.__proto__ === Function.<span style="color: #6b8e23;">prototype</span>
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">true</span>
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&#20294;&#26159;Firefox&#21462;&#19981;&#21040;Object.__proto__, &#30475;&#26469;&#20570;&#20102;&#20445;&#25252;&#65292;&#24517;&#39035;&#35201;&#29992;</span>
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">Object.getPrototypeOf(Object) === Function.prototype</span>
-</pre>
-</div>
+<pre class="code"><code>Object.__proto__ === Function.<span style="font-weight: bold; text-decoration: underline;">prototype</span>
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">true</span>
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#20294;&#26159;Firefox&#21462;&#19981;&#21040;Object.__proto__, &#30475;&#26469;&#20570;&#20102;&#20445;&#25252;&#65292;&#24517;&#39035;&#35201;&#29992;</span>
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">Object.getPrototypeOf(Object) === Function.prototype</span>
+</code></pre>
 
 <p>
 要晕了, 忍不住要画个图
@@ -320,8 +288,8 @@ Object instanceof Function
 
 
 <figure>
-<p><img src="https://www.evernote.com/l/ABerZUl8ytRL1KHVx1JSFhIgl6a-dZwdZBMB/image.png" alt="image.png">
-</p>
+<img src="https://www.evernote.com/l/ABerZUl8ytRL1KHVx1JSFhIgl6a-dZwdZBMB/image.png" alt="image.png">
+
 </figure>
 
 <p>
@@ -342,32 +310,29 @@ Object instanceof Function
 </div>
 </div>
 
-<div id="outline-container-orgheadline4" class="outline-2">
-<h2 id="orgheadline4">也没什么卵用得 contructor</h2>
-<div class="outline-text-2" id="text-orgheadline4">
+<div id="outline-container-org946d51d" class="outline-2">
+<h2 id="org946d51d">也没什么卵用得 contructor</h2>
+<div class="outline-text-2" id="text-org946d51d">
 <p>
 如果你好奇的在FireFox Console中看一下 <code>a</code> 除了刚才那些玩意，还有一个奇怪的东西
 </p>
 
 
 <figure>
-<p><img src="https://www.evernote.com/l/ABextuBjPu5MiqwpfrE1NUlZ28bhdc42qawB/image.png" alt="image.png">
-</p>
+<img src="https://www.evernote.com/l/ABextuBjPu5MiqwpfrE1NUlZ28bhdc42qawB/image.png" alt="image.png">
+
 </figure>
 
 <p>
 话说 <code>A</code> 里面这个constructor是个什么鬼,我们来玩它一下
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript">a.constructor === A.<span style="color: #6b8e23;">prototype</span>.constructor
-A.<span style="color: #6b8e23;">prototype</span>.constructor === A
-A.<span style="color: #6b8e23;">prototype</span>.constructor = <span style="color: #6b8e23;">null</span>
-a.constructor <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; null</span>
-a <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">A</span> <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">true</span>
-</pre>
-</div>
+<pre class="code"><code>a.constructor === A.<span style="font-weight: bold; text-decoration: underline;">prototype</span>.constructor
+A.<span style="font-weight: bold; text-decoration: underline;">prototype</span>.constructor === A
+A.<span style="font-weight: bold; text-decoration: underline;">prototype</span>.constructor = <span style="font-weight: bold; text-decoration: underline;">null</span>
+a.constructor <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">=&gt; null</span>
+a <span style="font-weight: bold;">instanceof</span> <span style="font-weight: bold; text-decoration: underline;">A</span> <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">true</span>
+</code></pre>
 
 <p>
 这只是函数都有的一个玩意而已, 由于js的函数可以作为构造器，也就是可以 <code>new</code> ，所以所有的
@@ -416,84 +381,75 @@ a <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">
 </div>
 </div>
 
-<div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5">Bonus 继承</h2>
-<div class="outline-text-2" id="text-orgheadline5">
+<div id="outline-container-orga5cd2eb" class="outline-2">
+<h2 id="orga5cd2eb">Bonus 继承</h2>
+<div class="outline-text-2" id="text-orga5cd2eb">
 <p>
 下面这个是babel 从es6 class 
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">class</span> A{
+<pre class="code"><code><span style="font-weight: bold;">class</span> A{
   constructor(name) {
-    <span style="color: #6b8e23;">this</span>.name= name
+    <span style="font-weight: bold; text-decoration: underline;">this</span>.name= name
   }
   toString() {
-    <span style="color: #00008b;">return</span> <span style="color: #6b8e23;">this</span>.name
+    <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">this</span>.name
   }
 }
 
-<span style="color: #00008b;">class</span> B <span style="color: #00008b;">extends</span> A {
+<span style="font-weight: bold;">class</span> B <span style="font-weight: bold;">extends</span> A {
   toString(){
-    <span style="color: #00008b;">return</span> <span style="color: #6b8e23;">this</span>.name + <span style="color: #8b0000;">'b'</span>
+    <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">this</span>.name + <span style="font-style: italic;">'b'</span>
   }
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 编译出来的ES5继承
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">_inherits</span>(<span style="color: #b8860b;">subClass</span>, <span style="color: #b8860b;">superClass</span>) { 
-    <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&#23494;</span>
+<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">_inherits</span>(<span style="font-weight: bold; font-style: italic;">subClass</span>, <span style="font-weight: bold; font-style: italic;">superClass</span>) { 
+    <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#23494;</span>
 }
 
-<span style="color: #00008b;">var</span> <span style="color: #b8860b;">A</span> = (<span style="color: #00008b;">function</span> () {
-    <span style="color: #00008b;">function</span> <span style="color: #6a5acd;">A</span>(<span style="color: #b8860b;">name</span>) {
-        <span style="color: #6b8e23;">this</span>.name = name;
+<span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">A</span> = (<span style="font-weight: bold;">function</span> () {
+    <span style="font-weight: bold;">function</span> <span style="font-weight: bold;">A</span>(<span style="font-weight: bold; font-style: italic;">name</span>) {
+        <span style="font-weight: bold; text-decoration: underline;">this</span>.name = name;
     }
 
-    A.<span style="color: #6b8e23;">prototype</span>.toString = <span style="color: #00008b;">function</span> toString() {
-        <span style="color: #00008b;">return</span> <span style="color: #6b8e23;">this</span>.name;
+    A.<span style="font-weight: bold; text-decoration: underline;">prototype</span>.toString = <span style="font-weight: bold;">function</span> toString() {
+        <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">this</span>.name;
     };
 
-    <span style="color: #00008b;">return</span> A;
+    <span style="font-weight: bold;">return</span> A;
 })();
 
-<span style="color: #00008b;">var</span> <span style="color: #b8860b;">B</span> = (<span style="color: #00008b;">function</span> (<span style="color: #b8860b;">_A</span>) {
-    <span style="color: #00008b;">function</span> <span style="color: #6a5acd;">B</span>() {
-        <span style="color: #00008b;">if</span> (_A != <span style="color: #6b8e23;">null</span>) {
-            _A.apply(<span style="color: #6b8e23;">this</span>, <span style="color: #6b8e23;">arguments</span>);
+<span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">B</span> = (<span style="font-weight: bold;">function</span> (<span style="font-weight: bold; font-style: italic;">_A</span>) {
+    <span style="font-weight: bold;">function</span> <span style="font-weight: bold;">B</span>() {
+        <span style="font-weight: bold;">if</span> (_A != <span style="font-weight: bold; text-decoration: underline;">null</span>) {
+            _A.apply(<span style="font-weight: bold; text-decoration: underline;">this</span>, <span style="font-weight: bold; text-decoration: underline;">arguments</span>);
         }
     }
 
     _inherits(B, _A);
 
-    B.<span style="color: #6b8e23;">prototype</span>.toString = <span style="color: #00008b;">function</span> toString() {
-        <span style="color: #00008b;">return</span> <span style="color: #6b8e23;">this</span>.name + <span style="color: #8b0000;">'b'</span>;
+    B.<span style="font-weight: bold; text-decoration: underline;">prototype</span>.toString = <span style="font-weight: bold;">function</span> toString() {
+        <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">this</span>.name + <span style="font-style: italic;">'b'</span>;
     };
 
-    <span style="color: #00008b;">return</span> B;
+    <span style="font-weight: bold;">return</span> B;
 })(A);
-</pre>
-</div>
+</code></pre>
 
 <p>
 其他地方都不用看了，inherits 函数用到了之前学到的所有玩意，要求实现要满足下列所有的cases,就当是课后练习了：
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span>= <span style="color: #00008b;">new</span> <span style="color: #36648b;">A</span>(<span style="color: #8b0000;">'A'</span>);
-<span style="color: #00008b;">var</span> <span style="color: #b8860b;">b</span>= <span style="color: #00008b;">new</span> <span style="color: #36648b;">B</span>(<span style="color: #8b0000;">'B'</span>);
+<pre class="code"><code><span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">a</span>= <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">A</span>(<span style="font-style: italic;">'A'</span>);
+<span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">b</span>= <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">B</span>(<span style="font-style: italic;">'B'</span>);
 a.constructor === A &amp;&amp;
 b.constructor === B &amp;&amp;
-a <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">A</span> &amp;&amp;
-b <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">A</span> &amp;&amp;
-b <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">B</span>
-</pre>
-</div>
+a <span style="font-weight: bold;">instanceof</span> <span style="font-weight: bold; text-decoration: underline;">A</span> &amp;&amp;
+b <span style="font-weight: bold;">instanceof</span> <span style="font-weight: bold; text-decoration: underline;">A</span> &amp;&amp;
+b <span style="font-weight: bold;">instanceof</span> <span style="font-weight: bold; text-decoration: underline;">B</span>
+</code></pre>
 </div>
 </div>
 <div id="footnotes">
@@ -517,17 +473,15 @@ b <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">
 </div></div>
 <div id="postamble" class="status">
 <footer>
-  <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2017-06-10 Sat 08:22</p>
-  <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6) x <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Author: root <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
+  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
-  <a class="gumroad-button" href="https://gum.co/grokking-monad">我的新书 Grokking Monad 现已发售，请自觉排队装逼</a>
-
-  <a class="github-fork-ribbon right-bottom fixed" href="https://github.com/jcouyang/blog" title="Fork me on GitHub">Fork me on GitHub</a>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
 </footer>
-
-<div id="disqus_thread"></div>
 </div>
 </body>
 </html>

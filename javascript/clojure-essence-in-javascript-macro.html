@@ -1,36 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-<!-- 2017-11-26 Sun 14:17 -->
-<meta  charset="utf-8">
-<meta  name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2019-03-27 Wed 02:21 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>JavaScript玩转Clojure大法之 - Macro (1)</title>
-<meta  name="generator" content="Org-mode">
-<meta  name="author" content="Jichao Ouyang">
-<meta  name="keywords" content="macro, javascript, clojure, lisp, sweetjs, meta programming">
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                                                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                                                                                              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                                                                                                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-NJRFJGX');</script>
-<!-- End Google Tag Manager -->
+<meta name="generator" content="Org mode">
+<meta name="author" content="root">
+<meta name="keywords" content="macro, javascript, clojure, lisp, sweetjs, meta programming">
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/style/pixyll.css"/>
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css" />
-<!--[if lt IE 9]>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.ie.min.css" />
-     <![endif]-->
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2013 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -82,9 +72,8 @@ for the JavaScript code in this tag.
     <a accesskey="h" href="/index.html"> HOME </a> |
     <a href="#" id="edit-in-github">EDIT</a> |
     <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
-    <a href="/archive.html">ARCHIVE</a> |
-    <a href="/theindex.html">INDEX</a> |
-    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a>
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
 <div id="content">
@@ -94,14 +83,14 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">Macro</a></li>
-<li><a href="#orgheadline2">Sweet.js</a>
+<li><a href="#orgc480da0">Macro</a></li>
+<li><a href="#orgfcdb5c0">Sweet.js</a>
 <ul>
-<li><a href="#orgheadline3">Rule macro</a></li>
-<li><a href="#orgheadline4">case macro</a></li>
+<li><a href="#org82f3609">Rule macro</a></li>
+<li><a href="#orgf8ced70">case macro</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline5">Recap</a></li>
+<li><a href="#org35b77b3">Recap</a></li>
 </ul>
 </div>
 </nav>
@@ -117,9 +106,9 @@ macro可以说是lisp语言的独门绝技, lisp语言数据即代码,以及s-ex
 虽然js原生不能这么玩, 但是依然不能阻止我们通过sweet.js在预编译的过程中使用macro.
 </p>
 
-<div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1">Macro</h2>
-<div class="outline-text-2" id="text-orgheadline1">
+<div id="outline-container-orgc480da0" class="outline-2">
+<h2 id="orgc480da0">Macro</h2>
+<div class="outline-text-2" id="text-orgc480da0">
 <p>
 我非常不喜欢中文字面翻译&#x2013;'宏', 中文宏的意思是大, 广大, 实在想不通这跟macro有毛关系. 而macro值的是某条指令可以扩展
 成一堆其它指令. 反而用个图我觉得更贴切
@@ -127,26 +116,24 @@ macro可以说是lisp语言的独门绝技, lisp语言数据即代码,以及s-ex
 
 
 <figure>
-<p><img src="./images/bender-make-bender.gif" alt="bender-make-bender.gif">
-</p>
+<img src="./images/bender-make-bender.gif" alt="bender-make-bender.gif">
+
 </figure>
 
-<div class="org-src-container">
-
-<pre class="src src-clojure">(macroexpand '(<span style="color: #00008b;">when-not</span> (= 1 3) (print <span style="color: #8b0000;">"damn"</span>)))
-<span style="color: #8c8c8c; font-style: italic;">; </span><span style="color: #8c8c8c; font-style: italic;">=&gt; (if (= 1 3) nil (do (print "damn")))</span>
-</pre>
-</div>
+<pre class="code"><code>(macroexpand '(<span style="font-weight: bold;">when-not</span> (= 1 3) (print <span style="font-style: italic;">"damn"</span>)))
+<span style="font-weight: bold; font-style: italic;">; </span><span style="font-weight: bold; font-style: italic;">=&gt; (if (= 1 3) nil (do (print "damn")))</span>
+</code></pre>
 
 <p>
 看看Clojure的macro <code>when-not</code> 能扩展成什么? 神奇的变成了if.
 </p>
 
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 靠, 这不是就是语法糖?
 </p>
-</blockquote>
+
+</blockquote></div>
 
 <p>
 嗯, 就是语法糖, 但是是强大的可以自定义的语法糖. 这代表着你可以用Clojure编写自己独特版本的Clojure.
@@ -174,12 +161,13 @@ lisp语言因为本身的原因能轻松这么办到
 ClojureScript, 也就是说, ClojureScript写的 go block 可以编译成能在浏览器上抛的单线程JavaScript.
 </p>
 
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 如果回忆不起来可以翻看下如何用JavaScript实现 core.async 的 go block.
 你会发现 generator 是实现的关键, 而ClojureScript却只用macro展成不同的纯状态机实现.
 </p>
-</blockquote>
+
+</blockquote></div>
 
 <p>
 怎么做到的呢, 就是macro, 如果你翻看ClojureScript 的 <a href="https://github.com/clojure/core.async/blob/master/src/main/clojure/cljs/core/async/macros.clj">core.async源码</a>, 会看见一堆一堆的macro. 根据go block
@@ -188,9 +176,9 @@ ClojureScript, 也就是说, ClojureScript写的 go block 可以编译成能在�
 </div>
 </div>
 
-<div id="outline-container-orgheadline2" class="outline-2">
-<h2 id="orgheadline2">Sweet.js</h2>
-<div class="outline-text-2" id="text-orgheadline2">
+<div id="outline-container-orgfcdb5c0" class="outline-2">
+<h2 id="orgfcdb5c0">Sweet.js</h2>
+<div class="outline-text-2" id="text-orgfcdb5c0">
 <p>
 因此对于像其它有更多语法的语言要实现macro可就没那么简单了(虽然一些新的语言还是很努力的实现了macro, 比如rust和julia). 
 比较直白的实现方式是定义的macro接收一个
@@ -198,15 +186,17 @@ AST, 然后改吧改吧, 做macro该干得事情. 但是操作语法树实在是
 </p>
 
 <p>
-而<a href="http://sweetjs.org/">sweet.js</a> 给我提供了一个自制js macro的工具, sweet.js来自mozilla<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>, 嗯嗯, 就是rust的那个mozilla, 
+而<a href="http://sweetjs.org">sweet.js</a> 给我提供了一个自制js macro的工具, sweet.js来自mozilla<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+mozilla还有论文呢: <a href="https://github.com/mozilla/sweet.js/blob/master/doc/paper/sweetjs.pdf">https://github.com/mozilla/sweet.js/blob/master/doc/paper/sweetjs.pdf</a>
+</span>, 嗯嗯, 就是rust的那个mozilla, 
 就是那个 <i>如果没有chrome, 应该能占浏览器半壁江山的</i> <del>汪峰</del> firefox
  的mozilla <del>公司</del> 基金会.
 </p>
 </div>
 
-<div id="outline-container-orgheadline3" class="outline-3">
-<h3 id="orgheadline3">Rule macro</h3>
-<div class="outline-text-3" id="text-orgheadline3">
+<div id="outline-container-org82f3609" class="outline-3">
+<h3 id="org82f3609">Rule macro</h3>
+<div class="outline-text-3" id="text-org82f3609">
 <p>
 因此sweet.js和mozilla自己的语言rust支持的macro语法上非常接近, 也绝逼不是巧合.
 </p>
@@ -214,30 +204,24 @@ AST, 然后改吧改吧, 做macro该干得事情. 但是操作语法树实在是
 <p>
 来看看rust的 rule macro
 </p>
-<div class="org-src-container">
-
-<pre class="src src-rust">macro_rules! foo {
+<pre class="code"><code>macro_rules! foo {
     (x =&gt; $e:expr) =&gt; (println!("got a ", $e));
 }
 foo!(x =&gt; 3); // =&gt; println!("got a ", 3)
-</pre>
-</div>
+</code></pre>
 
 <p>
 来看看 Sweet.js的 rule macro
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js">macro foo {
+<pre class="code"><code>macro foo {
   {
     (x=&gt;$e:expr)
   } =&gt; {
-    console.log(<span style="color: #8b0000;">'got a '</span>, $e)
+    console.log(<span style="font-style: italic;">'got a '</span>, $e)
   }
 }
-foo(x=&gt;3) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; console.log("got a ", 3)</span>
-</pre>
-</div>
+foo(x=&gt;3) <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">=&gt; console.log("got a ", 3)</span>
+</code></pre>
 
 <p>
 简直是一模一样, 好吧, 我承认我的标题应该改成 <i>javascript玩转rust大法更为贴切</i>, 但是我们先来关心下这里面到底发生了什么?
@@ -253,11 +237,12 @@ foo(x=&gt;3) <span style="color: #8c8c8c; font-style: italic;">// </span><span s
 <li>Expander按照定义的macro匹配扩展token树, 再parse成AST</li>
 </ol>
 
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 说人话!
 </p>
-</blockquote>
+
+</blockquote></div>
 
 <p>
 拿 macro foo 作为例子
@@ -293,9 +278,9 @@ foo &bull; ( &bull; x &bull; = &bull; &gt; &bull; 3 &bull; )</li>
 </div>
 </div>
 
-<div id="outline-container-orgheadline4" class="outline-3">
-<h3 id="orgheadline4">case macro</h3>
-<div class="outline-text-3" id="text-orgheadline4">
+<div id="outline-container-orgf8ced70" class="outline-3">
+<h3 id="orgf8ced70">case macro</h3>
+<div class="outline-text-3" id="text-orgf8ced70">
 <p>
 Allright, 当然这个例子好简单, 但是像 rule macro 只能做一些非常简单的形式上的一一变化, 那么说好的元编程呢?
 说好的可以像clojure那样用clojure编写clojure代码呢. 这时候case macro就是解决这个问题了. clojure由于
@@ -309,43 +294,37 @@ Allright, 当然这个例子好简单, 但是像 rule macro 只能做一些非�
 <p>
 让我们先来一 <del>发</del> 个例子
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js">  macro m {
-    <span style="color: #00008b;">case</span> {ctx (x=&gt;$x)} =&gt; {
-      console.log(<span style="color: #8b0000;">'haha iam javascript'</span>)
-      <span style="color: #00008b;">return</span> #{
+<pre class="code"><code>  macro m {
+    <span style="font-weight: bold;">case</span> {ctx (x=&gt;$x)} =&gt; {
+      console.log(<span style="font-style: italic;">'haha iam javascript'</span>)
+      <span style="font-weight: bold;">return</span> #{
        console.log($x) 
       }
     }
   }
   m(100) 
-<span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; haha iam javascript (to console)</span>
-<span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; console.log(100)</span>
-</pre>
-</div>
+<span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">=&gt; haha iam javascript (to console)</span>
+<span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">=&gt; console.log(100)</span>
+</code></pre>
 
 <p>
-如果你已经忘了, 请 <a href="#orgheadline3">电梯</a> 返回去对比一下到底有什么区别
+如果你已经忘了, 请 <a href="#org82f3609">电梯</a> 返回去对比一下到底有什么区别
 </p>
 <ol class="org-ol">
 <li>多了一个参数 <code>ctx</code>, 匹配用到m时的那个m</li>
 <li>接下来都一样, 直到&#x2026; <code>#{}</code> 这个是什么?
 这里面的语法变成语法树, 当然语法树结构是数组, 每个元素还是一个token树.比如console.log(3)大概是这种结构</li>
 </ol>
-<div class="org-src-container">
-
-<pre class="src src-javascript">[
-    {token: {value: <span style="color: #8b0000;">'console'</span>}}
-    {token: {value: <span style="color: #8b0000;">'.'</span>}},
-    {token: {value: <span style="color: #8b0000;">'log'</span>}},
-    {token: {value: <span style="color: #8b0000;">'()'</span>},
+<pre class="code"><code>[
+    {token: {value: <span style="font-style: italic;">'console'</span>}}
+    {token: {value: <span style="font-style: italic;">'.'</span>}},
+    {token: {value: <span style="font-style: italic;">'log'</span>}},
+    {token: {value: <span style="font-style: italic;">'()'</span>},
      inner:[
          {token: {value: 3}}
      ]}
 ]
-</pre>
-</div>
+</code></pre>
 <ol class="org-ol">
 <li>最重要的, 现在里面可以写正常js了, 意味着你可以用js编程各种语法,然后拼到token树中</li>
 </ol>
@@ -358,57 +337,50 @@ Allright, 当然这个例子好简单, 但是像 rule macro 只能做一些非�
 比如我要在js里弄一个想clojure的arity function一样骚的函数
 </p>
 
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 arity function指根据不同个数的参数, 有不同的函数body. 比如
 </p>
-<div class="org-src-container">
-
-<pre class="src src-clojure">(<span style="color: #00008b;">defn</span> <span style="color: #6a5acd;">add</span>
+<pre class="code"><code>(<span style="font-weight: bold;">defn</span> <span style="font-weight: bold;">add</span>
   ([x] (+ 0 x))
   ([x y] (+ x y)))
-(add 1)<span style="color: #8c8c8c; font-style: italic;">;=&gt;2</span>
-(add 1 2)<span style="color: #8c8c8c; font-style: italic;">;=&gt;3</span>
-</pre>
-</div>
-</blockquote>
+(add 1)<span style="font-weight: bold; font-style: italic;">;=&gt;2</span>
+(add 1 2)<span style="font-weight: bold; font-style: italic;">;=&gt;3</span>
+</code></pre>
+
+</blockquote></div>
 
 <p>
 所以类似的我期望的能在js里这样定义函数
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js">defn add {
+<pre class="code"><code>defn add {
   (a){a}
   (a, b) {a+b}
 }
-add(1) <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; 1</span>
-add(1, 2) <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; 3</span>
-</pre>
-</div>
+add(1) <span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">=&gt; 1</span>
+add(1, 2) <span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">=&gt; 3</span>
+</code></pre>
 
 <p>
 先把macro摆出来
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">var macro from http://jlongster.com/Sweet.js-Tutorial--2--Recursive-Macros-and-Custom-Pattern-Classes</span>
+<pre class="code"><code><span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">var macro from http://jlongster.com/Sweet.js-Tutorial--2--Recursive-Macros-and-Custom-Pattern-Classes</span>
 macro caseFunc {
-    <span style="color: #00008b;">case</span> {_ ($args...) {$body... $last:expr}} =&gt;
+    <span style="font-weight: bold;">case</span> {_ ($args...) {$body... $last:expr}} =&gt;
     {
-      letstx $len = [makeValue(#{$args...}.length , <span style="color: #6b8e23;">null</span>)];
-      <span style="color: #00008b;">return</span> #{
-      <span style="color: #00008b;">case</span> $len:
-        <span style="color: #00008b;">return</span> (<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">$args</span>...){<span style="color: #b8860b;">$body</span>... <span style="color: #00008b;">return</span> <span style="color: #b8860b;">$last</span>}).<span style="color: #b8860b;">apply</span>(<span style="color: #6b8e23;">this</span>, <span style="color: #6b8e23;">arguments</span>)
+      letstx $len = [makeValue(#{$args...}.length , <span style="font-weight: bold; text-decoration: underline;">null</span>)];
+      <span style="font-weight: bold;">return</span> #{
+      <span style="font-weight: bold;">case</span> $len:
+        <span style="font-weight: bold;">return</span> (<span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">$args</span>...){<span style="font-weight: bold; font-style: italic;">$body</span>... <span style="font-weight: bold;">return</span> <span style="font-weight: bold; font-style: italic;">$last</span>}).<span style="font-weight: bold; font-style: italic;">apply</span>(<span style="font-weight: bold; text-decoration: underline;">this</span>, <span style="font-weight: bold; text-decoration: underline;">arguments</span>)
       }
     }
 }
 
 macro defn{
   rule { $name { $(($args (,) ...){$body ...})...} } =&gt; {
-    <span style="color: #00008b;">function</span> <span style="color: #6a5acd;">$name</span> (){
-      <span style="color: #00008b;">switch</span>(<span style="color: #6b8e23;">arguments</span>.length){
+    <span style="font-weight: bold;">function</span> <span style="font-weight: bold;">$name</span> (){
+      <span style="font-weight: bold;">switch</span>(<span style="font-weight: bold; text-decoration: underline;">arguments</span>.length){
         $(caseFunc ($args...) {$body...};
          )...
       }
@@ -419,37 +391,37 @@ defn arity_function{
   (a){a}
   (a, b) {a + b}
 }
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt;</span>
-<span style="color: #8c8c8c; font-style: italic;">/*</span>
-<span style="color: #8c8c8c; font-style: italic;">function arity_function() {</span>
-<span style="color: #8c8c8c; font-style: italic;">    switch (arguments.length) {</span>
-<span style="color: #8c8c8c; font-style: italic;">    case 1:</span>
-<span style="color: #8c8c8c; font-style: italic;">        return function (a) {</span>
-<span style="color: #8c8c8c; font-style: italic;">            return a;</span>
-<span style="color: #8c8c8c; font-style: italic;">        }.apply(this, arguments);</span>
-<span style="color: #8c8c8c; font-style: italic;">    case 2:</span>
-<span style="color: #8c8c8c; font-style: italic;">        return function (a, b) {</span>
-<span style="color: #8c8c8c; font-style: italic;">            return a + b;</span>
-<span style="color: #8c8c8c; font-style: italic;">        }.apply(this, arguments);</span>
-<span style="color: #8c8c8c; font-style: italic;">    }</span>
-<span style="color: #8c8c8c; font-style: italic;">}</span>
-<span style="color: #8c8c8c; font-style: italic;">*/</span>
-</pre>
-</div>
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">=&gt;</span>
+<span style="font-weight: bold; font-style: italic;">/*</span>
+<span style="font-weight: bold; font-style: italic;">function arity_function() {</span>
+<span style="font-weight: bold; font-style: italic;">    switch (arguments.length) {</span>
+<span style="font-weight: bold; font-style: italic;">    case 1:</span>
+<span style="font-weight: bold; font-style: italic;">        return function (a) {</span>
+<span style="font-weight: bold; font-style: italic;">            return a;</span>
+<span style="font-weight: bold; font-style: italic;">        }.apply(this, arguments);</span>
+<span style="font-weight: bold; font-style: italic;">    case 2:</span>
+<span style="font-weight: bold; font-style: italic;">        return function (a, b) {</span>
+<span style="font-weight: bold; font-style: italic;">            return a + b;</span>
+<span style="font-weight: bold; font-style: italic;">        }.apply(this, arguments);</span>
+<span style="font-weight: bold; font-style: italic;">    }</span>
+<span style="font-weight: bold; font-style: italic;">}</span>
+<span style="font-weight: bold; font-style: italic;">*/</span>
+</code></pre>
 
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 WTF shen me gui
 </p>
-</blockquote>
+
+</blockquote></div>
 
 <p>
 叫我一点一点解释, 重要的是第二个macro(第一个应该都能看懂吧), 这里面有几个新东西
 </p>
 
 <ul class="org-ul">
-<li>第<a href="#coderef-last"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-last');" onmouseout="CodeHighlightOff(this, 'coderef-last');">2</a>行的 <code>$last:expr</code>: 匹配最后一个表达式</li>
-<li>第<a href="#coderef-makevalue"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-makevalue');" onmouseout="CodeHighlightOff(this, 'coderef-makevalue');">4</a>行: 里面的 <code>#{$args}</code> 把match到的javascript语法变成token树的列表.</li>
+<li>第<a href="#coderef-last" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-last');" onmouseout="CodeHighlightOff(this, 'coderef-last');">2</a>行的 <code>$last:expr</code>: 匹配最后一个表达式</li>
+<li>第<a href="#coderef-makevalue" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-makevalue');" onmouseout="CodeHighlightOff(this, 'coderef-makevalue');">4</a>行: 里面的 <code>#{$args}</code> 把match到的javascript语法变成token树的列表.</li>
 <li>这个token列表就是javascript的数组, 里面是token对象.
 <ul class="org-ul">
 <li>用 <code>makeValue</code> 把这个javascript再变成token树</li>
@@ -459,27 +431,24 @@ WTF shen me gui
 </ul>
 
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span class="linenr"> 1: </span>macro caseFunc {
-<span id="coderef-last" class="coderef-off"><span class="linenr"> 2: </span>  <span style="color: #00008b;">case</span> {_ ($args...) {$body... $last:expr}} =&gt;</span>
+<pre class="code"><code><span class="linenr"> 1: </span>macro caseFunc {
+<span id="coderef-last" class="coderef-off"><span class="linenr"> 2: </span>  <span style="font-weight: bold;">case</span> {_ ($args...) {$body... $last:expr}} =&gt;</span>
 <span class="linenr"> 3: </span>    {
-<span id="coderef-makevalue" class="coderef-off"><span class="linenr"> 4: </span>      letstx $len = [makeValue(#{$args...}.length , <span style="color: #6b8e23;">null</span>)];</span>
-<span class="linenr"> 5: </span>      <span style="color: #00008b;">return</span> #{
-<span id="coderef-len" class="coderef-off"><span class="linenr"> 6: </span>        <span style="color: #00008b;">case</span> $len:</span>
-<span class="linenr"> 7: </span>        <span style="color: #00008b;">return</span> (<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">$args</span>...){<span style="color: #b8860b;">$body</span>... <span style="color: #00008b;">return</span> <span style="color: #b8860b;">$last</span>}).<span style="color: #b8860b;">apply</span>(<span style="color: #6b8e23;">this</span>, <span style="color: #6b8e23;">arguments</span>)
+<span id="coderef-makevalue" class="coderef-off"><span class="linenr"> 4: </span>      letstx $len = [makeValue(#{$args...}.length , <span style="font-weight: bold; text-decoration: underline;">null</span>)];</span>
+<span class="linenr"> 5: </span>      <span style="font-weight: bold;">return</span> #{
+<span id="coderef-len" class="coderef-off"><span class="linenr"> 6: </span>        <span style="font-weight: bold;">case</span> $len:</span>
+<span class="linenr"> 7: </span>        <span style="font-weight: bold;">return</span> (<span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">$args</span>...){<span style="font-weight: bold; font-style: italic;">$body</span>... <span style="font-weight: bold;">return</span> <span style="font-weight: bold; font-style: italic;">$last</span>}).<span style="font-weight: bold; font-style: italic;">apply</span>(<span style="font-weight: bold; text-decoration: underline;">this</span>, <span style="font-weight: bold; text-decoration: underline;">arguments</span>)
 <span class="linenr"> 8: </span>      }
 <span class="linenr"> 9: </span>    }
 <span class="linenr">10: </span>}
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5">Recap</h2>
-<div class="outline-text-2" id="text-orgheadline5">
+<div id="outline-container-org35b77b3" class="outline-2">
+<h2 id="org35b77b3">Recap</h2>
+<div class="outline-text-2" id="text-org35b77b3">
 <p>
 总之, macro给我们带无线的 <del>wifi</del> 可能, 对于语法复杂的语言确实不能像lisp一样简单实现macro, 但是通过
 lexer和reader转换成类似lisp token树, 虽然坎坷了一些, 但是还是能达到相同的效果的. 当然 sweet.js 提供
@@ -487,7 +456,7 @@ lexer和reader转换成类似lisp token树, 虽然坎坷了一些, 但是还是�
 </p>
 
 <p>
-另外感兴趣的话可以看看我最近正WIP的项目 <a href="http://ru-lang.org/">ru-lang</a> 的一些macro.
+另外感兴趣的话可以看看我最近正WIP的项目 <a href="http://ru-lang.org">ru-lang</a> 的一些macro.
 </p>
 </div>
 </div>
@@ -504,17 +473,15 @@ mozilla还有论文呢: <a href="https://github.com/mozilla/sweet.js/blob/master
 </div></div>
 <div id="postamble" class="status">
 <footer>
-  <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2017-06-10 Sat 08:22</p>
-  <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6) x <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Author: root <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
+  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
-  <a class="gumroad-button" href="https://gum.co/grokking-monad">我的新书 Grokking Monad 现已发售，请自觉排队装逼</a>
-
-  <a class="github-fork-ribbon right-bottom fixed" href="https://github.com/jcouyang/blog" title="Fork me on GitHub">Fork me on GitHub</a>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
 </footer>
-
-<div id="disqus_thread"></div>
 </div>
 </body>
 </html>

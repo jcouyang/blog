@@ -1,35 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-<!-- 2017-10-24 Tue 14:18 -->
-<meta  charset="utf-8">
-<meta  name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2019-03-27 Wed 02:21 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Type Classes in TypeScript</title>
-<meta  name="generator" content="Org-mode">
-<meta  name="author" content="欧阳继超">
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                                                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                                                                                              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                                                                                                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-NJRFJGX');</script>
-<!-- End Google Tag Manager -->
+<meta name="generator" content="Org mode">
+<meta name="author" content="欧阳继超">
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/style/pixyll.css"/>
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css" />
-<!--[if lt IE 9]>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.ie.min.css" />
-     <![endif]-->
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2013 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -81,9 +71,8 @@ for the JavaScript code in this tag.
     <a accesskey="h" href="/index.html"> HOME </a> |
     <a href="#" id="edit-in-github">EDIT</a> |
     <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
-    <a href="/archive.html">ARCHIVE</a> |
-    <a href="/theindex.html">INDEX</a> |
-    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a>
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
 <div id="content">
@@ -93,15 +82,15 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">Functor</a>
+<li><a href="#orgead3863">Functor</a>
 <ul>
-<li><a href="#orgheadline2">Higher Kind Type</a></li>
-<li><a href="#orgheadline3">多态</a></li>
-<li><a href="#orgheadline4">Reflect Metadata</a></li>
+<li><a href="#orgb156c3d">Higher Kind Type</a></li>
+<li><a href="#org2973db0">多态</a></li>
+<li><a href="#org239851c">Reflect Metadata</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline5">Cartesian</a></li>
-<li><a href="#orgheadline6">Apply</a></li>
+<li><a href="#org5c89236">Cartesian</a></li>
+<li><a href="#org0f00d0b">Apply</a></li>
 </ul>
 </div>
 </nav>
@@ -125,62 +114,50 @@ Typeclass 可以想象为函数式编程的一种设计模式, 虽然并没有�
 例如现在有个数据类型 <code>Xstream</code>
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">class</span> Xstream&lt;T&gt; {
+<pre class="code"><code><span style="font-weight: bold;">class</span> Xstream&lt;T&gt; {
   value: T
   constructor(v: T) {
-    <span style="color: #6b8e23;">this</span>.value = v
+    <span style="font-weight: bold; text-decoration: underline;">this</span>.value = v
   }
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 如果是面向对象, 我们想让它能够被 map, 那么通常会抽象出接口 <code>Mapable</code>
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">interface</span> Mapable&lt;A&gt; {
+<pre class="code"><code><span style="font-weight: bold;">interface</span> Mapable&lt;A&gt; {
   map&lt;B&gt;(f: (v:A)=&gt;B): Mapable&lt;B&gt;
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 然后猥琐的打开  <code>Xstream</code> 来实现 <code>Mapable</code> 的 <code>map</code> 方法.
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">class</span> Xstream&lt;T&gt; <span style="color: #00008b;">implements</span> Mapable&lt;T&gt; {
+<pre class="code"><code><span style="font-weight: bold;">class</span> Xstream&lt;T&gt; <span style="font-weight: bold;">implements</span> Mapable&lt;T&gt; {
   value: T
   constructor(v: T) {
-    <span style="color: #6b8e23;">this</span>.value = v
+    <span style="font-weight: bold; text-decoration: underline;">this</span>.value = v
   }
 
   map&lt;B&gt;(f: (v: T) =&gt; B): Mapable&lt;B&gt; {
-    <span style="color: #00008b;">return</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Xstream</span>(f(<span style="color: #6b8e23;">this</span>.value))
+    <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Xstream</span>(f(<span style="font-weight: bold; text-decoration: underline;">this</span>.value))
   }
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 那么如果我还想要让这个数据结构能 fold, 就需要再打开一次:
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">class</span> Xstream&lt;T&gt; <span style="color: #00008b;">implements</span> Mapable&lt;T&gt;, Foldable&lt;T&gt; {
+<pre class="code"><code><span style="font-weight: bold;">class</span> Xstream&lt;T&gt; <span style="font-weight: bold;">implements</span> Mapable&lt;T&gt;, Foldable&lt;T&gt; {
    ...
   fold&lt;B&gt;(f:(acc:B,v:T)=&gt;B, base:B):B {
-    <span style="color: #00008b;">return</span> f(<span style="color: #6b8e23;">this</span>.value, base)
+    <span style="font-weight: bold;">return</span> f(<span style="font-weight: bold; text-decoration: underline;">this</span>.value, base)
   }
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 现在, 面向对象抽象数据结构的坏味道出来了, 对操作的添加是一点也不开放呢.
@@ -190,9 +167,9 @@ Typeclass 可以想象为函数式编程的一种设计模式, 虽然并没有�
 而函数式, 正好相反, 对操作的添加尤其开放.
 </p>
 
-<div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1">Functor</h2>
-<div class="outline-text-2" id="text-orgheadline1">
+<div id="outline-container-orgead3863" class="outline-2">
+<h2 id="orgead3863">Functor</h2>
+<div class="outline-text-2" id="text-orgead3863">
 <p>
 函数式中的这个 Mapable 接口就叫做 Functor type class, 
 </p>
@@ -200,36 +177,27 @@ Typeclass 可以想象为函数式编程的一种设计模式, 虽然并没有�
 <p>
 函数式不会这样做
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">class</span> Xstream&lt;T&gt; <span style="color: #00008b;">implements</span> Mapable&lt;T&gt; {...}
-</pre>
-</div>
+<pre class="code"><code><span style="font-weight: bold;">class</span> Xstream&lt;T&gt; <span style="font-weight: bold;">implements</span> Mapable&lt;T&gt; {...}
+</code></pre>
 
 <p>
 相反, 我们需要数据类型作为接口的类型参数
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">interface</span> Functor&lt;F&gt; {
+<pre class="code"><code><span style="font-weight: bold;">interface</span> Functor&lt;F&gt; {
   map&lt;A, B&gt;(f: (a: A) =&gt; B, fa: F&lt;A&gt;): F&lt;B&gt;
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 然后为 Xstream 实现 map 方法.
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">class</span> XstreamFunctor implement Functor&lt;Xstream&lt;any&gt;&gt; {
+<pre class="code"><code><span style="font-weight: bold;">class</span> XstreamFunctor implement Functor&lt;Xstream&lt;any&gt;&gt; {
   map&lt;A, B&gt;(f: (v: A) =&gt; B, fa: Xstream&lt;A&gt;): Xstream&lt;B&gt; {
-    <span style="color: #00008b;">return</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Xstream</span>(f(<span style="color: #6b8e23;">this</span>.value))
+    <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Xstream</span>(f(<span style="font-weight: bold; text-decoration: underline;">this</span>.value))
   }
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 注意: 现在 map 是 <code>Functor&lt;Xstream&lt;any&gt;&gt;</code> 的方法, 而不是 <code>Xstream&lt;any&gt;</code> 自己的方法
@@ -239,28 +207,22 @@ Typeclass 可以想象为函数式编程的一种设计模式, 虽然并没有�
 使用起来就像这样:
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">new</span> <span style="color: #36648b;">XstreamFunctor.map</span>((a)=&gt;a+1, <span style="color: #00008b;">new</span> <span style="color: #36648b;">Xstream</span>(1))
-</pre>
-</div>
+<pre class="code"><code><span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">XstreamFunctor.map</span>((a)=&gt;a+1, <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Xstream</span>(1))
+</code></pre>
 </div>
 
 
-<div id="outline-container-orgheadline2" class="outline-3">
-<h3 id="orgheadline2">Higher Kind Type</h3>
-<div class="outline-text-3" id="text-orgheadline2">
+<div id="outline-container-orgb156c3d" class="outline-3">
+<h3 id="orgb156c3d">Higher Kind Type</h3>
+<div class="outline-text-3" id="text-orgb156c3d">
 <p>
 但是问题是, 上面的代码放到 TypeScript 是不编译的. 因为 TypeScript 并没有 Higher Kind Type(HKT)
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">interface</span> Functor&lt;F&gt; {
+<pre class="code"><code><span style="font-weight: bold;">interface</span> Functor&lt;F&gt; {
   map&lt;A, B&gt;(f: (a: A) =&gt; B, fa: F&lt;A&gt;): F&lt;B&gt;
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 比如这里的 <code>F</code> 就是 HKT, <code>F</code> 不是一个具体类型, <code>F&lt;number&gt;</code> 才是, <code>F</code> 是相对 <code>F&lt;number&gt;</code> 更高阶的类型
@@ -270,15 +232,12 @@ Typeclass 可以想象为函数式编程的一种设计模式, 虽然并没有�
 大概就像高阶函数
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">a</span>(<span style="color: #b8860b;">b</span>){
-  <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(){
+<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">a</span>(<span style="font-weight: bold; font-style: italic;">b</span>){
+  <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">function</span>(){
      b + 1
   }
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 <code>a</code> 是高阶函数, <code>a(1)</code> 是普通函数.
@@ -292,30 +251,21 @@ Typeclass 可以想象为函数式编程的一种设计模式, 虽然并没有�
 需要一个 <code>_&lt;A&gt;</code> 借口来存放 HKT, 就像一个 类型的字典, 给一个高阶类型和一个类型, 可以给你查到具体类型:
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">interface</span> _&lt;A&gt; { }
-</pre>
-</div>
+<pre class="code"><code><span style="font-weight: bold;">interface</span> _&lt;A&gt; { }
+</code></pre>
 
 <p>
 <code>HKT</code> 就是所有高阶类型的 key, 注意到TypeScript 有 string literal type, 所以 key 其实就是 String Literal Type.
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js">type HKT = keyof _&lt;any&gt;
-</pre>
-</div>
+<pre class="code"><code>type HKT = keyof _&lt;any&gt;
+</code></pre>
 
 <p>
 使用 <code>$&lt;F,A&gt;</code> 可以方便而且美观的查到到一个高阶与低阶类型组成的具体类型:
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js">type $&lt;F <span style="color: #00008b;">extends</span> HKT, A&gt; = _&lt;A&gt;[F]
-</pre>
-</div>
+<pre class="code"><code>type $&lt;F <span style="font-weight: bold;">extends</span> HKT, A&gt; = _&lt;A&gt;[F]
+</code></pre>
 
 <p>
 欢迎来到 <b>Type Level Programming</b>, 至今为止我们都还没有值的操作, 全部都是类型, 而这些代码都不会编译到 JS 中
@@ -324,57 +274,45 @@ Typeclass 可以想象为函数式编程的一种设计模式, 虽然并没有�
 <p>
 再试试用这个HKT来实现 Functor
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">interface</span> Functor&lt;F <span style="color: #00008b;">extends</span> HKT&gt; {
+<pre class="code"><code><span style="font-weight: bold;">interface</span> Functor&lt;F <span style="font-weight: bold;">extends</span> HKT&gt; {
   map&lt;A, B&gt;(f: (a: A) =&gt; B, fa: $&lt;F, A&gt;): $&lt;F, B&gt;
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 现在, 可以试想 Xstream's Functor 实例了
 </p>
 
 <ol class="org-ol">
-<li><code>Xstream</code> 类型的 key 是 ="Xstream"=</li>
+<li><code>Xstream</code> 类型的 key 是 <code>"Xstream"</code></li>
 </ol>
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">interface</span> _&lt;A&gt; {
-  <span style="color: #8b0000;">"Xstream"</span>: Xstream&lt;A&gt;
+<pre class="code"><code><span style="font-weight: bold;">interface</span> _&lt;A&gt; {
+  <span style="font-style: italic;">"Xstream"</span>: Xstream&lt;A&gt;
 }
-</pre>
-</div>
+</code></pre>
 
 <ol class="org-ol">
-<li>虽然 <code>Functor&lt;"Xstream"&gt;</code> 中的 ="Xstream"= 看起来像是字符串, 但其实它是类型, 而且是类型安全的, 敲错字符会导致编译错误.</li>
+<li>虽然 <code>Functor&lt;"Xstream"&gt;</code> 中的 <code>"Xstream"</code> 看起来像是字符串, 但其实它是类型, 而且是类型安全的, 敲错字符会导致编译错误.</li>
 </ol>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">class</span> XstreamFunctor <span style="color: #00008b;">implements</span> Functor&lt;<span style="color: #8b0000;">"Xstream"</span>&gt; {
+<pre class="code"><code><span style="font-weight: bold;">class</span> XstreamFunctor <span style="font-weight: bold;">implements</span> Functor&lt;<span style="font-style: italic;">"Xstream"</span>&gt; {
   map&lt;A, B&gt;(f: (v: A) =&gt; B, fa: Xstream&lt;A&gt;): Xstream&lt;B&gt; {
-    <span style="color: #00008b;">return</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Xstream</span>(f(fa.value))
+    <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Xstream</span>(f(fa.value))
   }
 }
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 
-<div id="outline-container-orgheadline3" class="outline-3">
-<h3 id="orgheadline3">多态</h3>
-<div class="outline-text-3" id="text-orgheadline3">
+<div id="outline-container-org2973db0" class="outline-3">
+<h3 id="org2973db0">多态</h3>
+<div class="outline-text-3" id="text-org2973db0">
 <p>
 但是, 用起来好难看, 每次用map还要 new 这么个 Functor 出来, 比如
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">new</span> <span style="color: #36648b;">XstreamFunctor.map</span>(a=&gt;a+1, <span style="color: #00008b;">new</span> <span style="color: #36648b;">Xstream</span>(1))
-</pre>
-</div>
+<pre class="code"><code><span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">XstreamFunctor.map</span>(a=&gt;a+1, <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Xstream</span>(1))
+</code></pre>
 
 <p>
 面向对象的多态如何能找到对应解决方法呢? 比如现在多出来一个类型叫 <code>Ystream</code>.
@@ -388,13 +326,10 @@ Typeclass 可以想象为函数式编程的一种设计模式, 虽然并没有�
 理论上 map 应该是这样的:
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">map</span>&lt;F <span style="color: #00008b;">extends</span> FunctorInstance, A, B&gt;(f: (v: A) =&gt; B, fa: $&lt;F, A&gt;): $&lt;F, B&gt; {
-  <span style="color: #00008b;">return</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Functor</span>&lt;F&gt;().map(f, fa)
+<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">map</span>&lt;F <span style="font-weight: bold;">extends</span> FunctorInstance, A, B&gt;(f: (v: A) =&gt; B, fa: $&lt;F, A&gt;): $&lt;F, B&gt; {
+  <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Functor</span>&lt;F&gt;().map(f, fa)
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 但是 TypeScript 的弱弱的类型系统不会帮你找到 <code>Functor&lt;F&gt;</code> 的实例, Typescript 无法通过类型 <code>Functor&lt;"Xstream"&gt;</code> 就能找到
@@ -404,25 +339,19 @@ Typeclass 可以想象为函数式编程的一种设计模式, 虽然并没有�
 <p>
 解决方法有些麻烦, 类似于类型 <code>_</code> , 我们还需要一个字典, 但是这次是值字典而不是类型字典
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js">namespace Functor {
-  <span style="color: #00008b;">const</span> <span style="color: #b8860b;">Xstream</span> = <span style="color: #00008b;">new</span> <span style="color: #36648b;">XstreamFunctor</span>
-  <span style="color: #00008b;">const</span> <span style="color: #b8860b;">Ystream</span> = <span style="color: #00008b;">new</span> <span style="color: #36648b;">YstreamFunctor</span>
+<pre class="code"><code>namespace Functor {
+  <span style="font-weight: bold;">const</span> <span style="font-weight: bold; font-style: italic;">Xstream</span> = <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">XstreamFunctor</span>
+  <span style="font-weight: bold;">const</span> <span style="font-weight: bold; font-style: italic;">Ystream</span> = <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">YstreamFunctor</span>
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 Functor 字典存放所有 Functor 实例, 以类型名为 key
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js">Functor[<span style="color: #8b0000;">'Xstream'</span>].map(a=&gt;a+1, <span style="color: #00008b;">new</span> <span style="color: #36648b;">Xstream</span>(1))
-Functor[<span style="color: #8b0000;">'Ystream'</span>].map(a=&gt;a+1, <span style="color: #00008b;">new</span> <span style="color: #36648b;">Ystream</span>(1))
-</pre>
-</div>
+<pre class="code"><code>Functor[<span style="font-style: italic;">'Xstream'</span>].map(a=&gt;a+1, <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Xstream</span>(1))
+Functor[<span style="font-style: italic;">'Ystream'</span>].map(a=&gt;a+1, <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Ystream</span>(1))
+</code></pre>
 
 <p>
 用的时候用类型名查找, 但问题是, 类型名是个 String 值, 不是一个类型
@@ -432,23 +361,17 @@ Functor[<span style="color: #8b0000;">'Ystream'</span>].map(a=&gt;a+1, <span sty
 不管了, 先看看实现 <code>map</code> 还缺些什么
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js">type FunctorInstance = keyof <span style="color: #00008b;">typeof</span> Functor
-</pre>
-</div>
+<pre class="code"><code>type FunctorInstance = keyof <span style="font-weight: bold;">typeof</span> Functor
+</code></pre>
 
 <p>
-<code>FunctorInstance</code> 目前来说是 ='Xstream' | 'Ystream'=
+<code>FunctorInstance</code> 目前来说是 <code>'Xstream' | 'Ystream'</code>
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">map</span>&lt;F <span style="color: #00008b;">extends</span> FunctorInstance, A, B&gt;(f: (v: A) =&gt; B, fa: $&lt;F, A&gt;): $&lt;F, B&gt; {
-  <span style="color: #00008b;">return</span> Functor[F].map(f, fa)
+<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">map</span>&lt;F <span style="font-weight: bold;">extends</span> FunctorInstance, A, B&gt;(f: (v: A) =&gt; B, fa: $&lt;F, A&gt;): $&lt;F, B&gt; {
+  <span style="font-weight: bold;">return</span> Functor[F].map(f, fa)
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 这样还是编译不过的, 正如刚刚说的, <code>F</code> 是类型 <code>Functor[F]</code> 需要的 <code>F</code> 是值.
@@ -467,15 +390,12 @@ JS 中没法得到 <code>F</code> 的任何信息.
 </p>
 
 <p>
-例如我们都知道 <code>fa</code> 的 constructor.name 是 ='Xstream'=
+例如我们都知道 <code>fa</code> 的 constructor.name 是 <code>'Xstream'</code>
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">map</span>&lt;F <span style="color: #00008b;">extends</span> FunctorInstance, A, B&gt;(f: (v: A) =&gt; B, fa: $&lt;F, A&gt;): $&lt;F, B&gt; {
-  <span style="color: #00008b;">return</span> Functor[fa.constructor.name as F].map(f, fa)
+<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">map</span>&lt;F <span style="font-weight: bold;">extends</span> FunctorInstance, A, B&gt;(f: (v: A) =&gt; B, fa: $&lt;F, A&gt;): $&lt;F, B&gt; {
+  <span style="font-weight: bold;">return</span> Functor[fa.constructor.name as F].map(f, fa)
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 马德这还是编译不过
@@ -489,24 +409,18 @@ JS 中没法得到 <code>F</code> 的任何信息.
 但是我们明明知道 <code>Xstream</code> 一定会叨叨 <code>XstreamFunctor</code> 而 <code>Ystream</code> 一定会找到  <code>YStreamFunctor</code>, 只能越过 TypeScript 的萨比检查了.
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">map</span>&lt;F <span style="color: #00008b;">extends</span> FunctorInstance, A, B&gt;(f: (v: A) =&gt; B, fa: $&lt;F, A&gt;): $&lt;F, B&gt; {
-  <span style="color: #00008b;">return</span> (&lt;any&gt;Functor[fa.constructor.name as F]).map(f, fa) as $&lt;F, B&gt;
+<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">map</span>&lt;F <span style="font-weight: bold;">extends</span> FunctorInstance, A, B&gt;(f: (v: A) =&gt; B, fa: $&lt;F, A&gt;): $&lt;F, B&gt; {
+  <span style="font-weight: bold;">return</span> (&lt;any&gt;Functor[fa.constructor.name as F]).map(f, fa) as $&lt;F, B&gt;
 }
-</pre>
-</div>
+</code></pre>
 
 
 <p>
 让我试试类型多态的 map
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js">map&lt;<span style="color: #8b0000;">"Xstream"</span>, number, number&gt;(a=&gt;a+1, <span style="color: #00008b;">new</span> <span style="color: #36648b;">Xstream</span>(1))
-map&lt;<span style="color: #8b0000;">"Ystream"</span>, number, number&gt;(a=&gt;a+1, <span style="color: #00008b;">new</span> <span style="color: #36648b;">Ystream</span>(1))
-</pre>
-</div>
+<pre class="code"><code>map&lt;<span style="font-style: italic;">"Xstream"</span>, number, number&gt;(a=&gt;a+1, <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Xstream</span>(1))
+map&lt;<span style="font-style: italic;">"Ystream"</span>, number, number&gt;(a=&gt;a+1, <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Ystream</span>(1))
+</code></pre>
 
 <p>
 终于工作了
@@ -518,9 +432,9 @@ map&lt;<span style="color: #8b0000;">"Ystream"</span>, number, number&gt;(a=&gt;
 </div>
 </div>
 
-<div id="outline-container-orgheadline4" class="outline-3">
-<h3 id="orgheadline4">Reflect Metadata</h3>
-<div class="outline-text-3" id="text-orgheadline4">
+<div id="outline-container-org239851c" class="outline-3">
+<h3 id="org239851c">Reflect Metadata</h3>
+<div class="outline-text-3" id="text-org239851c">
 <p>
 比较妥善的办法是通过 <a href="https://github.com/rbuckton/reflect-metadata">Reflect Metadata</a>, 已经是 ECMA 的一个 proposal 但是不知什么时候会通过, 也不知道现在是stage 几, 反正 TypeScript 在推, Angular 在用, 也有polyfill
 </p>
@@ -534,57 +448,45 @@ map&lt;<span style="color: #8b0000;">"Ystream"</span>, number, number&gt;(a=&gt;
 <li><code>kind</code> 取出来</li>
 </ul>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">datatype</span>(<span style="color: #b8860b;">name</span>: <span style="color: #b8860b;">string</span>) {
-  <span style="color: #00008b;">return</span> (constructor: Function) =&gt; {
-    Reflect.defineMetadata(<span style="color: #8b0000;">'design:type'</span>, name, constructor);
+<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">datatype</span>(<span style="font-weight: bold; font-style: italic;">name</span>: <span style="font-weight: bold; font-style: italic;">string</span>) {
+  <span style="font-weight: bold;">return</span> (constructor: Function) =&gt; {
+    Reflect.defineMetadata(<span style="font-style: italic;">'design:type'</span>, name, constructor);
   }
 }
 
-<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">kind</span>(<span style="color: #b8860b;">target</span>: <span style="color: #b8860b;">any</span>) {
-  <span style="color: #00008b;">return</span> Reflect.getMetadata(<span style="color: #8b0000;">'design:type'</span>, target.constructor);
+<span style="font-weight: bold;">function</span> <span style="font-weight: bold;">kind</span>(<span style="font-weight: bold; font-style: italic;">target</span>: <span style="font-weight: bold; font-style: italic;">any</span>) {
+  <span style="font-weight: bold;">return</span> Reflect.getMetadata(<span style="font-style: italic;">'design:type'</span>, target.constructor);
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 比如 Tag Xstream
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js">datatype(<span style="color: #8b0000;">'Xstream'</span>)(Xstream)
-</pre>
-</div>
+<pre class="code"><code>datatype(<span style="font-style: italic;">'Xstream'</span>)(Xstream)
+</code></pre>
 
 <p>
 或是用 decorator 在声明class时加
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js">@datatype(<span style="color: #8b0000;">'Xstream'</span>)
-<span style="color: #00008b;">class</span> Xstream&lt;A&gt; {...}
-</pre>
-</div>
+<pre class="code"><code>@datatype(<span style="font-style: italic;">'Xstream'</span>)
+<span style="font-weight: bold;">class</span> Xstream&lt;A&gt; {...}
+</code></pre>
 
 <p>
 这样, 就可在 <code>map</code> 上使用 kind 拿到可靠的 key 了.
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">map</span>&lt;F <span style="color: #00008b;">extends</span> FunctorInstance, A, B&gt;(f: (v: A) =&gt; B, fa: $&lt;F, A&gt;): $&lt;F, B&gt; {
-  <span style="color: #00008b;">return</span> (&lt;any&gt;Functor[kind(fa) as F]).map(f, fa) as $&lt;F, B&gt;
+<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">map</span>&lt;F <span style="font-weight: bold;">extends</span> FunctorInstance, A, B&gt;(f: (v: A) =&gt; B, fa: $&lt;F, A&gt;): $&lt;F, B&gt; {
+  <span style="font-weight: bold;">return</span> (&lt;any&gt;Functor[kind(fa) as F]).map(f, fa) as $&lt;F, B&gt;
 }
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 </div>
 
 
-<div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5">Cartesian</h2>
-<div class="outline-text-2" id="text-orgheadline5">
+<div id="outline-container-org5c89236" class="outline-2">
+<h2 id="org5c89236">Cartesian</h2>
+<div class="outline-text-2" id="text-org5c89236">
 <p>
 这么久就讲了一个 Type Class, 下面随便讲两个常用的, 体会体会用 TypeClass 的好处吧
 </p>
@@ -601,44 +503,38 @@ map&lt;<span style="color: #8b0000;">"Ystream"</span>, number, number&gt;(a=&gt;
 Cartesian 只有一个函数 <code>product</code>, 可以把两个数据类型合并成一个, 其内部数据合并成 tuple
 </p>
 
-<div class="org-src-container">
+<pre class="code"><code>type CartesianInstances = keyof <span style="font-weight: bold;">typeof</span> Cartesian
 
-<pre class="src src-js">type CartesianInstances = keyof <span style="color: #00008b;">typeof</span> Cartesian
-
-<span style="color: #00008b;">interface</span> Cartesian&lt;F <span style="color: #00008b;">extends</span> HKT&gt; {
+<span style="font-weight: bold;">interface</span> Cartesian&lt;F <span style="font-weight: bold;">extends</span> HKT&gt; {
   product&lt;A, B&gt;(fa: $&lt;F, A&gt;, fb: $&lt;F, B&gt;): $&lt;F, [A, B]&gt;
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 羡慕我们来实现 Xstream  的 Cartesian 实例
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js">namespace Cartesian {
-  <span style="color: #00008b;">export</span> <span style="color: #00008b;">let</span> <span style="color: #b8860b;">Xstream</span>: Cartesian&lt;<span style="color: #8b0000;">"Xstream"</span>&gt;
+<pre class="code"><code>namespace Cartesian {
+  <span style="font-weight: bold;">export</span> <span style="font-weight: bold;">let</span> <span style="font-weight: bold; font-style: italic;">Xstream</span>: Cartesian&lt;<span style="font-style: italic;">"Xstream"</span>&gt;
 }
 
-<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">product</span>&lt;F <span style="color: #00008b;">extends</span> CartesianInstances, A, B&gt;(fa: $&lt;F, A&gt;, fb: $&lt;F, B&gt;): $&lt;F, [A, B]&gt; {
-  <span style="color: #00008b;">let</span> <span style="color: #b8860b;">instance</span> = (&lt;any&gt;Cartesian)[kind(fa)]
-  <span style="color: #00008b;">return</span> instance.product(fa, fb) as $&lt;F, [A, B]&gt;
+<span style="font-weight: bold;">function</span> <span style="font-weight: bold;">product</span>&lt;F <span style="font-weight: bold;">extends</span> CartesianInstances, A, B&gt;(fa: $&lt;F, A&gt;, fb: $&lt;F, B&gt;): $&lt;F, [A, B]&gt; {
+  <span style="font-weight: bold;">let</span> <span style="font-weight: bold; font-style: italic;">instance</span> = (&lt;any&gt;Cartesian)[kind(fa)]
+  <span style="font-weight: bold;">return</span> instance.product(fa, fb) as $&lt;F, [A, B]&gt;
 }
 
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">Cartesian Xstream instance</span>
-<span style="color: #00008b;">class</span> XstreamCartesian <span style="color: #00008b;">implements</span> Cartesian&lt;<span style="color: #8b0000;">"Xstream"</span>&gt; {
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">Cartesian Xstream instance</span>
+<span style="font-weight: bold;">class</span> XstreamCartesian <span style="font-weight: bold;">implements</span> Cartesian&lt;<span style="font-style: italic;">"Xstream"</span>&gt; {
   product&lt;A, B&gt;(fa: Xstream&lt;A&gt;, fb: Xstream&lt;B&gt;): Xstream&lt;[A, B]&gt; {
-    <span style="color: #00008b;">return</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Xstream</span>([fa.value, fb.value] as [A, B])
+    <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Xstream</span>([fa.value, fb.value] as [A, B])
   }
 }
 
-Cartesian.Xstream = <span style="color: #00008b;">new</span> <span style="color: #36648b;">XstreamCartesian</span>
+Cartesian.Xstream = <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">XstreamCartesian</span>
 
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">product of two Xstream</span>
-product&lt;<span style="color: #8b0000;">"Xstream"</span>, number, number&gt;(<span style="color: #00008b;">new</span> <span style="color: #36648b;">Xstream</span>(1), <span style="color: #00008b;">new</span> <span style="color: #36648b;">Xstream</span>(2))
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; Xstream([1,2])</span>
-</pre>
-</div>
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">product of two Xstream</span>
+product&lt;<span style="font-style: italic;">"Xstream"</span>, number, number&gt;(<span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Xstream</span>(1), <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Xstream</span>(2))
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">=&gt; Xstream([1,2])</span>
+</code></pre>
 
 <p>
 一个新的能作用在 <code>Xstream</code> 类型上的函数就这么定义好了.
@@ -646,78 +542,66 @@ product&lt;<span style="color: #8b0000;">"Xstream"</span>, number, number&gt;(<s
 </div>
 </div>
 
-<div id="outline-container-orgheadline6" class="outline-2">
-<h2 id="orgheadline6">Apply</h2>
-<div class="outline-text-2" id="text-orgheadline6">
+<div id="outline-container-org0f00d0b" class="outline-2">
+<h2 id="org0f00d0b">Apply</h2>
+<div class="outline-text-2" id="text-org0f00d0b">
 <p>
 同样还可以扩展 TypeClass, 比如 Apply 就扩展了 Cartesian 和 Functor
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">interface</span> Apply&lt;F <span style="color: #00008b;">extends</span> HKT&gt; <span style="color: #00008b;">extends</span> Cartesian&lt;F&gt;, Functor&lt;F&gt; {
+<pre class="code"><code><span style="font-weight: bold;">interface</span> Apply&lt;F <span style="font-weight: bold;">extends</span> HKT&gt; <span style="font-weight: bold;">extends</span> Cartesian&lt;F&gt;, Functor&lt;F&gt; {
   ap&lt;A, B&gt;(fab: $&lt;F, (a: A) =&gt; B&gt;, fa: $&lt;F, A&gt;): $&lt;F, B&gt;
 }
 
-type ApplyInstances = keyof <span style="color: #00008b;">typeof</span> Apply
+type ApplyInstances = keyof <span style="font-weight: bold;">typeof</span> Apply
 
 namespace Apply {
-  <span style="color: #00008b;">export</span> <span style="color: #00008b;">let</span> <span style="color: #b8860b;">Xstream</span>: Apply&lt;<span style="color: #8b0000;">"Xstream"</span>&gt;
+  <span style="font-weight: bold;">export</span> <span style="font-weight: bold;">let</span> <span style="font-weight: bold; font-style: italic;">Xstream</span>: Apply&lt;<span style="font-style: italic;">"Xstream"</span>&gt;
 }
 
-<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">ap</span>&lt;F <span style="color: #00008b;">extends</span> ApplyInstances, A, B&gt;(fab: $&lt;F, (a: A) =&gt; B&gt;, fa: $&lt;F, A&gt;): $&lt;F, B&gt; {
-  <span style="color: #00008b;">let</span> <span style="color: #b8860b;">instance</span> = (&lt;any&gt;Functor)[kind(fab)]
-  <span style="color: #00008b;">return</span> instance.ap(fab, fa) as $&lt;F, B&gt;
+<span style="font-weight: bold;">function</span> <span style="font-weight: bold;">ap</span>&lt;F <span style="font-weight: bold;">extends</span> ApplyInstances, A, B&gt;(fab: $&lt;F, (a: A) =&gt; B&gt;, fa: $&lt;F, A&gt;): $&lt;F, B&gt; {
+  <span style="font-weight: bold;">let</span> <span style="font-weight: bold; font-style: italic;">instance</span> = (&lt;any&gt;Functor)[kind(fab)]
+  <span style="font-weight: bold;">return</span> instance.ap(fab, fa) as $&lt;F, B&gt;
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 在实现 Xstream 的实例时, 别忘了吧 map 和 product 都 alias到对应 Type Class 的方法上.
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">class</span> XstreamApply <span style="color: #00008b;">implements</span> Apply&lt;<span style="color: #8b0000;">"Xstream"</span>&gt; {
+<pre class="code"><code><span style="font-weight: bold;">class</span> XstreamApply <span style="font-weight: bold;">implements</span> Apply&lt;<span style="font-style: italic;">"Xstream"</span>&gt; {
   ap&lt;A, B&gt;(fab: Xstream&lt;(a: A) =&gt; B&gt;, fa: Xstream&lt;A&gt;): Xstream&lt;B&gt; {
-    <span style="color: #00008b;">return</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Xstream</span>(fab.value(fa.value))
+    <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Xstream</span>(fab.value(fa.value))
   }
   map = Functor.Xstream.map
   product = Cartesian.Xstream.product
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 如果我们给 TypeClass 上加方法, 所有的实例也立马可以享受到
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00008b;">export</span> <span style="color: #00008b;">function</span> ap2&lt;F <span style="color: #00008b;">extends</span> ApplyInstances, A, B, C&gt;(fabc: $&lt;F, (a: A, b: B) =&gt; C&gt;, fa: $&lt;F, A&gt;, fb: $&lt;F, B&gt;): $&lt;F, C&gt; {
-  <span style="color: #00008b;">let</span> <span style="color: #b8860b;">instance</span>: any = Apply[kind(fabc) as F]
-  <span style="color: #00008b;">return</span> instance.ap(
+<pre class="code"><code><span style="font-weight: bold;">export</span> <span style="font-weight: bold;">function</span> ap2&lt;F <span style="font-weight: bold;">extends</span> ApplyInstances, A, B, C&gt;(fabc: $&lt;F, (a: A, b: B) =&gt; C&gt;, fa: $&lt;F, A&gt;, fb: $&lt;F, B&gt;): $&lt;F, C&gt; {
+  <span style="font-weight: bold;">let</span> <span style="font-weight: bold; font-style: italic;">instance</span>: any = Apply[kind(fabc) as F]
+  <span style="font-weight: bold;">return</span> instance.ap(
     instance.map(
       (f: (a: A, b: B) =&gt; C) =&gt; (([a, b]: [A, B]) =&gt; f(a, b))
       , fabc)
     , instance.product(fa, fb)
   ) as $&lt;F, C&gt;
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 现在 Xstream 自然就可以 <code>ap2</code> 了
 </p>
-<div class="org-src-container">
-
-<pre class="src src-js">ap2&lt;<span style="color: #8b0000;">"Xstream"</span>, number, number, number&gt;(
-  <span style="color: #00008b;">new</span> <span style="color: #36648b;">Xstream</span>((a: number, b: number) =&gt; a + b),
-  <span style="color: #00008b;">new</span> <span style="color: #36648b;">Xstream</span>(2),
-  <span style="color: #00008b;">new</span> <span style="color: #36648b;">Xstream</span>(3)
+<pre class="code"><code>ap2&lt;<span style="font-style: italic;">"Xstream"</span>, number, number, number&gt;(
+  <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Xstream</span>((a: number, b: number) =&gt; a + b),
+  <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Xstream</span>(2),
+  <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">Xstream</span>(3)
 )
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; Xstream(5)</span>
-</pre>
-</div>
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">=&gt; Xstream(5)</span>
+</code></pre>
 
 
 <p>
@@ -729,16 +613,14 @@ namespace Apply {
 <div id="postamble" class="status">
 <footer>
   <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2017-10-24 Tue 14:16</p>
-  <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6) x <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
-  <a class="gumroad-button" href="https://gum.co/grokking-monad">我的新书 Grokking Monad 现已发售，请自觉排队装逼</a>
-
-  <a class="github-fork-ribbon right-bottom fixed" href="https://github.com/jcouyang/blog" title="Fork me on GitHub">Fork me on GitHub</a>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
 </footer>
-
-<div id="disqus_thread"></div>
 </div>
 </body>
 </html>

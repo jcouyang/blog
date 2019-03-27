@@ -1,36 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-<!-- 2017-11-26 Sun 14:17 -->
-<meta  charset="utf-8">
-<meta  name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2019-03-27 Wed 02:21 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>自制语言初试 - 入lang</title>
-<meta  name="generator" content="Org-mode">
-<meta  name="author" content="Jichao Ouyang">
-<meta  name="keywords" content="macro, javascript, clojure, lisp, sweetjs, meta programming">
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                                                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                                                                                              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                                                                                                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-NJRFJGX');</script>
-<!-- End Google Tag Manager -->
+<meta name="generator" content="Org mode">
+<meta name="author" content="root">
+<meta name="keywords" content="macro, javascript, clojure, lisp, sweetjs, meta programming">
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/style/pixyll.css"/>
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css" />
-<!--[if lt IE 9]>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.ie.min.css" />
-     <![endif]-->
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2013 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -82,9 +72,8 @@ for the JavaScript code in this tag.
     <a accesskey="h" href="/index.html"> HOME </a> |
     <a href="#" id="edit-in-github">EDIT</a> |
     <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
-    <a href="/archive.html">ARCHIVE</a> |
-    <a href="/theindex.html">INDEX</a> |
-    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a>
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
 <div id="content">
@@ -94,29 +83,29 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">Rationale(为毛要整一门语言)</a>
+<li><a href="#org0aa462a">Rationale(为毛要整一门语言)</a>
 <ul>
-<li><a href="#orgheadline2">ClojureScript怎么就不好了</a></li>
-<li><a href="#orgheadline3">ClojureScript的数据结构移植</a></li>
-<li><a href="#orgheadline4">那macro呢</a></li>
+<li><a href="#org51631d0">ClojureScript怎么就不好了</a></li>
+<li><a href="#orgcbd02f9">ClojureScript的数据结构移植</a></li>
+<li><a href="#org2632c16">那macro呢</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline5">Ru-lang, The First Attampt</a>
+<li><a href="#org01554f7">Ru-lang, The First Attampt</a>
 <ul>
-<li><a href="#orgheadline6">lambda</a></li>
-<li><a href="#orgheadline7">Let</a>
+<li><a href="#orgcfe290d">lambda</a></li>
+<li><a href="#org0548960">Let</a>
 <ul>
-<li><a href="#orgheadline8">block scope binding</a></li>
-<li><a href="#orgheadline9">destruture array</a></li>
-<li><a href="#orgheadline10">looprecur</a></li>
+<li><a href="#org5febc96">block scope binding</a></li>
+<li><a href="#org8199fde">destruture array</a></li>
+<li><a href="#org1536c70">looprecur</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline11">Existential ?</a>
+<li><a href="#orgc668425">Existential ?</a>
 <ul>
-<li><a href="#orgheadline12">Infix macro</a></li>
+<li><a href="#org92abd8a">Infix macro</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline13">在哪里才能买到呢</a></li>
+<li><a href="#org61700de">在哪里才能买到呢</a></li>
 </ul>
 </li>
 </ul>
@@ -126,19 +115,19 @@ for the JavaScript code in this tag.
 
 <a href="https://news.ycombinator.com/submit" class="hn-button" data-url="http://ru-lang.org" data-count="horizontal">Vote on Hacker News</a><script type="text/javascript">var HN=[];HN.factory=function(e){return function(){HN.push([e].concat(Array.prototype.slice.call(arguments,0)))};},HN.on=HN.factory("on"),HN.once=HN.factory("once"),HN.off=HN.factory("off"),HN.emit=HN.factory("emit"),HN.load=function(){var e="hn-button.js";if(document.getElementById(e))return;var t=document.createElement("script");t.id=e,t.src="//hn-button.herokuapp.com/hn-button.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(t,n)},HN.load();</script>
 
-<div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1">Rationale(为毛要整一门语言)</h2>
-<div class="outline-text-2" id="text-orgheadline1">
+<div id="outline-container-org0aa462a" class="outline-2">
+<h2 id="org0aa462a">Rationale(为毛要整一门语言)</h2>
+<div class="outline-text-2" id="text-org0aa462a">
 
 <figure>
-<p><img src="./images/tv-giving-me-reason-to-live.gif" alt="tv-giving-me-reason-to-live.gif">
-</p>
+<img src="./images/tv-giving-me-reason-to-live.gif" alt="tv-giving-me-reason-to-live.gif">
+
 </figure>
 </div>
 
-<div id="outline-container-orgheadline2" class="outline-3">
-<h3 id="orgheadline2">ClojureScript怎么就不好了</h3>
-<div class="outline-text-3" id="text-orgheadline2">
+<div id="outline-container-org51631d0" class="outline-3">
+<h3 id="org51631d0">ClojureScript怎么就不好了</h3>
+<div class="outline-text-3" id="text-org51631d0">
 <p>
 接上篇简单的介绍sweet.js之后, 萌发了特别crazy的idea. 如果CoffeeScript或者LiveScript也算
 语言的话, 其实单单用sweet.js自制一堆macro就能实现类似的语言. 当然, 这两门语言都比较奇特, 一个
@@ -153,18 +142,19 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgheadline3" class="outline-3">
-<h3 id="orgheadline3">ClojureScript的数据结构移植</h3>
-<div class="outline-text-3" id="text-orgheadline3">
+<div id="outline-container-orgcbd02f9" class="outline-3">
+<h3 id="orgcbd02f9">ClojureScript的数据结构移植</h3>
+<div class="outline-text-3" id="text-orgcbd02f9">
 <p>
 ClojureScript的作者David做了一个非常有意思的项目,把ClojureScript的数据结构单独导出来做成类似underscore的库 - <a href="https://github.com/swannodette/mori">mori</a>.
 官方的解释是
 </p>
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 A simple bridge to ClojureScript's persistent data structures and supporting APIs for vanilla JavaScrip
 </p>
-</blockquote>
+
+</blockquote></div>
 <p>
 恩, 这不正是我想要的吗. 可以直接在JavaScript中使用ClojureScript的数据结构.
 </p>
@@ -175,9 +165,9 @@ A simple bridge to ClojureScript's persistent data structures and supporting API
 </div>
 </div>
 
-<div id="outline-container-orgheadline4" class="outline-3">
-<h3 id="orgheadline4">那macro呢</h3>
-<div class="outline-text-3" id="text-orgheadline4">
+<div id="outline-container-org2632c16" class="outline-3">
+<h3 id="org2632c16">那macro呢</h3>
+<div class="outline-text-3" id="text-org2632c16">
 <p>
 David导出了所有的数据结构以及function, 但是像macro却不可能直接导成JavaScript, 因为是编译时
 扩展的.
@@ -190,23 +180,24 @@ David导出了所有的数据结构以及function, 但是像macro却不可能直
 
 <p>
 于是为了验证移植macro的可能性, 我用Sweet.js实现了部分macro或者clojure的keyword, 我把这些
-macros和mori的集合叫 <a href="http://ru-lang.org/">ru-lang</a> , 这样就可以用类似JavaScript的形式, 使用到所有Clojure的好处.
+macros和mori的集合叫 <a href="http://ru-lang.org">ru-lang</a> , 这样就可以用类似JavaScript的形式, 使用到所有Clojure的好处.
 </p>
 
-<blockquote>
+<div class="epigraph"><blockquote>
 <p>
 Hacker News 上的讨论 <a href="https://news.ycombinator.com/item?id=9749286">https://news.ycombinator.com/item?id=9749286</a>
 </p>
-</blockquote>
+
+</blockquote></div>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5">Ru-lang, The First Attampt</h2>
-<div class="outline-text-2" id="text-orgheadline5">
+<div id="outline-container-org01554f7" class="outline-2">
+<h2 id="org01554f7">Ru-lang, The First Attampt</h2>
+<div class="outline-text-2" id="text-org01554f7">
 <p>
-叫做  <a href="http://ru-lang.org/">ru-lang</a> 有两层意思
+叫做  <a href="http://ru-lang.org">ru-lang</a> 有两层意思
 </p>
 <ul class="org-ul">
 <li>"入"长得像 &lambda; 的汉字, 所以 "入-lang" 也长得像 Clojure 的 JavaScript</li>
@@ -214,18 +205,15 @@ Hacker News 上的讨论 <a href="https://news.ycombinator.com/item?id=9749286">
 </ul>
 </div>
 
-<div id="outline-container-orgheadline6" class="outline-3">
-<h3 id="orgheadline6">lambda</h3>
-<div class="outline-text-3" id="text-orgheadline6">
+<div id="outline-container-orgcfe290d" class="outline-3">
+<h3 id="orgcfe290d">lambda</h3>
+<div class="outline-text-3" id="text-orgcfe290d">
 <p>
 Clojure有一个很cool的macro, <code>#{}</code>, 匿名函数的macro, cool的地方是它可以用 <code>%1</code>, <code>%2</code>
 代表第几个参数. 特别方便比如是在用map的时候
 </p>
-<div class="org-src-container">
-
-<pre class="src src-clojure">(map #(<span style="color: #b8860b;">%</span>+3) [1,2,3,4])
-</pre>
-</div>
+<pre class="code"><code>(map #(<span style="font-weight: bold; font-style: italic;">%</span>+3) [1,2,3,4])
+</code></pre>
 
 <p>
 移植这个macro还是比较简单的, 虽然真正的 <code>#</code> 在clojure中是一个切换reader table的标志, 可能
@@ -236,11 +224,8 @@ Clojure有一个很cool的macro, <code>#{}</code>, 匿名函数的macro, cool的
 由于#算是sweetjs的保留字符, 我把 <code>#</code> 换成 <code>fn</code> 来代替, <code>%</code> 在js里又是运算符, 改用 <code>$</code> 代替, 
 那么ru-lang版的匿名函数就变成了
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">map(fn($+3), [1,2,3,4])
-</pre>
-</div>
+<pre class="code"><code>map(fn($+3), [1,2,3,4])
+</code></pre>
 
 <p>
 很像clojure对不对, 但是又还是保留了js的语法, 是不是有点感觉怪怪的东西悄悄乱入了
@@ -255,34 +240,31 @@ Clojure有一个很cool的macro, <code>#{}</code>, 匿名函数的macro, cool的
 <li>用js的匿名函数包上, 返回</li>
 </ol>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript">macro fn {
-<span style="color: #00008b;">case</span> {
+<pre class="code"><code>macro fn {
+<span style="font-weight: bold;">case</span> {
   $ctx
   ($body:expr)
 }=&gt;{
-  <span style="color: #00008b;">function</span> <span style="color: #6a5acd;">replace_args</span>(<span style="color: #b8860b;">stxs</span>){
-    <span style="color: #00008b;">return</span> stxs.map(<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">x</span>){
-      <span style="color: #00008b;">if</span>(x.token.inner) {x.token.inner = replace_args(x.token.inner); <span style="color: #00008b;">return</span> x}
-      <span style="color: #00008b;">if</span>(x.token.type==parser.Token.Identifier &amp;&amp; x.token.value.match(<span style="color: #8b0000;">/^\$(\d?)$/</span>)){
-        <span style="color: #00008b;">var</span> <span style="color: #b8860b;">num</span> = x.token.value.match(<span style="color: #8b0000;">/^\$(\d?)$/</span>).pop()
-        <span style="color: #00008b;">if</span>(!num) num=1;
-        <span style="color: #00008b;">return</span> makeIdent(<span style="color: #8b0000;">'arguments['</span>+(num-1)+<span style="color: #8b0000;">']'</span>,#{$body});
+  <span style="font-weight: bold;">function</span> <span style="font-weight: bold;">replace_args</span>(<span style="font-weight: bold; font-style: italic;">stxs</span>){
+    <span style="font-weight: bold;">return</span> stxs.map(<span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">x</span>){
+      <span style="font-weight: bold;">if</span>(x.token.inner) {x.token.inner = replace_args(x.token.inner); <span style="font-weight: bold;">return</span> x}
+      <span style="font-weight: bold;">if</span>(x.token.type==parser.Token.Identifier &amp;&amp; x.token.value.match(<span style="font-style: italic;">/^\$(\d?)$/</span>)){
+        <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">num</span> = x.token.value.match(<span style="font-style: italic;">/^\$(\d?)$/</span>).pop()
+        <span style="font-weight: bold;">if</span>(!num) num=1;
+        <span style="font-weight: bold;">return</span> makeIdent(<span style="font-style: italic;">'arguments['</span>+(num-1)+<span style="font-style: italic;">']'</span>,#{$body});
       }
-      <span style="color: #00008b;">return</span> x;
+      <span style="font-weight: bold;">return</span> x;
     })
   }
-  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">body</span> = replace_args(#{$body})
+  <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">body</span> = replace_args(#{$body})
   letstx $new_body = body
-  <span style="color: #00008b;">return</span> #{
-    (<span style="color: #00008b;">function</span>(){<span style="color: #00008b;">return</span> $new_body})}
+  <span style="font-weight: bold;">return</span> #{
+    (<span style="font-weight: bold;">function</span>(){<span style="font-weight: bold;">return</span> $new_body})}
 }
 }
 
-<span style="color: #00008b;">export</span> fn;
-</pre>
-</div>
+<span style="font-weight: bold;">export</span> fn;
+</code></pre>
 
 <p>
 注意 <code>replace_args</code> 是递归的去替换所有token以及token的inner token
@@ -294,9 +276,9 @@ Clojure有一个很cool的macro, <code>#{}</code>, 匿名函数的macro, cool的
 </div>
 </div>
 
-<div id="outline-container-orgheadline7" class="outline-3">
-<h3 id="orgheadline7">Let</h3>
-<div class="outline-text-3" id="text-orgheadline7">
+<div id="outline-container-org0548960" class="outline-3">
+<h3 id="org0548960">Let</h3>
+<div class="outline-text-3" id="text-org0548960">
 <p>
 let 怎么就难了&#x2026;
 </p>
@@ -325,34 +307,28 @@ let 怎么就难了&#x2026;
 </p>
 </div>
 
-<div id="outline-container-orgheadline8" class="outline-4">
-<h4 id="orgheadline8">block scope binding</h4>
-<div class="outline-text-4" id="text-orgheadline8">
+<div id="outline-container-org5febc96" class="outline-4">
+<h4 id="org5febc96">block scope binding</h4>
+<div class="outline-text-4" id="text-org5febc96">
 <p>
 我们都知道js var是function scope, 也就是说可以
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span> =1;
-<span style="color: #00008b;">for</span>(<span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span>=0;a&lt;3;a++){
-  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">b</span> = a+1
+<pre class="code"><code><span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">a</span> =1;
+<span style="font-weight: bold;">for</span>(<span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">a</span>=0;a&lt;3;a++){
+  <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">b</span> = a+1
 }
-console.log(a, b)<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; 3,3</span>
-</pre>
-</div>
+console.log(a, b)<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">=&gt; 3,3</span>
+</code></pre>
 
 <p>
 所有的var会被hoist到函数的顶部, 相当于
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span>,<span style="color: #b8860b;">b</span>;
+<pre class="code"><code><span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">a</span>,<span style="font-weight: bold; font-style: italic;">b</span>;
 a=1
-  <span style="color: #00008b;">for</span>(a=0;a&lt;3;a++){
+  <span style="font-weight: bold;">for</span>(a=0;a&lt;3;a++){
     b = a+1
   }
-</pre>
-</div>
+</code></pre>
 
 <p>
 虽然 <a href="./essential-ecmascript6.html">es6 支持了 let block scope</a> 局部变量的定义, 但还是没有类似clojure的 let 表达式
@@ -362,39 +338,30 @@ a=1
 我喜欢能有这样一个东西
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">let</span>(a=1,b=2){a+b} === 3
-</pre>
-</div>
+<pre class="code"><code><span style="font-weight: bold;">let</span>(a=1,b=2){a+b} === 3
+</code></pre>
 
 <p>
 由于js只有function scope, 所以应该要扩展成
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #00008b;">function</span>(<span style="color: #b8860b;">a</span>,<span style="color: #b8860b;">b</span>){
-  <span style="color: #00008b;">return</span> a+b
+<pre class="code"><code><span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">a</span>,<span style="font-weight: bold; font-style: italic;">b</span>){
+  <span style="font-weight: bold;">return</span> a+b
 }(1,2)
-</pre>
-</div>
+</code></pre>
 
 
 <p>
 用macro实现这个再简单不过了
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">macro <span style="color: #00008b;">let</span> {
+<pre class="code"><code>macro <span style="font-weight: bold;">let</span> {
   rule { ($($key:ident=$val:expr) (,)...){$body:expr...$last:expr} } =&gt;{
-    (<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">$key</span>(,)...){
+    (<span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">$key</span>(,)...){
       $body...
-        <span style="color: #00008b;">return</span> $last
+        <span style="font-weight: bold;">return</span> $last
     })($val(,)...)
   }
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 so easy, <del>block scope binding</del>
@@ -402,124 +369,94 @@ so easy, <del>block scope binding</del>
 </div>
 </div>
 
-<div id="outline-container-orgheadline9" class="outline-4">
-<h4 id="orgheadline9">destruture array</h4>
-<div class="outline-text-4" id="text-orgheadline9">
+<div id="outline-container-org8199fde" class="outline-4">
+<h4 id="org8199fde">destruture array</h4>
+<div class="outline-text-4" id="text-org8199fde">
 <p>
 这个就稍微有那么点难度, 我们先把它分解成小问题
 </p>
 <ol class="org-ol">
 <li>一个空的binding返回空</li>
 </ol>
-<div class="org-src-container">
-
-<pre class="src src-javascript">[]=[1,2,3] -&gt; nothing
-</pre>
-</div>
+<pre class="code"><code>[]=[1,2,3] -&gt; nothing
+</code></pre>
 <ol class="org-ol">
 <li>一个正常的binding还是它自己</li>
 </ol>
-<div class="org-src-container">
-
-<pre class="src src-javascript">a=[1,2,3] -&gt; a=[1,2,3]
-</pre>
-</div>
+<pre class="code"><code>a=[1,2,3] -&gt; a=[1,2,3]
+</code></pre>
 <ol class="org-ol">
 <li>单个元素的destruct, 等于第一个元素</li>
 </ol>
-<div class="org-src-container">
-
-<pre class="src src-javascript">[a] = [1,2,3] -&gt; a=[1,2,3][0]
-</pre>
-</div>
+<pre class="code"><code>[a] = [1,2,3] -&gt; a=[1,2,3][0]
+</code></pre>
 <ol class="org-ol">
 <li>多个元素的destruct, 等于用第4部destruct头元素, 用5递归destruct尾部元素</li>
 </ol>
-<div class="org-src-container">
-
-<pre class="src src-javascript">[a,b,c] = [1,2,3] -&gt; destruct2(a=1), destruct5([,b,c]=[,2,3])
-</pre>
-</div>
+<pre class="code"><code>[a,b,c] = [1,2,3] -&gt; destruct2(a=1), destruct5([,b,c]=[,2,3])
+</code></pre>
 <ol class="org-ol">
 <li>尾部的destruct, 同样取第一个元素destruct, 然后自递归</li>
 </ol>
-<div class="org-src-container">
-
-<pre class="src src-javascript">[,b,c] = [,2,3] -&gt; destruct2(b=2), destruct5([,c]=[,3])
-</pre>
-</div>
+<pre class="code"><code>[,b,c] = [,2,3] -&gt; destruct2(b=2), destruct5([,c]=[,3])
+</code></pre>
 <ol class="org-ol">
 <li>最后一个元素的destruct</li>
 </ol>
-<div class="org-src-container">
-
-<pre class="src src-javascript">[,c] =[,3] -&gt; c=3
-</pre>
-</div>
+<pre class="code"><code>[,c] =[,3] -&gt; c=3
+</code></pre>
 
 <p>
 phewww&#x2026;&#x2026;分解完好像覆盖了所有情况了, 现在用macro实现就太简单了
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">macro destruct {
-  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">1</span>
+<pre class="code"><code>macro destruct {
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">1</span>
   rule {[]=$val:expr} =&gt; {}
-  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">2</span>
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">2</span>
   rule {$id:ident=$val:expr} =&gt; {$id=($val)}
-  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">3</span>
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">3</span>
   rule {[$id:ident]=$val:expr} =&gt; { $id=($val[0]) }
-  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">6</span>
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">6</span>
   rule { [,$last:ident]=$val:expr}=&gt;{$last=($val[0])}
-  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">5</span>
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">5</span>
   rule {[, $id:ident $tail...]=$val:expr}=&gt; {destruct $id=($val.shift()), destruct [$tail...]=$val.slice(1)}
-  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">4</span>
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">4</span>
   rule {[$id:ident $tail...]=$val:expr} =&gt; {destruct $id=($val.shift()), destruct [$tail...]=$val.slice(1)}
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 完了吗? 好像还没有, 万一有嵌套呢, 比如这样
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">[a, [b,c]] =[1,[2,3],4]
-</pre>
-</div>
+<pre class="code"><code>[a, [b,c]] =[1,[2,3],4]
+</code></pre>
 
 <p>
 好吧, 不就是再多一层递归么, 拨开便好了
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript"><span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">&#22836;&#37096;&#23884;&#22871;, &#25320;&#24320;</span>
+<pre class="code"><code><span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">&#22836;&#37096;&#23884;&#22871;, &#25320;&#24320;</span>
 rule {[[$id:ident]]=$val:expr} =&gt; { destruct [$id]=($val[0]) }
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&#23614;&#37096;&#23884;&#22871;, &#25320;&#24320;&#25320;&#24320;</span>
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#23614;&#37096;&#23884;&#22871;, &#25320;&#24320;&#25320;&#24320;</span>
 rule { [,[$last:ident]]=$val:expr}=&gt;{destruct [$last]=($val[0])}
-</pre>
-</div>
+</code></pre>
 
 <p>
 destructure object 的过程也非常类似, 我就懒得实现了
 </p>
 </div>
 </div>
-<div id="outline-container-orgheadline10" class="outline-4">
-<h4 id="orgheadline10">looprecur</h4>
-<div class="outline-text-4" id="text-orgheadline10">
+<div id="outline-container-org1536c70" class="outline-4">
+<h4 id="org1536c70">looprecur</h4>
+<div class="outline-text-4" id="text-org1536c70">
 <p>
 looprecur其实就是let的尾递归, 很容易变成循环
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">loop(a=1,b=18){
-  <span style="color: #00008b;">if</span> (a &gt; b)
-    <span style="color: #00008b;">return</span> a
+<pre class="code"><code>loop(a=1,b=18){
+  <span style="font-weight: bold;">if</span> (a &gt; b)
+    <span style="font-weight: bold;">return</span> a
   recur (a++,b--)
 }
-</pre>
-</div>
+</code></pre>
 <p>
 其实就是特殊的let, 只是在尾部从新绑定了 a 和 b 的值, 然后在let一下, 虽然是 clojure的东东, 但是这里
 是不是看起来非常的像JS原生呢:)
@@ -528,53 +465,44 @@ looprecur其实就是let的尾递归, 很容易变成循环
 <p>
 好了, 我们期待的当然是直接优化成循环了
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">(fucntion (a,b) {
-  <span style="color: #00008b;">while</span>(<span style="color: #6b8e23;">true</span>){
-    <span style="color: #00008b;">if</span>(a&gt;b)
-      <span style="color: #00008b;">return</span> a
+<pre class="code"><code>(fucntion (a,b) {
+  <span style="font-weight: bold;">while</span>(<span style="font-weight: bold; text-decoration: underline;">true</span>){
+    <span style="font-weight: bold;">if</span>(a&gt;b)
+      <span style="font-weight: bold;">return</span> a
     a++;
     b--;
   }
 })(1,18)
-</pre>
-</div>
+</code></pre>
 
 <p>
 let都实现了, 实现这也太容易了
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">macro loop {
+<pre class="code"><code>macro loop {
   rule {($params...){$body... recur($binding:expr(,)...)}} =&gt; {
-    <span style="color: #00008b;">let</span>($params...){
-      <span style="color: #00008b;">while</span> (<span style="color: #6b8e23;">true</span>) {
+    <span style="font-weight: bold;">let</span>($params...){
+      <span style="font-weight: bold;">while</span> (<span style="font-weight: bold; text-decoration: underline;">true</span>) {
         $body...;
           $binding(;)...
       }
     }
   }
 }
-</pre>
-</div>
+</code></pre>
 <p>
 直接调用let就好了, 只要把body循环那么一下, binding放到循环最后.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgheadline11" class="outline-3">
-<h3 id="orgheadline11">Existential ?</h3>
-<div class="outline-text-3" id="text-orgheadline11">
+<div id="outline-container-orgc668425" class="outline-3">
+<h3 id="orgc668425">Existential ?</h3>
+<div class="outline-text-3" id="text-orgc668425">
 <p>
 只移植 clojure 是不是开始有点无聊了, 让我们换换口味. CoffeeScript的判空我一直是非常喜欢, 不如试试也移过来,就可以这样了.
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">a?.b?().c?=1
-</pre>
-</div>
+<pre class="code"><code>a?.b?().c?=1
+</code></pre>
 
 <p>
 比起嵌套一大堆if else或者是 Haskell fancy的 maybe monad, 这样的判空操作非常简单而且可读.
@@ -582,14 +510,14 @@ let都实现了, 实现这也太容易了
 
 
 <figure>
-<p><img src="./images/maybe.gif" alt="maybe.gif">
-</p>
+<img src="./images/maybe.gif" alt="maybe.gif">
+
 </figure>
 </div>
 
-<div id="outline-container-orgheadline12" class="outline-4">
-<h4 id="orgheadline12">Infix macro</h4>
-<div class="outline-text-4" id="text-orgheadline12">
+<div id="outline-container-org92abd8a" class="outline-4">
+<h4 id="org92abd8a">Infix macro</h4>
+<div class="outline-text-4" id="text-org92abd8a">
 <p>
 还记得 <a href="./clojure-essence-in-javascript-macro.html">上篇</a> 提到这次要讲 Infix macro吗, 恩, 要实现 <code>?</code> 我们必不可少需要使用Infix macro.
 </p>
@@ -611,39 +539,33 @@ let都实现了, 实现这也太容易了
 则与后面的token连上(把 <code>?</code> 去掉)
 </p>
 
-<div class="org-src-container">
-
-<pre class="src src-javascript">macro (?) {
+<pre class="code"><code>macro (?) {
   rule infix {$left:expr | $right... } =&gt; {
-    (<span style="color: #00008b;">function</span>(){
-      <span style="color: #00008b;">if</span>(<span style="color: #00008b;">typeof</span> $left!==<span style="color: #8b0000;">'undefined'</span> &amp;&amp; $left!==<span style="color: #6b8e23;">null</span>){
-        <span style="color: #00008b;">return</span> $left $right...
+    (<span style="font-weight: bold;">function</span>(){
+      <span style="font-weight: bold;">if</span>(<span style="font-weight: bold;">typeof</span> $left!==<span style="font-style: italic;">'undefined'</span> &amp;&amp; $left!==<span style="font-weight: bold; text-decoration: underline;">null</span>){
+        <span style="font-weight: bold;">return</span> $left $right...
       }
     })()
   }
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 注意 infix macro 需要在 rule 后加上 <code>infix</code> 的keyword. 当然 infix 不仅可以用于 rule macro, 同样也可以用到
 case macro
 </p>
-<div class="org-src-container">
-
-<pre class="src src-javascript">macro (?) {
-  <span style="color: #00008b;">case</span> infix {$left:expr |$name $right... } =&gt; {
-    <span style="color: #00008b;">return</span> #{
-      (<span style="color: #00008b;">function</span>(){
-        <span style="color: #00008b;">if</span>(<span style="color: #00008b;">typeof</span> $left!==<span style="color: #8b0000;">'undefined'</span> &amp;&amp; $left!==<span style="color: #6b8e23;">null</span>){
-          <span style="color: #00008b;">return</span> $left $right...
+<pre class="code"><code>macro (?) {
+  <span style="font-weight: bold;">case</span> infix {$left:expr |$name $right... } =&gt; {
+    <span style="font-weight: bold;">return</span> #{
+      (<span style="font-weight: bold;">function</span>(){
+        <span style="font-weight: bold;">if</span>(<span style="font-weight: bold;">typeof</span> $left!==<span style="font-style: italic;">'undefined'</span> &amp;&amp; $left!==<span style="font-weight: bold; text-decoration: underline;">null</span>){
+          <span style="font-weight: bold;">return</span> $left $right...
         }
       })()  
     }
   }
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 稍微不一样的是原来case macro的第一个参数要放到 <code>|</code> 后面了
@@ -652,13 +574,13 @@ case macro
 </div>
 </div>
 
-<div id="outline-container-orgheadline13" class="outline-3">
-<h3 id="orgheadline13">在哪里才能买到呢</h3>
-<div class="outline-text-3" id="text-orgheadline13">
+<div id="outline-container-org61700de" class="outline-3">
+<h3 id="org61700de">在哪里才能买到呢</h3>
+<div class="outline-text-3" id="text-org61700de">
 
 <figure>
-<p><img src="./images/shut-up-and-take-my-money.gif" alt="shut-up-and-take-my-money.gif">
-</p>
+<img src="./images/shut-up-and-take-my-money.gif" alt="shut-up-and-take-my-money.gif">
+
 </figure>
 
 <p>
@@ -688,17 +610,15 @@ case macro
 </div>
 <div id="postamble" class="status">
 <footer>
-  <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2017-06-10 Sat 08:22</p>
-  <p>Generated by: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.3.6) x <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Author: root <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
+  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
-  <a class="gumroad-button" href="https://gum.co/grokking-monad">我的新书 Grokking Monad 现已发售，请自觉排队装逼</a>
-
-  <a class="github-fork-ribbon right-bottom fixed" href="https://github.com/jcouyang/blog" title="Fork me on GitHub">Fork me on GitHub</a>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
 </footer>
-
-<div id="disqus_thread"></div>
 </div>
 </body>
 </html>
