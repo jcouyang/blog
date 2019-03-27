@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2019-03-27 Wed 06:00 -->
+<!-- 2019-03-27 Wed 06:03 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Functional Ruby</title>
@@ -82,46 +82,46 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org9095172">lambda</a></li>
-<li><a href="#org7cc6d5e">神奇的 <code>&amp;</code></a></li>
-<li><a href="#org5ccb3e1">为什么 lambda 是 proc</a>
+<li><a href="#org9e86ef9">lambda</a></li>
+<li><a href="#org182810e">神奇的 <code>&amp;</code></a></li>
+<li><a href="#orgb6ed739">为什么 lambda 是 proc</a>
 <ul>
-<li><a href="#orgbdc7354">return</a></li>
-<li><a href="#orga76cb4f">参数检查</a></li>
+<li><a href="#org0ce0c01">return</a></li>
+<li><a href="#org52153e5">参数检查</a></li>
 </ul>
 </li>
-<li><a href="#orga73f147">闭包</a></li>
-<li><a href="#org09bda23">pattern matching</a>
+<li><a href="#org0d945c9">闭包</a></li>
+<li><a href="#orgd8f434c">pattern matching</a>
 <ul>
-<li><a href="#orgdbfbeb0">destructure</a></li>
-<li><a href="#org65c5854">case when</a>
+<li><a href="#org052791d">destructure</a></li>
+<li><a href="#orgb200a8e">case when</a>
 <ul>
-<li><a href="#orgff72e22">值</a></li>
-<li><a href="#orga5b5dcb">类型</a></li>
-<li><a href="#org4697760">表达式</a></li>
-<li><a href="#org4e5880c">lambda （aka guard）</a></li>
-<li><a href="#org24303ef"><i>正则</i></a></li>
-<li><a href="#orgaaa9705">其实只是个简单的语法糖</a></li>
+<li><a href="#orge54574f">值</a></li>
+<li><a href="#orgc3ec2e7">类型</a></li>
+<li><a href="#org41688e5">表达式</a></li>
+<li><a href="#org6214dd9">lambda （aka guard）</a></li>
+<li><a href="#orga9e68b3"><i>正则</i></a></li>
+<li><a href="#org25e4a96">其实只是个简单的语法糖</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orge29113b">一个简单的例子</a>
+<li><a href="#org30cff56">一个简单的例子</a>
 <ul>
-<li><a href="#orgbfb6dd6">一个简单的 Either Monad</a>
+<li><a href="#orge7e4a05">一个简单的 Either Monad</a>
 <ul>
-<li><a href="#org516012a">Functor</a></li>
-<li><a href="#org736d5cd">Monad</a></li>
-<li><a href="#org34cc1ca">一个好看的 inspect</a></li>
-<li><a href="#org465b63a">联合类型 Left | Right</a></li>
+<li><a href="#orge0ba00f">Functor</a></li>
+<li><a href="#orgc26e991">Monad</a></li>
+<li><a href="#orge92b1de">一个好看的 inspect</a></li>
+<li><a href="#orgf93b571">联合类型 Left | Right</a></li>
 </ul>
 </li>
-<li><a href="#orgfc8cf48">用 Either 做控制流</a></li>
+<li><a href="#org6fa64b9">用 Either 做控制流</a></li>
 </ul>
 </li>
-<li><a href="#orgfe33a55">actor model 多线程</a>
+<li><a href="#org212f406">actor model 多线程</a>
 <ul>
-<li><a href="#org1b86c65">pmap</a></li>
+<li><a href="#orge090575">pmap</a></li>
 </ul>
 </li>
 </ul>
@@ -153,9 +153,9 @@ for the JavaScript code in this tag.
 说到 ruby 都会觉得是纯面向对象语言，所有东西都是对象。但是，函数式与面向对象并无冲突（你看看Scala）。最近一个项目用 ruby 写了一个非常常用的 feeder，一不小心写得函数式了些，让我们看看fancy的ruby到底能干些什么fancy的函数式。
 </p>
 
-<div id="outline-container-org9095172" class="outline-2">
-<h2 id="org9095172">lambda</h2>
-<div class="outline-text-2" id="text-org9095172">
+<div id="outline-container-org9e86ef9" class="outline-2">
+<h2 id="org9e86ef9">lambda</h2>
+<div class="outline-text-2" id="text-org9e86ef9">
 <p>
 不出所料，函数式一定要先有 lambda，跟所有的 ruby 对象一样，lambda 也就是一个正常的对象
 </p>
@@ -198,9 +198,9 @@ plus1.(3)
 </div>
 </div>
 
-<div id="outline-container-org7cc6d5e" class="outline-2">
-<h2 id="org7cc6d5e">神奇的 <code>&amp;</code></h2>
-<div class="outline-text-2" id="text-org7cc6d5e">
+<div id="outline-container-org182810e" class="outline-2">
+<h2 id="org182810e">神奇的 <code>&amp;</code></h2>
+<div class="outline-text-2" id="text-org182810e">
 <p>
 这里的 magic 是 <code>&amp;</code> 把 <code>plus1</code> 变成 Block 发给数组了，Block 也就是我们常见的 <code>{}</code> ，等价于：
 </p>
@@ -241,9 +241,9 @@ desuger 完其实就是
 </div>
 </div>
 
-<div id="outline-container-org5ccb3e1" class="outline-2">
-<h2 id="org5ccb3e1">为什么 lambda 是 proc</h2>
-<div class="outline-text-2" id="text-org5ccb3e1">
+<div id="outline-container-orgb6ed739" class="outline-2">
+<h2 id="orgb6ed739">为什么 lambda 是 proc</h2>
+<div class="outline-text-2" id="text-orgb6ed739">
 <p>
 话说回来，既然 lambda 也返回 Proc 实例， <code>Proc.new</code> 也返回 Proc 实例，为何要设计这两种匿名函数呢？
 </p>
@@ -252,9 +252,9 @@ desuger 完其实就是
 简单来说， Proc 只是一段代码块，你可以想象引用的地方会变成这块代码块，而 lambda 不仅是一块代码块，表现得更像一个函数。具体来讲，就是 return 与参数检查：
 </p>
 </div>
-<div id="outline-container-orgbdc7354" class="outline-3">
-<h3 id="orgbdc7354">return</h3>
-<div class="outline-text-3" id="text-orgbdc7354">
+<div id="outline-container-org0ce0c01" class="outline-3">
+<h3 id="org0ce0c01">return</h3>
+<div class="outline-text-3" id="text-org0ce0c01">
 <p>
 来看个诡异的，下面这段代码我们可能会期望是返回一个数组，只是 <code>jichao</code> 会变成 <code>lulu</code> 而已
 </p>
@@ -278,9 +278,9 @@ desuger 完其实就是
 </div>
 </div>
 
-<div id="outline-container-orga76cb4f" class="outline-3">
-<h3 id="orga76cb4f">参数检查</h3>
-<div class="outline-text-3" id="text-orga76cb4f">
+<div id="outline-container-org52153e5" class="outline-3">
+<h3 id="org52153e5">参数检查</h3>
+<div class="outline-text-3" id="text-org52153e5">
 <p>
 确切的说是参数元数 arity 的检查，比如随便定义一个method，如果你给的参数元数不匹配，会得到一个异常
 </p>
@@ -324,9 +324,9 @@ heheda.()
 </div>
 </div>
 
-<div id="outline-container-orga73f147" class="outline-2">
-<h2 id="orga73f147">闭包</h2>
-<div class="outline-text-2" id="text-orga73f147">
+<div id="outline-container-org0d945c9" class="outline-2">
+<h2 id="org0d945c9">闭包</h2>
+<div class="outline-text-2" id="text-org0d945c9">
 <p>
 通常面向对象的捕捉一个绑定通常会通过 <code>@</code>
 </p>
@@ -366,17 +366,17 @@ hehedaToOuyang &amp;heheda
 </div>
 </div>
 
-<div id="outline-container-org09bda23" class="outline-2">
-<h2 id="org09bda23">pattern matching</h2>
-<div class="outline-text-2" id="text-org09bda23">
+<div id="outline-container-orgd8f434c" class="outline-2">
+<h2 id="orgd8f434c">pattern matching</h2>
+<div class="outline-text-2" id="text-orgd8f434c">
 <p>
 ruby 支持简单的几种模式匹配
 </p>
 </div>
 
-<div id="outline-container-orgdbfbeb0" class="outline-3">
-<h3 id="orgdbfbeb0">destructure</h3>
-<div class="outline-text-3" id="text-orgdbfbeb0">
+<div id="outline-container-org052791d" class="outline-3">
+<h3 id="org052791d">destructure</h3>
+<div class="outline-text-3" id="text-org052791d">
 <pre class="code"><code>first, *middle_and_last = [<span style="color: #8b0000;">'Phillip'</span>, <span style="color: #8b0000;">'Jay'</span>, <span style="color: #8b0000;">'Fry'</span>]
 <span style="color: #228b22;">p</span> first, middle_and_last
 </code></pre>
@@ -412,9 +412,9 @@ printFirstName fry
 </div>
 </div>
 
-<div id="outline-container-org65c5854" class="outline-3">
-<h3 id="org65c5854">case when</h3>
-<div class="outline-text-3" id="text-org65c5854">
+<div id="outline-container-orgb200a8e" class="outline-3">
+<h3 id="orgb200a8e">case when</h3>
+<div class="outline-text-3" id="text-orgb200a8e">
 <p>
 ruby 中的 case<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
 <a href="http://docs.ruby-lang.org/en/2.2.0/syntax/control_expressions_rdoc.html#label-case+Expression">http://docs.ruby-lang.org/en/2.2.0/syntax/control_expressions_rdoc.html#label-case+Expression</a>
@@ -422,9 +422,9 @@ ruby 中的 case<label for="1" class="margin-toggle sidenote-number"></label><in
 </p>
 </div>
 
-<div id="outline-container-orgff72e22" class="outline-4">
-<h4 id="orgff72e22">值</h4>
-<div class="outline-text-4" id="text-orgff72e22">
+<div id="outline-container-orge54574f" class="outline-4">
+<h4 id="orge54574f">值</h4>
+<div class="outline-text-4" id="text-orge54574f">
 <p>
 这个很简单，应该都有用过
 </p>
@@ -438,9 +438,9 @@ ruby 中的 case<label for="1" class="margin-toggle sidenote-number"></label><in
 </div>
 </div>
 
-<div id="outline-container-orga5b5dcb" class="outline-4">
-<h4 id="orga5b5dcb">类型</h4>
-<div class="outline-text-4" id="text-orga5b5dcb">
+<div id="outline-container-orgc3ec2e7" class="outline-4">
+<h4 id="orgc3ec2e7">类型</h4>
+<div class="outline-text-4" id="text-orgc3ec2e7">
 <pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">Me</span>
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">initialize</span> name
     <span style="color: #b8860b;">@name</span> = name
@@ -467,9 +467,9 @@ me = <span style="color: #36648b;">Me</span>.new <span style="color: #8b0000;">'
 </div>
 </div>
 
-<div id="outline-container-org4697760" class="outline-4">
-<h4 id="org4697760">表达式</h4>
-<div class="outline-text-4" id="text-org4697760">
+<div id="outline-container-org41688e5" class="outline-4">
+<h4 id="org41688e5">表达式</h4>
+<div class="outline-text-4" id="text-org41688e5">
 <p>
 跟 <code>if else</code> 一样用
 </p>
@@ -484,9 +484,9 @@ me = <span style="color: #36648b;">Me</span>.new <span style="color: #8b0000;">'
 </div>
 </div>
 
-<div id="outline-container-org4e5880c" class="outline-4">
-<h4 id="org4e5880c">lambda （aka guard）</h4>
-<div class="outline-text-4" id="text-org4e5880c">
+<div id="outline-container-org6214dd9" class="outline-4">
+<h4 id="org6214dd9">lambda （aka guard）</h4>
+<div class="outline-text-4" id="text-org6214dd9">
 <pre class="code"><code><span style="color: #228b22;">require</span> <span style="color: #8b0000;">'ostruct'</span>
   me = <span style="color: #36648b;">OpenStruct</span>.new(<span style="color: #6b8e23;">name:</span> <span style="color: #8b0000;">'jichao'</span>, <span style="color: #6b8e23;">first_name:</span> <span style="color: #8b0000;">'ouyang'</span>)
   <span style="color: #00008b;">case</span> me
@@ -497,9 +497,9 @@ me = <span style="color: #36648b;">Me</span>.new <span style="color: #8b0000;">'
 </div>
 </div>
 
-<div id="outline-container-org24303ef" class="outline-4">
-<h4 id="org24303ef"><i>正则</i></h4>
-<div class="outline-text-4" id="text-org24303ef">
+<div id="outline-container-orga9e68b3" class="outline-4">
+<h4 id="orga9e68b3"><i>正则</i></h4>
+<div class="outline-text-4" id="text-orga9e68b3">
 <pre class="code"><code><span style="color: #00008b;">case</span> <span style="color: #8b0000;">'jichao ouyang'</span>
 <span style="color: #00008b;">when</span> <span style="color: #8b0000;">/ouyang/</span>
 <span style="color: #8b0000;">"heheda"</span>
@@ -508,9 +508,9 @@ me = <span style="color: #36648b;">Me</span>.new <span style="color: #8b0000;">'
 </div>
 </div>
 
-<div id="outline-container-orgaaa9705" class="outline-4">
-<h4 id="orgaaa9705">其实只是个简单的语法糖</h4>
-<div class="outline-text-4" id="text-orgaaa9705">
+<div id="outline-container-org25e4a96" class="outline-4">
+<h4 id="org25e4a96">其实只是个简单的语法糖</h4>
+<div class="outline-text-4" id="text-org25e4a96">
 <p>
 case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的正则
 </p>
@@ -538,9 +538,9 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
 </div>
 </div>
 
-<div id="outline-container-orge29113b" class="outline-2">
-<h2 id="orge29113b">一个简单的例子</h2>
-<div class="outline-text-2" id="text-orge29113b">
+<div id="outline-container-org30cff56" class="outline-2">
+<h2 id="org30cff56">一个简单的例子</h2>
+<div class="outline-text-2" id="text-org30cff56">
 <p>
 一个简单的 feeder 流程大概是，从一个或多个数据源获取数据并 feed 到一个地方（DB, S3, ElasticSearch之类)。通常是一个定期的任务，比如没多久就 feed 那么一次。
 </p>
@@ -557,18 +557,18 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
 不管是什么形式，监控都不应该跟我们的业务搞到一起去，比如
 </p>
 </div>
-<div id="outline-container-orgbfb6dd6" class="outline-3">
-<h3 id="orgbfb6dd6">一个简单的 Either Monad<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
+<div id="outline-container-orge7e4a05" class="outline-3">
+<h3 id="orge7e4a05">一个简单的 Either Monad<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
 <a href="http://hackage.haskell.org/package/base-4.8.2.0/docs/src/Data.Either.html#Either">http://hackage.haskell.org/package/base-4.8.2.0/docs/src/Data.Either.html#Either</a>
 </span></h3>
-<div class="outline-text-3" id="text-orgbfb6dd6">
+<div class="outline-text-3" id="text-orge7e4a05">
 <p>
 创建一个刚好够用的 Either 非常简单
 </p>
 </div>
-<div id="outline-container-org516012a" class="outline-4">
-<h4 id="org516012a">Functor</h4>
-<div class="outline-text-4" id="text-org516012a">
+<div id="outline-container-orge0ba00f" class="outline-4">
+<h4 id="orge0ba00f">Functor</h4>
+<div class="outline-text-4" id="text-orge0ba00f">
 <pre class="code"><code><span style="color: #00008b;">module</span> <span style="color: #36648b;">Either</span>
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">initialize</span> v
     <span style="color: #b8860b;">@v</span> = v
@@ -586,9 +586,9 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
 </code></pre>
 </div>
 </div>
-<div id="outline-container-org736d5cd" class="outline-4">
-<h4 id="org736d5cd">Monad</h4>
-<div class="outline-text-4" id="text-org736d5cd">
+<div id="outline-container-orgc26e991" class="outline-4">
+<h4 id="orgc26e991">Monad</h4>
+<div class="outline-text-4" id="text-orgc26e991">
 <pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">bind</span>
   <span style="color: #00008b;">case</span> <span style="color: #00008b;">self</span>
   <span style="color: #00008b;">when</span> <span style="color: #36648b;">Right</span>
@@ -603,9 +603,9 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
 </code></pre>
 </div>
 </div>
-<div id="outline-container-org34cc1ca" class="outline-4">
-<h4 id="org34cc1ca">一个好看的 inspect</h4>
-<div class="outline-text-4" id="text-org34cc1ca">
+<div id="outline-container-orge92b1de" class="outline-4">
+<h4 id="orge92b1de">一个好看的 inspect</h4>
+<div class="outline-text-4" id="text-orge92b1de">
 <pre class="code"><code>  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">inspect</span>
     <span style="color: #00008b;">case</span> <span style="color: #00008b;">self</span>
     <span style="color: #00008b;">when</span> <span style="color: #36648b;">Left</span>
@@ -618,9 +618,9 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
 </code></pre>
 </div>
 </div>
-<div id="outline-container-org465b63a" class="outline-4">
-<h4 id="org465b63a">联合类型 Left | Right</h4>
-<div class="outline-text-4" id="text-org465b63a">
+<div id="outline-container-orgf93b571" class="outline-4">
+<h4 id="orgf93b571">联合类型 Left | Right</h4>
+<div class="outline-text-4" id="text-orgf93b571">
 <p>
 在实现了 Either 接口之后,我们可以很容易的实现  Left | Right
 </p>
@@ -660,9 +660,9 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
 </div>
 </div>
 
-<div id="outline-container-orgfc8cf48" class="outline-3">
-<h3 id="orgfc8cf48">用 Either 做控制流</h3>
-<div class="outline-text-3" id="text-orgfc8cf48">
+<div id="outline-container-org6fa64b9" class="outline-3">
+<h3 id="org6fa64b9">用 Either 做控制流</h3>
+<div class="outline-text-3" id="text-org6fa64b9">
 <pre class="code"><code><span class="linenr">1: </span><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">run</span>
 <span class="linenr">2: </span>  list_of_error_or_detail =
 <span id="coderef-listof_error_or_id" class="coderef-off"><span class="linenr">3: </span>    listof_error_or_id.map <span style="color: #00008b;">do</span> |error_or_id| <span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span></span>
@@ -697,17 +697,17 @@ logger.info <span style="color: #8b0000;">"processing success </span><span style
 </div>
 </div>
 
-<div id="outline-container-orgfe33a55" class="outline-2">
-<h2 id="orgfe33a55">actor model 多线程</h2>
-<div class="outline-text-2" id="text-orgfe33a55">
+<div id="outline-container-org212f406" class="outline-2">
+<h2 id="org212f406">actor model 多线程</h2>
+<div class="outline-text-2" id="text-org212f406">
 <p>
 当你的数据处理都是函数式的之后，或者说 immutable，应用多线程将是十分简单而且安全的事情, 下面也是一个简单的例子，使用 <a href="https://github.com/celluloid/celluloid">Celluloid</a> 把我们的 feeder 改成多线程
 </p>
 </div>
 
-<div id="outline-container-org1b86c65" class="outline-3">
-<h3 id="org1b86c65">pmap</h3>
-<div class="outline-text-3" id="text-org1b86c65">
+<div id="outline-container-orge090575" class="outline-3">
+<h3 id="orge090575">pmap</h3>
+<div class="outline-text-3" id="text-orge090575">
 <pre class="code"><code><span style="color: #228b22;">require</span> <span style="color: #8b0000;">"celluloid/autostart"</span>
 <span style="color: #00008b;">module</span> <span style="color: #36648b;">Enumerable</span>
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">pmap</span>(&amp;block)
@@ -741,7 +741,7 @@ logger.info <span style="color: #8b0000;">"processing success </span><span style
 <div id="postamble" class="status">
 <footer>
   <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2019-03-27 Wed 05:59</p>
+  <p>Modified: 2019-03-27 Wed 06:03</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
