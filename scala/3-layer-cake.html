@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2019-03-27 Wed 06:03 -->
+<!-- 2019-03-27 Wed 09:33 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>3 Layer Scala Cake</title>
@@ -9,7 +9,7 @@
 <meta name="author" content="Jichao Ouyang">
 <meta name="description" content="I've been using Free Monad in production for a while, as the projects scale and more members contribute, the boundary of different layer reveal them self more clearly."
 >
-<meta name="keywords" content="Scala, Free, Monad, MTL, ReaderT">
+<meta name="keywords" content="Scala,Free,Monad,MTL,ReaderT">
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -85,42 +85,79 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgc2aa800">The Program</a></li>
-<li><a href="#org0365a41">Refactor</a>
+<li><a href="#org7c8df20">The Program</a></li>
+<li><a href="#org70d7e3d">Refactor</a>
 <ul>
-<li><a href="#orgef299e1">Take 1: IO</a></li>
-<li><a href="#orge22251e">Take 2: ReaderT Pattern</a></li>
-<li><a href="#orgf065f92">Retro</a>
+<li><a href="#org81b6502">Take 1: IO</a></li>
+<li><a href="#org5775714">Take 2: ReaderT Pattern</a></li>
+<li><a href="#org279d2bf">Retro</a>
 <ul>
-<li><a href="#org9c569ba">Imperative</a></li>
-<li><a href="#orged71750">IO</a></li>
-<li><a href="#org0a49fda">ReaderT</a></li>
+<li><a href="#org4989037">Imperative</a></li>
+<li><a href="#orgbad5811">IO</a></li>
+<li><a href="#orgbb24828">ReaderT</a></li>
 </ul>
 </li>
-<li><a href="#orgd699438"><b>Tagless Final</b> is nothing but a fancy name of <b>ReaderT</b></a></li>
+<li><a href="#org6bf3fea"><b>Tagless Final</b> is nothing but a fancy name of <b>ReaderT</b></a></li>
 </ul>
 </li>
-<li><a href="#orgb82e60d">3 Layer Cake</a>
+<li><a href="#org2edcd6f">3 Layer Cake</a>
 <ul>
-<li><a href="#org06f57e5">The Needs of State</a></li>
-<li><a href="#orgbe8013d">MTL</a></li>
-<li><a href="#org0b248b6">Free Monad</a></li>
-<li><a href="#org4a558a1">ReaderT + MTL + Free</a>
+<li><a href="#org7e9dcde">The Needs of State</a></li>
+<li><a href="#org011e361">MTL</a></li>
+<li><a href="#orge110995">Free Monad</a></li>
+<li><a href="#orgc09d58d">ReaderT + MTL + Free</a>
 <ul>
-<li><a href="#org5f01288">Layer 3: Business (Free)</a></li>
-<li><a href="#org65f3308">Layer 2: MTL + Interpreter</a></li>
-<li><a href="#orgb019049">Layer 1: ReaderT</a></li>
+<li><a href="#org73652f1">Layer 3: Business (Free)</a></li>
+<li><a href="#orgfd07923">Layer 2: MTL + Interpreter</a></li>
+<li><a href="#org64c7937">Layer 1: ReaderT</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li><a href="#org6da306e">Recap</a></li>
 </ul>
 </div>
 </nav>
+<pre class="code"><code>(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((ditaa . t)))
+</code></pre>
 
-<div id="outline-container-orgc2aa800" class="outline-2">
-<h2 id="orgc2aa800">The Program</h2>
-<div class="outline-text-2" id="text-orgc2aa800">
+
+<figure>
+<a href="https://github.com/jcouyang/luci"><object type="image/svg+xml" data="https://upload.wikimedia.org/wikipedia/commons/0/0a/Imperial_Encyclopaedia_-_Animal_Kingdom_-_pic057_-_%E9%B8%95%E9%B6%BF%E5%9C%96.svg" class="org-svg">
+Sorry, your browser does not support SVG.</object></a>
+
+</figure>
+
+<p>
+I've been using Free Monad in production for a while, as the projects scale and more
+members contribute, the boundary of different layer reveal them self very clearly.
+</p>
+
+<p>
+Thanks to the summary from <a href="https://www.parsonsmatt.org/2018/03/22/three_layer_haskell_cake.html">Matt Parsons' 3 layer Haskell Cake</a>.
+I found my Scala code also happen to fell into these 3 layer cake. 
+</p>
+
+<p>
+To make the future project has more clear boundary of abstraction, I created <a href="https://github.com/jcouyang/luci"><ruby>鸬鹚<rt>luci</rt></ruby></a><label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+It means cormorant
+</span>
+for better taste of Free Monad mixing MTL and ReaderT.
+</p>
+
+<p>
+Here it is the Scala version of Cake, prepare your folks please.
+</p>
+
+<p>
+But before cutting the cake, let's <del>wash our hands</del> describe the most common program.
+</p>
+
+<div id="outline-container-org7c8df20" class="outline-2">
+<h2 id="org7c8df20">The Program</h2>
+<div class="outline-text-2" id="text-org7c8df20">
 <p>
 It will read output a log, query a data base, and do the calculation.
 </p>
@@ -175,13 +212,13 @@ Let us refactor in a baby step, with <code>IO</code>
 </p>
 </div>
 </div>
-<div id="outline-container-org0365a41" class="outline-2">
-<h2 id="org0365a41">Refactor</h2>
-<div class="outline-text-2" id="text-org0365a41">
+<div id="outline-container-org70d7e3d" class="outline-2">
+<h2 id="org70d7e3d">Refactor</h2>
+<div class="outline-text-2" id="text-org70d7e3d">
 </div>
-<div id="outline-container-orgef299e1" class="outline-3">
-<h3 id="orgef299e1">Take 1: IO</h3>
-<div class="outline-text-3" id="text-orgef299e1">
+<div id="outline-container-org81b6502" class="outline-3">
+<h3 id="org81b6502">Take 1: IO</h3>
+<div class="outline-text-3" id="text-org81b6502">
 <p>
 modeling your problem with <code>IO</code> is easy, just wrap everything in IO
 </p>
@@ -281,9 +318,9 @@ Clearly IO isn't enough for more complex scenario, let's see what we can improve
 </div>
 </div>
 
-<div id="outline-container-orge22251e" class="outline-3">
-<h3 id="orge22251e">Take 2: ReaderT Pattern</h3>
-<div class="outline-text-3" id="text-orge22251e">
+<div id="outline-container-org5775714" class="outline-3">
+<h3 id="org5775714">Take 2: ReaderT Pattern</h3>
+<div class="outline-text-3" id="text-org5775714">
 <p>
 The problem of Dependent Injection via parameters is limited and not scalable, when your program get bigger,
 eventually you will need to have sub programs and then you will find the dependency has to be passed all the way down
@@ -337,17 +374,17 @@ Finally, the program, without any parameters!!!
 </div>
 </div>
 
-<div id="outline-container-orgf065f92" class="outline-3">
-<h3 id="orgf065f92">Retro</h3>
-<div class="outline-text-3" id="text-orgf065f92">
+<div id="outline-container-org279d2bf" class="outline-3">
+<h3 id="org279d2bf">Retro</h3>
+<div class="outline-text-3" id="text-org279d2bf">
 <p>
 Let us retro the evolving progress of the type of <code>program</code>
 </p>
 </div>
 
-<div id="outline-container-org9c569ba" class="outline-4">
-<h4 id="org9c569ba">Imperative</h4>
-<div class="outline-text-4" id="text-org9c569ba">
+<div id="outline-container-org4989037" class="outline-4">
+<h4 id="org4989037">Imperative</h4>
+<div class="outline-text-4" id="text-org4989037">
 <pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>
 </code></pre>
 <p>
@@ -356,9 +393,9 @@ I'd name this layer <b>Bare Metal</b>. Here only exists raw values, 0 abstractio
 </div>
 </div>
 
-<div id="outline-container-orged71750" class="outline-4">
-<h4 id="orged71750">IO</h4>
-<div class="outline-text-4" id="text-orged71750">
+<div id="outline-container-orgbad5811" class="outline-4">
+<h4 id="orgbad5811">IO</h4>
+<div class="outline-text-4" id="text-orgbad5811">
 <pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span>(deps...)<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>]
 </code></pre>
 
@@ -382,9 +419,9 @@ Effects are now Referential Transparent, but the way to inject and use effects i
 </div>
 </div>
 
-<div id="outline-container-org0a49fda" class="outline-4">
-<h4 id="org0a49fda">ReaderT</h4>
-<div class="outline-text-4" id="text-org0a49fda">
+<div id="outline-container-orgbb24828" class="outline-4">
+<h4 id="orgbb24828">ReaderT</h4>
+<div class="outline-text-4" id="text-orgbb24828">
 <pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">ReaderT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Env</span>, <span style="color: #6b8e23;">Int</span>]
 </code></pre>
 
@@ -425,9 +462,9 @@ ReaderT is pretty good "pattern" after all:
 </div>
 </div>
 
-<div id="outline-container-orgd699438" class="outline-3">
-<h3 id="orgd699438"><b>Tagless Final</b> is nothing but a fancy name of <b>ReaderT</b></h3>
-<div class="outline-text-3" id="text-orgd699438">
+<div id="outline-container-org6bf3fea" class="outline-3">
+<h3 id="org6bf3fea"><b>Tagless Final</b> is nothing but a fancy name of <b>ReaderT</b></h3>
+<div class="outline-text-3" id="text-org6bf3fea">
 <p>
 if we make some type alias for readerT, it's pretty much the same thing as the recent trending "design pattern" - <i>Tagless Final</i>
 </p>
@@ -462,12 +499,34 @@ if we make some type alias for readerT, it's pretty much the same thing as the r
 If you look close enough, here it actually becomes 3 layers:
 </p>
 <ul class="org-ul">
-<li>Layer 1: IO (AlgInterp)</li>
-<li>Layer 2: IO ~&gt; Alg (state, log, doobieQuery)</li>
+<li>Layer 1: IO</li>
+<li>Layer 2: Alg ~&gt; IO (state, log, doobieQuery)</li>
 <li>Layer 3: Alg (program)</li>
 </ul>
 
+<pre class="code"><code>+--------------+
+|Layer 3:      |
+|     Alg      |
+|              |
++------+-------+
+       |run
+/--------------\
+|Layer 2:      |
+| AlgInterp[IO]|
+|              |
+\--------------/
+       |
+       v
++--------------+
+|Layer 1:      | 
+|      IO      |
+|              |
++--------------+
+
+</code></pre>
+
 <p>
+<img src="images/readerT-cake.png" alt="readerT-cake.png">
 both layer 2 and 3 are pure, but the different is,
 </p>
 <ul class="org-ul">
@@ -478,9 +537,9 @@ both layer 2 and 3 are pure, but the different is,
 </div>
 </div>
 
-<div id="outline-container-orgb82e60d" class="outline-2">
-<h2 id="orgb82e60d">3 Layer Cake</h2>
-<div class="outline-text-2" id="text-orgb82e60d">
+<div id="outline-container-org2edcd6f" class="outline-2">
+<h2 id="org2edcd6f">3 Layer Cake</h2>
+<div class="outline-text-2" id="text-org2edcd6f">
 <p>
 We now have a solid 3 Layer Scala Cake base made of <code>ReaderT</code>
 </p>
@@ -490,9 +549,9 @@ But you know, single flavor of cake won't satisfy everyone's taste.
 </p>
 </div>
 
-<div id="outline-container-org06f57e5" class="outline-3">
-<h3 id="org06f57e5">The Needs of State</h3>
-<div class="outline-text-3" id="text-org06f57e5">
+<div id="outline-container-org7e9dcde" class="outline-3">
+<h3 id="org7e9dcde">The Needs of State</h3>
+<div class="outline-text-3" id="text-org7e9dcde">
 <p>
 remember the 5 factors that compose our program?
 </p>
@@ -596,11 +655,11 @@ to <code>StateT</code>, then we will lose the effects of <code>ReaderT</code>
 </div>
 </div>
 
-<div id="outline-container-orgbe8013d" class="outline-3">
-<h3 id="orgbe8013d">MTL</h3>
-<div class="outline-text-3" id="text-orgbe8013d">
+<div id="outline-container-org011e361" class="outline-3">
+<h3 id="org011e361">MTL</h3>
+<div class="outline-text-3" id="text-org011e361">
 <p>
-To able to use both <code>ReaderT</code> and <code>StateT</code>, <a href="https://typelevel.org/cats-mtl/">MTL</a> <label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+To able to use both <code>ReaderT</code> and <code>StateT</code>, <a href="https://typelevel.org/cats-mtl/">MTL</a> <label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
 Monad Transformer Library
 </span>is an elegant solution though.
 </p>
@@ -650,11 +709,11 @@ have more effects, e.g. WriterT(to output something Monoid), EitherT(to provide 
 </div>
 </div>
 
-<div id="outline-container-org0b248b6" class="outline-3">
-<h3 id="org0b248b6">Free Monad</h3>
-<div class="outline-text-3" id="text-org0b248b6">
+<div id="outline-container-orge110995" class="outline-3">
+<h3 id="orge110995">Free Monad</h3>
+<div class="outline-text-3" id="text-orge110995">
 <p>
-Thus, the <a href="https://typelevel.org/cats/datatypes/freemonad.html">Free Monad</a> will save your ass by providing monad for free if you have a Functor<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
+Thus, the <a href="https://typelevel.org/cats/datatypes/freemonad.html">Free Monad</a> will save your ass by providing monad for free if you have a Functor<label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
 via <a href="https://blog.oyanglul.us/grokking-monad/scala/en/part3#orgd67ff11">CoYoneda Lema</a> you just need to provide a data type(case class) <code>F[A]</code>, and you will get Functor for free.
 </span>.
 </p>
@@ -716,9 +775,9 @@ problem of Monad Transformer, then what's the whole point of using Free again?
 </div>
 
 
-<div id="outline-container-org4a558a1" class="outline-3">
-<h3 id="org4a558a1">ReaderT + MTL + Free</h3>
-<div class="outline-text-3" id="text-org4a558a1">
+<div id="outline-container-orgc09d58d" class="outline-3">
+<h3 id="orgc09d58d">ReaderT + MTL + Free</h3>
+<div class="outline-text-3" id="text-orgc09d58d">
 <p>
 Now that we know all approach has their own pros and cons, to eliminate their cons and magnify pros, the ultimate solution for
 abstracting effects is <b>Why not all of them</b>
@@ -773,7 +832,7 @@ Similar to a real world program, we need to go through the same 3 layer to execu
 </ol>
 
 <p>
-But here we just keep doing the same thing to our EDSL<label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
+But here we just keep doing the same thing to our EDSL<label for="4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="4" class="margin-toggle"/><span class="sidenote">
 Embedded Domain Specific Language
 </span>
 </p>
@@ -793,9 +852,9 @@ For demonstrating the power of ReaderT + MTL + Free, here we compose a program t
 </div>
 
 
-<div id="outline-container-org5f01288" class="outline-4">
-<h4 id="org5f01288">Layer 3: Business (Free)</h4>
-<div class="outline-text-4" id="text-org5f01288">
+<div id="outline-container-org73652f1" class="outline-4">
+<h4 id="org73652f1">Layer 3: Business (Free)</h4>
+<div class="outline-text-4" id="text-org73652f1">
 <p>
 to create a EDSL for Business, just use the Effects
 </p>
@@ -834,16 +893,16 @@ from here we can easily tell that <code>Program</code> should contain following 
 </p>
 
 <p>
-This is the Layer 3, which only has business DSL no IO<label for="4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="4" class="margin-toggle"/><span class="sidenote">
+This is the Layer 3, which only has business DSL no IO<label for="5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="5" class="margin-toggle"/><span class="sidenote">
 Http4sClient is exception since the effect itself is a Tagless Final
 </span> thanks to the <b>Abstraction Barrier</b> provided by Layer 2.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org65f3308" class="outline-4">
-<h4 id="org65f3308">Layer 2: MTL + Interpreter</h4>
-<div class="outline-text-4" id="text-org65f3308">
+<div id="outline-container-orgfd07923" class="outline-4">
+<h4 id="orgfd07923">Layer 2: MTL + Interpreter</h4>
+<div class="outline-text-4" id="text-orgfd07923">
 <p>
 Layer 2 is like a VM, it connects the business and bare metal, here we can deal with stateful effect with transformer
 </p>
@@ -891,9 +950,9 @@ explicitly inject <code>MonadState</code> to have everything explicitly managed 
 </div>
 </div>
 
-<div id="outline-container-orgb019049" class="outline-4">
-<h4 id="orgb019049">Layer 1: ReaderT</h4>
-<div class="outline-text-4" id="text-orgb019049">
+<div id="outline-container-org64c7937" class="outline-4">
+<h4 id="org64c7937">Layer 1: ReaderT</h4>
+<div class="outline-text-4" id="text-org64c7937">
 <p>
 Once we compile the program, a binary is produced.
 </p>
@@ -929,15 +988,49 @@ Anyway It's very easy to explain and compose args though!
 
 <ol class="org-ol">
 <li>binary for <code>Http4sClient[IO, ?]</code> needs <code>Client[IO]</code> to run, so here <code>httpclient</code> is instance of <code>Client[IO]</code></li>
-<li>binary for <code>Writer[Chain[String], ?]</code> needs <code>FuntorTell[IO, Chain[String]]</code> to run, presented by meow-mtl <code>.tellInstance</code></li>
+<li>binary for <code>Writer[Chain[String], ?]</code> needs <code>FuntorTell[IO, Chain[String]]</code> to run, presented by <a href="https://github.com/oleg-py/meow-mtl">meow-mtl</a> <code>.tellInstance</code></li>
 <li>binary for <code>Reader[Config, ?]</code> needs <code>Config</code> to run</li>
-<li>binary for <code>State[Int, ?]</code> needs <code>MonadState[IO, Int]</code> to run, which presented here by meow-mtl from <code>.stateInstance</code></li>
+<li>binary for <code>State[Int, ?]</code> needs <code>MonadState[IO, Int]</code> to run, which presented here by <a href="https://github.com/oleg-py/meow-mtl">meow-mtl</a> from <code>.stateInstance</code></li>
 <li>binary for <code>Either[Throwable, ?]</code> needs nothing so <code>Unit</code> is provided</li>
 </ol>
 
 <p>
 Of course there is one more layer missing - <b>Layer 0</b>, if you focus enough you will find out <code>binary.run(args)</code> will return <code>IO</code>
 </p>
+
+<pre class="code"><code>+--------------+
+|Layer 3:      |
+|   Program    |
+|              |
++------+-------+
+       |compile
+/--------------\
+|Layer 2:      |
+|   Compiler   |
+|              |
+\--------------/
+       |        
+       v        
++--------------+
+|Layer 1:      | 
+|   Binary     |
+|              |
++------+-------+
+       | run(args)
+       v  
++--------------+
+|Layer 0:      | 
+|     IO       |
+|              |
++--------------+
+
+</code></pre>
+
+
+<figure>
+<img src="images/free-cake.png" alt="free-cake.png">
+
+</figure>
 
 <p>
 Run the last layer 0 <code>binary.run(args).unsafeRunSync()</code> then all effects will be touching your bare metal.
@@ -946,23 +1039,53 @@ Run the last layer 0 <code>binary.run(args).unsafeRunSync()</code> then all effe
 </div>
 </div>
 </div>
+
+<div id="outline-container-org6da306e" class="outline-2">
+<h2 id="org6da306e">Recap</h2>
+<div class="outline-text-2" id="text-org6da306e">
+<p>
+There's never one solution that fits all problem, when should choose what really depends..
+</p>
+
+<p>
+But overall if your business isn't that complex, the 3 layer ReaderT pattern is an reasonable complexitive of abstraction.
+</p>
+
+<p>
+I also have a confession to make, that I was intentional making ReaderT + MTL so clumsy.
+</p>
+
+<p>
+Actually with help of meow-mtl, one <code>Ref[IO]</code> is good enough provide us stateful effects, just like how Free + MTL works.
+</p>
+
+<p>
+Whatever your choice is, keep the 3 layer cake in mind, it will always help your structure an extensible,
+compoable, testable and scalable project.
+</p>
+</div>
+</div>
 <div id="footnotes">
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
 <div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
-Monad Transformer Library
+It means cormorant
 </p></div></div>
 
 <div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
-via <a href="https://blog.oyanglul.us/grokking-monad/scala/en/part3#orgd67ff11">CoYoneda Lema</a> you just need to provide a data type(case class) <code>F[A]</code>, and you will get Functor for free.
+Monad Transformer Library
 </p></div></div>
 
 <div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
-Embedded Domain Specific Language
+via <a href="https://blog.oyanglul.us/grokking-monad/scala/en/part3#orgd67ff11">CoYoneda Lema</a> you just need to provide a data type(case class) <code>F[A]</code>, and you will get Functor for free.
 </p></div></div>
 
 <div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara">
+Embedded Domain Specific Language
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5">5</a></sup> <div class="footpara"><p class="footpara">
 Http4sClient is exception since the effect itself is a Tagless Final
 </p></div></div>
 
@@ -972,7 +1095,7 @@ Http4sClient is exception since the effect itself is a Tagless Final
 <div id="postamble" class="status">
 <footer>
   <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2019-03-27 Wed 06:03</p>
+  <p>Modified: 2019-03-27 Wed 09:33</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
