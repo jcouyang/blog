@@ -5,7 +5,8 @@
 #+description: I've been using Free Monad in production for a while, as the projects scale and more members contribute, the boundary of different layer reveal them self more clearly.
 #+KEYWORDS: Scala,Free,Monad,MTL,ReaderT
 
-#+BEGIN_SRC emacs-lisp
+
+#+BEGIN_SRC emacs-lisp :exports none
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((ditaa . t)))
@@ -273,7 +274,7 @@ If you look close enough, here it actually becomes 3 layers:
 - Layer 2: Alg ~> IO (state, log, doobieQuery)
 - Layer 3: Alg (program)
 
-#+BEGIN_SRC ditaa :file images/readerT-cake.png :exports result
+#+BEGIN_SRC ditaa :file images/readerT-cake.png :exports results
   +--------------+
   |Layer 3:      |
   |     Alg      |
@@ -288,7 +289,7 @@ If you look close enough, here it actually becomes 3 layers:
          |
          v
   +--------------+
-  |Layer 1:      | 
+  |Layer 1:      |
   |      IO      |
   |              |
   +--------------+
@@ -624,7 +625,7 @@ Anyway It's very easy to explain and compose args though!
 
 Of course there is one more layer missing - *Layer 0*, if you focus enough you will find out =binary.run(args)= will return =IO=
 
-#+BEGIN_SRC ditaa :file images/free-cake.png :exports result
+#+BEGIN_SRC ditaa :file images/free-cake.png :exports results
   +--------------+
   |Layer 3:      |
   |   Program    |
@@ -636,17 +637,17 @@ Of course there is one more layer missing - *Layer 0*, if you focus enough you w
   |   Compiler   |
   |              |
   \--------------/
-         |        
-         v        
+         |
+         v
   +--------------+
-  |Layer 1:      | 
+  |Layer 1:      |
   |   Binary     |
   |              |
   +------+-------+
          | run(args)
-         v  
+         v
   +--------------+
-  |Layer 0:      | 
+  |Layer 0:      |
   |     IO       |
   |              |
   +--------------+
@@ -667,10 +668,42 @@ I also have a confession to make, that I was intentional making ReaderT + MTL so
 
 Actually with help of meow-mtl, one =Ref[IO]= is good enough provide us stateful effects, just like how Free + MTL works.
 
-Whatever your choice is, keep the 3 layer cake in mind, it will always help your structure an extensible,
-compoable, testable and scalable project.
+** ReaderT + MTL
+1. Something to ask: =ReaderT=
+2. Something to write: =FunctorTell[IO, ?]=
+3. Some effects on dependencies: Tagless Final style
+4. Some error to handle: =ReaderT= itself has instance of =MonadError=
+5. Something stateful: =MonadState[IO, ?]=
+
+** Free + MTL + ReaderT
+1. Something to ask: =Reader=
+2. Something to write: =Writer=
+3. Some effects on dependencies: custom Data Type and interpreter
+4. Some error to handle: =Either= has instance of =MonadError=
+5. Something stateful: =State=
+
+
+** 
+
+There are a lot of awesome approaches that solve the exact problem though, if let me rank them:[fn:6]
+1. ReaderT
+2. [[https://github.com/typelevel/cats-tagless][Tagless Final]]
+3. [[http://degoes.net/articles/zio-environment][ZIO Environment]]
+4. ReaderT + MTL
+5. Free
+6. [[https://github.com/atnos-org/eff][Eff]]
+7. Free + MTL + ReaderT
+
+My preference is to choose one that ~>= 3~ for medium to large project,
+for small project number of effects are predicable and managable ~<= 3~
+is quite enough.
+
+No matter what your choice is, keep in mind the 3 layer cake, it will always help your structure an extensible,
+composable, testable and scalable project.
 
 * Footnotes
+
+[fn:6] Sorted based on my expierence/observation by difficulty ASC
 
 [fn:5] It means cormorant
 
