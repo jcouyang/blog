@@ -1,26 +1,8 @@
-(setq exec-path (split-string (getenv "PATH") ":"))
-(require 'package) ;; You might already have this line
-(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
-                    (not (gnutls-available-p))))
-       (url (concat (if no-ssl "http" "https") "://stable.melpa.org/packages/")))
-  (add-to-list 'package-archives (cons "melpastable" url) t))
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
-
+;; (deftheme gtk-ide "gtk-ide theme")
+;; (load-theme 'gtk-ide t t)
+;; (enable-theme 'gtk-ide)
+(require 'package)
 (package-initialize) ;; You might already have this line
-(package-refresh-contents)
-
-(package-install 'org-plus-contrib)
-(package-install 'scala-mode)
-(package-install 'haskell-mode)
-(package-install 'ox-tufte)
-(package-install 'htmlize)
-(package-install 'color-theme-modern)
-(package-install 'clojure-mode)
-
-(deftheme gtk-ide "gtk-ide theme")
-(load-theme 'gtk-ide t t)
-(enable-theme 'gtk-ide)
 (require 'org)
 (require 'scala-mode)
 (require 'haskell-mode)
@@ -94,15 +76,14 @@ PROPERTY, i.e. \"behavior\" parameter from `org-export-options-alist'."
 :RSS_PERMALINK: %L
 :PUBDATE: %D
 :END:
-%k
-" `((?t . ,(org-publish-find-title entry project))
+%c" `((?t . ,(org-publish-find-title entry project))
                  (?D . ,(format-time-string "<%Y-%m-%d %a>" (org-publish-find-date entry project)))
-                 (?c . ,(or (org-publish-find-property entry :description project 'html) " "))
-                 (?k . ,(or (org-publish-find-property entry :keywords project 'html) " "))
+                 (?c . ,(org-publish-find-property entry :description project 'html))
+                 ;;(?k . ,(mapconcat (lambda (x) (format "=%s=" x)) (split-string (or (org-publish-find-property entry :keywords project 'html) "") ",") " "))
                  (?l . ,(concat "file:" entry))
                  (?L . ,(replace-regexp-in-string "\.org" "\.html" entry))
                  ))
-    "--- Oops ---"))
+    "---"))
 
 (defun set-org-publish-project-alist ()
   "Set publishing projects for Orgweb and Worg."
@@ -135,7 +116,7 @@ PROPERTY, i.e. \"behavior\" parameter from `org-export-options-alist'."
         :sitemap-filename "index.org"
         :exclude "\!.*\.org"
         :sitemap-date-format ,config-date-format
-        :makeindex nil
+        :makeindex t
         :html-head-include-default-style nil
         )
 
