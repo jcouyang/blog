@@ -13,8 +13,17 @@ jobs:
           git clone git@github.com:jcouyang/blog.git -b gh-pages public
           rm -rf public/*
       - run: emacs --batch -l orgpress.el -f org-publish-all
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - public
+  deploy:
+    docker:
+      - image: jcouyang/orgpress
+      - attach_workspace:
+          at: /tmp/public
       - run: |
-          cd public
+          cd /tmp/public
           git config user.email "oyanglulu@gmail.com"
           git config user.name "oyanglulubot"
           git add .
