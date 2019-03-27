@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2019-03-27 Wed 02:21 -->
+<!-- 2019-03-27 Wed 02:27 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>入语言第二试: readtable 与 core.async</title>
@@ -85,8 +85,8 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgc0da412">Readtable</a></li>
-<li><a href="#orgc2a3e5e">core.async</a></li>
+<li><a href="#org3f7b930">Readtable</a></li>
+<li><a href="#orgd6e4178">core.async</a></li>
 </ul>
 </div>
 </nav>
@@ -113,26 +113,26 @@ for the JavaScript code in this tag.
 <li>core.async</li>
 </ul>
 
-<div id="outline-container-orgc0da412" class="outline-2">
-<h2 id="orgc0da412">Readtable</h2>
-<div class="outline-text-2" id="text-orgc0da412">
+<div id="outline-container-org3f7b930" class="outline-2">
+<h2 id="org3f7b930">Readtable</h2>
+<div class="outline-text-2" id="text-org3f7b930">
 <p>
 readtable 在 clojure 中的意义是说 macro 可以按照几种 readtable 进行扩展，比如遇到特殊符号‘#’，就可以用另一张 table 中的 macro 来扩展了。
 </p>
 
-<pre class="code"><code>(+ 1 2) <span style="font-weight: bold; font-style: italic;">; a list</span>
-#(+ 1 2) <span style="font-weight: bold; font-style: italic;">; =&gt; (fn (+ 1 2))</span>
+<pre class="code"><code>(+ 1 2) <span style="color: #8c8c8c; font-style: italic;">; a list</span>
+#(+ 1 2) <span style="color: #8c8c8c; font-style: italic;">; =&gt; (fn (+ 1 2))</span>
 
-{<span style="font-weight: bold; text-decoration: underline;">:a</span> 1 <span style="font-weight: bold; text-decoration: underline;">:b</span> 2} <span style="font-weight: bold; font-style: italic;">; hash map</span>
-#{<span style="font-weight: bold; text-decoration: underline;">:a</span> 1 <span style="font-weight: bold; text-decoration: underline;">:b</span> 2} <span style="font-weight: bold; font-style: italic;">; set</span>
+{<span style="color: #6b8e23;">:a</span> 1 <span style="color: #6b8e23;">:b</span> 2} <span style="color: #8c8c8c; font-style: italic;">; hash map</span>
+#{<span style="color: #6b8e23;">:a</span> 1 <span style="color: #6b8e23;">:b</span> 2} <span style="color: #8c8c8c; font-style: italic;">; set</span>
 </code></pre>
 
 <p>
 由于 sweet.js 也支持 readtable，虽然并不是很完美，我就尝试了一下让 ru-lang  也能在遇到‘#’的时候做一些特俗的扩展。比如这是我想要实现的功能，让这几种 literal 的写法遇到‘#’后扩展成 mori 对应的数据结构：
 </p>
-<pre class="code"><code>#[bar, he] <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">=&gt; mori.vector(bar,he)</span>
-#{a: 1, b: 2} <span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">=&gt; mori.hashMap('a', 1, 'b', 2)</span>
-##{1, 2, 3} <span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">=&gt; mori.set([1,2,3])</span>
+<pre class="code"><code>#[bar, he] <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; mori.vector(bar,he)</span>
+#{a: 1, b: 2} <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; mori.hashMap('a', 1, 'b', 2)</span>
+##{1, 2, 3} <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; mori.set([1,2,3])</span>
 </code></pre>
 
 <div class="epigraph"><blockquote>
@@ -146,7 +146,7 @@ readtable 在 clojure 中的意义是说 macro 可以按照几种 readtable 进�
 实现再简单不过了，先创建一个 readtable，挂上‘#’
 </p>
 <pre class="code"><code>sweet.currentReadtable().extend({
-<span style="font-style: italic;">'#'</span>: <span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">ch</span>, <span style="font-weight: bold; font-style: italic;">reader</span>) {
+<span style="color: #8b0000;">'#'</span>: <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">ch</span>, <span style="color: #b8860b;">reader</span>) {
 ...
 }
 })
@@ -156,13 +156,13 @@ readtable 在 clojure 中的意义是说 macro 可以按照几种 readtable 进�
 以 vector 为例，当遇到‘#’后边为 <code>()</code> 时，将它变成 mori.vector&#x2026;就好了：
 </p>
 <pre class="code"><code>module.exports = sweet.currentReadtable().extend({
-  <span style="font-style: italic;">'#'</span>: <span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">ch</span>, <span style="font-weight: bold; font-style: italic;">reader</span>) {
-    <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">hashtag</span> = reader.readIdentifier();
-    <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">pun</span> = reader.readToken();
-    <span style="font-weight: bold;">switch</span>(pun.value){
-    <span style="font-weight: bold;">case</span> <span style="font-style: italic;">'[]'</span>:
-      <span style="font-weight: bold;">return</span> [reader.makeIdentifier(<span style="font-style: italic;">'mori.vector'</span>)].concat(
-        reader.makeDelimiter(<span style="font-style: italic;">'()'</span>,pun.inner)
+  <span style="color: #8b0000;">'#'</span>: <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">ch</span>, <span style="color: #b8860b;">reader</span>) {
+    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">hashtag</span> = reader.readIdentifier();
+    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">pun</span> = reader.readToken();
+    <span style="color: #00008b;">switch</span>(pun.value){
+    <span style="color: #00008b;">case</span> <span style="color: #8b0000;">'[]'</span>:
+      <span style="color: #00008b;">return</span> [reader.makeIdentifier(<span style="color: #8b0000;">'mori.vector'</span>)].concat(
+        reader.makeDelimiter(<span style="color: #8b0000;">'()'</span>,pun.inner)
       );
 ...
 </code></pre>
@@ -180,9 +180,9 @@ readtable 在 clojure 中的意义是说 macro 可以按照几种 readtable 进�
 </div>
 </div>
 
-<div id="outline-container-orgc2a3e5e" class="outline-2">
-<h2 id="orgc2a3e5e">core.async</h2>
-<div class="outline-text-2" id="text-orgc2a3e5e">
+<div id="outline-container-orgd6e4178" class="outline-2">
+<h2 id="orgd6e4178">core.async</h2>
+<div class="outline-text-2" id="text-orgd6e4178">
 <p>
 首先，不知道这是什么的童鞋请回到<a href="./clojure-core.async-essence-in-native-javascript.html">这一篇</a>，然后，感谢 clojurescript 的实现，使得这次移植这么顺利。懂得童鞋就会怀疑，clojurescript 不是还是用得 clojure 的 macro 来生成对应的状态机么？怎么可能轻松移植到 javascript？
 </p>
@@ -204,12 +204,12 @@ readtable 在 clojure 中的意义是说 macro 可以按照几种 readtable 进�
 <p>
 移植了以后看我怎么用（更多测试在<a href="https://github.com/jcouyang/conjs/blob/c8af05791befa230ed73125804fa29cc0f3201fc/spec/mori-spec.js#L196">这里</a>）
 </p>
-<pre class="code"><code><span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">c</span> = <span style="font-weight: bold;">async</span>.chan()
-<span style="font-weight: bold;">async</span>.take$(c ,<span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">x</span>){
-    expect(x).toBe(<span style="font-style: italic;">'something in channel'</span>)
+<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">c</span> = <span style="color: #00008b;">async</span>.chan()
+<span style="color: #00008b;">async</span>.take$(c ,<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">x</span>){
+    expect(x).toBe(<span style="color: #8b0000;">'something in channel'</span>)
     done()
 })
-<span style="font-weight: bold;">async</span>.put$(c, <span style="font-style: italic;">'something in channel'</span>)
+<span style="color: #00008b;">async</span>.put$(c, <span style="color: #8b0000;">'something in channel'</span>)
 </code></pre>
 
 <p>
@@ -220,44 +220,44 @@ readtable 在 clojure 中的意义是说 macro 可以按照几种 readtable 进�
 那些都是 macro，当然我还要实现对应的 macro 了，先来看下加了  go block macro 后的效果:
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">channel1</span> = mori.<span style="font-weight: bold;">async</span>.chan();
-<span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">channel2</span> = mori.<span style="font-weight: bold;">async</span>.chan();
-<span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">data2</span> = [1,2,3];
+<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">channel1</span> = mori.<span style="color: #00008b;">async</span>.chan();
+<span style="color: #00008b;">var</span> <span style="color: #b8860b;">channel2</span> = mori.<span style="color: #00008b;">async</span>.chan();
+<span style="color: #00008b;">var</span> <span style="color: #b8860b;">data2</span> = [1,2,3];
 go {
-  <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">a</span> &lt;! channel1;
-  <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">b</span> &lt;! channel2;
-  expect(a).toBe(<span style="font-style: italic;">"data1"</span>);
+  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span> &lt;! channel1;
+  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">b</span> &lt;! channel2;
+  expect(a).toBe(<span style="color: #8b0000;">"data1"</span>);
   expect(b).toEqual([1,2,3]);
   done();
 };
 go {data2 &gt;! channel2};
-go {<span style="font-style: italic;">'data1'</span> &gt;! channel1};
+go {<span style="color: #8b0000;">'data1'</span> &gt;! channel1};
 </code></pre>
 
 <p>
 当然还支持 alts
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">channela</span> = mori.<span style="font-weight: bold;">async</span>.chan();
-<span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">channelb</span> = mori.<span style="font-weight: bold;">async</span>.chan();
-<span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">data2</span> = [1,2,3];    
+<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">channela</span> = mori.<span style="color: #00008b;">async</span>.chan();
+<span style="color: #00008b;">var</span> <span style="color: #b8860b;">channelb</span> = mori.<span style="color: #00008b;">async</span>.chan();
+<span style="color: #00008b;">var</span> <span style="color: #b8860b;">data2</span> = [1,2,3];    
 go {
-  <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">anywho</span> &lt;!alts [channela, channelb];
-  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">vector.a(0) is equals to nth(vector, 0)</span>
+  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">anywho</span> &lt;!alts [channela, channelb];
+  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">vector.a(0) is equals to nth(vector, 0)</span>
   expect(anywho.a(0)).toEqual([1,2,3]);
   expect(anywho.a(1)).toBe(channelb);
   done();
 };
 go {data2 &gt;! channelb};
-go {<span style="font-style: italic;">'data1'</span> &gt;! channela};
+go {<span style="color: #8b0000;">'data1'</span> &gt;! channela};
 </code></pre>
 
 <p>
 go block macro 的实现其实也没有花<a href="https://github.com/jcouyang/ru/blob/master/macro/async.sjs">太多的代码</a>， 以 take 为例，只需要把后面的句子都放入 take 的 callback 中好了，通过我的 <a href="./clojure-essence-in-javascript-macro.html">sweet macro 简介</a> 我想这里应该能看懂的：
 </p>
-<pre class="code"><code><span style="font-weight: bold;">let</span> (&lt;!) = macro {
-    rule infix { <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">$left</span>:ident |  $right:expr $rest $[...] } =&gt; {
-        <span style="font-weight: bold;">return</span> mori.<span style="font-weight: bold;">async</span>.take$($right, <span style="font-weight: bold;">function</span> (<span style="font-weight: bold; font-style: italic;">value</span>) {
+<pre class="code"><code><span style="color: #00008b;">let</span> (&lt;!) = macro {
+    rule infix { <span style="color: #00008b;">var</span> <span style="color: #b8860b;">$left</span>:ident |  $right:expr $rest $[...] } =&gt; {
+        <span style="color: #00008b;">return</span> mori.<span style="color: #00008b;">async</span>.take$($right, <span style="color: #00008b;">function</span> (<span style="color: #b8860b;">value</span>) {
             $left = value
             $rest $[...]
         })
@@ -276,19 +276,19 @@ go block macro 的实现其实也没有花<a href="https://github.com/jcouyang/r
 所以，上面的 take 测试放到 <a href="http://ru-lang.org/try/#%20%20%20%20var%20channel1%20=%20mori.async.chan%28%29;%0A%20%20%20%20var%20channel2%20=%20mori.async.chan%28%29;%0A%20%20%20%20var%20data2%20=%20%5B1,2,3%5D;%0A%20%20%20%20go%20%7B%0A%20%20%20%20%20%20var%20a%20%3C!%20channel1;%0A%20%20%20%20%20%20var%20b%20%3C!%20channel2;%0A%20%20%20%20%20%20expect%28a%29.toBe%28%22data1%22%29;%0A%20%20%20%20%20%20expect%28b%29.toEqual%28%5B1,2,3%5D%29;%0A%20%20%20%20%20%20done%28%29;%0A%20%20%20%20%7D;%0A%20%20%20%20go%20%7Bdata2%20%3E!%20channel2%7D;%0A%20%20%20%20go%20%7B%27data1%27%20%3E!%20channel1%7D;">ru-lang repl</a> 中会编译成
 </p>
 <pre class="code"><code>go {
-  <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">a</span> &lt;! channel1;
-  <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">b</span> &lt;! channel2;
-  expect(a).toBe(<span style="font-style: italic;">"data1"</span>);
+  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span> &lt;! channel1;
+  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">b</span> &lt;! channel2;
+  expect(a).toBe(<span style="color: #8b0000;">"data1"</span>);
   expect(b).toEqual([1,2,3]);
   done();
 };
-<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">=&gt; </span>
-(<span style="font-weight: bold;">function</span> () {
-    <span style="font-weight: bold;">return</span> mori.<span style="font-weight: bold;">async</span>.take$(channel1, <span style="font-weight: bold;">function</span> (<span style="font-weight: bold; font-style: italic;">value</span>) {
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; </span>
+(<span style="color: #00008b;">function</span> () {
+    <span style="color: #00008b;">return</span> mori.<span style="color: #00008b;">async</span>.take$(channel1, <span style="color: #00008b;">function</span> (<span style="color: #b8860b;">value</span>) {
         a = value;
-        <span style="font-weight: bold;">return</span> mori.<span style="font-weight: bold;">async</span>.take$(channel2, <span style="font-weight: bold;">function</span> (<span style="font-weight: bold; font-style: italic;">value$2</span>) {
+        <span style="color: #00008b;">return</span> mori.<span style="color: #00008b;">async</span>.take$(channel2, <span style="color: #00008b;">function</span> (<span style="color: #b8860b;">value$2</span>) {
             b = value$2;
-            expect(a).toBe(<span style="font-style: italic;">'data1'</span>);
+            expect(a).toBe(<span style="color: #8b0000;">'data1'</span>);
             expect(b).toEqual([
                 1,
                 2,
@@ -338,7 +338,7 @@ go block macro 的实现其实也没有花<a href="https://github.com/jcouyang/r
 <div id="postamble" class="status">
 <footer>
   <p>Author: root <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Modified: 2019-03-27 Wed 02:27</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>

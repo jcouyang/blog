@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2019-03-27 Wed 02:21 -->
+<!-- 2019-03-27 Wed 02:27 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>JavaScript玩转Clojure大法之 - Trampoline</title>
@@ -85,11 +85,11 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org3dd6f52">尾递归(tail recursion)</a></li>
-<li><a href="#orge9bd791">相互递归(mutual recursion)</a>
+<li><a href="#orgaf68dbe">尾递归(tail recursion)</a></li>
+<li><a href="#orgd5bcfc5">相互递归(mutual recursion)</a>
 <ul>
-<li><a href="#org1046eeb">DFA</a></li>
-<li><a href="#org05d7f98">Trampoline</a></li>
+<li><a href="#org8359330">DFA</a></li>
+<li><a href="#orgeb6f620">Trampoline</a></li>
 </ul>
 </li>
 </ul>
@@ -151,12 +151,12 @@ ok, 这就是相互递归(mutual recursion)
 
 <p>
 在继续解释trampoline是如何优化相互递归之前, 可能有些同学不太清楚什么是尾递归优化, 当然嫌我啰嗦的可以直接坐
-<a href="#orge9bd791">电梯</a>直达.
+<a href="#orgd5bcfc5">电梯</a>直达.
 </p>
 
-<div id="outline-container-org3dd6f52" class="outline-2">
-<h2 id="org3dd6f52">尾递归(tail recursion)</h2>
-<div class="outline-text-2" id="text-org3dd6f52">
+<div id="outline-container-orgaf68dbe" class="outline-2">
+<h2 id="orgaf68dbe">尾递归(tail recursion)</h2>
+<div class="outline-text-2" id="text-orgaf68dbe">
 <p>
 又要拿一个被举烂了的例子 - 求n的阶乘
 </p>
@@ -164,9 +164,9 @@ ok, 这就是相互递归(mutual recursion)
 <p>
 很容易就可以写出来
 </p>
-<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">fact</span>(<span style="font-weight: bold; font-style: italic;">n</span>){
-    <span style="font-weight: bold;">if</span>(n==0)<span style="font-weight: bold;">return</span> 1;
-    <span style="font-weight: bold;">return</span> n*fact(n-1);
+<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">fact</span>(<span style="color: #b8860b;">n</span>){
+    <span style="color: #00008b;">if</span>(n==0)<span style="color: #00008b;">return</span> 1;
+    <span style="color: #00008b;">return</span> n*fact(n-1);
 }
 </code></pre>
 
@@ -182,9 +182,9 @@ ok, 这就是相互递归(mutual recursion)
 那么怎么才是尾递归, 当然是最后一个操作一定是调用自己.
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">fact</span>(<span style="font-weight: bold; font-style: italic;">n</span>, <span style="font-weight: bold; font-style: italic;">acc</span>){
-    <span style="font-weight: bold;">if</span>(n==0)<span style="font-weight: bold;">return</span> acc;
-    <span style="font-weight: bold;">return</span> fact(n-1, acc*n)
+<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">fact</span>(<span style="color: #b8860b;">n</span>, <span style="color: #b8860b;">acc</span>){
+    <span style="color: #00008b;">if</span>(n==0)<span style="color: #00008b;">return</span> acc;
+    <span style="color: #00008b;">return</span> fact(n-1, acc*n)
 }
 </code></pre>
 <p>
@@ -198,13 +198,13 @@ ok, 这就是相互递归(mutual recursion)
 <p>
 由于tail recur非常容易改写成循环, 编译器容易对其进行优化
 </p>
-<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">fact</span>(<span style="font-weight: bold; font-style: italic;">n</span>){
-    <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">acc</span>=1,<span style="font-weight: bold; font-style: italic;">i</span>=n
-    <span style="font-weight: bold;">while</span>(i!=0){
+<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">fact</span>(<span style="color: #b8860b;">n</span>){
+    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">acc</span>=1,<span style="color: #b8860b;">i</span>=n
+    <span style="color: #00008b;">while</span>(i!=0){
         acc=acc*i;
         i-=1;
     }
-    <span style="font-weight: bold;">return</span> acc
+    <span style="color: #00008b;">return</span> acc
 }
 </code></pre>
 
@@ -234,16 +234,16 @@ ok, 这就是相互递归(mutual recursion)
 </blockquote></div>
 </div>
 </div>
-<div id="outline-container-orge9bd791" class="outline-2">
-<h2 id="orge9bd791">相互递归(mutual recursion)</h2>
-<div class="outline-text-2" id="text-orge9bd791">
+<div id="outline-container-orgd5bcfc5" class="outline-2">
+<h2 id="orgd5bcfc5">相互递归(mutual recursion)</h2>
+<div class="outline-text-2" id="text-orgd5bcfc5">
 <p>
 相互递归由于是函数之间的互相调用, 则不能像尾递归一样直接优化成循环就完事.
 </p>
 </div>
-<div id="outline-container-org1046eeb" class="outline-3">
-<h3 id="org1046eeb">DFA</h3>
-<div class="outline-text-3" id="text-org1046eeb">
+<div id="outline-container-org8359330" class="outline-3">
+<h3 id="org8359330">DFA</h3>
+<div class="outline-text-3" id="text-org8359330">
 <p>
 举个最简单的例子, 相互递归经常用于状态机的实现, 比如自动贩卖机, 假设这台贩卖机非常简单, 只吃五块,只卖巧克力
 </p>
@@ -259,30 +259,30 @@ ok, 这就是相互递归(mutual recursion)
 <p>
 好吧, 我们来实现一把
 </p>
-<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">eat_money</span>(<span style="font-weight: bold; font-style: italic;">input_seq</span>){
-    <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">input</span> = input_seq.shift()
-    <span style="font-weight: bold;">if</span>(input== <span style="font-style: italic;">'&#20116;&#22359;'</span>)
-        console.log(<span style="font-style: italic;">'&#25910;&#21040;&#21602;,&#36873;&#20010;&#24039;&#20811;&#21147;&#21543;^_^'</span>)
+<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">eat_money</span>(<span style="color: #b8860b;">input_seq</span>){
+    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">input</span> = input_seq.shift()
+    <span style="color: #00008b;">if</span>(input== <span style="color: #8b0000;">'&#20116;&#22359;'</span>)
+        console.log(<span style="color: #8b0000;">'&#25910;&#21040;&#21602;,&#36873;&#20010;&#24039;&#20811;&#21147;&#21543;^_^'</span>)
         choose(input_seq)
-    <span style="font-weight: bold;">else</span>
+    <span style="color: #00008b;">else</span>
         eat_money(input_seq)
 }
 
-<span style="font-weight: bold;">function</span> <span style="font-weight: bold;">choose</span>(<span style="font-weight: bold; font-style: italic;">input_seq</span>){
-    <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">input</span> = input_seq.shift()
-    <span style="font-weight: bold;">if</span>(input== <span style="font-style: italic;">'&#24039;&#20811;&#21147;'</span>)
-        console.log(<span style="font-style: italic;">'&#36873;&#20102;&#24039;&#20811;&#21147;, &#25353;&#19979;&#25214;&#38646;&#25353;&#38062;, &#25105;&#36824;&#27424;&#20320;&#20004;&#22359;&#38065;&#21734;'</span>)
+<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">choose</span>(<span style="color: #b8860b;">input_seq</span>){
+    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">input</span> = input_seq.shift()
+    <span style="color: #00008b;">if</span>(input== <span style="color: #8b0000;">'&#24039;&#20811;&#21147;'</span>)
+        console.log(<span style="color: #8b0000;">'&#36873;&#20102;&#24039;&#20811;&#21147;, &#25353;&#19979;&#25214;&#38646;&#25353;&#38062;, &#25105;&#36824;&#27424;&#20320;&#20004;&#22359;&#38065;&#21734;'</span>)
         changes(input_seq)
-    <span style="font-weight: bold;">else</span>
+    <span style="color: #00008b;">else</span>
         choose(input_seq)
 }
 
-<span style="font-weight: bold;">function</span> <span style="font-weight: bold;">changes</span>(<span style="font-weight: bold; font-style: italic;">input_seq</span>){
-    <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">input</span> = input_seq.shift()
-    <span style="font-weight: bold;">if</span>(input==<span style="font-style: italic;">'&#25214;&#38646;'</span>)
-        console.log(<span style="font-style: italic;">'&#27426;&#36814;&#20877;&#27425;&#20809;&#20020;'</span>)
+<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">changes</span>(<span style="color: #b8860b;">input_seq</span>){
+    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">input</span> = input_seq.shift()
+    <span style="color: #00008b;">if</span>(input==<span style="color: #8b0000;">'&#25214;&#38646;'</span>)
+        console.log(<span style="color: #8b0000;">'&#27426;&#36814;&#20877;&#27425;&#20809;&#20020;'</span>)
         eat_money(input_seq)
-    <span style="font-weight: bold;">else</span>
+    <span style="color: #00008b;">else</span>
         changes(input_seq)
 }
 </code></pre>
@@ -304,10 +304,10 @@ ok, 这就是相互递归(mutual recursion)
 <p>
 现在问题来了, 如果我的 <code>input_seq</code> 非常长, 比如
 </p>
-<pre class="code"><code><span style="font-weight: bold;">for</span>(<span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">n</span>=15;n&gt;0;n--){
+<pre class="code"><code><span style="color: #00008b;">for</span>(<span style="color: #00008b;">var</span> <span style="color: #b8860b;">n</span>=15;n&gt;0;n--){
   input_seq=input_seq.concat(input_seq)
 }
-input_seq.length <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">=&gt; 294912</span>
+input_seq.length <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; 294912</span>
 </code></pre>
 <p>
 现在 <code>input_seq</code> 非常大, 再试试(请到node上试)
@@ -326,9 +326,9 @@ RangeError: Maximum call stack size exceeded
 </div>
 </div>
 
-<div id="outline-container-org05d7f98" class="outline-3">
-<h3 id="org05d7f98">Trampoline</h3>
-<div class="outline-text-3" id="text-org05d7f98">
+<div id="outline-container-orgeb6f620" class="outline-3">
+<h3 id="orgeb6f620">Trampoline</h3>
+<div class="outline-text-3" id="text-orgeb6f620">
 <p>
 Trampoline就是用来解决相互递归爆栈的问题, 等等, 什么是Trampoline
 </p>
@@ -347,17 +347,17 @@ trampoline是一个函数:
 比如可以把贩卖机简单的改造一下, 让他返回函数, 而不是直接调用其他函数, 注意第<a href="#coderef-trampoline" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-trampoline');" onmouseout="CodeHighlightOff(this, 'coderef-trampoline');">6</a>行
 </p>
 
-<pre class="code"><code><span class="linenr"> 1: </span><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">eat_money</span>(<span style="font-weight: bold; font-style: italic;">input_seq</span>){
-<span class="linenr"> 2: </span>  <span style="font-weight: bold;">if</span>(input_seq.length==0)<span style="font-weight: bold;">return</span>
-<span class="linenr"> 3: </span>  <span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">input</span> = input_seq.shift()
-<span class="linenr"> 4: </span>  <span style="font-weight: bold;">if</span>(input== <span style="font-style: italic;">'&#20116;&#22359;'</span>){
-<span class="linenr"> 5: </span>    console.log(<span style="font-style: italic;">'&#25910;&#21040;&#21602;,&#36873;&#20010;&#24039;&#20811;&#21147;&#21543;^_^'</span>)
-<span id="coderef-trampoline" class="coderef-off"><span class="linenr"> 6: </span>    <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">function</span>(){</span>
-<span class="linenr"> 7: </span>      <span style="font-weight: bold;">return</span> choose(input_seq)
+<pre class="code"><code><span class="linenr"> 1: </span><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">eat_money</span>(<span style="color: #b8860b;">input_seq</span>){
+<span class="linenr"> 2: </span>  <span style="color: #00008b;">if</span>(input_seq.length==0)<span style="color: #00008b;">return</span>
+<span class="linenr"> 3: </span>  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">input</span> = input_seq.shift()
+<span class="linenr"> 4: </span>  <span style="color: #00008b;">if</span>(input== <span style="color: #8b0000;">'&#20116;&#22359;'</span>){
+<span class="linenr"> 5: </span>    console.log(<span style="color: #8b0000;">'&#25910;&#21040;&#21602;,&#36873;&#20010;&#24039;&#20811;&#21147;&#21543;^_^'</span>)
+<span id="coderef-trampoline" class="coderef-off"><span class="linenr"> 6: </span>    <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(){</span>
+<span class="linenr"> 7: </span>      <span style="color: #00008b;">return</span> choose(input_seq)
 <span class="linenr"> 8: </span>    }
-<span class="linenr"> 9: </span>  }<span style="font-weight: bold;">else</span>{
-<span class="linenr">10: </span>    <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">function</span>(){
-<span class="linenr">11: </span>      <span style="font-weight: bold;">return</span> eat_money(input_seq)
+<span class="linenr"> 9: </span>  }<span style="color: #00008b;">else</span>{
+<span class="linenr">10: </span>    <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(){
+<span class="linenr">11: </span>      <span style="color: #00008b;">return</span> eat_money(input_seq)
 <span class="linenr">12: </span>    }
 <span class="linenr">13: </span>  } 
 <span class="linenr">14: </span>}
@@ -386,10 +386,10 @@ trampoline是一个函数:
 <img src="./images/stack.gif" alt="stack.gif">
 
 </figure>
-<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">eat_money</span>(<span style="font-weight: bold; font-style: italic;">input_seq</span>){
-    <span style="font-weight: bold;">return</span> choose(input_seq){
-        <span style="font-weight: bold;">return</span> changes(input_seq){
-            <span style="font-weight: bold;">return</span> ...
+<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">eat_money</span>(<span style="color: #b8860b;">input_seq</span>){
+    <span style="color: #00008b;">return</span> choose(input_seq){
+        <span style="color: #00008b;">return</span> changes(input_seq){
+            <span style="color: #00008b;">return</span> ...
         }
     }
 }
@@ -406,11 +406,11 @@ trampoline是一个函数:
 
 </figure>
 
-<pre class="code"><code><span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">res</span> = eat_money(input_seq)
-<span style="font-weight: bold;">while</span>(<span style="font-weight: bold; text-decoration: underline;">true</span>){
-    <span style="font-weight: bold;">if</span>(<span style="font-weight: bold;">typeof</span> res ==<span style="font-style: italic;">'function'</span>)res = res()
-    <span style="font-weight: bold;">else</span>
-        <span style="font-weight: bold;">break</span>
+<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">res</span> = eat_money(input_seq)
+<span style="color: #00008b;">while</span>(<span style="color: #6b8e23;">true</span>){
+    <span style="color: #00008b;">if</span>(<span style="color: #00008b;">typeof</span> res ==<span style="color: #8b0000;">'function'</span>)res = res()
+    <span style="color: #00008b;">else</span>
+        <span style="color: #00008b;">break</span>
 }
 </code></pre>
 
@@ -429,7 +429,7 @@ trampoline是一个函数:
 <div id="postamble" class="status">
 <footer>
   <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Modified: 2019-03-27 Wed 02:27</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>

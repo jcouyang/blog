@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2019-03-27 Wed 02:21 -->
+<!-- 2019-03-27 Wed 02:27 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>JavaScript玩转Clojure大法之 - Macro (1)</title>
@@ -83,14 +83,14 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgc480da0">Macro</a></li>
-<li><a href="#orgfcdb5c0">Sweet.js</a>
+<li><a href="#org9a8af01">Macro</a></li>
+<li><a href="#org17d03ca">Sweet.js</a>
 <ul>
-<li><a href="#org82f3609">Rule macro</a></li>
-<li><a href="#orgf8ced70">case macro</a></li>
+<li><a href="#orgb431f38">Rule macro</a></li>
+<li><a href="#orga706344">case macro</a></li>
 </ul>
 </li>
-<li><a href="#org35b77b3">Recap</a></li>
+<li><a href="#org9baaae1">Recap</a></li>
 </ul>
 </div>
 </nav>
@@ -106,9 +106,9 @@ macro可以说是lisp语言的独门绝技, lisp语言数据即代码,以及s-ex
 虽然js原生不能这么玩, 但是依然不能阻止我们通过sweet.js在预编译的过程中使用macro.
 </p>
 
-<div id="outline-container-orgc480da0" class="outline-2">
-<h2 id="orgc480da0">Macro</h2>
-<div class="outline-text-2" id="text-orgc480da0">
+<div id="outline-container-org9a8af01" class="outline-2">
+<h2 id="org9a8af01">Macro</h2>
+<div class="outline-text-2" id="text-org9a8af01">
 <p>
 我非常不喜欢中文字面翻译&#x2013;'宏', 中文宏的意思是大, 广大, 实在想不通这跟macro有毛关系. 而macro值的是某条指令可以扩展
 成一堆其它指令. 反而用个图我觉得更贴切
@@ -120,8 +120,8 @@ macro可以说是lisp语言的独门绝技, lisp语言数据即代码,以及s-ex
 
 </figure>
 
-<pre class="code"><code>(macroexpand '(<span style="font-weight: bold;">when-not</span> (= 1 3) (print <span style="font-style: italic;">"damn"</span>)))
-<span style="font-weight: bold; font-style: italic;">; </span><span style="font-weight: bold; font-style: italic;">=&gt; (if (= 1 3) nil (do (print "damn")))</span>
+<pre class="code"><code>(macroexpand '(<span style="color: #00008b;">when-not</span> (= 1 3) (print <span style="color: #8b0000;">"damn"</span>)))
+<span style="color: #8c8c8c; font-style: italic;">; </span><span style="color: #8c8c8c; font-style: italic;">=&gt; (if (= 1 3) nil (do (print "damn")))</span>
 </code></pre>
 
 <p>
@@ -176,9 +176,9 @@ ClojureScript, 也就是说, ClojureScript写的 go block 可以编译成能在�
 </div>
 </div>
 
-<div id="outline-container-orgfcdb5c0" class="outline-2">
-<h2 id="orgfcdb5c0">Sweet.js</h2>
-<div class="outline-text-2" id="text-orgfcdb5c0">
+<div id="outline-container-org17d03ca" class="outline-2">
+<h2 id="org17d03ca">Sweet.js</h2>
+<div class="outline-text-2" id="text-org17d03ca">
 <p>
 因此对于像其它有更多语法的语言要实现macro可就没那么简单了(虽然一些新的语言还是很努力的实现了macro, 比如rust和julia). 
 比较直白的实现方式是定义的macro接收一个
@@ -194,9 +194,9 @@ mozilla还有论文呢: <a href="https://github.com/mozilla/sweet.js/blob/master
 </p>
 </div>
 
-<div id="outline-container-org82f3609" class="outline-3">
-<h3 id="org82f3609">Rule macro</h3>
-<div class="outline-text-3" id="text-org82f3609">
+<div id="outline-container-orgb431f38" class="outline-3">
+<h3 id="orgb431f38">Rule macro</h3>
+<div class="outline-text-3" id="text-orgb431f38">
 <p>
 因此sweet.js和mozilla自己的语言rust支持的macro语法上非常接近, 也绝逼不是巧合.
 </p>
@@ -217,10 +217,10 @@ foo!(x =&gt; 3); // =&gt; println!("got a ", 3)
   {
     (x=&gt;$e:expr)
   } =&gt; {
-    console.log(<span style="font-style: italic;">'got a '</span>, $e)
+    console.log(<span style="color: #8b0000;">'got a '</span>, $e)
   }
 }
-foo(x=&gt;3) <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">=&gt; console.log("got a ", 3)</span>
+foo(x=&gt;3) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; console.log("got a ", 3)</span>
 </code></pre>
 
 <p>
@@ -278,9 +278,9 @@ foo &bull; ( &bull; x &bull; = &bull; &gt; &bull; 3 &bull; )</li>
 </div>
 </div>
 
-<div id="outline-container-orgf8ced70" class="outline-3">
-<h3 id="orgf8ced70">case macro</h3>
-<div class="outline-text-3" id="text-orgf8ced70">
+<div id="outline-container-orga706344" class="outline-3">
+<h3 id="orga706344">case macro</h3>
+<div class="outline-text-3" id="text-orga706344">
 <p>
 Allright, 当然这个例子好简单, 但是像 rule macro 只能做一些非常简单的形式上的一一变化, 那么说好的元编程呢?
 说好的可以像clojure那样用clojure编写clojure代码呢. 这时候case macro就是解决这个问题了. clojure由于
@@ -295,20 +295,20 @@ Allright, 当然这个例子好简单, 但是像 rule macro 只能做一些非�
 让我们先来一 <del>发</del> 个例子
 </p>
 <pre class="code"><code>  macro m {
-    <span style="font-weight: bold;">case</span> {ctx (x=&gt;$x)} =&gt; {
-      console.log(<span style="font-style: italic;">'haha iam javascript'</span>)
-      <span style="font-weight: bold;">return</span> #{
+    <span style="color: #00008b;">case</span> {ctx (x=&gt;$x)} =&gt; {
+      console.log(<span style="color: #8b0000;">'haha iam javascript'</span>)
+      <span style="color: #00008b;">return</span> #{
        console.log($x) 
       }
     }
   }
   m(100) 
-<span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">=&gt; haha iam javascript (to console)</span>
-<span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">=&gt; console.log(100)</span>
+<span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; haha iam javascript (to console)</span>
+<span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; console.log(100)</span>
 </code></pre>
 
 <p>
-如果你已经忘了, 请 <a href="#org82f3609">电梯</a> 返回去对比一下到底有什么区别
+如果你已经忘了, 请 <a href="#orgb431f38">电梯</a> 返回去对比一下到底有什么区别
 </p>
 <ol class="org-ol">
 <li>多了一个参数 <code>ctx</code>, 匹配用到m时的那个m</li>
@@ -316,10 +316,10 @@ Allright, 当然这个例子好简单, 但是像 rule macro 只能做一些非�
 这里面的语法变成语法树, 当然语法树结构是数组, 每个元素还是一个token树.比如console.log(3)大概是这种结构</li>
 </ol>
 <pre class="code"><code>[
-    {token: {value: <span style="font-style: italic;">'console'</span>}}
-    {token: {value: <span style="font-style: italic;">'.'</span>}},
-    {token: {value: <span style="font-style: italic;">'log'</span>}},
-    {token: {value: <span style="font-style: italic;">'()'</span>},
+    {token: {value: <span style="color: #8b0000;">'console'</span>}}
+    {token: {value: <span style="color: #8b0000;">'.'</span>}},
+    {token: {value: <span style="color: #8b0000;">'log'</span>}},
+    {token: {value: <span style="color: #8b0000;">'()'</span>},
      inner:[
          {token: {value: 3}}
      ]}
@@ -341,11 +341,11 @@ Allright, 当然这个例子好简单, 但是像 rule macro 只能做一些非�
 <p>
 arity function指根据不同个数的参数, 有不同的函数body. 比如
 </p>
-<pre class="code"><code>(<span style="font-weight: bold;">defn</span> <span style="font-weight: bold;">add</span>
+<pre class="code"><code>(<span style="color: #00008b;">defn</span> <span style="color: #6a5acd;">add</span>
   ([x] (+ 0 x))
   ([x y] (+ x y)))
-(add 1)<span style="font-weight: bold; font-style: italic;">;=&gt;2</span>
-(add 1 2)<span style="font-weight: bold; font-style: italic;">;=&gt;3</span>
+(add 1)<span style="color: #8c8c8c; font-style: italic;">;=&gt;2</span>
+(add 1 2)<span style="color: #8c8c8c; font-style: italic;">;=&gt;3</span>
 </code></pre>
 
 </blockquote></div>
@@ -357,30 +357,30 @@ arity function指根据不同个数的参数, 有不同的函数body. 比如
   (a){a}
   (a, b) {a+b}
 }
-add(1) <span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">=&gt; 1</span>
-add(1, 2) <span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">=&gt; 3</span>
+add(1) <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; 1</span>
+add(1, 2) <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; 3</span>
 </code></pre>
 
 <p>
 先把macro摆出来
 </p>
 
-<pre class="code"><code><span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">var macro from http://jlongster.com/Sweet.js-Tutorial--2--Recursive-Macros-and-Custom-Pattern-Classes</span>
+<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">var macro from http://jlongster.com/Sweet.js-Tutorial--2--Recursive-Macros-and-Custom-Pattern-Classes</span>
 macro caseFunc {
-    <span style="font-weight: bold;">case</span> {_ ($args...) {$body... $last:expr}} =&gt;
+    <span style="color: #00008b;">case</span> {_ ($args...) {$body... $last:expr}} =&gt;
     {
-      letstx $len = [makeValue(#{$args...}.length , <span style="font-weight: bold; text-decoration: underline;">null</span>)];
-      <span style="font-weight: bold;">return</span> #{
-      <span style="font-weight: bold;">case</span> $len:
-        <span style="font-weight: bold;">return</span> (<span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">$args</span>...){<span style="font-weight: bold; font-style: italic;">$body</span>... <span style="font-weight: bold;">return</span> <span style="font-weight: bold; font-style: italic;">$last</span>}).<span style="font-weight: bold; font-style: italic;">apply</span>(<span style="font-weight: bold; text-decoration: underline;">this</span>, <span style="font-weight: bold; text-decoration: underline;">arguments</span>)
+      letstx $len = [makeValue(#{$args...}.length , <span style="color: #6b8e23;">null</span>)];
+      <span style="color: #00008b;">return</span> #{
+      <span style="color: #00008b;">case</span> $len:
+        <span style="color: #00008b;">return</span> (<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">$args</span>...){<span style="color: #b8860b;">$body</span>... <span style="color: #00008b;">return</span> <span style="color: #b8860b;">$last</span>}).<span style="color: #b8860b;">apply</span>(<span style="color: #6b8e23;">this</span>, <span style="color: #6b8e23;">arguments</span>)
       }
     }
 }
 
 macro defn{
   rule { $name { $(($args (,) ...){$body ...})...} } =&gt; {
-    <span style="font-weight: bold;">function</span> <span style="font-weight: bold;">$name</span> (){
-      <span style="font-weight: bold;">switch</span>(<span style="font-weight: bold; text-decoration: underline;">arguments</span>.length){
+    <span style="color: #00008b;">function</span> <span style="color: #6a5acd;">$name</span> (){
+      <span style="color: #00008b;">switch</span>(<span style="color: #6b8e23;">arguments</span>.length){
         $(caseFunc ($args...) {$body...};
          )...
       }
@@ -391,21 +391,21 @@ defn arity_function{
   (a){a}
   (a, b) {a + b}
 }
-<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">=&gt;</span>
-<span style="font-weight: bold; font-style: italic;">/*</span>
-<span style="font-weight: bold; font-style: italic;">function arity_function() {</span>
-<span style="font-weight: bold; font-style: italic;">    switch (arguments.length) {</span>
-<span style="font-weight: bold; font-style: italic;">    case 1:</span>
-<span style="font-weight: bold; font-style: italic;">        return function (a) {</span>
-<span style="font-weight: bold; font-style: italic;">            return a;</span>
-<span style="font-weight: bold; font-style: italic;">        }.apply(this, arguments);</span>
-<span style="font-weight: bold; font-style: italic;">    case 2:</span>
-<span style="font-weight: bold; font-style: italic;">        return function (a, b) {</span>
-<span style="font-weight: bold; font-style: italic;">            return a + b;</span>
-<span style="font-weight: bold; font-style: italic;">        }.apply(this, arguments);</span>
-<span style="font-weight: bold; font-style: italic;">    }</span>
-<span style="font-weight: bold; font-style: italic;">}</span>
-<span style="font-weight: bold; font-style: italic;">*/</span>
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt;</span>
+<span style="color: #8c8c8c; font-style: italic;">/*</span>
+<span style="color: #8c8c8c; font-style: italic;">function arity_function() {</span>
+<span style="color: #8c8c8c; font-style: italic;">    switch (arguments.length) {</span>
+<span style="color: #8c8c8c; font-style: italic;">    case 1:</span>
+<span style="color: #8c8c8c; font-style: italic;">        return function (a) {</span>
+<span style="color: #8c8c8c; font-style: italic;">            return a;</span>
+<span style="color: #8c8c8c; font-style: italic;">        }.apply(this, arguments);</span>
+<span style="color: #8c8c8c; font-style: italic;">    case 2:</span>
+<span style="color: #8c8c8c; font-style: italic;">        return function (a, b) {</span>
+<span style="color: #8c8c8c; font-style: italic;">            return a + b;</span>
+<span style="color: #8c8c8c; font-style: italic;">        }.apply(this, arguments);</span>
+<span style="color: #8c8c8c; font-style: italic;">    }</span>
+<span style="color: #8c8c8c; font-style: italic;">}</span>
+<span style="color: #8c8c8c; font-style: italic;">*/</span>
 </code></pre>
 
 <div class="epigraph"><blockquote>
@@ -432,12 +432,12 @@ WTF shen me gui
 
 
 <pre class="code"><code><span class="linenr"> 1: </span>macro caseFunc {
-<span id="coderef-last" class="coderef-off"><span class="linenr"> 2: </span>  <span style="font-weight: bold;">case</span> {_ ($args...) {$body... $last:expr}} =&gt;</span>
+<span id="coderef-last" class="coderef-off"><span class="linenr"> 2: </span>  <span style="color: #00008b;">case</span> {_ ($args...) {$body... $last:expr}} =&gt;</span>
 <span class="linenr"> 3: </span>    {
-<span id="coderef-makevalue" class="coderef-off"><span class="linenr"> 4: </span>      letstx $len = [makeValue(#{$args...}.length , <span style="font-weight: bold; text-decoration: underline;">null</span>)];</span>
-<span class="linenr"> 5: </span>      <span style="font-weight: bold;">return</span> #{
-<span id="coderef-len" class="coderef-off"><span class="linenr"> 6: </span>        <span style="font-weight: bold;">case</span> $len:</span>
-<span class="linenr"> 7: </span>        <span style="font-weight: bold;">return</span> (<span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">$args</span>...){<span style="font-weight: bold; font-style: italic;">$body</span>... <span style="font-weight: bold;">return</span> <span style="font-weight: bold; font-style: italic;">$last</span>}).<span style="font-weight: bold; font-style: italic;">apply</span>(<span style="font-weight: bold; text-decoration: underline;">this</span>, <span style="font-weight: bold; text-decoration: underline;">arguments</span>)
+<span id="coderef-makevalue" class="coderef-off"><span class="linenr"> 4: </span>      letstx $len = [makeValue(#{$args...}.length , <span style="color: #6b8e23;">null</span>)];</span>
+<span class="linenr"> 5: </span>      <span style="color: #00008b;">return</span> #{
+<span id="coderef-len" class="coderef-off"><span class="linenr"> 6: </span>        <span style="color: #00008b;">case</span> $len:</span>
+<span class="linenr"> 7: </span>        <span style="color: #00008b;">return</span> (<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">$args</span>...){<span style="color: #b8860b;">$body</span>... <span style="color: #00008b;">return</span> <span style="color: #b8860b;">$last</span>}).<span style="color: #b8860b;">apply</span>(<span style="color: #6b8e23;">this</span>, <span style="color: #6b8e23;">arguments</span>)
 <span class="linenr"> 8: </span>      }
 <span class="linenr"> 9: </span>    }
 <span class="linenr">10: </span>}
@@ -446,9 +446,9 @@ WTF shen me gui
 </div>
 </div>
 
-<div id="outline-container-org35b77b3" class="outline-2">
-<h2 id="org35b77b3">Recap</h2>
-<div class="outline-text-2" id="text-org35b77b3">
+<div id="outline-container-org9baaae1" class="outline-2">
+<h2 id="org9baaae1">Recap</h2>
+<div class="outline-text-2" id="text-org9baaae1">
 <p>
 总之, macro给我们带无线的 <del>wifi</del> 可能, 对于语法复杂的语言确实不能像lisp一样简单实现macro, 但是通过
 lexer和reader转换成类似lisp token树, 虽然坎坷了一些, 但是还是能达到相同的效果的. 当然 sweet.js 提供
@@ -474,7 +474,7 @@ mozilla还有论文呢: <a href="https://github.com/mozilla/sweet.js/blob/master
 <div id="postamble" class="status">
 <footer>
   <p>Author: root <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Modified: 2019-03-27 Wed 02:27</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>

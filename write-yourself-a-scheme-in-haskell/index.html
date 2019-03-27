@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2019-03-27 Wed 02:21 -->
+<!-- 2019-03-27 Wed 02:27 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>用Haskell48小时写你个Scheme</title>
@@ -154,49 +154,49 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org8abbe81">前言</a></li>
-<li><a href="#org3e94fa1">跑起来</a>
+<li><a href="#org164a6cd">前言</a></li>
+<li><a href="#org39a8724">跑起来</a>
 <ul>
-<li><a href="#orge51b164">Hello World</a></li>
-<li><a href="#org199b39d">操作符</a></li>
-<li><a href="#org889a22e">练习</a></li>
+<li><a href="#org8ceae40">Hello World</a></li>
+<li><a href="#org201f5b8">操作符</a></li>
+<li><a href="#org6c49732">练习</a></li>
 </ul>
 </li>
-<li><a href="#org71e35bb">语法分析</a>
+<li><a href="#org0d2abd7">语法分析</a>
 <ul>
-<li><a href="#org71cd4ea">写个简单的parser</a>
+<li><a href="#org8fd0f03">写个简单的parser</a>
 <ul>
-<li><a href="#orgbf7b994">定义 parser</a></li>
-<li><a href="#org1ebe23d">Parse</a></li>
-<li><a href="#org81d355d">Either</a></li>
-<li><a href="#org7451dfd">pattern matching</a></li>
+<li><a href="#org2b1f089">定义 parser</a></li>
+<li><a href="#org825feb3">Parse</a></li>
+<li><a href="#orgd78dd34">Either</a></li>
+<li><a href="#org3bc69b4">pattern matching</a></li>
 </ul>
 </li>
-<li><a href="#orga02e0da">空白符</a></li>
-<li><a href="#org1dad74e">返回值</a>
+<li><a href="#org89bc1d7">空白符</a></li>
+<li><a href="#org7cb1f58">返回值</a>
 <ul>
-<li><a href="#org9fb4f62">ParseString</a></li>
-<li><a href="#org59edb10">parseAtom</a></li>
-<li><a href="#org36abda5">parseNumber</a></li>
-<li><a href="#orgae4542e">最后</a></li>
+<li><a href="#org706eba6">ParseString</a></li>
+<li><a href="#orgc3225f6">parseAtom</a></li>
+<li><a href="#org02f341e">parseNumber</a></li>
+<li><a href="#org0d5e07e">最后</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org4666508">求值，第一部分</a>
+<li><a href="#org722ff80">求值，第一部分</a>
 <ul>
-<li><a href="#orgd5bc5b7">to String</a></li>
-<li><a href="#orgd33a091">实现 show 类型类</a></li>
+<li><a href="#orga7a8685">to String</a></li>
+<li><a href="#org026bd50">实现 show 类型类</a></li>
 </ul>
 </li>
-<li><a href="#org28fb65f">待续&#x2026;</a></li>
+<li><a href="#org6cf9d34">待续&#x2026;</a></li>
 </ul>
 </div>
 </nav>
 
-<div id="outline-container-org8abbe81" class="outline-2">
-<h2 id="org8abbe81">前言</h2>
-<div class="outline-text-2" id="text-org8abbe81">
+<div id="outline-container-org164a6cd" class="outline-2">
+<h2 id="org164a6cd">前言</h2>
+<div class="outline-text-2" id="text-org164a6cd">
 
 <figure>
 <img src="../images/everyone-out-of-the-universe.gif" alt="everyone-out-of-the-universe.gif">
@@ -228,9 +228,9 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-org3e94fa1" class="outline-2">
-<h2 id="org3e94fa1">跑起来</h2>
-<div class="outline-text-2" id="text-org3e94fa1">
+<div id="outline-container-org39a8724" class="outline-2">
+<h2 id="org39a8724">跑起来</h2>
+<div class="outline-text-2" id="text-org39a8724">
 
 <figure>
 <img src="http://imgs.xkcd.com/comics/haskell.png" alt="haskell.png">
@@ -238,19 +238,19 @@ for the JavaScript code in this tag.
 </figure>
 </div>
 
-<div id="outline-container-orge51b164" class="outline-3">
-<h3 id="orge51b164">Hello World</h3>
-<div class="outline-text-3" id="text-orge51b164">
+<div id="outline-container-org8ceae40" class="outline-3">
+<h3 id="org8ceae40">Hello World</h3>
+<div class="outline-text-3" id="text-org8ceae40">
 <p>
 一切从hello开始，说好的用Haskell实现，先来看Haskell写一个hello world <del>有多麻烦</del>
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">module</span> <span style="font-weight: bold; text-decoration: underline;">Main</span> <span style="font-weight: bold;">where</span>
-<span style="font-weight: bold;">import</span> <span style="font-weight: bold; text-decoration: underline;">System.Environment</span>
-<span style="font-weight: bold;">main</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">IO</span> <span style="font-weight: bold; text-decoration: underline;">()</span>
-<span style="font-weight: bold;">main</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold;">do</span>
-  args <span style="font-weight: bold; font-style: italic;">&lt;-</span> getArgs
-  putStrLn (<span style="font-style: italic;">"Hello, "</span> <span style="font-weight: bold; font-style: italic;">++</span> args <span style="font-weight: bold; font-style: italic;">!!</span> 0)
+<pre class="code"><code><span style="color: #00008b;">module</span> <span style="color: #36648b;">Main</span> <span style="color: #00008b;">where</span>
+<span style="color: #00008b;">import</span> <span style="color: #36648b;">System.Environment</span>
+<span style="color: #6a5acd;">main</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">IO</span> <span style="color: #36648b;">()</span>
+<span style="color: #6a5acd;">main</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
+  args <span style="color: #b8860b;">&lt;-</span> getArgs
+  putStrLn (<span style="color: #8b0000;">"Hello, "</span> <span style="color: #b8860b;">++</span> args <span style="color: #b8860b;">!!</span> 0)
 </code></pre>
 
 <p>
@@ -271,7 +271,7 @@ module 可以稍后介绍，其中
 原因是 do 只是 <code>&gt;&gt;=</code> (aka <code>flatMap</code>) 和 <code>&gt;&gt;</code> 的语法糖，flatmap 永远应该返回同样类型的 Monad
 </p>
 
-<pre class="code"><code>getArgs <span style="font-weight: bold;">&gt;&gt;=</span> (<span style="font-weight: bold; font-style: italic;">\</span>args <span style="font-weight: bold; font-style: italic;">-&gt;</span> putStrLn (<span style="font-style: italic;">"Hello, "</span> <span style="font-weight: bold; font-style: italic;">++</span> args <span style="font-weight: bold; font-style: italic;">!!</span> 0))
+<pre class="code"><code>getArgs <span style="color: #6a5acd;">&gt;&gt;=</span> (<span style="color: #b8860b;">\</span>args <span style="color: #b8860b;">-&gt;</span> putStrLn (<span style="color: #8b0000;">"Hello, "</span> <span style="color: #b8860b;">++</span> args <span style="color: #b8860b;">!!</span> 0))
 </code></pre>
 
 </blockquote></div>
@@ -290,9 +290,9 @@ Hello, jichao
 </div>
 </div>
 
-<div id="outline-container-org199b39d" class="outline-3">
-<h3 id="org199b39d">操作符</h3>
-<div class="outline-text-3" id="text-org199b39d">
+<div id="outline-container-org201f5b8" class="outline-3">
+<h3 id="org201f5b8">操作符</h3>
+<div class="outline-text-3" id="text-org201f5b8">
 <p>
 前面出现了好些操作符，比如 <code>++</code> <code>!!</code> ，当它们堆叠到一起如果没有括号，很难分辨哪些表达式会先求值，所以先让我们熟悉一下常见的操作符，都有哪些结合律，以及优先级顺序
 </p>
@@ -420,9 +420,9 @@ Hello, jichao
 </div>
 
 
-<div id="outline-container-org889a22e" class="outline-3">
-<h3 id="org889a22e">练习</h3>
-<div class="outline-text-3" id="text-org889a22e">
+<div id="outline-container-org6c49732" class="outline-3">
+<h3 id="org6c49732">练习</h3>
+<div class="outline-text-3" id="text-org6c49732">
 <ol class="org-ol">
 <li>修改helloword成读两个参数，并打印</li>
 <li>把两个参数给的数字相加，输出结果</li>
@@ -432,9 +432,9 @@ Hello, jichao
 </div>
 </div>
 
-<div id="outline-container-org71e35bb" class="outline-2">
-<h2 id="org71e35bb">语法分析</h2>
-<div class="outline-text-2" id="text-org71e35bb">
+<div id="outline-container-org0d2abd7" class="outline-2">
+<h2 id="org0d2abd7">语法分析</h2>
+<div class="outline-text-2" id="text-org0d2abd7">
 
 <figure>
 <img src="../images/robot-what.gif" alt="robot-what.gif">
@@ -442,9 +442,9 @@ Hello, jichao
 </figure>
 </div>
 
-<div id="outline-container-org71cd4ea" class="outline-3">
-<h3 id="org71cd4ea">写个简单的parser</h3>
-<div class="outline-text-3" id="text-org71cd4ea">
+<div id="outline-container-org8fd0f03" class="outline-3">
+<h3 id="org8fd0f03">写个简单的parser</h3>
+<div class="outline-text-3" id="text-org8fd0f03">
 <p>
 语法分析，需要引入著名的Parsec库, 当然,在这之前得先安装 Parsec
 </p>
@@ -456,18 +456,18 @@ cabal install parsec
 如果没有 cabal 都没装, 请 <code>brew install cabal</code>, 非mac用户对不住了,我也不知道怎么装,自行google吧.
 </p>
 </div>
-<div id="outline-container-orgbf7b994" class="outline-4">
-<h4 id="orgbf7b994">定义 parser</h4>
-<div class="outline-text-4" id="text-orgbf7b994">
-<pre class="code"><code><span style="font-weight: bold;">import</span> <span style="font-weight: bold; text-decoration: underline;">Text.ParserCombinators.Parsec</span> <span style="font-weight: bold;">hiding</span> (spaces)
-<span style="font-weight: bold;">import</span> <span style="font-weight: bold; text-decoration: underline;">System.Environment</span>
+<div id="outline-container-org2b1f089" class="outline-4">
+<h4 id="org2b1f089">定义 parser</h4>
+<div class="outline-text-4" id="text-org2b1f089">
+<pre class="code"><code><span style="color: #00008b;">import</span> <span style="color: #36648b;">Text.ParserCombinators.Parsec</span> <span style="color: #00008b;">hiding</span> (spaces)
+<span style="color: #00008b;">import</span> <span style="color: #36648b;">System.Environment</span>
 </code></pre>
 
 <p>
 然后实现一个简单的可以解析一些 scheme 符号的 parser
 </p>
-<pre class="code"><code><span style="font-weight: bold;">symbol</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Parser</span> <span style="font-weight: bold; text-decoration: underline;">Char</span>
-<span style="font-weight: bold;">symbol</span> <span style="font-weight: bold; font-style: italic;">=</span> oneOf <span style="font-style: italic;">"!#$%&amp;|*+-/:&lt;=&gt;?@^_~"</span>
+<pre class="code"><code><span style="color: #6a5acd;">symbol</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">Char</span>
+<span style="color: #6a5acd;">symbol</span> <span style="color: #b8860b;">=</span> oneOf <span style="color: #8b0000;">"!#$%&amp;|*+-/:&lt;=&gt;?@^_~"</span>
 </code></pre>
 
 <p>
@@ -475,17 +475,17 @@ symbol 等于 <code>oneOf blahblah</code>, 返回一个 Parser Monad， 里面�
 </p>
 </div>
 </div>
-<div id="outline-container-org1ebe23d" class="outline-4">
-<h4 id="org1ebe23d">Parse</h4>
-<div class="outline-text-4" id="text-org1ebe23d">
+<div id="outline-container-org825feb3" class="outline-4">
+<h4 id="org825feb3">Parse</h4>
+<div class="outline-text-4" id="text-org825feb3">
 <p>
 下面我们用这个 parser 试试 parse 一下
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">readExpr</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">String</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">String</span>
-<span style="font-weight: bold;">readExpr</span> input <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold;">case</span> parse symbol <span style="font-style: italic;">"lisp"</span> input <span style="font-weight: bold;">of</span>
-    <span style="font-weight: bold; text-decoration: underline;">Left</span> err <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-style: italic;">"No match: "</span> <span style="font-weight: bold; font-style: italic;">++</span> show err
-    <span style="font-weight: bold; text-decoration: underline;">Right</span> val <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-style: italic;">"Found value"</span>
+<pre class="code"><code><span style="color: #6a5acd;">readExpr</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
+<span style="color: #6a5acd;">readExpr</span> input <span style="color: #b8860b;">=</span> <span style="color: #00008b;">case</span> parse symbol <span style="color: #8b0000;">"lisp"</span> input <span style="color: #00008b;">of</span>
+    <span style="color: #36648b;">Left</span> err <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"No match: "</span> <span style="color: #b8860b;">++</span> show err
+    <span style="color: #36648b;">Right</span> val <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"Found value"</span>
 </code></pre>
 
 <p>
@@ -514,9 +514,9 @@ parse
 </div>
 </div>
 
-<div id="outline-container-org81d355d" class="outline-4">
-<h4 id="org81d355d">Either</h4>
-<div class="outline-text-4" id="text-org81d355d">
+<div id="outline-container-orgd78dd34" class="outline-4">
+<h4 id="orgd78dd34">Either</h4>
+<div class="outline-text-4" id="text-orgd78dd34">
 <p>
 先不管细节,大体上来说, parse 接收 一个 Parsec 类型, 一个描述, 一个 Stream 类型, 返回一个 Either
 </p>
@@ -547,9 +547,9 @@ parse
 </div>
 </div>
 
-<div id="outline-container-org7451dfd" class="outline-4">
-<h4 id="org7451dfd">pattern matching</h4>
-<div class="outline-text-4" id="text-org7451dfd">
+<div id="outline-container-org3bc69b4" class="outline-4">
+<h4 id="org3bc69b4">pattern matching</h4>
+<div class="outline-text-4" id="text-org3bc69b4">
 <p>
 下来是 of 后面的 <code>blah -&gt; blah blah</code>
 </p>
@@ -565,24 +565,24 @@ parse
 </div>
 </div>
 
-<div id="outline-container-orga02e0da" class="outline-3">
-<h3 id="orga02e0da">空白符</h3>
-<div class="outline-text-3" id="text-orga02e0da">
+<div id="outline-container-org89bc1d7" class="outline-3">
+<h3 id="org89bc1d7">空白符</h3>
+<div class="outline-text-3" id="text-org89bc1d7">
 <p>
 现在我们能拿到 scheme 的 symbol 了, 作为一个 parser 还需要过滤掉一些没用的空白符, 比如说空格先:
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">spaces</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Parser</span> <span style="font-weight: bold; text-decoration: underline;">()</span>
-<span style="font-weight: bold;">spaces</span> <span style="font-weight: bold; font-style: italic;">=</span> skipMany1 space
+<pre class="code"><code><span style="color: #6a5acd;">spaces</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">()</span>
+<span style="color: #6a5acd;">spaces</span> <span style="color: #b8860b;">=</span> skipMany1 space
 </code></pre>
 
 <p>
 这里我们定义了 <code>spaces</code> 函数, 这也是为什么要在之前的 <code>import</code> 的时候 <code>hiding</code> 掉 <code>Parsec</code> 里的 <code>spaces</code>
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">readExpr</span> input <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold;">case</span> parse (spaces <span style="font-weight: bold; font-style: italic;">&gt;&gt;</span> symbol) <span style="font-style: italic;">"lisp"</span> input <span style="font-weight: bold;">of</span>
-    <span style="font-weight: bold; text-decoration: underline;">Left</span> err <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-style: italic;">"No match: "</span> <span style="font-weight: bold; font-style: italic;">++</span> show err
-    <span style="font-weight: bold; text-decoration: underline;">Right</span> val <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-style: italic;">"Found value"</span>
+<pre class="code"><code><span style="color: #6a5acd;">readExpr</span> input <span style="color: #b8860b;">=</span> <span style="color: #00008b;">case</span> parse (spaces <span style="color: #b8860b;">&gt;&gt;</span> symbol) <span style="color: #8b0000;">"lisp"</span> input <span style="color: #00008b;">of</span>
+    <span style="color: #36648b;">Left</span> err <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"No match: "</span> <span style="color: #b8860b;">++</span> show err
+    <span style="color: #36648b;">Right</span> val <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"Found value"</span>
 </code></pre>
 
 <p>
@@ -591,9 +591,9 @@ parse
 </div>
 </div>
 
-<div id="outline-container-org1dad74e" class="outline-3">
-<h3 id="org1dad74e">返回值</h3>
-<div class="outline-text-3" id="text-org1dad74e">
+<div id="outline-container-org7cb1f58" class="outline-3">
+<h3 id="org7cb1f58">返回值</h3>
+<div class="outline-text-3" id="text-org7cb1f58">
 <p>
 到现在为止我们的parser也只能说打印是否找到合法的输入, 但是还不能真正的将输入字符parse成为数据结构.
 </p>
@@ -601,12 +601,12 @@ parse
 <p>
 所以假设我们先来实现将读入的字符转换成值, scheme 的值有这么几种
 </p>
-<pre class="code"><code><span style="font-weight: bold;">data</span> <span style="font-weight: bold; text-decoration: underline;">LispVal</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold; text-decoration: underline;">Atom</span> <span style="font-weight: bold; text-decoration: underline;">String</span>
-             <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">List</span> [<span style="font-weight: bold; text-decoration: underline;">LispVal</span>]
-             <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">DottedList</span> [<span style="font-weight: bold; text-decoration: underline;">LispVal</span>] <span style="font-weight: bold; text-decoration: underline;">LispVal</span>
-             <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">Number</span> <span style="font-weight: bold; text-decoration: underline;">Integer</span>
-             <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">String</span> <span style="font-weight: bold; text-decoration: underline;">String</span>
-             <span style="font-weight: bold; font-style: italic;">|</span> <span style="font-weight: bold; text-decoration: underline;">Bool</span> <span style="font-weight: bold; text-decoration: underline;">Bool</span>
+<pre class="code"><code><span style="color: #00008b;">data</span> <span style="color: #36648b;">LispVal</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Atom</span> <span style="color: #36648b;">String</span>
+             <span style="color: #b8860b;">|</span> <span style="color: #36648b;">List</span> [<span style="color: #36648b;">LispVal</span>]
+             <span style="color: #b8860b;">|</span> <span style="color: #36648b;">DottedList</span> [<span style="color: #36648b;">LispVal</span>] <span style="color: #36648b;">LispVal</span>
+             <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Number</span> <span style="color: #36648b;">Integer</span>
+             <span style="color: #b8860b;">|</span> <span style="color: #36648b;">String</span> <span style="color: #36648b;">String</span>
+             <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Bool</span> <span style="color: #36648b;">Bool</span>
 </code></pre>
 
 <p>
@@ -632,19 +632,19 @@ parse
 </ul>
 </div>
 
-<div id="outline-container-org9fb4f62" class="outline-4">
-<h4 id="org9fb4f62">ParseString</h4>
-<div class="outline-text-4" id="text-org9fb4f62">
+<div id="outline-container-org706eba6" class="outline-4">
+<h4 id="org706eba6">ParseString</h4>
+<div class="outline-text-4" id="text-org706eba6">
 <p>
 有了这个抽象数据类型 ADT,我们就可以将parse的内容转换成 scheme 的 ADT, 首先,试试 parse 个 String
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">parseString</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Parser</span> <span style="font-weight: bold; text-decoration: underline;">LispVal</span>
-<span style="font-weight: bold;">parseString</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold;">do</span>
-                char <span style="font-style: italic;">'"'</span>
-                x <span style="font-weight: bold; font-style: italic;">&lt;-</span> many (noneOf <span style="font-style: italic;">"\""</span>)
-                char <span style="font-style: italic;">'"'</span>
-                return <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold; text-decoration: underline;">String</span> x
+<pre class="code"><code><span style="color: #6a5acd;">parseString</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
+<span style="color: #6a5acd;">parseString</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
+                char <span style="color: #8b0000;">'"'</span>
+                x <span style="color: #b8860b;">&lt;-</span> many (noneOf <span style="color: #8b0000;">"\""</span>)
+                char <span style="color: #8b0000;">'"'</span>
+                return <span style="color: #b8860b;">$</span> <span style="color: #36648b;">String</span> x
 </code></pre>
 
 <p>
@@ -661,9 +661,9 @@ parse
 </div>
 </div>
 
-<div id="outline-container-org59edb10" class="outline-4">
-<h4 id="org59edb10">parseAtom</h4>
-<div class="outline-text-4" id="text-org59edb10">
+<div id="outline-container-orgc3225f6" class="outline-4">
+<h4 id="orgc3225f6">parseAtom</h4>
+<div class="outline-text-4" id="text-orgc3225f6">
 <p>
 atom 的parser 也比较直接, 正常的 atom 
 </p>
@@ -673,15 +673,15 @@ atom 的parser 也比较直接, 正常的 atom
 <li><code>#t</code> 是 True, <code>#f</code> 是 False</li>
 </ul>
 
-<pre class="code"><code><span style="font-weight: bold;">parseAtom</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Parser</span> <span style="font-weight: bold; text-decoration: underline;">LispVal</span>
-<span style="font-weight: bold;">parseAtom</span> <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold;">do</span> 
-              first <span style="font-weight: bold; font-style: italic;">&lt;-</span> letter <span style="font-weight: bold; font-style: italic;">&lt;|&gt;</span> symbol
-              rest <span style="font-weight: bold; font-style: italic;">&lt;-</span> many (letter <span style="font-weight: bold; font-style: italic;">&lt;|&gt;</span> digit <span style="font-weight: bold; font-style: italic;">&lt;|&gt;</span> symbol)
-              <span style="font-weight: bold;">let</span> atom <span style="font-weight: bold; font-style: italic;">=</span> first<span style="font-weight: bold; text-decoration: underline;">:</span>rest
-              return <span style="font-weight: bold; font-style: italic;">$</span> <span style="font-weight: bold;">case</span> atom <span style="font-weight: bold;">of</span> 
-                         <span style="font-style: italic;">"#t"</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Bool</span> <span style="font-weight: bold; text-decoration: underline;">True</span>
-                         <span style="font-style: italic;">"#f"</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Bool</span> <span style="font-weight: bold; text-decoration: underline;">False</span>
-                         <span style="font-weight: bold;">_</span>    <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Atom</span> atom
+<pre class="code"><code><span style="color: #6a5acd;">parseAtom</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
+<span style="color: #6a5acd;">parseAtom</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span> 
+              first <span style="color: #b8860b;">&lt;-</span> letter <span style="color: #b8860b;">&lt;|&gt;</span> symbol
+              rest <span style="color: #b8860b;">&lt;-</span> many (letter <span style="color: #b8860b;">&lt;|&gt;</span> digit <span style="color: #b8860b;">&lt;|&gt;</span> symbol)
+              <span style="color: #00008b;">let</span> atom <span style="color: #b8860b;">=</span> first<span style="color: #36648b;">:</span>rest
+              return <span style="color: #b8860b;">$</span> <span style="color: #00008b;">case</span> atom <span style="color: #00008b;">of</span> 
+                         <span style="color: #8b0000;">"#t"</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Bool</span> <span style="color: #36648b;">True</span>
+                         <span style="color: #8b0000;">"#f"</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Bool</span> <span style="color: #36648b;">False</span>
+                         <span style="color: #00008b;">_</span>    <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Atom</span> atom
 </code></pre>
 
 <p>
@@ -698,11 +698,11 @@ atom 的parser 也比较直接, 正常的 atom
 </div>
 </div>
 
-<div id="outline-container-org36abda5" class="outline-4">
-<h4 id="org36abda5">parseNumber</h4>
-<div class="outline-text-4" id="text-org36abda5">
-<pre class="code"><code><span style="font-weight: bold;">parseNumber</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Parser</span> <span style="font-weight: bold; text-decoration: underline;">LispVal</span>
-<span style="font-weight: bold;">parseNumber</span> <span style="font-weight: bold; font-style: italic;">=</span> liftM (<span style="font-weight: bold; text-decoration: underline;">Number</span> <span style="font-weight: bold; font-style: italic;">.</span> read) <span style="font-weight: bold; font-style: italic;">$</span> many1 digit
+<div id="outline-container-org02f341e" class="outline-4">
+<h4 id="org02f341e">parseNumber</h4>
+<div class="outline-text-4" id="text-org02f341e">
+<pre class="code"><code><span style="color: #6a5acd;">parseNumber</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
+<span style="color: #6a5acd;">parseNumber</span> <span style="color: #b8860b;">=</span> liftM (<span style="color: #36648b;">Number</span> <span style="color: #b8860b;">.</span> read) <span style="color: #b8860b;">$</span> many1 digit
 </code></pre>
 
 <p>
@@ -723,40 +723,40 @@ atom 的parser 也比较直接, 正常的 atom
 </div>
 </div>
 
-<div id="outline-container-orgae4542e" class="outline-4">
-<h4 id="orgae4542e">最后</h4>
-<div class="outline-text-4" id="text-orgae4542e">
+<div id="outline-container-org0d5e07e" class="outline-4">
+<h4 id="org0d5e07e">最后</h4>
+<div class="outline-text-4" id="text-org0d5e07e">
 <p>
 有了这几个 parser, 可以用我们刚见过的 <code>&lt;|&gt;</code> 把它们拼起来
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">parseExpr</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">Parser</span> <span style="font-weight: bold; text-decoration: underline;">LispVal</span>
-<span style="font-weight: bold;">parseExpr</span> <span style="font-weight: bold; font-style: italic;">=</span> parseAtom
-         <span style="font-weight: bold; font-style: italic;">&lt;|&gt;</span> parseString
-         <span style="font-weight: bold; font-style: italic;">&lt;|&gt;</span> parseNumber
+<pre class="code"><code><span style="color: #6a5acd;">parseExpr</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
+<span style="color: #6a5acd;">parseExpr</span> <span style="color: #b8860b;">=</span> parseAtom
+         <span style="color: #b8860b;">&lt;|&gt;</span> parseString
+         <span style="color: #b8860b;">&lt;|&gt;</span> parseNumber
 </code></pre>
 
 <p>
 用我们的新 parser 放到 <code>readExpr</code> 中:
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">readExpr</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">String</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">String</span>
-<span style="font-weight: bold;">readExpr</span> input <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold;">case</span> parse parseExpr <span style="font-style: italic;">"lisp"</span> input <span style="font-weight: bold;">of</span>
-    <span style="font-weight: bold; text-decoration: underline;">Left</span> err <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-style: italic;">"No match: "</span> <span style="font-weight: bold; font-style: italic;">++</span> show err
-    <span style="font-weight: bold; text-decoration: underline;">Right</span> <span style="font-weight: bold;">_</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-style: italic;">"Found value"</span>
+<pre class="code"><code><span style="color: #6a5acd;">readExpr</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
+<span style="color: #6a5acd;">readExpr</span> input <span style="color: #b8860b;">=</span> <span style="color: #00008b;">case</span> parse parseExpr <span style="color: #8b0000;">"lisp"</span> input <span style="color: #00008b;">of</span>
+    <span style="color: #36648b;">Left</span> err <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"No match: "</span> <span style="color: #b8860b;">++</span> show err
+    <span style="color: #36648b;">Right</span> <span style="color: #00008b;">_</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"Found value"</span>
 </code></pre>
 </div>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org4666508" class="outline-2">
-<h2 id="org4666508">求值，第一部分</h2>
-<div class="outline-text-2" id="text-org4666508">
+<div id="outline-container-org722ff80" class="outline-2">
+<h2 id="org722ff80">求值，第一部分</h2>
+<div class="outline-text-2" id="text-org722ff80">
 </div>
-<div id="outline-container-orgd5bc5b7" class="outline-3">
-<h3 id="orgd5bc5b7">to String</h3>
-<div class="outline-text-3" id="text-orgd5bc5b7">
+<div id="outline-container-orga7a8685" class="outline-3">
+<h3 id="orga7a8685">to String</h3>
+<div class="outline-text-3" id="text-orga7a8685">
 <p>
 在真的开始 eval 之前, 我们先把打印的部分实现, 比如之前能 parse 的 <code>List</code> 打印成 scheme 的话应该是 <code>()</code>
 </p>
@@ -764,12 +764,12 @@ atom 的parser 也比较直接, 正常的 atom
 <p>
 简单的实现 premitive 类型
 </p>
-<pre class="code"><code><span class="linenr">1: </span><span style="font-weight: bold;">showVal</span> <span style="font-weight: bold; font-style: italic;">::</span> <span style="font-weight: bold; text-decoration: underline;">LispVal</span> <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">String</span>
-<span class="linenr">2: </span><span style="font-weight: bold;">showVal</span> (<span style="font-weight: bold; text-decoration: underline;">String</span> contents) <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-style: italic;">"\""</span> <span style="font-weight: bold; font-style: italic;">++</span> contents <span style="font-weight: bold; font-style: italic;">++</span> <span style="font-style: italic;">"\""</span>
-<span class="linenr">3: </span><span style="font-weight: bold;">showVal</span> (<span style="font-weight: bold; text-decoration: underline;">Atom</span> name) <span style="font-weight: bold; font-style: italic;">=</span> name
-<span class="linenr">4: </span><span style="font-weight: bold;">showVal</span> (<span style="font-weight: bold; text-decoration: underline;">Number</span> contents) <span style="font-weight: bold; font-style: italic;">=</span> show contents
-<span class="linenr">5: </span><span style="font-weight: bold;">showVal</span> (<span style="font-weight: bold; text-decoration: underline;">Bool</span> <span style="font-weight: bold; text-decoration: underline;">True</span>) <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-style: italic;">"#t"</span>
-<span class="linenr">6: </span><span style="font-weight: bold;">showVal</span> (<span style="font-weight: bold; text-decoration: underline;">Bool</span> <span style="font-weight: bold; text-decoration: underline;">False</span>) <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-style: italic;">"#f"</span>
+<pre class="code"><code><span class="linenr">1: </span><span style="color: #6a5acd;">showVal</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">LispVal</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
+<span class="linenr">2: </span><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">String</span> contents) <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"\""</span> <span style="color: #b8860b;">++</span> contents <span style="color: #b8860b;">++</span> <span style="color: #8b0000;">"\""</span>
+<span class="linenr">3: </span><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">Atom</span> name) <span style="color: #b8860b;">=</span> name
+<span class="linenr">4: </span><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">Number</span> contents) <span style="color: #b8860b;">=</span> show contents
+<span class="linenr">5: </span><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">Bool</span> <span style="color: #36648b;">True</span>) <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"#t"</span>
+<span class="linenr">6: </span><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">Bool</span> <span style="color: #36648b;">False</span>) <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"#f"</span>
 </code></pre>
 
 <p>
@@ -780,8 +780,8 @@ atom 的parser 也比较直接, 正常的 atom
 处理完这些 premitive 类型, 接下来看看如何打印稍微复杂一些的 <code>List</code> 和 <code>DottedList</code> 吧.
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">showVal</span> (<span style="font-weight: bold; text-decoration: underline;">List</span> contents) <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-style: italic;">"("</span> <span style="font-weight: bold; font-style: italic;">++</span> unwordsList contents <span style="font-weight: bold; font-style: italic;">++</span> <span style="font-style: italic;">")"</span>
-<span style="font-weight: bold;">showVal</span> (<span style="font-weight: bold; text-decoration: underline;">DottedList</span> head tail) <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-style: italic;">"("</span> <span style="font-weight: bold; font-style: italic;">++</span> unwordsList head <span style="font-weight: bold; font-style: italic;">++</span> <span style="font-style: italic;">" . "</span> <span style="font-weight: bold; font-style: italic;">++</span> showVal tail <span style="font-weight: bold; font-style: italic;">++</span> <span style="font-style: italic;">")"</span>
+<pre class="code"><code><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">List</span> contents) <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"("</span> <span style="color: #b8860b;">++</span> unwordsList contents <span style="color: #b8860b;">++</span> <span style="color: #8b0000;">")"</span>
+<span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">DottedList</span> head tail) <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"("</span> <span style="color: #b8860b;">++</span> unwordsList head <span style="color: #b8860b;">++</span> <span style="color: #8b0000;">" . "</span> <span style="color: #b8860b;">++</span> showVal tail <span style="color: #b8860b;">++</span> <span style="color: #8b0000;">")"</span>
 </code></pre>
 
 <p>
@@ -792,8 +792,8 @@ scheme 的 List 用括号括起来, 内容则是用空格分开的一个个元�
 其中的 <code>unwordsList</code> 会将内容的元素的 showVal 值用空格连接起来.
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">unwordsList</span> <span style="font-weight: bold; font-style: italic;">::</span> [<span style="font-weight: bold; text-decoration: underline;">LispVal</span>] <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">String</span>
-<span style="font-weight: bold;">unwordsList</span> <span style="font-weight: bold; font-style: italic;">=</span> unwords <span style="font-weight: bold; font-style: italic;">.</span> map showVal
+<pre class="code"><code><span style="color: #6a5acd;">unwordsList</span> <span style="color: #b8860b;">::</span> [<span style="color: #36648b;">LispVal</span>] <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
+<span style="color: #6a5acd;">unwordsList</span> <span style="color: #b8860b;">=</span> unwords <span style="color: #b8860b;">.</span> map showVal
 </code></pre>
 
 <p>
@@ -801,9 +801,9 @@ scheme 的 List 用括号括起来, 内容则是用空格分开的一个个元�
 </p>
 </div>
 </div>
-<div id="outline-container-orgd33a091" class="outline-3">
-<h3 id="orgd33a091">实现 show 类型类</h3>
-<div class="outline-text-3" id="text-orgd33a091">
+<div id="outline-container-org026bd50" class="outline-3">
+<h3 id="org026bd50">实现 show 类型类</h3>
+<div class="outline-text-3" id="text-org026bd50">
 <p>
 上节的 <code>showVal</code> 实现中, 不知道有没有注意到 Number 的实现使用了 <code>show contents</code>. 我们知道 <code>contents</code> 的类型是 Haskell 的 <code>Integer</code>, 之所以可以 <code>show</code>, 是 <code>Integer</code> 实现了类型类 <code>Show</code>.
 </p>
@@ -812,7 +812,7 @@ scheme 的 List 用括号括起来, 内容则是用空格分开的一个个元�
 同样的我们可以实现让 <code>LispVal</code> 类型实现类型类 <code>Show</code>
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">instance</span> <span style="font-weight: bold; text-decoration: underline;">Show</span> <span style="font-weight: bold; text-decoration: underline;">LispVal</span> <span style="font-weight: bold;">where</span> show <span style="font-weight: bold; font-style: italic;">=</span> showVal
+<pre class="code"><code><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Show</span> <span style="color: #36648b;">LispVal</span> <span style="color: #00008b;">where</span> show <span style="color: #b8860b;">=</span> showVal
 </code></pre>
 
 <p>
@@ -823,24 +823,24 @@ scheme 的 List 用括号括起来, 内容则是用空格分开的一个个元�
 下面,我们就可以修改 <code>readExpr</code> 函数, 让他打印出 parse 出来的值
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">readExpr</span> input <span style="font-weight: bold; font-style: italic;">=</span> <span style="font-weight: bold;">case</span> parse parseExpr <span style="font-style: italic;">"lisp"</span> input <span style="font-weight: bold;">of</span>
-    <span style="font-weight: bold; text-decoration: underline;">Left</span> err <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-style: italic;">"No match: "</span> <span style="font-weight: bold; font-style: italic;">++</span> show err
-    <span style="font-weight: bold; text-decoration: underline;">Right</span> val <span style="font-weight: bold; font-style: italic;">-&gt;</span> <span style="font-style: italic;">"Found "</span> <span style="font-weight: bold; font-style: italic;">++</span> show val
+<pre class="code"><code><span style="color: #6a5acd;">readExpr</span> input <span style="color: #b8860b;">=</span> <span style="color: #00008b;">case</span> parse parseExpr <span style="color: #8b0000;">"lisp"</span> input <span style="color: #00008b;">of</span>
+    <span style="color: #36648b;">Left</span> err <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"No match: "</span> <span style="color: #b8860b;">++</span> show err
+    <span style="color: #36648b;">Right</span> val <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"Found "</span> <span style="color: #b8860b;">++</span> show val
 </code></pre>
 
 <p>
 输出
 </p>
 <pre class="code"><code>ghc -package parsec -o parser src/listing4.1.hs
-./parser <span style="font-style: italic;">"(1 2 2)"</span>
+./parser <span style="color: #8b0000;">"(1 2 2)"</span>
 </code></pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org28fb65f" class="outline-2">
-<h2 id="org28fb65f">待续&#x2026;</h2>
-<div class="outline-text-2" id="text-org28fb65f">
+<div id="outline-container-org6cf9d34" class="outline-2">
+<h2 id="org6cf9d34">待续&#x2026;</h2>
+<div class="outline-text-2" id="text-org6cf9d34">
 <ul class="org-ul">
 <li>错误处理及异常</li>
 <li>求值，第二部分</li>
@@ -857,7 +857,7 @@ scheme 的 List 用括号括起来, 内容则是用空格分开的一个个元�
 <div id="postamble" class="status">
 <footer>
   <p>Author: root <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Modified: 2019-03-27 Wed 02:27</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>

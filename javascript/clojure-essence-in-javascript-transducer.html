@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2019-03-27 Wed 02:21 -->
+<!-- 2019-03-27 Wed 02:27 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>JavaScript玩转Clojure大法之Transducer</title>
@@ -85,19 +85,19 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orga155db5">Reducer</a>
+<li><a href="#org9a40bdb">Reducer</a>
 <ul>
-<li><a href="#orgf1255fb">transform</a></li>
-<li><a href="#orgb2a8297">Reducer</a>
+<li><a href="#org3a489db">transform</a></li>
+<li><a href="#orgd6f34a9">Reducer</a>
 <ul>
-<li><a href="#org851d18d">Reducible</a></li>
+<li><a href="#org1c333a7">Reducible</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org3089ef2">Transducer</a></li>
-<li><a href="#org9986b15">Is it Curry?</a></li>
-<li><a href="#org2d0f74b">完整例子</a></li>
+<li><a href="#orgb122e61">Transducer</a></li>
+<li><a href="#org447b0fc">Is it Curry?</a></li>
+<li><a href="#org0352227">完整例子</a></li>
 </ul>
 </div>
 </nav>
@@ -125,9 +125,9 @@ Clojure的作者
 <a href="http://clojure.com/blog/2012/05/15/anatomy-of-reducer.html">Reducer</a> 却没那么 <b>高调</b>. 在解释transducer之前, 先看看什么是Reducer, 如果能看懂, 再接着看Transducer.
 </p>
 
-<div id="outline-container-orga155db5" class="outline-2">
-<h2 id="orga155db5">Reducer</h2>
-<div class="outline-text-2" id="text-orga155db5">
+<div id="outline-container-org9a40bdb" class="outline-2">
+<h2 id="org9a40bdb">Reducer</h2>
+<div class="outline-text-2" id="text-org9a40bdb">
 <p>
 说道reduce这个词, 想必JS Developer大多会用过underscore<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
 我是故意吧reduce的参数顺序写"反"的, 原来underscore是先消费collection的. 至于为什么要反过来
@@ -178,9 +178,9 @@ Terminology:
 来看看更好的解法
 </p>
 </div>
-<div id="outline-container-orgf1255fb" class="outline-3">
-<h3 id="orgf1255fb">transform</h3>
-<div class="outline-text-3" id="text-orgf1255fb">
+<div id="outline-container-org3a489db" class="outline-3">
+<h3 id="org3a489db">transform</h3>
+<div class="outline-text-3" id="text-org3a489db">
 <p>
 reduce函数需要等待map返回新的coll后才能reduce, 那么可不可以一步直接算出来呢?
 </p>
@@ -202,9 +202,9 @@ xf(reduceFn) -&gt; anotherReduceFn
 <p>
 map 函数的简单transform实现可以这样实现,如果你感兴趣的话
 </p>
-<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">map</span>(<span style="font-weight: bold; font-style: italic;">fn</span>){
-  <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">reduceFn</span>){
-    <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">result</span>, <span style="font-weight: bold; font-style: italic;">input</span>){
+<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">map</span>(<span style="color: #b8860b;">fn</span>){
+  <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">reduceFn</span>){
+    <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">result</span>, <span style="color: #b8860b;">input</span>){
       reduceFn(result, fn(input))
     }
   }
@@ -226,9 +226,9 @@ yeah, 现在只需要一步就reduce出来结果了, reduce应用 <code>map(inc)
 </div>
 </div>
 
-<div id="outline-container-orgb2a8297" class="outline-3">
-<h3 id="orgb2a8297"><a href="http://clojure.org/reducers">Reducer</a></h3>
-<div class="outline-text-3" id="text-orgb2a8297">
+<div id="outline-container-orgd6f34a9" class="outline-3">
+<h3 id="orgd6f34a9"><a href="http://clojure.org/reducers">Reducer</a></h3>
+<div class="outline-text-3" id="text-orgd6f34a9">
 <p>
 但是如果我们不想改变map函数的接口, 原始形式的接口还是比较好写好读的
 </p>
@@ -237,7 +237,7 @@ yeah, 现在只需要一步就reduce出来结果了, reduce应用 <code>map(inc)
 <p>
 那么需要进一步的抽象, 我把新的map函数叫做rmap好了
 </p>
-<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">rmap</span>(<span style="font-weight: bold; font-style: italic;">fn</span>, <span style="font-weight: bold; font-style: italic;">coll</span>){
+<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">rmap</span>(<span style="color: #b8860b;">fn</span>, <span style="color: #b8860b;">coll</span>){
   reducer(coll, map(fn))
 }
 </code></pre>
@@ -253,9 +253,9 @@ yeah, 现在只需要一步就reduce出来结果了, reduce应用 <code>map(inc)
 </div>
 
 
-<div id="outline-container-org851d18d" class="outline-4">
-<h4 id="org851d18d">Reducible</h4>
-<div class="outline-text-4" id="text-org851d18d">
+<div id="outline-container-org1c333a7" class="outline-4">
+<h4 id="org1c333a7">Reducible</h4>
+<div class="outline-text-4" id="text-org1c333a7">
 <p>
 答案是, 反转reduce的关系, 原来reduce用sum去计算结果, 现在,我们调用reducible的reduce方法来计算结果
 </p>
@@ -277,7 +277,7 @@ yeah, 现在只需要一步就reduce出来结果了, reduce应用 <code>map(inc)
 <p>
 也就是reduce函数现在应该长这样, 我们暂且叫它 <code>rreduce</code>
 </p>
-<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">rreduce</span>(<span style="font-weight: bold; font-style: italic;">reduceFn</span>, <span style="font-weight: bold; font-style: italic;">init</span>, <span style="font-weight: bold; font-style: italic;">reducible</span>){
+<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">rreduce</span>(<span style="color: #b8860b;">reduceFn</span>, <span style="color: #b8860b;">init</span>, <span style="color: #b8860b;">reducible</span>){
   reducible(reduceFn, init)
 }
 </code></pre>
@@ -289,9 +289,9 @@ yeah, 现在只需要一步就reduce出来结果了, reduce应用 <code>map(inc)
 <p>
 reducer接收coll和xf, 返回reducible函数. 这一切都是lazy的, 直到rreduce调用<a href="#coderef-coll" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-coll');" onmouseout="CodeHighlightOff(this, 'coderef-coll');">第coll行</a>才执行.
 </p>
-<pre class="code"><code><span style="font-weight: bold;">function</span> <span style="font-weight: bold;">reducer</span>(<span style="font-weight: bold; font-style: italic;">coll</span>, <span style="font-weight: bold; font-style: italic;">xf</span>){
-  <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">reduceFn</span>, <span style="font-weight: bold; font-style: italic;">init</span>){
-<span id="coderef-coll" class="coderef-off">    <span style="font-weight: bold;">return</span> coll.reduce(xf(reduceFn), init) (coll)</span>
+<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">reducer</span>(<span style="color: #b8860b;">coll</span>, <span style="color: #b8860b;">xf</span>){
+  <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">reduceFn</span>, <span style="color: #b8860b;">init</span>){
+<span id="coderef-coll" class="coderef-off">    <span style="color: #00008b;">return</span> coll.reduce(xf(reduceFn), init) (coll)</span>
   }
 }
 </code></pre>
@@ -300,9 +300,9 @@ reducer接收coll和xf, 返回reducible函数. 这一切都是lazy的, 直到rre
 </div>
 </div>
 
-<div id="outline-container-org3089ef2" class="outline-2">
-<h2 id="org3089ef2">Transducer</h2>
-<div class="outline-text-2" id="text-org3089ef2">
+<div id="outline-container-orgb122e61" class="outline-2">
+<h2 id="orgb122e61">Transducer</h2>
+<div class="outline-text-2" id="text-orgb122e61">
 <p>
 说了半天Reducer,明明说好的要解释的Transducer呢?
 </p>
@@ -350,17 +350,17 @@ transduce接收一个transducer,一个reducing function, 一个初始值, 一个
 <p>
 可以用在任何地方
 </p>
-<pre class="code"><code>seq(xf data) <span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">&#29983;&#25104;&#19968;&#20010;lazy&#30340;&#24207;&#21015;, &#21516;&#26102;lazy transform, &#27599;&#27425;&#21462;&#30340;&#26102;&#20505;data&#20250;&#34987;transform</span>
-into([], xf data) <span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">&#25226; data transform&#21518;&#25918;&#21040;&#19968;&#20010;&#25968;&#32452;&#37324;</span>
-chan(1, xform) <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#24403;&#25968;&#25454;&#32463;&#36807;CSP&#30340;channel&#26102;&#34987;transform</span>
+<pre class="code"><code>seq(xf data) <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">&#29983;&#25104;&#19968;&#20010;lazy&#30340;&#24207;&#21015;, &#21516;&#26102;lazy transform, &#27599;&#27425;&#21462;&#30340;&#26102;&#20505;data&#20250;&#34987;transform</span>
+into([], xf data) <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">&#25226; data transform&#21518;&#25918;&#21040;&#19968;&#20010;&#25968;&#32452;&#37324;</span>
+chan(1, xform) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&#24403;&#25968;&#25454;&#32463;&#36807;CSP&#30340;channel&#26102;&#34987;transform</span>
 </code></pre>
 </div>
 </div>
 
 
-<div id="outline-container-org9986b15" class="outline-2">
-<h2 id="org9986b15">Is it Curry?</h2>
-<div class="outline-text-2" id="text-org9986b15">
+<div id="outline-container-org447b0fc" class="outline-2">
+<h2 id="org447b0fc">Is it Curry?</h2>
+<div class="outline-text-2" id="text-org447b0fc">
 <p>
 怎么看着有点像柯里化, 一样么?
 </p>
@@ -372,7 +372,7 @@ chan(1, xform) <span style="font-weight: bold; font-style: italic;">// </span><s
 <p>
 比如一个柯里化的map可以
 </p>
-<pre class="code"><code><span style="font-weight: bold;">var</span> <span style="font-weight: bold; font-style: italic;">mapinc</span> = map(inc)
+<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">mapinc</span> = map(inc)
 mapinc([1,2,3])
 </code></pre>
 
@@ -389,14 +389,14 @@ mapinc([1,2,3])
 但是tranceducer只是转换, 所以只接受reducing函数
 </p>
 <pre class="code"><code>reduce(mapinc(sum), 0, [1,2,3])
-<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">=&gt; 9</span>
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; 9</span>
 </code></pre>
 </div>
 </div>
 
-<div id="outline-container-org2d0f74b" class="outline-2">
-<h2 id="org2d0f74b">完整例子</h2>
-<div class="outline-text-2" id="text-org2d0f74b">
+<div id="outline-container-org0352227" class="outline-2">
+<h2 id="org0352227">完整例子</h2>
+<div class="outline-text-2" id="text-org0352227">
 <a class="jsbin-embed" href="http://jsbin.com/sulaxe/1/embed?html,js,console">JS Bin</a><script src="http://static.jsbin.com/js/embed.js"></script>
 </div>
 </div>
@@ -424,7 +424,7 @@ clojure中的数据结构和函数. document严重过时, 建议看导入的<a h
 <div id="postamble" class="status">
 <footer>
   <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Modified: 2019-03-27 Wed 02:27</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>

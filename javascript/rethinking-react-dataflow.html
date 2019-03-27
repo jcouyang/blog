@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2019-03-27 Wed 02:21 -->
+<!-- 2019-03-27 Wed 02:27 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rethinking React Dataflow</title>
@@ -82,15 +82,15 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgb757b94">Reactive</a></li>
-<li><a href="#orgbe9114f">Monadic</a></li>
-<li><a href="#org5cc462a">🌰</a>
+<li><a href="#org0a7ad88">Reactive</a></li>
+<li><a href="#org7b095e0">Monadic</a></li>
+<li><a href="#org712f75d">🌰</a>
 <ul>
-<li><a href="#orgb0cdcc9">一个简单的 Pure Component</a></li>
-<li><a href="#orgc7aecdd">Debounce</a></li>
-<li><a href="#orgef2f4d7">发送 API 请求</a></li>
-<li><a href="#orgc7acf71">继续 flatMap 结果到流上</a></li>
-<li><a href="#orgbe47d8a">Model</a></li>
+<li><a href="#org8583100">一个简单的 Pure Component</a></li>
+<li><a href="#org9ec3ac2">Debounce</a></li>
+<li><a href="#org15bec61">发送 API 请求</a></li>
+<li><a href="#orgafde357">继续 flatMap 结果到流上</a></li>
+<li><a href="#org471d345">Model</a></li>
 </ul>
 </li>
 </ul>
@@ -108,9 +108,9 @@ Redux 现在红的一塌糊涂，写这篇文章并不是专门来踢馆的，�
 我用过裸的 React，确实代码 scale 了会很难过，也用过 redux，predictable 不是吹的，但是这不该归功于 redux，而应该是纯函数，一个函数式编程顺带的最基本的好处。所以，撇开 redux 不聊，来看看除了纯函数，让我们来重新思考下函数式的其他一些奇技淫巧如何能帮助我们提升状态的可预测性。
 </p>
 
-<div id="outline-container-orgb757b94" class="outline-2">
-<h2 id="orgb757b94">Reactive</h2>
-<div class="outline-text-2" id="text-orgb757b94">
+<div id="outline-container-org0a7ad88" class="outline-2">
+<h2 id="org0a7ad88">Reactive</h2>
+<div class="outline-text-2" id="text-org0a7ad88">
 <p>
 相对于命令式的在各个地方 setState，setState 的顺序非常难确定， 就跟可变变量赋值一样，谁先谁后对结果影响巨大。这也是函数式要消灭的赋值。但是话说回来，我特么为什么要去推测状态呢？你永远无法列举完用户交互的操作顺序，即使可以也太头疼了。
 </p>
@@ -135,9 +135,9 @@ Redux 现在红的一塌糊涂，写这篇文章并不是专门来踢馆的，�
 </div>
 </div>
 
-<div id="outline-container-orgbe9114f" class="outline-2">
-<h2 id="orgbe9114f">Monadic</h2>
-<div class="outline-text-2" id="text-orgbe9114f">
+<div id="outline-container-org7b095e0" class="outline-2">
+<h2 id="org7b095e0">Monadic</h2>
+<div class="outline-text-2" id="text-org7b095e0">
 <p>
 不用纠结于 Monad 到底是什么，只要会用 flatmap 就好。例如 redux 非常头疼的问题，Async Action 怎么办？
 </p>
@@ -148,9 +148,9 @@ Redux 现在红的一塌糊涂，写这篇文章并不是专门来踢馆的，�
 </div>
 </div>
 
-<div id="outline-container-org5cc462a" class="outline-2">
-<h2 id="org5cc462a">🌰</h2>
-<div class="outline-text-2" id="text-org5cc462a">
+<div id="outline-container-org712f75d" class="outline-2">
+<h2 id="org712f75d">🌰</h2>
+<div class="outline-text-2" id="text-org712f75d">
 <p>
 要不直接看效果，怕是干讲连 flatmap 都讲不明白。
 </p>
@@ -184,20 +184,20 @@ Redux 现在红的一塌糊涂，写这篇文章并不是专门来踢馆的，�
 </figure>
 </div>
 
-<div id="outline-container-orgb0cdcc9" class="outline-3">
-<h3 id="orgb0cdcc9">一个简单的 Pure Component</h3>
-<div class="outline-text-3" id="text-orgb0cdcc9">
+<div id="outline-container-org8583100" class="outline-3">
+<h3 id="org8583100">一个简单的 Pure Component</h3>
+<div class="outline-text-3" id="text-org8583100">
 <p>
 使用 React 创建一个 Component
 </p>
-<pre class="code"><code><span style="font-weight: bold;">const</span> <span style="font-weight: bold; font-style: italic;">TypeNsearch</span> = (props)=&gt;{
-    <span style="font-weight: bold;">let</span> {search} = props.actions
-    <span style="font-weight: bold;">return</span> &lt;div&gt;
+<pre class="code"><code><span style="color: #00008b;">const</span> <span style="color: #b8860b;">TypeNsearch</span> = (props)=&gt;{
+    <span style="color: #00008b;">let</span> {search} = props.actions
+    <span style="color: #00008b;">return</span> &lt;div&gt;
         &lt;input onChange={e=&gt;search(e.target.value)}&gt;&lt;/input&gt;
         &lt;ul&gt;
         {
             props.results&amp;&amp;props.results.map(item=&gt;{
-                <span style="font-weight: bold;">return</span> &lt;li key={item.id}&gt;&lt;a href={item.html_url}&gt;{item.full_name} ({item.stargazers_count})&lt;/a&gt;&lt;/li&gt;
+                <span style="color: #00008b;">return</span> &lt;li key={item.id}&gt;&lt;a href={item.html_url}&gt;{item.full_name} ({item.stargazers_count})&lt;/a&gt;&lt;/li&gt;
             })
         }
         &lt;/ul&gt;
@@ -215,15 +215,15 @@ return 的地方就是 Virtual DOM 了，一个输入框 <code>input</code> ，�
 </div>
 </div>
 
-<div id="outline-container-orgc7aecdd" class="outline-3">
-<h3 id="orgc7aecdd">Debounce</h3>
-<div class="outline-text-3" id="text-orgc7aecdd">
+<div id="outline-container-org9ec3ac2" class="outline-3">
+<h3 id="org9ec3ac2">Debounce</h3>
+<div class="outline-text-3" id="text-org9ec3ac2">
 <p>
 一旦把用户事件的值发送到 Intent Stream，响应事件的工作就算已经做完了。接下来实现第二步， 至少间隔 500ms 才发送 API 请求。这意味着我们可以开始构建数据流了，让数据流中的类型为 <code>search</code> 的值 debounce 500ms 就好。
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">function</span>(<span style="font-weight: bold; font-style: italic;">intent$</span>){
-  <span style="font-weight: bold;">let</span> <span style="font-weight: bold; font-style: italic;">updateSink$</span> = intent$.filter(i=&gt;i.type==<span style="font-style: italic;">'search'</span>)
+<pre class="code"><code><span style="color: #00008b;">function</span>(<span style="color: #b8860b;">intent$</span>){
+  <span style="color: #00008b;">let</span> <span style="color: #b8860b;">updateSink$</span> = intent$.filter(i=&gt;i.type==<span style="color: #8b0000;">'search'</span>)
                        .debounce(500)
   ...
 </code></pre>
@@ -238,9 +238,9 @@ return 的地方就是 Virtual DOM 了，一个输入框 <code>input</code> ，�
 </div>
 </div>
 
-<div id="outline-container-orgef2f4d7" class="outline-3">
-<h3 id="orgef2f4d7">发送 API 请求</h3>
-<div class="outline-text-3" id="text-orgef2f4d7">
+<div id="outline-container-org15bec61" class="outline-3">
+<h3 id="org15bec61">发送 API 请求</h3>
+<div class="outline-text-3" id="text-org15bec61">
 <p>
 接下来的事情就简单的，流上的值之间一定是间隔 500ms 以上，我们可以放心的直接通过这些值构造响应的 API 地址并发送请求。
 </p>
@@ -258,16 +258,16 @@ rest 是一个 Isomophic 的 JavaScript Restful 客户端。在拼好地址后�
 </div>
 </div>
 
-<div id="outline-container-orgc7acf71" class="outline-3">
-<h3 id="orgc7acf71">继续 flatMap 结果到流上</h3>
-<div class="outline-text-3" id="text-orgc7acf71">
+<div id="outline-container-orgafde357" class="outline-3">
+<h3 id="orgafde357">继续 flatMap 结果到流上</h3>
+<div class="outline-text-3" id="text-orgafde357">
 <p>
 精彩的地方来了，当我们获得一个 Promise 后，如何将 Promise 内的一个异步的结果在作为流输出呢？这时候就可以派上我们的 Monad， monadic 的连接 promise 和 Intent Stream。
 </p>
 
 <pre class="code"><code>.flatMap(request=&gt;most.fromPromise(
                          request.then(resp=&gt;({
-                           type: <span style="font-style: italic;">'dataUpdate'</span>,
+                           type: <span style="color: #8b0000;">'dataUpdate'</span>,
                            value: resp.entity
                          }))))
 </code></pre>
@@ -291,13 +291,13 @@ flatMap(rest)-------respA--respB---&gt;
 </div>
 </div>
 
-<div id="outline-container-orgbe47d8a" class="outline-3">
-<h3 id="orgbe47d8a">Model</h3>
-<div class="outline-text-3" id="text-orgbe47d8a">
+<div id="outline-container-org471d345" class="outline-3">
+<h3 id="org471d345">Model</h3>
+<div class="outline-text-3" id="text-org471d345">
 <p>
 在得到一个里面都是 API 返回值的流之后，可以简单的 model 话一下这条流的数据：
 </p>
-<pre class="code"><code>.filter(i=&gt;i.type==<span style="font-style: italic;">'dataUpdate'</span>)
+<pre class="code"><code>.filter(i=&gt;i.type==<span style="color: #8b0000;">'dataUpdate'</span>)
 .map(data=&gt;JSON.parse(data.value).items)
 .map(items=&gt;items.slice(0,10))
 </code></pre>
@@ -331,7 +331,7 @@ stateStream ---state=&gt;({results:mA})---state=&gt;({results:mB})---&gt;
 <div id="postamble" class="status">
 <footer>
   <p>Author: root <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Modified: 2019-03-27 Wed 02:27</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>

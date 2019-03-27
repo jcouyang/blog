@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2019-03-27 Wed 02:21 -->
+<!-- 2019-03-27 Wed 02:27 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Finch vs Http4s, which is FPer</title>
@@ -82,18 +82,18 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org1312a0a">Finch</a>
+<li><a href="#org369f073">Finch</a>
 <ul>
-<li><a href="#orgbc3e50c">composible: 🍎 🍎 🍎 🍎</a></li>
-<li><a href="#orgf8644ea">extensible: 🍎 🍎</a></li>
-<li><a href="#org84de08d">joy of FP: 🍎 🍎 🍎</a></li>
+<li><a href="#org7d34688">composible: 🍎 🍎 🍎 🍎</a></li>
+<li><a href="#org0114b3e">extensible: 🍎 🍎</a></li>
+<li><a href="#orga77cfcb">joy of FP: 🍎 🍎 🍎</a></li>
 </ul>
 </li>
-<li><a href="#org6bf3324">Http4s</a>
+<li><a href="#org72cc257">Http4s</a>
 <ul>
-<li><a href="#org82cb660">composible: 🍎 🍎 🍎 🍎 🍎</a></li>
-<li><a href="#org13dea0e">extensible: 🍎 🍎 🍎 🍎 🍎</a></li>
-<li><a href="#org8f5dc0a">joy of FP: 🍎 🍎 🍎 🍎 🍎</a></li>
+<li><a href="#org406c89a">composible: 🍎 🍎 🍎 🍎 🍎</a></li>
+<li><a href="#org1bcf4b4">extensible: 🍎 🍎 🍎 🍎 🍎</a></li>
+<li><a href="#org6ff8341">joy of FP: 🍎 🍎 🍎 🍎 🍎</a></li>
 </ul>
 </li>
 </ul>
@@ -122,20 +122,20 @@ Definition:
 Scale from 1 to 5:
 </p>
 
-<div id="outline-container-org1312a0a" class="outline-2">
-<h2 id="org1312a0a">Finch</h2>
-<div class="outline-text-2" id="text-org1312a0a">
+<div id="outline-container-org369f073" class="outline-2">
+<h2 id="org369f073">Finch</h2>
+<div class="outline-text-2" id="text-org369f073">
 </div>
-<div id="outline-container-orgbc3e50c" class="outline-3">
-<h3 id="orgbc3e50c">composible: 🍎 🍎 🍎 🍎</h3>
-<div class="outline-text-3" id="text-orgbc3e50c">
+<div id="outline-container-org7d34688" class="outline-3">
+<h3 id="org7d34688">composible: 🍎 🍎 🍎 🍎</h3>
+<div class="outline-text-3" id="text-org7d34688">
 <p>
 finch takes full advantage of shapeless' product and coproduct to routes <b>Matcher</b>
 </p>
-<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">getApples</span> <span style="font-weight: bold;">=</span> get(<span style="font-style: italic;">"apple"</span>) { <span style="font-weight: bold; text-decoration: underline;">Ok</span>(<span style="font-style: italic;">"&#127822;&#127822;"</span>)} 
-<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">getApple</span> <span style="font-weight: bold;">=</span> get(<span style="font-style: italic;">"apple"</span> :: path[<span style="font-weight: bold; text-decoration: underline;">Int</span>]) { (id<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Int</span>) <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Ok</span>(<span style="font-style: italic;">"&#127822;"</span>)}
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span>) { <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>)} 
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApple</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span> :: path[<span style="color: #6b8e23;">Int</span>]) { (id<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;"</span>)}
 
-<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">routes</span> <span style="font-weight: bold;">=</span> getApples :+: getApple
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">routes</span> <span style="color: #00008b;">=</span> getApples :+: getApple
 </code></pre>
 
 <p>
@@ -149,17 +149,17 @@ finch takes full advantage of shapeless' product and coproduct to routes <b>Matc
 <p>
 About <b>Middleware</b>, finch need to mix finagle filter to do the job. so it will end up very ugly and inconsistent from the routes above
 </p>
-<pre class="code"><code><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">AuthFilter</span>(<span style="font-weight: bold;">implicit</span> ttf<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">ToTwitterFuture</span>[<span style="font-weight: bold; text-decoration: underline;">ProgramF</span>]) <span style="font-weight: bold;">extends</span> <span style="font-weight: bold; text-decoration: underline;">SimpleFilter</span>[<span style="font-weight: bold; text-decoration: underline;">Request</span>, <span style="font-weight: bold; text-decoration: underline;">Response</span>] {
-  <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">apply</span>(req<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Request</span>, service<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Service</span>[<span style="font-weight: bold; text-decoration: underline;">Request</span>, <span style="font-weight: bold; text-decoration: underline;">Response</span>])<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Future</span>[<span style="font-weight: bold; text-decoration: underline;">Response</span>] <span style="font-weight: bold;">=</span> {
-    (req.path, req.headerMap.get(<span style="font-style: italic;">"TOKEN"</span>)) <span style="font-weight: bold;">match</span> {
-      <span style="font-weight: bold;">case</span> (<span style="font-style: italic;">"/login"</span>, <span style="font-weight: bold;">_</span>)        <span style="font-weight: bold;">=&gt;</span> service(req)
-      <span style="font-weight: bold;">case</span> (<span style="font-weight: bold; font-style: italic;">url</span>, <span style="font-weight: bold; text-decoration: underline;">Some</span>(<span style="font-weight: bold; font-style: italic;">token</span>)) <span style="font-weight: bold;">=&gt;</span> ??? <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">fetch user info and pass to service</span>
+<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">AuthFilter</span>(<span style="color: #228b22;">implicit</span> ttf<span style="color: #00008b;">:</span> <span style="color: #36648b;">ToTwitterFuture</span>[<span style="color: #6b8e23;">ProgramF</span>]) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">SimpleFilter</span>[<span style="color: #6b8e23;">Request</span>, <span style="color: #6b8e23;">Response</span>] {
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>(req<span style="color: #00008b;">:</span> <span style="color: #36648b;">Request</span>, service<span style="color: #00008b;">:</span> <span style="color: #36648b;">Service</span>[<span style="color: #6b8e23;">Request</span>, <span style="color: #6b8e23;">Response</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Future</span>[<span style="color: #6b8e23;">Response</span>] <span style="color: #00008b;">=</span> {
+    (req.path, req.headerMap.get(<span style="color: #8b0000;">"TOKEN"</span>)) <span style="color: #00008b;">match</span> {
+      <span style="color: #00008b;">case</span> (<span style="color: #8b0000;">"/login"</span>, <span style="color: #00008b;">_</span>)        <span style="color: #00008b;">=&gt;</span> service(req)
+      <span style="color: #00008b;">case</span> (<span style="color: #b8860b;">url</span>, <span style="color: #36648b;">Some</span>(<span style="color: #b8860b;">token</span>)) <span style="color: #00008b;">=&gt;</span> ??? <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">fetch user info and pass to service</span>
 </code></pre>
 
 <p>
 and then compose filter and service
 </p>
-<pre class="code"><code><span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">AuthFilter</span> andThen routes.toServiceAs[<span style="font-weight: bold; text-decoration: underline;">Application</span>.<span style="font-weight: bold; text-decoration: underline;">Json</span>]
+<pre class="code"><code><span style="color: #00008b;">new</span> <span style="color: #36648b;">AuthFilter</span> andThen routes.toServiceAs[<span style="color: #6b8e23;">Application</span>.<span style="color: #6b8e23;">Json</span>]
 </code></pre>
 
 <p>
@@ -168,13 +168,13 @@ you may have notice that the finangle filter is more lower level verbose code an
 </div>
 </div>
 
-<div id="outline-container-orgf8644ea" class="outline-3">
-<h3 id="orgf8644ea">extensible: 🍎 🍎</h3>
-<div class="outline-text-3" id="text-orgf8644ea">
+<div id="outline-container-org0114b3e" class="outline-3">
+<h3 id="org0114b3e">extensible: 🍎 🍎</h3>
+<div class="outline-text-3" id="text-org0114b3e">
 <p>
 finch has a lot of internal custom types, e.g. the magic happen behind the DSL above:
 </p>
-<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">getApples</span> <span style="font-weight: bold;">=</span> get(<span style="font-style: italic;">"apple"</span>) { <span style="font-weight: bold; text-decoration: underline;">Ok</span>(<span style="font-style: italic;">"&#127822;&#127822;"</span>)} 
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span>) { <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>)} 
 </code></pre>
 <p>
 is:
@@ -209,7 +209,7 @@ For example my controller will actually return me a <a href="https://typelevel.o
 How can I get it to work with the router?
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">getApples</span> <span style="font-weight: bold;">=</span> get(<span style="font-style: italic;">"apple"</span>) { <span style="font-weight: bold; text-decoration: underline;">Free</span>[<span style="font-weight: bold; text-decoration: underline;">Program</span>, <span style="font-weight: bold; text-decoration: underline;">Output</span>[<span style="font-weight: bold; text-decoration: underline;">String</span>]].pure(<span style="font-weight: bold; text-decoration: underline;">Ok</span>(<span style="font-style: italic;">"&#127822;&#127822;"</span>))} 
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span>) { <span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">Program</span>, <span style="color: #6b8e23;">Output</span>[<span style="color: #6b8e23;">String</span>]].pure(<span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>))} 
 </code></pre>
 
 <p>
@@ -224,10 +224,10 @@ actually it only supports <code>IO[_]</code>, <code>Output[_]</code>, <code>Resp
 UPDATE: from <a href="https://github.com/finagle/finch/pull/1045">0.27.0</a> it supports custom converter to convert any user custom type to IO
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">implicit</span> <span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">conv</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">new</span> <span style="font-weight: bold; text-decoration: underline;">ToEffect</span>[<span style="font-weight: bold; text-decoration: underline;">Free</span>[<span style="font-weight: bold; text-decoration: underline;">Program</span>, ?], <span style="font-weight: bold; text-decoration: underline;">IO</span>] {
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">apply</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>](a<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Free</span>[<span style="font-weight: bold; text-decoration: underline;">Program</span>, <span style="font-weight: bold; text-decoration: underline;">A</span>])<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">IO</span>[<span style="font-weight: bold; text-decoration: underline;">A</span>] <span style="font-weight: bold;">=</span> ???
+<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">conv</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">ToEffect</span>[<span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">Program</span>, ?], <span style="color: #6b8e23;">IO</span>] {
+<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">Program</span>, <span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> ???
 }
-<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">getApples</span> <span style="font-weight: bold;">=</span> get(<span style="font-style: italic;">"apple"</span>) { <span style="font-weight: bold; text-decoration: underline;">Free</span>[<span style="font-weight: bold; text-decoration: underline;">Program</span>, <span style="font-weight: bold; text-decoration: underline;">Output</span>[<span style="font-weight: bold; text-decoration: underline;">String</span>]].pure(<span style="font-weight: bold; text-decoration: underline;">Ok</span>(<span style="font-style: italic;">"&#127822;&#127822;"</span>))} 
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span>) { <span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">Program</span>, <span style="color: #6b8e23;">Output</span>[<span style="color: #6b8e23;">String</span>]].pure(<span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>))} 
 </code></pre>
 
 <p>
@@ -237,9 +237,9 @@ But still, it's so many implicits magic happen behind and the journey wasn't so 
 </div>
 
 
-<div id="outline-container-org84de08d" class="outline-3">
-<h3 id="org84de08d">joy of FP: 🍎 🍎 🍎</h3>
-<div class="outline-text-3" id="text-org84de08d">
+<div id="outline-container-orga77cfcb" class="outline-3">
+<h3 id="orga77cfcb">joy of FP: 🍎 🍎 🍎</h3>
+<div class="outline-text-3" id="text-orga77cfcb">
 <p>
 except some funs from shapeless there aren't actually any cats interop during composition of routes
 </p>
@@ -252,24 +252,24 @@ any knowledge about cats before using finch.
 </div>
 </div>
 
-<div id="outline-container-org6bf3324" class="outline-2">
-<h2 id="org6bf3324">Http4s</h2>
-<div class="outline-text-2" id="text-org6bf3324">
+<div id="outline-container-org72cc257" class="outline-2">
+<h2 id="org72cc257">Http4s</h2>
+<div class="outline-text-2" id="text-org72cc257">
 </div>
-<div id="outline-container-org82cb660" class="outline-3">
-<h3 id="org82cb660">composible: 🍎 🍎 🍎 🍎 🍎</h3>
-<div class="outline-text-3" id="text-org82cb660">
+<div id="outline-container-org406c89a" class="outline-3">
+<h3 id="org406c89a">composible: 🍎 🍎 🍎 🍎 🍎</h3>
+<div class="outline-text-3" id="text-org406c89a">
 <p>
 meanwhile, http4s takes advantage of cats to achieve path <b>Matcher</b>
 </p>
-<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">getApples</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">HttpRoutes</span>.of[<span style="font-weight: bold; text-decoration: underline;">IO</span>] {
-  <span style="font-weight: bold;">case</span> <span style="font-weight: bold; text-decoration: underline;">GET</span> <span style="font-weight: bold; text-decoration: underline;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Root</span> <span style="font-weight: bold; text-decoration: underline;">/</span> <span style="font-style: italic;">"apple"</span> <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Ok</span>(<span style="font-style: italic;">"&#127822;&#127822;"</span>)
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">HttpRoutes</span>.of[<span style="color: #6b8e23;">IO</span>] {
+  <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">GET</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"apple"</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>)
 }
-<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">getApple</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">HttpRoutes</span>.of[<span style="font-weight: bold; text-decoration: underline;">IO</span>] {
-  <span style="font-weight: bold;">case</span> <span style="font-weight: bold; text-decoration: underline;">GET</span> <span style="font-weight: bold; text-decoration: underline;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Root</span> <span style="font-weight: bold; text-decoration: underline;">/</span> <span style="font-style: italic;">"apple"</span> <span style="font-weight: bold; text-decoration: underline;">/</span> <span style="font-weight: bold; text-decoration: underline;">id</span> <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Ok</span>(<span style="font-style: italic;">"&#127822;"</span>)
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApple</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">HttpRoutes</span>.of[<span style="color: #6b8e23;">IO</span>] {
+  <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">GET</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"apple"</span> <span style="color: #6b8e23;">/</span> <span style="color: #36648b;">id</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;"</span>)
 }
 
-<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">routes</span> <span style="font-weight: bold;">=</span> getApples &lt;+&gt; getApple
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">routes</span> <span style="color: #00008b;">=</span> getApples &lt;+&gt; getApple
 </code></pre>
 
 <p>
@@ -311,10 +311,10 @@ or compose a Kleisli of type <code>Kleisli[Option[F,?], Response[F], F[Response[
 <p>
 e.g. auth user before <code>getApple</code>
 </p>
-<pre class="code"><code><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">auth</span> <span style="font-weight: bold;">=</span> <span style="font-weight: bold; text-decoration: underline;">Kleisli</span> { req<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Request</span>[<span style="font-weight: bold; text-decoration: underline;">IO</span>] <span style="font-weight: bold;">=&gt;</span>
-  findUserInDatabase(req) <span style="font-weight: bold;">match</span> {
-    <span style="font-weight: bold;">case</span> <span style="font-weight: bold; text-decoration: underline;">true</span> <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">OptionT</span>(<span style="font-weight: bold; text-decoration: underline;">IO</span>(<span style="font-weight: bold; text-decoration: underline;">Some</span>(req)))
-    <span style="font-weight: bold;">case</span> <span style="font-weight: bold; text-decoration: underline;">false</span> <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">OptionT</span>.fromOption[<span style="font-weight: bold; text-decoration: underline;">IO</span>](<span style="font-weight: bold; text-decoration: underline;">None</span>)
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">auth</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span> { req<span style="color: #00008b;">:</span> <span style="color: #36648b;">Request</span>[<span style="color: #6b8e23;">IO</span>] <span style="color: #00008b;">=&gt;</span>
+  findUserInDatabase(req) <span style="color: #00008b;">match</span> {
+    <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">true</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">OptionT</span>(<span style="color: #6b8e23;">IO</span>(<span style="color: #6b8e23;">Some</span>(req)))
+    <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">false</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">OptionT</span>.fromOption[<span style="color: #6b8e23;">IO</span>](<span style="color: #6b8e23;">None</span>)
   }
 }
 
@@ -322,9 +322,9 @@ auth andThen getApple
 </code></pre>
 </div>
 </div>
-<div id="outline-container-org13dea0e" class="outline-3">
-<h3 id="org13dea0e">extensible: 🍎 🍎 🍎 🍎 🍎</h3>
-<div class="outline-text-3" id="text-org13dea0e">
+<div id="outline-container-org1bcf4b4" class="outline-3">
+<h3 id="org1bcf4b4">extensible: 🍎 🍎 🍎 🍎 🍎</h3>
+<div class="outline-text-3" id="text-org1bcf4b4">
 <p>
 Since route matcher is simply just Kleisli, extending http4s to support types other than <code>F[Response[F]]</code> will
 be much simpler.
@@ -334,18 +334,18 @@ be much simpler.
 For the same example as above in finch, that my controller will return a free program <code>Free[Program, IO[Response[IO]]]</code> instead of <code>IO[Response[IO]]</code>
 </p>
 
-<pre class="code"><code><span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">type alias for route that return free monad</span>
-<span style="font-weight: bold;">type</span> <span style="font-weight: bold; text-decoration: underline;">FreeRoute</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]] <span style="font-weight: bold;">=</span>
-  <span style="font-weight: bold; text-decoration: underline;">Kleisli</span>[<span style="font-weight: bold; text-decoration: underline;">OptionT</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>, ?], <span style="font-weight: bold; text-decoration: underline;">Request</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>], <span style="font-weight: bold; text-decoration: underline;">ProgramF</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold; text-decoration: underline;">Response</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>]]]]
+<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">type alias for route that return free monad</span>
+<span style="color: #00008b;">type</span> <span style="color: #6b8e23;">FreeRoute</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span>
+  <span style="color: #6b8e23;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">ProgramF</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]]]]
 
-<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">custom dsl</span>
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">route</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold;">_</span>]<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Monad</span>](
-  pf<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">PartialFunction</span>[<span style="font-weight: bold; text-decoration: underline;">Request</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>], <span style="font-weight: bold; text-decoration: underline;">ProgramF</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>[<span style="font-weight: bold; text-decoration: underline;">Response</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>]]]])<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">FreeRoute</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>] <span style="font-weight: bold;">=</span>
-  <span style="font-weight: bold; text-decoration: underline;">Kleisli</span>(
-    (req<span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Request</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>]) <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">OptionT</span>(implicitly[<span style="font-weight: bold; text-decoration: underline;">Monad</span>[<span style="font-weight: bold; text-decoration: underline;">F</span>]].pure(pf.lift(req))))
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">custom dsl</span>
+<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">route</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]<span style="color: #00008b;">:</span> <span style="color: #36648b;">Monad</span>](
+  pf<span style="color: #00008b;">:</span> <span style="color: #36648b;">PartialFunction</span>[<span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">ProgramF</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]]]])<span style="color: #00008b;">:</span> <span style="color: #36648b;">FreeRoute</span>[<span style="color: #6b8e23;">F</span>] <span style="color: #00008b;">=</span>
+  <span style="color: #6b8e23;">Kleisli</span>(
+    (req<span style="color: #00008b;">:</span> <span style="color: #36648b;">Request</span>[<span style="color: #6b8e23;">F</span>]) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">OptionT</span>(implicitly[<span style="color: #6b8e23;">Monad</span>[<span style="color: #6b8e23;">F</span>]].pure(pf.lift(req))))
 
-<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">getApples</span> <span style="font-weight: bold;">=</span> route {
-  <span style="font-weight: bold;">case</span> <span style="font-weight: bold; text-decoration: underline;">GET</span> <span style="font-weight: bold; text-decoration: underline;">-&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Root</span> <span style="font-weight: bold; text-decoration: underline;">/</span> <span style="font-style: italic;">"apple"</span> <span style="font-weight: bold;">=&gt;</span> <span style="font-weight: bold; text-decoration: underline;">Ok</span>(<span style="font-style: italic;">"&#127822;&#127822;"</span>).pure[<span style="font-weight: bold; text-decoration: underline;">Free</span>[<span style="font-weight: bold; text-decoration: underline;">Program</span>,?]]
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> route {
+  <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">GET</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"apple"</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>).pure[<span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">Program</span>,?]]
 }
 </code></pre>
 
@@ -357,9 +357,9 @@ since getApples is still Kleisli, all the methods such as <code>&lt;+&gt;</code>
 to hook it back to http4s route, simply map interpreter to <code>getApples</code>
 </p>
 
-<pre class="code"><code><span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">interp</span><span style="font-weight: bold;">:</span> <span style="font-weight: bold; text-decoration: underline;">Program</span> ~&gt; <span style="font-weight: bold; text-decoration: underline;">IO</span> <span style="font-weight: bold;">=</span> ???
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">interp</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Program</span> ~&gt; <span style="color: #6b8e23;">IO</span> <span style="color: #00008b;">=</span> ???
 
-<span style="font-weight: bold;">val</span> <span style="font-weight: bold; font-style: italic;">router</span> <span style="font-weight: bold;">=</span> getApples flatMapF interp
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">router</span> <span style="color: #00008b;">=</span> getApples flatMapF interp
 </code></pre>
 
 <p>
@@ -369,9 +369,9 @@ here I used flatMapF because interp will give it another <code>IO</code>, which 
 </div>
 
 
-<div id="outline-container-org8f5dc0a" class="outline-3">
-<h3 id="org8f5dc0a">joy of FP: 🍎 🍎 🍎 🍎 🍎</h3>
-<div class="outline-text-3" id="text-org8f5dc0a">
+<div id="outline-container-org6ff8341" class="outline-3">
+<h3 id="org6ff8341">joy of FP: 🍎 🍎 🍎 🍎 🍎</h3>
+<div class="outline-text-3" id="text-org6ff8341">
 <p>
 Since Http4s takes full power of data type Kleisli, since Kleisli at the end is just a function, it's much more composable and extensible in every way.
 </p>
@@ -417,7 +417,7 @@ by just using Kleisli data type.
 <div id="postamble" class="status">
 <footer>
   <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2019-03-27 Wed 02:21</p>
+  <p>Modified: 2019-03-27 Wed 02:27</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
