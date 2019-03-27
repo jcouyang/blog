@@ -3,6 +3,7 @@ jobs:
   build:
     docker:
       - image: jcouyang/orgpress
+    working_directory: /orgpress
     steps:
       - add_ssh_keys:
           fingerprints:
@@ -14,12 +15,17 @@ jobs:
           rm -rf public/*
       - run: emacs --batch -l orgpress.el -f org-publish-all
       - persist_to_workspace:
-          root: workspace
+          root: /orgpress
           paths:
             - public
   deploy:
     docker:
       - image: jcouyang/orgpress
+    working_directory: /orgpress
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - '61:3b:b7:35:4b:c4:da:25:d9:3e:a0:6c:ea:9e:9c:f1'
       - attach_workspace:
           at: /tmp/public
       - run: |
@@ -34,7 +40,8 @@ workflows:
   version: 2
   build:
     jobs:
-      - build:
+      - build
+      - deploy:
           filters:
             branches:
               only:
