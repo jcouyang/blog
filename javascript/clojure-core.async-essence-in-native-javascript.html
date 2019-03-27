@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2019-03-27 Wed 09:33 -->
+<!-- 2019-03-27 Wed 10:30 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Clojure 风格的 JavaScript 并发编程</title>
@@ -85,27 +85,27 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org2a87a9b">TL;DR SLIDES</a></li>
-<li><a href="#orgbc4351d">Communicating Sequential Processes</a>
+<li><a href="#orgc56ff00">TL;DR SLIDES</a></li>
+<li><a href="#org8b42ba9">Communicating Sequential Processes</a>
 <ul>
-<li><a href="#orga19c138">什么是并发</a></li>
-<li><a href="#orga63ad23">异步与多线程</a></li>
-<li><a href="#orgb6c9fe9">CSP</a>
+<li><a href="#org6ebb97e">什么是并发</a></li>
+<li><a href="#org4202e2d">异步与多线程</a></li>
+<li><a href="#orgdee6b26">CSP</a>
 <ul>
-<li><a href="#orge264def">Event loop</a></li>
-<li><a href="#orgb7245bd">CSP, Channel, Goroutines</a></li>
+<li><a href="#org541eee3">Event loop</a></li>
+<li><a href="#orgef957d4">CSP, Channel, Goroutines</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgcc5cc89">CSP in JavaScript</a>
+<li><a href="#orgfeaec3c">CSP in JavaScript</a>
 <ul>
-<li><a href="#org88b8a02">Generator</a></li>
-<li><a href="#orgd23e31b">Goroutines in JavaScript</a></li>
-<li><a href="#orgaa1da62">timeout</a></li>
-<li><a href="#org7c4b0d9">take &lt;!</a></li>
-<li><a href="#org4aa9927">put &gt;!</a></li>
-<li><a href="#org3dde4b7">JavaScript 版本 的 CSP</a></li>
+<li><a href="#orgf28ca56">Generator</a></li>
+<li><a href="#org4663f4a">Goroutines in JavaScript</a></li>
+<li><a href="#org341f0e8">timeout</a></li>
+<li><a href="#orge0c2670">take &lt;!</a></li>
+<li><a href="#orgbe99acb">put &gt;!</a></li>
+<li><a href="#orgae4653a">JavaScript 版本 的 CSP</a></li>
 </ul>
 </li>
 </ul>
@@ -124,16 +124,16 @@ for the JavaScript code in this tag.
 <p>
 在看到第一行JavaScript代码之前，我要啰嗦一下为什么要用 clojure core.async 的异步风格。
 </p>
-<div id="outline-container-org2a87a9b" class="outline-2">
-<h2 id="org2a87a9b">TL;DR SLIDES</h2>
-<div class="outline-text-2" id="text-org2a87a9b">
+<div id="outline-container-orgc56ff00" class="outline-2">
+<h2 id="orgc56ff00">TL;DR SLIDES</h2>
+<div class="outline-text-2" id="text-orgc56ff00">
 <iframe src="http://git.io/js-csp" width="800" height="600" seamless="true"></iframe>
 </div>
 </div>
 
-<div id="outline-container-orgbc4351d" class="outline-2">
-<h2 id="orgbc4351d">Communicating Sequential Processes</h2>
-<div class="outline-text-2" id="text-orgbc4351d">
+<div id="outline-container-org8b42ba9" class="outline-2">
+<h2 id="org8b42ba9">Communicating Sequential Processes</h2>
+<div class="outline-text-2" id="text-org8b42ba9">
 <p>
 通信顺序进程, 是计算机科学中用于一种描述并发系统中交互的形式语言, 简称CSP, 来源于C.A.R Hoare 1978年的论文. 
 没错了, Hoare就是发明 <del>让我们算法课纠结得快挂科的</del> 快排算法的那位大牛. 
@@ -145,9 +145,9 @@ CSP的阵营, 叫做 Core.async.
 </p>
 </div>
 
-<div id="outline-container-orga19c138" class="outline-3">
-<h3 id="orga19c138">什么是并发</h3>
-<div class="outline-text-3" id="text-orga19c138">
+<div id="outline-container-org6ebb97e" class="outline-3">
+<h3 id="org6ebb97e">什么是并发</h3>
+<div class="outline-text-3" id="text-org6ebb97e">
 <p>
 并发可能很容易和并行混淆, 但是结合我们自己想一想,还是很容易分得清的.
 </p>
@@ -172,9 +172,9 @@ CSP的阵营, 叫做 Core.async.
 </div>
 </div>
 
-<div id="outline-container-orga63ad23" class="outline-3">
-<h3 id="orga63ad23">异步与多线程</h3>
-<div class="outline-text-3" id="text-orga63ad23">
+<div id="outline-container-org4202e2d" class="outline-3">
+<h3 id="org4202e2d">异步与多线程</h3>
+<div class="outline-text-3" id="text-org4202e2d">
 <p>
 说到并发, 大概都会联想到多线程.
 </p>
@@ -216,9 +216,9 @@ CSP的阵营, 叫做 Core.async.
 </div>
 </div>
 
-<div id="outline-container-orgb6c9fe9" class="outline-3">
-<h3 id="orgb6c9fe9">CSP</h3>
-<div class="outline-text-3" id="text-orgb6c9fe9">
+<div id="outline-container-orgdee6b26" class="outline-3">
+<h3 id="orgdee6b26">CSP</h3>
+<div class="outline-text-3" id="text-orgdee6b26">
 <p>
 那么你就要问了, 你是怎么知道手机响的, 还不是要开一个线程让耳朵监听着. 对的, 但是异步只需要很少的有限个线程就好了, 比如我有十个手机
 要发给十个老婆, 我还是两个线程, 而如果是多线程的话我要fork出来十只手. JS的异步就是这么干的, 一个专门
@@ -226,9 +226,9 @@ CSP的阵营, 叫做 Core.async.
 </p>
 </div>
 
-<div id="outline-container-orge264def" class="outline-4">
-<h4 id="orge264def">Event loop</h4>
-<div class="outline-text-4" id="text-orge264def">
+<div id="outline-container-org541eee3" class="outline-4">
+<h4 id="org541eee3">Event loop</h4>
+<div class="outline-text-4" id="text-org541eee3">
 <p>
 Event loop 模式非常简单, 浏览器运行javascript就是从 event loop 里面取任务, 队列中任务的来源为函数调用栈与事件绑定.比如
 </p>
@@ -335,9 +335,9 @@ js把判断老婆同不同意的函数挂到了event loop队列中, 就继续执
 </div>
 </div>
 
-<div id="outline-container-orgb7245bd" class="outline-4">
-<h4 id="orgb7245bd">CSP, Channel, Goroutines</h4>
-<div class="outline-text-4" id="text-orgb7245bd">
+<div id="outline-container-orgef957d4" class="outline-4">
+<h4 id="orgef957d4">CSP, Channel, Goroutines</h4>
+<div class="outline-text-4" id="text-orgef957d4">
 <p>
 CSP 的概念非常简单, 想象一下 event loop
 </p>
@@ -410,11 +410,11 @@ CSP 的概念非常简单, 想象一下 event loop
 </div>
 
 
-<div id="outline-container-orgcc5cc89" class="outline-2">
-<h2 id="orgcc5cc89">CSP in JavaScript<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+<div id="outline-container-orgfeaec3c" class="outline-2">
+<h2 id="orgfeaec3c">CSP in JavaScript<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
 里面的go的实现来自 <a href="http://swannodette.github.io/2013/08/24/es6-generators-and-csp/">http://swannodette.github.io/2013/08/24/es6-generators-and-csp/</a>
 </span></h2>
-<div class="outline-text-2" id="text-orgcc5cc89">
+<div class="outline-text-2" id="text-orgfeaec3c">
 <p>
 瞅瞅我们都要实现写什么
 </p>
@@ -429,9 +429,9 @@ CSP 的概念非常简单, 想象一下 event loop
 </p>
 </div>
 
-<div id="outline-container-org88b8a02" class="outline-3">
-<h3 id="org88b8a02">Generator</h3>
-<div class="outline-text-3" id="text-org88b8a02">
+<div id="outline-container-orgf28ca56" class="outline-3">
+<h3 id="orgf28ca56">Generator</h3>
+<div class="outline-text-3" id="text-orgf28ca56">
 <p>
 <a href="http://blog.dev/javascript/essential-ecmascript6.html#sec-9">ES6 终于支持了Generator</a>, 目前Firefox与Chrome都已经实现.<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
 Chrome有一个 feature toggle 可以打开部分 es6 功能.  打开 <code>chrome://flags/#enable-javascript-harmony</code> 设置为 <code>true</code>
@@ -448,9 +448,9 @@ Chrome有一个 feature toggle 可以打开部分 es6 功能.  打开 <code>chro
 </div>
 
 
-<div id="outline-container-orgd23e31b" class="outline-3">
-<h3 id="orgd23e31b">Goroutines in JavaScript</h3>
-<div class="outline-text-3" id="text-orgd23e31b">
+<div id="outline-container-org4663f4a" class="outline-3">
+<h3 id="org4663f4a">Goroutines in JavaScript</h3>
+<div class="outline-text-3" id="text-org4663f4a">
 <p>
 goroutines 其实就是一个状态机, generator为输入
 </p>
@@ -485,9 +485,9 @@ goroutines 其实就是一个状态机, generator为输入
 </div>
 </div>
 
-<div id="outline-container-orgaa1da62" class="outline-3">
-<h3 id="orgaa1da62">timeout</h3>
-<div class="outline-text-3" id="text-orgaa1da62">
+<div id="outline-container-org341f0e8" class="outline-3">
+<h3 id="org341f0e8">timeout</h3>
+<div class="outline-text-3" id="text-org341f0e8">
 <p>
 一个类似于 thread sleep 的功能, 想让任务能等待个一段时间再执行,
 只需要在 <code>go_</code> 中加入一个 timeout 的 <code>case</code> 就好了
@@ -514,9 +514,9 @@ goroutines 其实就是一个状态机, generator为输入
 </div>
 </div>
 
-<div id="outline-container-org7c4b0d9" class="outline-3">
-<h3 id="org7c4b0d9">take &lt;!</h3>
-<div class="outline-text-3" id="text-org7c4b0d9">
+<div id="outline-container-orge0c2670" class="outline-3">
+<h3 id="orge0c2670">take &lt;!</h3>
+<div class="outline-text-3" id="text-orge0c2670">
 <p>
 当 generator 从 channel 中 take 数据时
 </p>
@@ -542,9 +542,9 @@ goroutines 其实就是一个状态机, generator为输入
 </div>
 </div>
 
-<div id="outline-container-org4aa9927" class="outline-3">
-<h3 id="org4aa9927">put &gt;!</h3>
-<div class="outline-text-3" id="text-org4aa9927">
+<div id="outline-container-orgbe99acb" class="outline-3">
+<h3 id="orgbe99acb">put &gt;!</h3>
+<div class="outline-text-3" id="text-orgbe99acb">
 <p>
 当 generator 往 channel 中 put 数据
 </p>
@@ -567,9 +567,9 @@ goroutines 其实就是一个状态机, generator为输入
 </div>
 </div>
 
-<div id="outline-container-org3dde4b7" class="outline-3">
-<h3 id="org3dde4b7">JavaScript 版本 的 CSP</h3>
-<div class="outline-text-3" id="text-org3dde4b7">
+<div id="outline-container-orgae4653a" class="outline-3">
+<h3 id="orgae4653a">JavaScript 版本 的 CSP</h3>
+<div class="outline-text-3" id="text-orgae4653a">
 <p>
 现在可以原原本本的将之前的clojure的例子翻译成JavaScript了
 </p>
@@ -639,7 +639,7 @@ Chrome有一个 feature toggle 可以打开部分 es6 功能.  打开 <code>chro
 <div id="postamble" class="status">
 <footer>
   <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2019-03-27 Wed 09:33</p>
+  <p>Modified: 2019-03-27 Wed 10:30</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
