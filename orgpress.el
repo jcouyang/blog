@@ -116,7 +116,7 @@ PROPERTY, i.e. \"behavior\" parameter from `org-export-options-alist'."
         :sitemap-filename "index.org"
         :exclude "\!.*\.org"
         :sitemap-date-format ,config-date-format
-        :makeindex t
+        :makeindex nil
         :html-head-include-default-style nil
         )
 
