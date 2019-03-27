@@ -3,19 +3,30 @@
 #+AUTHOR: Jichao Ouyang
 #+MACRO: ruby @@html:<ruby>$1<rt>$2</rt></ruby>@@
 #+description: I've been using Free Monad in production for a while, as the projects scale and more members contribute, the boundary of different layer reveal them self more clearly.
-#+KEYWORDS: Scala, Free, Monad, MTL, ReaderT
+#+KEYWORDS: Scala,Free,Monad,MTL,ReaderT
 
-# I've been using Free Monad in production for a while, as the projects scale and more
-# members contribute, the boundary of different layer reveal them self more clearly.
+#+BEGIN_SRC emacs-lisp
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((ditaa . t)))
+#+END_SRC
 
-# Thanks the summary from [[https://www.parsonsmatt.org/2018/03/22/three_layer_haskell_cake.html][Matt Parsons' 3 layer Haskell Cake]].
-# I found my Scala code also happen to fell into these 3 layer cake. 
-# # To make the future project has more clear boundary of abstraction, I created [[https://github.com/jcouyang/luci][{{{ruby(鸬鹚,luci)}}}]]
-# for better taste of Free Monad effects.
+#+RESULTS:
 
-# Here it is the Scala version of Cake, prepare your folk please.
+[[https://github.com/jcouyang/luci][https://upload.wikimedia.org/wikipedia/commons/0/0a/Imperial_Encyclopaedia_-_Animal_Kingdom_-_pic057_-_%E9%B8%95%E9%B6%BF%E5%9C%96.svg]]
 
-# But before cutting the cake, let's +wash our hands+ describe the most common program.
+I've been using Free Monad in production for a while, as the projects scale and more
+members contribute, the boundary of different layer reveal them self very clearly.
+
+Thanks to the summary from [[https://www.parsonsmatt.org/2018/03/22/three_layer_haskell_cake.html][Matt Parsons' 3 layer Haskell Cake]].
+I found my Scala code also happen to fell into these 3 layer cake. 
+
+To make the future project has more clear boundary of abstraction, I created [[https://github.com/jcouyang/luci][{{{ruby(鸬鹚,luci)}}}]][fn:5]
+for better taste of Free Monad mixing MTL and ReaderT.
+
+Here it is the Scala version of Cake, prepare your folks please.
+
+But before cutting the cake, let's +wash our hands+ describe the most common program.
 
 * The Program
 It will read output a log, query a data base, and do the calculation.
@@ -258,10 +269,34 @@ if we make some type alias for readerT, it's pretty much the same thing as the r
 #+END_SRC
 
 If you look close enough, here it actually becomes 3 layers:
-- Layer 1: IO (AlgInterp)
-- Layer 2: IO ~> Alg (state, log, doobieQuery)
+- Layer 1: IO
+- Layer 2: Alg ~> IO (state, log, doobieQuery)
 - Layer 3: Alg (program)
 
+#+BEGIN_SRC ditaa :file images/readerT-cake.png :exports result
+  +--------------+
+  |Layer 3:      |
+  |     Alg      |
+  |              |
+  +------+-------+
+         |run
+  /--------------\
+  |Layer 2:      |
+  | AlgInterp[IO]|
+  |              |
+  \--------------/
+         |
+         v
+  +--------------+
+  |Layer 1:      | 
+  |      IO      |
+  |              |
+  +--------------+
+
+#+END_SRC
+
+#+RESULTS:
+[[file:images/readerT-cake.png]]
 both layer 2 and 3 are pure, but the different is,
 - Layer 2 is just 1-1 mapping from IO to Alg
 - Layer 3 is orchestration of Layer 2 for pure business
@@ -582,16 +617,62 @@ Don't worry about types and order since compiler will tell you where exactly the
 Anyway It's very easy to explain and compose args though!
 
 1. binary for =Http4sClient[IO, ?]= needs =Client[IO]= to run, so here =httpclient= is instance of =Client[IO]=
-2. binary for =Writer[Chain[String], ?]= needs =FuntorTell[IO, Chain[String]]= to run, presented by meow-mtl =.tellInstance=
+2. binary for =Writer[Chain[String], ?]= needs =FuntorTell[IO, Chain[String]]= to run, presented by [[https://github.com/oleg-py/meow-mtl][meow-mtl]] =.tellInstance=
 3. binary for =Reader[Config, ?]= needs =Config= to run
-6. binary for =State[Int, ?]= needs =MonadState[IO, Int]= to run, which presented here by meow-mtl from =.stateInstance=
+6. binary for =State[Int, ?]= needs =MonadState[IO, Int]= to run, which presented here by [[https://github.com/oleg-py/meow-mtl][meow-mtl]] from =.stateInstance=
 7. binary for =Either[Throwable, ?]= needs nothing so =Unit= is provided
 
 Of course there is one more layer missing - *Layer 0*, if you focus enough you will find out =binary.run(args)= will return =IO=
 
+#+BEGIN_SRC ditaa :file images/free-cake.png :exports result
+  +--------------+
+  |Layer 3:      |
+  |   Program    |
+  |              |
+  +------+-------+
+         |compile
+  /--------------\
+  |Layer 2:      |
+  |   Compiler   |
+  |              |
+  \--------------/
+         |        
+         v        
+  +--------------+
+  |Layer 1:      | 
+  |   Binary     |
+  |              |
+  +------+-------+
+         | run(args)
+         v  
+  +--------------+
+  |Layer 0:      | 
+  |     IO       |
+  |              |
+  +--------------+
+
+#+END_SRC
+
+#+RESULTS:
+[[file:images/free-cake.png]]
+
 Run the last layer 0 =binary.run(args).unsafeRunSync()= then all effects will be touching your bare metal.
 
+* Recap
+There's never one solution that fits all problem, when should choose what really depends..
+
+But overall if your business isn't that complex, the 3 layer ReaderT pattern is an reasonable complexitive of abstraction.
+
+I also have a confession to make, that I was intentional making ReaderT + MTL so clumsy.
+
+Actually with help of meow-mtl, one =Ref[IO]= is good enough provide us stateful effects, just like how Free + MTL works.
+
+Whatever your choice is, keep the 3 layer cake in mind, it will always help your structure an extensible,
+compoable, testable and scalable project.
+
 * Footnotes
+
+[fn:5] It means cormorant
 
 [fn:4] Monad Transformer Library
 
