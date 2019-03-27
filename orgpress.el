@@ -1,8 +1,9 @@
-;; (deftheme gtk-ide "gtk-ide theme")
-;; (load-theme 'gtk-ide t t)
-;; (enable-theme 'gtk-ide)
 (require 'package)
 (package-initialize) ;; You might already have this line
+(deftheme gtk-ide "gtk-ide theme")
+(load-theme 'gtk-ide t t)
+(enable-theme 'gtk-ide)
+
 (require 'org)
 (require 'scala-mode)
 (require 'haskell-mode)
