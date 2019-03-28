@@ -275,29 +275,33 @@ If you look close enough, here it actually becomes 3 layers:
 - Layer 3: Alg (program)
 
 #+BEGIN_SRC ditaa :file images/readerT-cake.png :exports results
-  +--------------+
-  |Layer 3:      |
-  |     Alg      |
-  |              |
-  +------+-------+
-         |run
-  /--------------\
-  |Layer 2:      |
-  | AlgInterp[IO]|
-  |              |
-  \--------------/
-         |
-         v
-  +--------------+
-  |Layer 1:      |
-  |      IO      |
-  |              |
-  +--------------+
+                    |    
+          Production| Test
+  +--------------+  |
+  |Layer 3:      |  |
+  |     Alg      +-------------+
+  |cGRE          |  |          |
+  +------+-------+  |          :run           
+         |run       |          |
+  /--------------\  |   /--------------\
+  |Layer 2:      |  |   |Layer 2:      |
+  | AlgInterp[IO]|  |   |FakeAlgInterp[IO]
+  |cRED          |  |   |cRED          |
+  \--------------/  |   \--------------/
+         |          |          |
+         v          |          :
+  +--------------+  |          |
+  |Layer 1:      |  |          |
+  |      IO      |<------------+
+  |cBLU          |  |
+  +--------------+  |
+                    |
 
 #+END_SRC
 
 #+RESULTS:
 [[file:images/readerT-cake.png]]
+
 both layer 2 and 3 are pure, but the different is,
 - Layer 2 is just 1-1 mapping from IO to Alg
 - Layer 3 is orchestration of Layer 2 for pure business
@@ -626,32 +630,34 @@ Anyway It's very easy to explain and compose args though!
 Of course there is one more layer missing - *Layer 0*, if you focus enough you will find out =binary.run(args)= will return =IO=
 
 #+BEGIN_SRC ditaa :file images/free-cake.png :exports results
-  +--------------+
-  |Layer 3:      |
-  |   Program    |
-  |              |
-  +------+-------+
-         |compile
-  /--------------\
-  |Layer 2:      |
-  |   Compiler   |
-  |              |
-  \--------------/
-         |
-         v
-  +--------------+
-  |Layer 1:      |
-  |   Binary     |
-  |              |
-  +------+-------+
-         | run(args)
-         v
-  +--------------+
-  |Layer 0:      |
-  |     IO       |
-  |              |
-  +--------------+
-
+                     |
+           Production| Test
+  +--------------+   |
+  |Layer 3:      |   |
+  |   Program    +------------+
+  |cGRE          |   |        :
+  +------+-------+   |        |compile
+         |compile    |        v
+  /--------------\   | /--------------\
+  |Layer 2:      |   | |Layer 2:      |
+  |   Compiler   |   | |  Fake Compiler
+  |cRED          |   | |cRED          |
+  \--------------/   | \------+-------/
+         |           |        |
+         v           |        :
+  +--------------+   |        |
+  |Layer 1:      |<-----------+
+  |   Binary     |   |
+  |cPNK          +------------+
+  +------+-------+   |        :
+         | run(args) |        |
+         v           | run(fake_args)
+  +--------------+   |        |
+  |Layer 0:      |   |        |
+  |     IO       |<-----------+
+  |cBLU          |   |
+  +--------------+   |
+                     |
 #+END_SRC
 
 #+RESULTS:
@@ -703,7 +709,7 @@ composable, testable and scalable project.
 
 * Footnotes
 
-[fn:6] Sorted based on my expierence/observation by difficulty ASC
+[fn:6] Sorted based on my experience/observation by difficulty ASC
 
 [fn:5] It means cormorant
 
