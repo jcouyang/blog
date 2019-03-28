@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2019-03-28 Thu 10:01 -->
+<!-- 2019-03-28 Thu 10:43 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>使用 dotfiles 和 stow 管理你的 dotfiles</title>
+<title>使用 dotfiles 和 stow 管理你的 dotfiles 使用 dotfiles 和 stow 管理你的 dotfiles</title>
 <meta name="generator" content="Org mode">
-<meta name="author" content="欧阳继超">
+<meta name="author" content="欧阳继超 欧阳继超">
+<meta name="description" content="可能看标题你觉得我疯了，什么叫用 dotfiles 管理你的 dotfiles。第一个单词 [[http://dotfiles.github.io/][dotfiles]] 指将 HOME 目录下的 =.XXX= (它们是真的字面意思dotfiles) 文件同步到 Github 上的方式。通常情况下，我们在开发过程中装的大部分工具，都会在 HOME 目录下创建一个以 =.= 开头的文件或目录，放置配置或者状态。因此我们希望的是用 github 版本管理这些 *配置* ，而不是 *状态* 。"
+>
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -77,24 +79,37 @@ for the JavaScript code in this tag.
 </div>
 <div id="content">
 <header>
-<h1 class="title">使用 dotfiles 和 stow 管理你的 dotfiles</h1>
+<h1 class="title">使用 dotfiles 和 stow 管理你的 dotfiles 使用 dotfiles 和 stow 管理你的 dotfiles</h1>
 </header><nav id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org7a32ac8">使用 stow 管理 symlink</a>
+<li><a href="#org030d7b1">TLDR;</a></li>
+<li><a href="#org6c0d133">使用 stow 管理 symlink</a>
 <ul>
-<li><a href="#orgac241d6">stow 文件</a></li>
-<li><a href="#org5d508f7">stow 目录</a></li>
+<li><a href="#org686482f">stow 文件</a></li>
+<li><a href="#orgc925b3a">stow 目录</a></li>
 </ul>
 </li>
-<li><a href="#org049bd31">push to github</a></li>
-<li><a href="#orgd21c146">submodule vs subtree</a></li>
-<li><a href="#orgbdf25ea">㊙ Sensitive dotfiles</a></li>
+<li><a href="#orgdbc16c6">push to github</a></li>
+<li><a href="#orgc341815">submodule vs subtree</a></li>
+<li><a href="#orgf55917f">㊙ Sensitive dotfiles</a></li>
 </ul>
 </div>
 </nav>
+
+<div id="outline-container-org030d7b1" class="outline-2">
+<h2 id="org030d7b1">TLDR;</h2>
+<div class="outline-text-2" id="text-org030d7b1">
+<pre class="code"><code>brew install stow
+<span style="color: #228b22;">cd</span> ~
+git clone git@github.com:jcouyang/dotfiles.git
+<span style="color: #228b22;">cd</span> dotfiles
+stow .
+</code></pre>
+
 <p>
+*
 可能看标题你觉得我疯了，什么叫用 dotfiles 管理你的 dotfiles。
 </p>
 
@@ -107,20 +122,16 @@ for the JavaScript code in this tag.
 因此我们希望的是用 github 版本管理这些 <b>配置</b> ，而不是 <b>状态</b> 。
 </p>
 
-<div class="epigraph"><blockquote>
-<p>
-下面例子中的 dotfiles repo 在<a href="https://github.com/jcouyang/dotfiles">这里</a>
-</p>
-
-</blockquote></div>
 
 <p>
 好吧，让我们来看看到底如何版本管理这些 “dotfiles”。
 </p>
+</div>
+</div>
 
-<div id="outline-container-org7a32ac8" class="outline-2">
-<h2 id="org7a32ac8">使用 stow 管理 symlink</h2>
-<div class="outline-text-2" id="text-org7a32ac8">
+<div id="outline-container-org6c0d133" class="outline-2">
+<h2 id="org6c0d133">使用 stow 管理 symlink</h2>
+<div class="outline-text-2" id="text-org6c0d133">
 <p>
 GNU stow 是管理符号链接（symlink）的一个小公举。只需要
 </p>
@@ -147,9 +158,9 @@ GNU stow 是管理符号链接（symlink）的一个小公举。只需要
 </pre>
 </div>
 
-<div id="outline-container-orgac241d6" class="outline-3">
-<h3 id="orgac241d6">stow 文件</h3>
-<div class="outline-text-3" id="text-orgac241d6">
+<div id="outline-container-org686482f" class="outline-3">
+<h3 id="org686482f">stow 文件</h3>
+<div class="outline-text-3" id="text-org686482f">
 <p>
  注意看我们需要版本管理文件应该是 config.fish 和 omf 下的所有文件，于是，我将这些文件考到我新建
 的 <code>~/dotfiles</code> 目录下
@@ -192,9 +203,9 @@ ls fish/.config/fish/
 </div>
 </div>
 
-<div id="outline-container-org5d508f7" class="outline-3">
-<h3 id="org5d508f7">stow 目录</h3>
-<div class="outline-text-3" id="text-org5d508f7">
+<div id="outline-container-orgc925b3a" class="outline-3">
+<h3 id="orgc925b3a">stow 目录</h3>
+<div class="outline-text-3" id="text-orgc925b3a">
 <p>
 另外我们在试试管理 omf(oh-my-fish)，似乎 omf下面没有什么状态，bundle 和 theme 都是配置，所以
 与其 symlink 文件，不如 symlink 整个 omf 目录。同样在 <code>~/dotfiles</code>  目录下运行
@@ -223,9 +234,9 @@ stow omf
 </div>
 </div>
 
-<div id="outline-container-org049bd31" class="outline-2">
-<h2 id="org049bd31">push to github</h2>
-<div class="outline-text-2" id="text-org049bd31">
+<div id="outline-container-orgdbc16c6" class="outline-2">
+<h2 id="orgdbc16c6">push to github</h2>
+<div class="outline-text-2" id="text-orgdbc16c6">
 <p>
 下面看如何用 github 来管理这些 dotfiles
 </p>
@@ -246,9 +257,9 @@ git push origin master
 </div>
 </div>
 
-<div id="outline-container-orgd21c146" class="outline-2">
-<h2 id="orgd21c146">submodule vs subtree</h2>
-<div class="outline-text-2" id="text-orgd21c146">
+<div id="outline-container-orgc341815" class="outline-2">
+<h2 id="orgc341815">submodule vs subtree</h2>
+<div class="outline-text-2" id="text-orgc341815">
 <p>
 但是我有些配置文件其实在另外一个 repo 上，这时候我怎么能跟这个 <code>dotfiles</code> repo 合到一起呢？
 </p>
@@ -307,9 +318,9 @@ git subtree push --prefix emacs/.emacs.d emacs master
 </div>
 
 
-<div id="outline-container-orgbdf25ea" class="outline-2">
-<h2 id="orgbdf25ea">㊙ Sensitive dotfiles</h2>
-<div class="outline-text-2" id="text-orgbdf25ea">
+<div id="outline-container-orgf55917f" class="outline-2">
+<h2 id="orgf55917f">㊙ Sensitive dotfiles</h2>
+<div class="outline-text-2" id="text-orgf55917f">
 <p>
 有些 dotfiles  中可能涉及一些 token 或者密码，如果把他们 push 到 public 的 github 上， <del>有可能</del> 肯定会对你个人或者公司造成巨大的损失（最近公司就开始扫描个人 github 账户了🙀 好紧张）。于是我们需要对这些敏感的 dotfiles 做加密。
 </p>
@@ -321,7 +332,7 @@ git subtree push --prefix emacs/.emacs.d emacs master
 <p>
 目前最广泛使用的加密手段是 Gnupg，简称 gpg，一样使用 brew 装就好了
 </p>
-<pre class="code"><code>brew install gnupg
+<pre class="code"><code>brew install gnupg2
 </code></pre>
 
 <p>
@@ -343,7 +354,7 @@ git subtree push --prefix emacs/.emacs.d emacs master
 </p>
 
 <p>
-现在 git remote crypt  大法就该登场了，到这里 <a href="https://github.com/joeyh/git-remote-gcrypt">https://github.com/joeyh/git-remote-gcrypt</a>  把 repo 下下来执行 <code>./install.sh</code>, 之后就应该有 <code>git-remote-gcrypt</code> 这样一个命令，先别跑
+现在 git remote crypt  大法就该登场了，到这里 <a href="https://github.com/spwhitton/git-remote-gcrypt">https://github.com/spwhitton/git-remote-gcrypt</a> 把 repo 下下来执行 <code>./install.sh</code>, 之后就应该有 <code>git-remote-gcrypt</code> 这样一个命令，先别跑
 </p>
 
 <p>
@@ -373,8 +384,8 @@ git push
 </div>
 <div id="postamble" class="status">
 <footer>
-  <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2019-03-28 Thu 10:01</p>
+  <p>Author: 欧阳继超 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
+  <p>Modified: 2019-03-28 Thu 10:43</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
