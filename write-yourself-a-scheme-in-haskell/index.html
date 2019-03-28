@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2019-03-27 Wed 10:30 -->
+<!-- 2019-03-28 Thu 10:01 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>用Haskell48小时写你个Scheme</title>
@@ -154,49 +154,49 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org4905cc2">前言</a></li>
-<li><a href="#org4b387d6">跑起来</a>
+<li><a href="#orgc514359">前言</a></li>
+<li><a href="#org28c7052">跑起来</a>
 <ul>
-<li><a href="#org4c63818">Hello World</a></li>
-<li><a href="#orgafea13e">操作符</a></li>
-<li><a href="#org1585079">练习</a></li>
+<li><a href="#org9332f03">Hello World</a></li>
+<li><a href="#org3d805fc">操作符</a></li>
+<li><a href="#org81d6e2c">练习</a></li>
 </ul>
 </li>
-<li><a href="#org541b7a3">语法分析</a>
+<li><a href="#org696e173">语法分析</a>
 <ul>
-<li><a href="#org4a8e415">写个简单的parser</a>
+<li><a href="#org996daa7">写个简单的parser</a>
 <ul>
-<li><a href="#orge2955d1">定义 parser</a></li>
-<li><a href="#orgf9320ac">Parse</a></li>
-<li><a href="#orge1448af">Either</a></li>
-<li><a href="#org9711c16">pattern matching</a></li>
+<li><a href="#org4099267">定义 parser</a></li>
+<li><a href="#orgaf5c6fc">Parse</a></li>
+<li><a href="#org44c37ba">Either</a></li>
+<li><a href="#orgf648a2e">pattern matching</a></li>
 </ul>
 </li>
-<li><a href="#org8d2af51">空白符</a></li>
-<li><a href="#orgf64fdf3">返回值</a>
+<li><a href="#org93d0cb8">空白符</a></li>
+<li><a href="#org534cdc6">返回值</a>
 <ul>
-<li><a href="#org1e84ed6">ParseString</a></li>
-<li><a href="#org27722d9">parseAtom</a></li>
-<li><a href="#org35a8ff0">parseNumber</a></li>
-<li><a href="#org9f476a2">最后</a></li>
+<li><a href="#org112677c">ParseString</a></li>
+<li><a href="#org2a1f760">parseAtom</a></li>
+<li><a href="#orgf854974">parseNumber</a></li>
+<li><a href="#org0b7d010">最后</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org0cc8cb9">求值，第一部分</a>
+<li><a href="#org0de6e63">求值，第一部分</a>
 <ul>
-<li><a href="#org27f53af">to String</a></li>
-<li><a href="#orgfebcb59">实现 show 类型类</a></li>
+<li><a href="#org90d3a8b">to String</a></li>
+<li><a href="#org49bb85d">实现 show 类型类</a></li>
 </ul>
 </li>
-<li><a href="#org58350c8">待续&#x2026;</a></li>
+<li><a href="#org237fc40">待续&#x2026;</a></li>
 </ul>
 </div>
 </nav>
 
-<div id="outline-container-org4905cc2" class="outline-2">
-<h2 id="org4905cc2">前言</h2>
-<div class="outline-text-2" id="text-org4905cc2">
+<div id="outline-container-orgc514359" class="outline-2">
+<h2 id="orgc514359">前言</h2>
+<div class="outline-text-2" id="text-orgc514359">
 
 <figure>
 <img src="../images/everyone-out-of-the-universe.gif" alt="everyone-out-of-the-universe.gif">
@@ -228,9 +228,9 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-org4b387d6" class="outline-2">
-<h2 id="org4b387d6">跑起来</h2>
-<div class="outline-text-2" id="text-org4b387d6">
+<div id="outline-container-org28c7052" class="outline-2">
+<h2 id="org28c7052">跑起来</h2>
+<div class="outline-text-2" id="text-org28c7052">
 
 <figure>
 <img src="http://imgs.xkcd.com/comics/haskell.png" alt="haskell.png">
@@ -238,9 +238,9 @@ for the JavaScript code in this tag.
 </figure>
 </div>
 
-<div id="outline-container-org4c63818" class="outline-3">
-<h3 id="org4c63818">Hello World</h3>
-<div class="outline-text-3" id="text-org4c63818">
+<div id="outline-container-org9332f03" class="outline-3">
+<h3 id="org9332f03">Hello World</h3>
+<div class="outline-text-3" id="text-org9332f03">
 <p>
 一切从hello开始，说好的用Haskell实现，先来看Haskell写一个hello world <del>有多麻烦</del>
 </p>
@@ -290,9 +290,9 @@ Hello, jichao
 </div>
 </div>
 
-<div id="outline-container-orgafea13e" class="outline-3">
-<h3 id="orgafea13e">操作符</h3>
-<div class="outline-text-3" id="text-orgafea13e">
+<div id="outline-container-org3d805fc" class="outline-3">
+<h3 id="org3d805fc">操作符</h3>
+<div class="outline-text-3" id="text-org3d805fc">
 <p>
 前面出现了好些操作符，比如 <code>++</code> <code>!!</code> ，当它们堆叠到一起如果没有括号，很难分辨哪些表达式会先求值，所以先让我们熟悉一下常见的操作符，都有哪些结合律，以及优先级顺序
 </p>
@@ -420,9 +420,9 @@ Hello, jichao
 </div>
 
 
-<div id="outline-container-org1585079" class="outline-3">
-<h3 id="org1585079">练习</h3>
-<div class="outline-text-3" id="text-org1585079">
+<div id="outline-container-org81d6e2c" class="outline-3">
+<h3 id="org81d6e2c">练习</h3>
+<div class="outline-text-3" id="text-org81d6e2c">
 <ol class="org-ol">
 <li>修改helloword成读两个参数，并打印</li>
 <li>把两个参数给的数字相加，输出结果</li>
@@ -432,9 +432,9 @@ Hello, jichao
 </div>
 </div>
 
-<div id="outline-container-org541b7a3" class="outline-2">
-<h2 id="org541b7a3">语法分析</h2>
-<div class="outline-text-2" id="text-org541b7a3">
+<div id="outline-container-org696e173" class="outline-2">
+<h2 id="org696e173">语法分析</h2>
+<div class="outline-text-2" id="text-org696e173">
 
 <figure>
 <img src="../images/robot-what.gif" alt="robot-what.gif">
@@ -442,9 +442,9 @@ Hello, jichao
 </figure>
 </div>
 
-<div id="outline-container-org4a8e415" class="outline-3">
-<h3 id="org4a8e415">写个简单的parser</h3>
-<div class="outline-text-3" id="text-org4a8e415">
+<div id="outline-container-org996daa7" class="outline-3">
+<h3 id="org996daa7">写个简单的parser</h3>
+<div class="outline-text-3" id="text-org996daa7">
 <p>
 语法分析，需要引入著名的Parsec库, 当然,在这之前得先安装 Parsec
 </p>
@@ -456,9 +456,9 @@ cabal install parsec
 如果没有 cabal 都没装, 请 <code>brew install cabal</code>, 非mac用户对不住了,我也不知道怎么装,自行google吧.
 </p>
 </div>
-<div id="outline-container-orge2955d1" class="outline-4">
-<h4 id="orge2955d1">定义 parser</h4>
-<div class="outline-text-4" id="text-orge2955d1">
+<div id="outline-container-org4099267" class="outline-4">
+<h4 id="org4099267">定义 parser</h4>
+<div class="outline-text-4" id="text-org4099267">
 <pre class="code"><code><span style="color: #00008b;">import</span> <span style="color: #36648b;">Text.ParserCombinators.Parsec</span> <span style="color: #00008b;">hiding</span> (spaces)
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">System.Environment</span>
 </code></pre>
@@ -475,9 +475,9 @@ symbol 等于 <code>oneOf blahblah</code>, 返回一个 Parser Monad， 里面�
 </p>
 </div>
 </div>
-<div id="outline-container-orgf9320ac" class="outline-4">
-<h4 id="orgf9320ac">Parse</h4>
-<div class="outline-text-4" id="text-orgf9320ac">
+<div id="outline-container-orgaf5c6fc" class="outline-4">
+<h4 id="orgaf5c6fc">Parse</h4>
+<div class="outline-text-4" id="text-orgaf5c6fc">
 <p>
 下面我们用这个 parser 试试 parse 一下
 </p>
@@ -514,9 +514,9 @@ parse
 </div>
 </div>
 
-<div id="outline-container-orge1448af" class="outline-4">
-<h4 id="orge1448af">Either</h4>
-<div class="outline-text-4" id="text-orge1448af">
+<div id="outline-container-org44c37ba" class="outline-4">
+<h4 id="org44c37ba">Either</h4>
+<div class="outline-text-4" id="text-org44c37ba">
 <p>
 先不管细节,大体上来说, parse 接收 一个 Parsec 类型, 一个描述, 一个 Stream 类型, 返回一个 Either
 </p>
@@ -547,9 +547,9 @@ parse
 </div>
 </div>
 
-<div id="outline-container-org9711c16" class="outline-4">
-<h4 id="org9711c16">pattern matching</h4>
-<div class="outline-text-4" id="text-org9711c16">
+<div id="outline-container-orgf648a2e" class="outline-4">
+<h4 id="orgf648a2e">pattern matching</h4>
+<div class="outline-text-4" id="text-orgf648a2e">
 <p>
 下来是 of 后面的 <code>blah -&gt; blah blah</code>
 </p>
@@ -565,9 +565,9 @@ parse
 </div>
 </div>
 
-<div id="outline-container-org8d2af51" class="outline-3">
-<h3 id="org8d2af51">空白符</h3>
-<div class="outline-text-3" id="text-org8d2af51">
+<div id="outline-container-org93d0cb8" class="outline-3">
+<h3 id="org93d0cb8">空白符</h3>
+<div class="outline-text-3" id="text-org93d0cb8">
 <p>
 现在我们能拿到 scheme 的 symbol 了, 作为一个 parser 还需要过滤掉一些没用的空白符, 比如说空格先:
 </p>
@@ -591,9 +591,9 @@ parse
 </div>
 </div>
 
-<div id="outline-container-orgf64fdf3" class="outline-3">
-<h3 id="orgf64fdf3">返回值</h3>
-<div class="outline-text-3" id="text-orgf64fdf3">
+<div id="outline-container-org534cdc6" class="outline-3">
+<h3 id="org534cdc6">返回值</h3>
+<div class="outline-text-3" id="text-org534cdc6">
 <p>
 到现在为止我们的parser也只能说打印是否找到合法的输入, 但是还不能真正的将输入字符parse成为数据结构.
 </p>
@@ -632,9 +632,9 @@ parse
 </ul>
 </div>
 
-<div id="outline-container-org1e84ed6" class="outline-4">
-<h4 id="org1e84ed6">ParseString</h4>
-<div class="outline-text-4" id="text-org1e84ed6">
+<div id="outline-container-org112677c" class="outline-4">
+<h4 id="org112677c">ParseString</h4>
+<div class="outline-text-4" id="text-org112677c">
 <p>
 有了这个抽象数据类型 ADT,我们就可以将parse的内容转换成 scheme 的 ADT, 首先,试试 parse 个 String
 </p>
@@ -661,9 +661,9 @@ parse
 </div>
 </div>
 
-<div id="outline-container-org27722d9" class="outline-4">
-<h4 id="org27722d9">parseAtom</h4>
-<div class="outline-text-4" id="text-org27722d9">
+<div id="outline-container-org2a1f760" class="outline-4">
+<h4 id="org2a1f760">parseAtom</h4>
+<div class="outline-text-4" id="text-org2a1f760">
 <p>
 atom 的parser 也比较直接, 正常的 atom 
 </p>
@@ -698,9 +698,9 @@ atom 的parser 也比较直接, 正常的 atom
 </div>
 </div>
 
-<div id="outline-container-org35a8ff0" class="outline-4">
-<h4 id="org35a8ff0">parseNumber</h4>
-<div class="outline-text-4" id="text-org35a8ff0">
+<div id="outline-container-orgf854974" class="outline-4">
+<h4 id="orgf854974">parseNumber</h4>
+<div class="outline-text-4" id="text-orgf854974">
 <pre class="code"><code><span style="color: #6a5acd;">parseNumber</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
 <span style="color: #6a5acd;">parseNumber</span> <span style="color: #b8860b;">=</span> liftM (<span style="color: #36648b;">Number</span> <span style="color: #b8860b;">.</span> read) <span style="color: #b8860b;">$</span> many1 digit
 </code></pre>
@@ -723,9 +723,9 @@ atom 的parser 也比较直接, 正常的 atom
 </div>
 </div>
 
-<div id="outline-container-org9f476a2" class="outline-4">
-<h4 id="org9f476a2">最后</h4>
-<div class="outline-text-4" id="text-org9f476a2">
+<div id="outline-container-org0b7d010" class="outline-4">
+<h4 id="org0b7d010">最后</h4>
+<div class="outline-text-4" id="text-org0b7d010">
 <p>
 有了这几个 parser, 可以用我们刚见过的 <code>&lt;|&gt;</code> 把它们拼起来
 </p>
@@ -750,13 +750,13 @@ atom 的parser 也比较直接, 正常的 atom
 </div>
 </div>
 
-<div id="outline-container-org0cc8cb9" class="outline-2">
-<h2 id="org0cc8cb9">求值，第一部分</h2>
-<div class="outline-text-2" id="text-org0cc8cb9">
+<div id="outline-container-org0de6e63" class="outline-2">
+<h2 id="org0de6e63">求值，第一部分</h2>
+<div class="outline-text-2" id="text-org0de6e63">
 </div>
-<div id="outline-container-org27f53af" class="outline-3">
-<h3 id="org27f53af">to String</h3>
-<div class="outline-text-3" id="text-org27f53af">
+<div id="outline-container-org90d3a8b" class="outline-3">
+<h3 id="org90d3a8b">to String</h3>
+<div class="outline-text-3" id="text-org90d3a8b">
 <p>
 在真的开始 eval 之前, 我们先把打印的部分实现, 比如之前能 parse 的 <code>List</code> 打印成 scheme 的话应该是 <code>()</code>
 </p>
@@ -801,9 +801,9 @@ scheme 的 List 用括号括起来, 内容则是用空格分开的一个个元�
 </p>
 </div>
 </div>
-<div id="outline-container-orgfebcb59" class="outline-3">
-<h3 id="orgfebcb59">实现 show 类型类</h3>
-<div class="outline-text-3" id="text-orgfebcb59">
+<div id="outline-container-org49bb85d" class="outline-3">
+<h3 id="org49bb85d">实现 show 类型类</h3>
+<div class="outline-text-3" id="text-org49bb85d">
 <p>
 上节的 <code>showVal</code> 实现中, 不知道有没有注意到 Number 的实现使用了 <code>show contents</code>. 我们知道 <code>contents</code> 的类型是 Haskell 的 <code>Integer</code>, 之所以可以 <code>show</code>, 是 <code>Integer</code> 实现了类型类 <code>Show</code>.
 </p>
@@ -838,9 +838,9 @@ scheme 的 List 用括号括起来, 内容则是用空格分开的一个个元�
 </div>
 </div>
 
-<div id="outline-container-org58350c8" class="outline-2">
-<h2 id="org58350c8">待续&#x2026;</h2>
-<div class="outline-text-2" id="text-org58350c8">
+<div id="outline-container-org237fc40" class="outline-2">
+<h2 id="org237fc40">待续&#x2026;</h2>
+<div class="outline-text-2" id="text-org237fc40">
 <ul class="org-ul">
 <li>错误处理及异常</li>
 <li>求值，第二部分</li>
@@ -857,7 +857,7 @@ scheme 的 List 用括号括起来, 内容则是用空格分开的一个个元�
 <div id="postamble" class="status">
 <footer>
   <p>Author: root <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2019-03-27 Wed 10:30</p>
+  <p>Modified: 2019-03-28 Thu 10:01</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
