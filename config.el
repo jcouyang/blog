@@ -2,17 +2,14 @@
       config-base-url "http://blog.oyanglul.us"
       config-home-link "/jichao.ouyang.html"
       config-date-format "%b %d, %Y"
-      config-entry-format "
-* [[%l][%t]]
+      config-entry-format "[[%l][%t]]
 :PROPERTIES:
 :HTML_CONTAINER_CLASS: blogentry
 :RSS_PERMALINK: %L
 :PUBDATE: %D
 :END:
-/%d/
-
-%p
-
-[[%l][Read More...]]
--------
-")
+%c"
+      blog-path (expand-file-name "org")
+      assets-path (expand-file-name "assets")
+      user-mail-address "oyanglulu@gmail.com"
+      )
