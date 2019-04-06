@@ -1,0 +1,189 @@
+#+TITLE: Into ReaderT-verse
+#+DATE: <2019-03-25 Mon>
+#+AUTHOR: Jichao Ouyang
+#+MACRO: ruby @@html:<ruby>$1<rt>$2</rt></ruby>@@
+#+description: As what I've been discussed in [[https://blog.oyanglul.us/scala/3-layer-cake][3 Layer Scala Cake]] ReaderT pattern is pretty much enough
+#+description: for most case. So, let's dive into the ReaderT universe and see how can we factor those effects out.
+#+KEYWORDS: Scala,Monad,MTL,ReaderT
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="Into ReaderT-verse" />
+#+HTML_HEAD_EXTRA: <meta property="og:description" content="ReaderT monad is all you need!!!" />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+
+To keep this article reletively small, lets scope our problem smaller
+* The Program
+I'll start with a simple deja vu program.
+
+#+BEGIN_SRC scala
+  val sourceBucketName = "source-bucket"
+  val fileName = "fileA"
+  val targetBucketName = "target-bucket"
+  val awsClient = AmazonS3ClientBuilder.standard().build()
+  def pureBusinessProcess(content: String): String = ???
+  def program = {
+    val content = awsClient.getObject(sourceBucketName, fileName)
+    val result = pureBusinessProcess(content)
+    awsClient.putObject(targetBucketName, fileName)
+  }
+#+END_SRC
+
+It's pretty simple program:
+1. fetch a file from s3 bucket A
+2. process the content according to what business you have
+3. put the result into a file in bucket B
+
+
+* The Problem
+Such program looks pretty clean and readable but implementation like this is never good enough for production because it lack of:
+1. Error handling
+2. Testability
+3. Logging
+
+If we add those 3 factors, the =program= will not clean and readable anymore
+
+#+BEGIN_SRC scala
+    val awsClient = AmazonS3ClientBuilder.standard().build()
+    def pureBusinessProcess(content: String): String = ???
+    val logger = org.log4s.getLogger
+    def program(client: AmazonS3) = {
+      val content = try {
+        val content = try {
+          awsClient.getObject(sourceBucketName, fileName)
+        } catch {
+          case e: Throwable =>
+            logger.error("error fetching file from S3")
+            throw e
+        }
+        val result = pureBusinessProcess(content)
+        try {
+          awsClient.putObject(targetBucketName, fileName)
+        } catch {
+          case e: Throwable =>
+            logger.error("error puting file to S3")
+            throw e
+        }
+      } catch { 
+        case e: Throwable => logger.error(s"error processing $fileName from $sourceBucketName: ${e.getMessage}")
+      }
+    }
+#+END_SRC
+
+So, we factor the effect =client: AmazonS3= as parameter to achieve little improvement of testability, however,
+this is an absolutly crap, the core process of the program is totally lost in the ocean of error handling and logging.
+
+* A better version with ReaderT
+With ReaderT, we will get a better version of:
+
+1. DI[fn:1]
+2. Error Handling[fn:2]
+
+Instead of parameterize =client=, we change the return type of
+=program= to =ReaderT[IO, AmazonS3, Unit]=
+#+BEGIN_SRC scala
+  def program: ReaderT[IO, AmazonS3, Unit] = for {
+    content <- Kleisli(client => IO(client.getObject(sourceBucketName, fileName)))
+      .onError{case e:Throwable => IO(logger.error("error fetching file from S3: ${e.getMessage}"))}
+    result = pureBusinessProcess(content)
+    _ <- Kleisli(client => IO(client.putObject(targetBucketName, fileName)))
+      .onError{case e: Throwable => IO(logger.error("error puting file to S3"))}
+  } yield ()
+#+END_SRC
+
+Ok it's little bit better though I don't think it's very readable.
+
+Now it's the best feature of functional programming, ReaderT is pure so you can put that "not so readable thing" anywhere
+and give it a reasonable name.
+
+#+BEGIN_SRC scala
+  val fetchContent = Kleisli(client => IO(client.getObject(sourceBucketName, fileName)))
+      .onError{case e:Throwable => IO(logger.error("error fetching file from S3: ${e.getMessage}"))}
+  
+  def putContent(content: String) = Kleisli(client => IO(client.putObject(targetBucketName, fileName, content)))
+      .onError{case e: Throwable => IO(logger.error("error puting file to S3: ${e.getMessage}"))}
+
+  def program: ReaderT[IO, AmazonS3, PutObjectResult] = for {
+    content <- fetchContent
+    result = pureBusinessProcess(content)
+    _ <- putContent(result)
+  } yield ()
+#+END_SRC
+
+Fine, that's better at readability, but testing journey won't be much difference, I still need to mock the =client=
+and stub =getObject= and =putObject=.
+#+BEGIN_SRC scala
+val fakeClient = mock[AmazonS3]
+val res = mock[PutObjectResult]
+fakeClient.getObject(sourceBucketName, fileName) returns "some content"
+fakeClient.putObject(targetBucketName, fileName, "processed") returns res
+program.run(fakeClient).unsafeRunSync must_== res
+#+END_SRC
+
+Not bad but not good either, we can avoid mocking and stubing by abstract another layer, just like [[file:3-layer-cake.org][3 Layer Scala Cake]]
+
+** Layer 2
+#+BEGIN_SRC scala
+trait Interpreter[F[_]] {
+    def getObject(bucketName: String, fileName: String): F[String]
+    def putObject(bucketName: String, fileName: String, content: String): F[PutObjectResult]
+}
+#+END_SRC
+
+** Layer 3
+#+BEGIN_SRC scala
+  def program: ReaderT[IO, Interpreter[IO], PutObjectResult] = for {
+    content <- Kleisli(_.getObject(sourceBucketName, fileName))
+    result = pureBusinessProcess(content)
+    _ <- Kleisli(_.putObject(targetBucketName, fileName, result))
+  } yield ()
+#+END_SRC
+
+A =Kleisli= before =_.getObject...= barely sacrifice our readability but the benifit we get is that we can
+swap Layer 2 with abitrary interpreter in test
+#+BEGIN_SRC scala
+    val res = mock[PutObjectResult]
+    program.run(new Interpreter[IO] {
+      def getObject(bucketName: String, fileName: String) = IO("some content")
+      def putObject(bucketName: String, fileName: String, content: String) = res
+    }).unsafeRunSync() must_== res
+
+#+END_SRC
+
+* ReaderT-verse
+Finally we just need to refactor a bit and it's production ready:
+1. Readable
+2. Testable[fn:4]
+3. Better Error Handling[fn:2]
+4. Logging
+5. Extensible[fn:3]
+6. Composable[fn:3]
+
+#+BEGIN_SRC scala
+  def program: ReaderT[IO, Interpreter[IO], PutObjectResult] = for {
+    env <- Kleisli(_.getEnv)
+    content <- Kleisli(_.getObject(env.source, env.fileName))
+    .onError{case e:Throwable => IO(logger.error(s"error fetching file from S3: ${e.getMessage}"))}
+    result = pureBusinessProcess(content)
+    resp <- Kleisli(_.putObject(env.target, env.fileName, result))
+    .onError{case e: Throwable => IO(logger.error(s"error puting file to S3: ${e.getMessage}"))}
+  } yield resp
+
+  case class Env(source: String, target: String, fileName: String)
+  val interpreter = new Interpreter[IO] {
+    lazy val awsClient = AmazonS3ClientBuilder.standard().build()
+    def getEnv = IO(Env("sourceBucket", "targetBucket", "fileA"))
+    def getObject(bucketName: String, fileName: String) =
+      IO(awsClient.getObject(bucketName, fileName))
+    def putObject(bucketName: String, fileName: String, content: String) =
+      IO(awsClient.putObject(bucketName, fileName, content))
+  }
+
+program.run(interpreter).unsafeRunSync()
+#+END_SRC
+* Footnotes
+
+[fn:4] by swaping out Layer 2
+
+[fn:3] Same as Tagless Final
+
+[fn:2] thanks to [[https://typelevel.org/cats/api/cats/MonadError.html][MonadError]]
+
+[fn:1] Dependency Injection
