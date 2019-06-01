@@ -1,9 +1,13 @@
-#+TITLE: 范畴论完全装逼手册(一) / Grokking Monad
+#+TITLE: 范畴论完全装逼手册 / Grokking Monad
 #+Date: <2017-02-10 Fri>
 #+AUTHOR: 欧阳继超
 #+OPTIONS: ^:t
 #+MACRO: ruby @@html:<ruby>$1<rt>$2</rt></ruby>@@
+#+PROPERTY: header-args :eval never-export
 
+- *[[./part1.org][第一部分：猫论]]* 👈
+- [[./part2.org][第二部分：食用猫呢]]
+- [[./part3.org][第三部分：搞基猫呢]]
 * COMMENT
 #+BEGIN_SRC emacs-lisp
 (require 'ob-dot)
@@ -12,17 +16,46 @@
 #+RESULTS:
 : ob-dot
 
-* 第一部分：{{{ruby(范畴论,Catergory Theory)}}}
+* 第一部分：{{{ruby(猫论,Catergory Theory)}}}
 
-很多人都不明白什么是Monad，并不是因为不会用，不知觉可能就在用某种 monad。\\
-定义和使用起来其实不难，困惑的大多应该是后面的这堆理论-- 范畴论。当然，我也没学过范畴论，只是略微看得懂写Haskell罢了。
+https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/De_Alice%27s_Abenteuer_im_Wunderland_Carroll_pic_23_edited_1_of_2.png/1920px-De_Alice%27s_Abenteuer_im_Wunderland_Carroll_pic_23_edited_1_of_2.png [fn:1]
+
+#+BEGIN_QUOTE
+`But I don’t want to go among mad people,’ Alice remarked.
+
+`Oh, you can’t help that,’ said the Cat: `we’re all mad here. I’m mad. You’re mad.’
+
+`How do you know I’m mad?’ said Alice.
+`You must be,’ said the Cat, `or you wouldn’t have come here.’
+
+Alice didn’t think that proved it at all; however, she went on `And how do you know that you’re mad?’
+
+    -- Alice's Adventures in Wonderland
+#+END_QUOTE
+
+{{{ruby(单子,Monad)}}}是什么? 你也不懂, 我也不懂, 我们都不懂.
+
+话说, 我又怎么知道你不懂呢?
+
+当然不懂, 不然, 你怎么会来到这里?
+
+我又是怎么知道自己不懂呢?
+
+因为, 我知道懂的人什么样子. 显然, 我不是.
+
+懂的人一定知道{{{ruby(猫论, Category Theory)}}}.
+
+懂猫论的人又不一定知道编程. 但是懂编程的人可以略懂猫论.
+
+编程是项技术, 即理论的降维. 所以要降低门槛, 比如我在书中也[[https://book.douban.com/subject/26883736/][写过一章]]用JavaScript来解释，某人也尝试过[[http://www.ruanyifeng.com/blog/2017/02/fp-tutorial.html][写博客解释]]，[fn:2]没想到那些也不知道会不会 Haskell/Scala 的人就跑出来喷你们前端[fn:3]这些不懂函数式的渣渣乱搞出来的东西根本就不是单子。
 
 我也画过一些图来解释，又会被嫌弃画风不好。但是，作为灵魂画师，我只 +是觉得自己萌萌的啊+ 在乎画的灵魂是否能够给你一点启发。好吧，讲这么学术的东西，还是用dot来画吧，看起来好正规呢。
 
-好了，安全带系好，我真的要开车了。为了 +防止鄙视链顶端的语言用户们喷再嫌弃+ 解释的不到位，就用 Haskell 好了（虽然haskell也没到鄙视链顶），其实也不难解释清楚 +才怪+ 。
+好了，安全带系好，我真的要开车了。为了防止{{{ruby(解释的不到位,又被喷)}}}，就用 Haskell/Scala 好了[fn:4]，其实也不难解释清楚 +才怪+ 。
 
-这里面很多很装逼的单词，它们都是 /斜体/ ，就算没看懂，把这些词记住也足够{{{ruby(装一阵子逼了,买一阵子萌了)}}}。
+这里面很多很装逼的单词，它们都是 /斜体/ ，就算没看懂，把这些词背下来也足够{{{ruby(装好一阵子逼了,买一阵子萌了)}}}。
 
+这里还有很多代码, 它们都成对出现, 第一段是 Haskell, 第二段是 Scala.
 
 ** /Category/
 #+INDEX: Catergory
@@ -32,11 +65,11 @@
 - 东西 =O= （Object）
 - 两个东西的关系，箭头 =~>= （ /{{{ruby(态射,Morphism)}}}/ ）
 
-一些属性
+还必须带上一些属性: 
 - 一定有一个叫 id 的箭头，也叫做 1
 - 箭头可以 /{{{ruby(组合, compose)}}}/
 
-恩，就是这么简单
+恩, 就是这么简单!
 
 #+BEGIN_SRC dot :file images/category.svg :exports results
   digraph {
@@ -55,24 +88,46 @@
 #+RESULTS:
 [[file:images/category.svg]]
 
-这些玩意对应到 haskell 的 typeclass 大致就是这样
+
+#+BEGIN_QUOTE
+注意到为什么我会箭头从右往左，接着看代码, 你会发现这个方向跟 compose 的方向刚好一致!
+#+END_QUOTE
+
+这些玩意对应到 haskell 的 typeclass 大致就是这样:
+
 #+BEGIN_SRC haskell
 class Category (c :: * -> * -> *) where
   id :: c a a
   (.) :: c y z -> c x y -> c x z
 #+END_SRC
 
-#+BEGIN_QUOTE
-注意到为什么我会箭头从右往左，你会发现这个方向跟 compose 的方向刚好一致
-#+END_QUOTE
+
+而 Scala 可以用 trait 来表示这个 typeclass:
+#+BEGIN_SRC scala
+  trait Category[C[_, _]] {
+    val id[A]: C[A, A]
+    def <<<(a: C[Y, Z], b: C[X, Y]): C[X, Z] 
+  }
+#+END_SRC
 
 如果这是你第一次见到 Haskell 代码，没有关系，语法真的很简单 +才怪+
 - =class= 定义了一个 TypeClass， =Category= 是这个 TypeClass 的名字
 - Type class 类似于定义类型的规范，规范为 =where= 后面那一坨
 - 类型规范的对象是参数 ~(c:: * -> * -> *)~ ， =::= 后面是c的类型
-- c 是 /higher kind/ ，跟higher order function的定义差不多，它是接收类型，构造新类型的类型。这里的 c 接收一个类型，再接收一个类型，就可以返回个类型。
+- c 是 /higher kind/ =* -> *= ，跟higher order function的定义差不多，它是接收类型，构造新类型的类型。这里的 c 接收一个类型，再接收一个类型，就可以返回个类型。
+#+INDEX: Kind
 - ~id:: c a a~ 表示 c 范畴上的 a 到 a 的箭头
 - =.= 的意思 c 范畴上，如果喂一个 y 到 z 的箭头，再喂一个 x 到 y 的箭头，那么就返回 x 到 z 的箭头。
+
+另外 compose 在 haskell 中直接是句号 =.=
+
+scala 中用 =<<<= 或者 =compose=
+
+总之, 用文字再读一遍上面这些代码就了然了.
+
+范畴 C 其实就包含
+1. 返回 A 对象到 A 对象的 id 箭头
+2. 可以组合 Y 对象到 Z 对象 和 X 对象到 Y 对象的箭头 compose
 
 {{{ruby(简单吧,hen nan ba)}}}?还没有高数抽象呢。
 
@@ -82,7 +137,7 @@ Haskell 类型系统范畴叫做 Hask
 
 在 Hask 范畴上：
 
-- 东西是类型
+- 东西就是类型
 - 箭头是类型的变换，即 =->=
 - id 就是 id 函数的类型 =a -> a=
 - compose 当然就是函数组合的类型
@@ -93,21 +148,31 @@ instance Category (Hask:: * -> * -> *) where
   (f . g) x = f (g x)
 #+END_SRC
 
-我们看见新的关键字 =instance= ，这表示 Hask 是 Type class Category 的实例类型，也就是说我们可以Hask的个构造器去真的构造一个类型
+我们看见新的关键字 =instance= ，这表示 Hask 是 Type class Category 的实例类型，也就是说对任意Hask类型, 那么就能找到它的 id 和 compose
 
-比如：
-#+BEGIN_SRC haskell
-(->) a a
+#+BEGIN_SRC scala
+  implicit val haskCat: Category[Hask[_, _]] = new Category[Hask] {
+    val id[A] = identity[A]
+    def <<<[X, Y, Z](a: Hask[Y, Z], b: Hask[X, Y]) = a compose b
+  }
 #+END_SRC
-就构造了一个从a类型到a类型的的类型
 
-构造出来的这个类型可以作为 id 函数的类型
+Scala 中, 只需要 new 这个 trait 就可以实现这个 typeclass
+
+其中: identity =Hask a a= 就是
 #+BEGIN_SRC haskell
-id :: (->) a a
+(->) a a -- or
+a -> a -- 因为 -> 是中缀构造器
 #+END_SRC
+
+#+BEGIN_SRC scala
+A => A
+#+END_SRC
+
 
 *** /Duel/
-每个 Category还有一个镜像，什么都一样，除了箭头是反的
+#+INDEX: Duel
+每个 Category 还有一个镜像，什么都一样，除了箭头是反的
 
 ** /{{{ruby(函子, Functor)}}}/
 #+INDEX: Functor
@@ -133,7 +198,7 @@ id :: (->) a a
           label=D
           "T a" -> "T a" [label="T id"]
           "T a" -> "T b" [label="T g"]
-          "T b" -> "T c" [label="T f"]
+ "T b" -> "T c" [label="T f"]
           "T a" -> "T c" [label="T f . g = T f . T g"]
   }
 
@@ -145,7 +210,7 @@ id :: (->) a a
 #+RESULTS:
 [[file:images/functor.svg]]
 
-所以大部分把Functor/Monad比喻成盒子其实在定义上是错的，虽然这样比喻比较容易理解，在使用上问题也不大。但是，Functor只是从一个范畴到另一个范畴的映射关系而已。
+所以大部分把 Functor/Monad 比喻成盒子其实在定义上是错的，虽然这样比喻比较容易理解，在使用上问题也不大。但是，Functor 只是从一个范畴到另一个范畴的映射关系而已。
 
 - 范畴间 东西的 Functor 标记为 =T(O)=
 - 范畴间 箭头的 Functor 标记为 =T(~>)=
@@ -158,6 +223,12 @@ class (Category c, Category d) => Functor c d t where
   fmap :: c a b -> d (t a) (t b)
 #+END_SRC
 
+#+BEGIN_SRC scala
+  trait Functor[C[_, _], D[_, _], T[_]] {
+    def fmap[A, B](c: C[A, B]): D[T[A], T[B]]
+  }
+#+END_SRC
+
 =Functor c d t= 这表示从范畴 c 到范畴 d 的一个 Functor t
 
 如果把范畴 c 和 d 都限制到 Hask 范畴
@@ -167,29 +238,44 @@ class Functor (->) (->) t where
   fmap :: (->) a b -> (->) (t a) (t b)
 #+END_SRC
 
+#+BEGIN_SRC scala
+trait Functor[=>[_, _], =>[_, _], T[_]] {
+ def fmap[A, B](c: =>[A, B]): =>[T[A], T[B]]
+}
+#+END_SRC
 =->= 在 Haskell 中是中缀类型构造器，所以是可以写在中间的
 
-这样就会变成我们熟悉的 Funtor 的 Typeclass（把Functor 的第一第二个参数去掉的话）
+这样就会变成我们熟悉的 Funtor 的 Typeclass[fn:5]
+
 #+BEGIN_SRC haskell
 class Functor t where
   fmap :: (a -> b) -> (t a -> t b)
+#+END_SRC
+
+#+BEGIN_SRC scala
+  trait Functor[T[_]] {
+   def fmap[A, B](c: A => B): T[A] => T[B]
+  }
 #+END_SRC
 
 而 /{{{ruby(自函子,endofunctor)}}}/ 就是这种连接相同范畴的 Functor，因为它从范畴 Hask 到达同样的范畴 Hask
 #+INDEX: endofunctor
 #+INDEX: 自函子
 
+这回看代码就很容易对应上图和概念了, 这里的自函子只是映射范畴 ~->~ 到 ~->~, 箭头函数那个箭头, 类型却变成了 t a
+
 这里的 fmap 就是 T(~>)，在 Hask 范畴上，所以是 T(->), 这个箭头是函数，所以也能表示成 T(f) 如果 =f:: a -> b=
 
-** /{{{ruby(Cat, +猫+)}}}/
-当我们把一个Category看成一个object，functor看成箭头，那么我们又得到了一个Category，这种object是category的category我们叫它 -- /Cat/
+** TODO /{{{ruby(Cat, +猫+)}}}/
+#+INDEX: 猫
+递归的, 当我们可以把一个 Category 看成一个 object，functor 看成箭头，那么我们又得到了一个 Category，这种 object 是 category 的 category 我们叫它 -- /Cat/
 
-已经没法讲了，看 TODO 图吧
+已经{{{ruby(没, meow)}}}的办法用语言描述这么高维度的事情了，看图吧...
 
-** /{{{ruby(自然变换,Natural Transformations)}}}/
+** /{{{ruby(自然变换,Natural Transformations)}}}/<<NT>>
 #+INDEX: Natural Transformations
 #+INDEX: 自然变换
-Functor 是范畴间的映射，而 Functor 在 Cat 范畴又是个箭头，所以，Functor间的映射，也就是 Cat 范畴上的 Functor，叫做 /自然变换/
+Functor 是范畴间的映射，所以在这个 Cat 范畴中, 把范畴看成是对象, 那么 Functor 在 Cat 范畴又是个箭头
 
 #+BEGIN_SRC dot :file images/natrual-transformation.svg :exports results
   digraph {
@@ -236,22 +322,41 @@ Functor 是范畴间的映射，而 Functor 在 Cat 范畴又是个箭头，所�
 #+RESULTS:
 [[file:images/natrual-transformation.svg]]
 
-所以范畴 c 上的函子 f 到 g 的自然变化就可以表示成
+而 Functor 间也有映射，叫做 +喵的变换+ /自然变换/
+
+范畴 c 上的函子 f 到 g 的自然变化就可以表示成
 #+BEGIN_SRC haskell
 type Nat c f g = c (f a) (g a)
 #+END_SRC
 
+Scala 没有 rank n type[fn:6], 只能靠 apply 来 meme 了
+#+BEGIN_SRC scala
+trait Nat[C[_, _], F[_], G[_]] {
+  def apply[A]: C[F[A], G[A]]
+}
+#+END_SRC
+
 Hask 范畴上的自然变化就变成了
+
 #+BEGIN_SRC haskell
 type NatHask f g = f a -> g a
 #+END_SRC
 
-有趣的是，自然转换也满足箭头的概念，可以当成 functor 范畴上的箭头，所以又可以定义出来一个 Functor Catergory
+#+BEGIN_SRC scala
+trait NatHask[F[_], G[_]] {
+  def apply[A]: F[A] => G[A]
+}
+
+#+END_SRC
+
+有趣的是, 还可以继续升维度, 比如
 
 - 东西是函子
 - 箭头是自然变换
 
-要成为范畴，还有两点
+恭喜你到达 Functor 范畴.
+
+当然, 要成为范畴，还有两个属性:
 - id 为 f a 到 f a 的自然变换
 - 自然变换的组合
 
@@ -269,21 +374,23 @@ functorF -> functorG[label="η"]
 #+RESULTS:
 [[file:images/functor-category.svg]]
 
-我们来梳理一下，已经不知道升了几个维度了，我们假设类型是第一维度
+别着急, 我们来梳理一下，如果已经不知道升了几个维度了，我们假设类型所在范畴是第一维度
 - 一维： Hask， 东西是类型，箭头是 ->
 - 二维： Cat， 东西是 Hask， 箭头是 Functor
 - 三维： Functor范畴， 东西是Functor， 箭头是自然变换
 
-感觉到达三维已经是极限了，尼玛还有完没完了，每升一个维度还要起这么多装逼的名字，再升维度就要一脸懵逼了呢。虽然维度不算太高，但是已经不能用简单的图来描述了，所以需要引入 String Diagram。
+感觉到达三维已经是极限了，尼玛还有完没完了，每升一个维度还要起这么多装逼的名字，再升维度老子就画不出来了
+
+所以这时候, 需要引入 String Diagram。
 
 ** String Diagram
 
 String Diagram 的概念很简单，就是点变线线变点。
 
-当有了自然变换之后，没法表示了呀，那原来的点和线都升一维度，变成线和面，这样，就腾出一个点来表示自然变换了。
+还记得当有了自然变换之后，三个维度已经没法表示了，那原来的点和线都升一维度，变成线和面，这样，就腾出一个点来表示自然变换了。
 
 #+CAPTION: String Diagram：自然变换是点，Functor是线，范畴是面
-https://www.evernote.com/l/ABecC0oxzthLE5w382ydpghjjHjpw2UFqkgB/image.png
+[[file:images/p1-string-diagram.png]]
 
 compose的方向是从右往左，从下到上。
 
@@ -293,7 +400,7 @@ compose的方向是从右往左，从下到上。
 
 让我们来看看什么叫有来回。
 
-https://www.evernote.com/l/ABcAAZt8nvxH4bq0EXQ-Jm5eNEKpCtrQe70B/image.png
+[[file:images/p1-adjunction-functor.png]]
 
 其中：
 
@@ -310,17 +417,18 @@ https://www.evernote.com/l/ABcAAZt8nvxH4bq0EXQ-Jm5eNEKpCtrQe70B/image.png
 f :: a -> b
 f':: b -> a
 #+END_SRC
+
 那么 f 与 f' 同构，因为 f . f' = id = f' . f
 
 伴随函子的 FG 组合是 C 范畴的 id 函子 F . G = 1_c
 
 #+CAPTION: 伴随函子的两个Functor组合, 左侧为 F \eta, 右侧为 \epsilon F
-https://www.evernote.com/l/ABdvTPL9liFBrbtLJampYbYWvWmxxe50ossB/image.png
+[[file:images/p1-ajunction-functor-compose.png]]
 
 Functor 不仅横着可以组合，竖着(自然变换维度)也是可以组合的，因为自然变换是 Functor 范畴的箭头。
 
 #+CAPTION: F \eta . \epsilon F  = F
-https://www.evernote.com/l/ABcPa4yf4XpENptngB9xFoJRfHffZ8GPtIoB/image.png
+[[file:images/p1-ajunction-functor-compose-nat.png]]
 
 当到组合 F \eta . \epsilon F 得到一个弯弯曲曲的 F 时，我们可以拽着F的两段一拉，就得到了直的 F。
 
@@ -333,7 +441,7 @@ String Diagram 神奇的地方是所有线都可以拉上下两端，这个技�
 - 有一个从 i_c 到 T 的自然变化 \eta (eta)
 - 有一个从 T^2 到 T 的自然变化 \mu (mu)
 
-https://www.evernote.com/l/ABexO3KphElMrZ_5scYTDxjOelA5cigrHCoB/image.png
+[[file:images/p1-monad-properties.png]]
 
 #+BEGIN_SRC haskell
 class Endofunctor c t => Monad c t where
@@ -341,6 +449,12 @@ class Endofunctor c t => Monad c t where
   mu  :: c (t (t a)) (t a)
 #+END_SRC
 
+#+BEGIN_SRC scala
+  trait Monad[C[_, _], T[_]]] extends Endofunctor[C, T] {
+    def eta[A]: C[A, T[A]]
+    def mu[A]: C[T[T[A]], T[A]]
+  }
+#+END_SRC
 同样，把 c = Hask 替换进去，就得到更类似我们 Haskell 中 Monad 的定义
 #+BEGIN_SRC haskell
 class Endofunctor m => Monad m where
@@ -348,13 +462,19 @@ class Endofunctor m => Monad m where
   mu :: m m a -> m a
 #+END_SRC
 
+#+BEGIN_SRC scala
+  trait Monad[M[_]] extends Endofunctor[M] {
+    def eta[A]: A => M[A]
+    def mu[A]: M[M[A]] => M[A]
+  }
+#+END_SRC
 要推出单子的 \eta 变换，只需要让 FG = T
 #+CAPTION: 伴随函子的 \epsilon 就是单子的 \eta
-https://www.evernote.com/l/ABfg4vXk8DJGRZGPRv6A_ifmOykudKxqyqUB/image.png
+[[file:images/p1-ajunction-functor-to-monad-eta.png]]
 
 同样的，当 FG = T, F \eta G 就可以变成 \mu
 #+CAPTION: 伴随函子的 F \eta G 是函子的 \mu
-https://www.evernote.com/l/ABf_3PObVKVLI4xOK9ijFcnC0hZ29TJIZVsB/image.png
+[[file:images/p1-ajunction-functor-to-monad-mu.png]]
 
 *** 三角等式
 
@@ -362,25 +482,21 @@ https://www.evernote.com/l/ABf_3PObVKVLI4xOK9ijFcnC0hZ29TJIZVsB/image.png
 
 要推出三角等式只需要组合 F \eta G 和 \epsilon F G
 #+CAPTION: F \eta G  . \epsilon F G = F G
-https://www.evernote.com/l/ABemC0HnOQ1PIpiI6Y-34nEm4CSoITFuB64B/image.png
-
+[[file:images/p1-adjunction-functor-triangle.png]]
 #+CAPTION: F \eta G  . \epsilon F G= F G 对应到Monad就是 \mu . \eta T = T
-https://www.evernote.com/l/ABePUH_43tVLgJJ8y4QNKhr10UnxWlWnpI0B/image.png
+[[file:images/p1-monad-triangle.png]]
 
 换到代码上来说
 #+BEGIN_SRC haskell
-  class Endofunctor m => Monad m where
     (mu . eta) m = m
 #+END_SRC
 
 同样的，左右翻转也成立
 
 #+CAPTION: F \eta G . F G \epsilon = F G
-https://www.evernote.com/l/ABfdt-llk4dKvY94Pqn5fZFlRt5B9qwii6UB/image.png
-
+[[file:images/p1-adjunction-functor-triangle-reverse.png]]
 #+CAPTION: F \eta G . F G \epsilon = F G 对应到 Monad是 \mu . T \eta = T
-https://www.evernote.com/l/ABcG2YoCCNdHd7pdFViyMBMli12foiuBIsAB/image.png
-
+[[file:images/p1-monad-triangle-reverse.png]]
 T \eta 就是 fmap eta
 #+BEGIN_SRC haskell
     (mu . fmap eta) m = m
@@ -397,21 +513,20 @@ m >>= eta = m
 单子另一大定律是结合律，让我们从伴随函子推起
 
 假设我们现在有函子 F \eta G 和 函子 F \eta G F G, compose 起来会变成  F \eta G . F \eta G F G
-https://www.evernote.com/l/ABfsS4KBjE1Gbrd8AouQJeBVc9u_sqBUzPwB/image.png
+[[file:images/p1-ajunction-functor-monad-laws-1.png]]
 
 用 F G = T ， F \eta G = \mu 代换那么就得到了单子的 \mu . \mu T
-https://www.evernote.com/l/ABc_scvfquxHhKZZ6I51i1hL3f5Oe382IZ0B/image.png
+[[file:images/p1-ajunction-functor-monad-laws-2.png]]
 
 当组合 F \eta G 和 F G F \mu G 后，会得到一个镜像的图
-https://www.evernote.com/l/ABcsGipPc8BFL7Yp9NuCfUQQ3W0JntC7JDcB/image.png
+[[file:images/p1-ajunction-functor-monad-laws-3.png]]
 
 对应到单子的 \mu . T \mu
-https://www.evernote.com/l/ABdRAkfmbjJMHZNeSNxzc_r2bgeq2MNKrC8B/image.png
 
 结合律是说 \mu . \mu T = \mu . T \mu , 即图左右翻转结果是相等的，为什么呢？看单子的String Diagram 不太好看出来，我们来看伴随函子
 
 如果把左图的左边的 \mu 往上挪一点，右边的 \mu 往下挪一点，是不是跟右图就一样了
-https://www.evernote.com/l/ABcv0axE5alKiZupUL2SyhrALuS-4DyBfQAB/image.png
+[[file:images/p1-ajunction-functor-monad-laws-4.png]]
 
 结合律反映到代码中就是
 #+BEGIN_SRC haskell
@@ -436,6 +551,14 @@ embed x f = fmap f x
 
 unembed :: Functor f => (forall b . (a -> b) -> f b) -> f a
 unembed f = f id
+#+END_SRC
+
+Scala 语言没有 Rank N Type支持, 但是 [[NT][{{{ruby(自然变换,Natural Transformations)}}}]] 提到过可以用 =apply= 来模拟. 其实可以使用 Cats 的 [[https://typelevel.org/cats/datatypes/functionk.html][FunctionK(~>)]] 更方便:
+#+BEGIN_SRC scala
+  def embed[F[_], A](fa: F[A])(implicit f: Functor[F]): (A => ?) ~> F =
+    Lambda[(A => ?) ~> F](f.fmap(_)(fa))
+  def unembed[F[_]](fnk: (A => ?) ~> F): F[A] =
+    fnk(identity)
 #+END_SRC
 
 embed 可以把 functor =f a= 变成 =(a -> b) -> f b=
@@ -479,30 +602,53 @@ unembed 是反过来， =(a -> b) -> f b= 变成 =f a=
 *** Rank N Type
 #+INDEX: Arbitrary-rank polymorphism
 #+INDEX: Rank N Type
-- Monomorphic Rank 0 / 0级单态: t
-- Polymorphic Rank 1 / 1级 +变态+ 多态: forall a. a -> t
-- Polymorphic Rank 2 / 2级多态: (forall a. a -> t) -> t
-- Polymorphic Rank 3 / 3级多态: ((forall a. a -> t) -> t) -> t
 
-看rank几只要数左边 forall 的括号嵌套层数就好了
+说好的要解释 Rank N Type
 
-一级多态锁定全部类型变化中的类型a
+Haskell 中可以不用声明类型, 但是其实是省略掉 universally quantified =forall=, 如果把 forall 全部加回来,
+就明了很多:
 
-二级多态可以分别确定 a -> t 这个函数的类型多态
+- Monomorphic Rank 0 / 0级单态[fn:7]: t
+- Polymorphic Rank 1 / 1级 +变态+ 多态: forall a b. a -> b
+- Polymorphic Rank 2 / 2级多态: forall c. (forall a b. a -> b) -> c
+- Polymorphic Rank 3 / 3级多态: forall d . (forall c . (forall a b . a -> b) -> c) -> d
 
-比如
+看 rank 几只要数左边 forall 的个数就好了.
+
+一级多态只锁定一次类型 a 和 b
+
+二级多态可以分两次确定类型, 第一次确定 c, 第二次确定 a b
+
+三级多台分三次: 第一次 d, 第二次 c, 第三次 a b
+
+比如:
+
 #+BEGIN_SRC haskell
-rank2 :: (forall a. a -> a) -> (Bool, Char)
-rank2 f = (f True, f 'a')
+rank2 :: forall b c . b -> c -> (forall a. a -> a) -> (b, c)
+rank2 b c f = (f b, f c)
+
+rank2 True 'a' id
+-- (True, 'a')
+#+END_SRC
+
+#+BEGIN_SRC scala
+  def rank2[B, C](b: B, c: C)(fnk: Id ~> Id): (B, C) =
+    (fnk(b), fnk(c))
+  rank2(true, 'a')(FunctionK.id[Id])
 #+END_SRC
 
 - f 在 =f True= 时类型 =Boolean -> Boolean= 是符合 =forall a. a->a= 的
-- 在 =f 'a'= 时类型是 =Char -> Char= 也符合 =forall a. a->a=
+- 与此同时 =f 'a'= 时类型确实是 =Char -> Char= 但也符合 =forall a. a->a=
 
-但是到 rank1 类型系统就懵逼了
+如果是 rank1 类型系统就懵逼了:
 #+BEGIN_SRC haskell
-rank1 :: forall a. (a -> a) -> (Bool, Char)
-rank1 f = (f True, f 'a')
+rank1 :: forall a b c . b -> c -> (a -> a) -> (b, c)
+rank1 b c f = (f b, f c)
+#+END_SRC
+
+#+BEGIN_SRC scala
+def rank1[A, B, C](b: B, c: C)(fn: A => A): (B, C) =
+  (fn(b), fn(c))
 #+END_SRC
 f 在 =f True= 是确定 a 是 Boolean，在rank1多态是时就确定了 =a->a= 的类型一定是 =Boolean -> Boolean=
 
@@ -566,35 +712,84 @@ f 在 =f True= 是确定 a 是 Boolean，在rank1多态是时就确定了 =a->a=
 #+RESULTS:
 [[file:images/kleisli.svg]]
 
-Functor 的 Catergory 叫做 Functor Catergory，因为有箭头 -- 自然变换。Monad 也可以定义出来一个 Catergory（当然由于Monad是 Endofunctor，所以他也可以是 自函子范畴），叫做 Kleisli Catergory，那么 Kleisli 的箭头是什么？
+{{{ruby(函子,Functor)}}} 的范畴叫做 {{{ruby(函子范畴,Functor Catergory)}}}, 自然变换是其箭头。那{{{ruby(单子,Monad)}}}也可以定义一个范畴吗?[fn:8]
 
+是的, 这个范畴名字叫做 +单子范畴+[fn:9] {{{ruby(可莱斯利范畴,Kleisli Catergory)}}}[fn:10]，那么 Kleisli 的箭头是什么？
 我们看定义，Kleisli Catergory
+
 1. 箭头是 Kleisli 箭头 =a -> T b=
 2. 东西就是c范畴中的东西. 因为 a 和 b 都是 c 范畴上的， 由于T是自函子，所以 T b 也是 c 范畴的
 
-看到图上的 {{{ruby(T f, fmap f)}}} 和 \mu 了没？
+看到图上的 {{{ruby(T f, fmap f)}}} 和 \mu 了没？[fn:11]
 
 #+BEGIN_SRC haskell
 f :: b -> T c
-fmap f :: T b -> T^2 c
-mu :: T^2 c -> T c
+fmap f :: T b -> T T c
+mu :: T T c -> T c
 #+END_SRC
 
-紫色的箭头连起来（compose）就是 T f'，所以, 
+#+BEGIN_SRC scala
+def f[T[_], B, C](b: B): T[C]
+def fmap[T[_], B, C](f: B => C)(tb: T[B]): T[T[C]]
+def mu[T[_], C](ttc: T[T[C]]): T[C]
+#+END_SRC
+
+紫色的箭头 =T f=[fn:12] 和紫色的虚线箭头 \mu 连起来就是 =T f'=, 那么最出名的 ~>>=~ 符号终于出来了:
 #+BEGIN_SRC haskell
-tb >>= f = mu . fmap f tb
+tb >>= f = (mu . fmap f) tb
 #+END_SRC
 
-大火箭则是蓝色箭头的组合 
-#+BEGIN_SRC haskel
+#+BEGIN_SRC scala
+def flatMap[T[_], B, C](f: B => T[C])(tb: T[B]): T[C] = (mu compose fmap(f))(tb)
+#+END_SRC
+
+下面这个大火箭 ~<=<~ 可以把蓝色箭头组合起来.
+#+BEGIN_SRC haskell
 (f <=< g) = mu . T f . g = mu . fmap f . g
 #+END_SRC
 
-而且大火箭就是 Kleisli 范畴的 compose
+#+BEGIN_SRC scala
+def <=<[T[_], A, B, C](f: B => T[C])(g: A => T[B]): A => T[C] =
+  mu compose fmap(f) compose g
+#+END_SRC
+
+因此大火箭就是 Kleisli 范畴的 =compose=
 
 #+BEGIN_SRC haskell
 (<=<) :: Monad T => (b -> T c) -> (a -> T b) -> (a -> T c)
 #+END_SRC
 
 ** Summary
-第一部分理论部分都讲完了， 如果你读到这里还没有被这些{{{ruby(吊炸天,乱七八糟)}}}的概念搞daze，接下来可以看看它到底跟我们编程有鸟关系呢？第二部分 -> 处基猫呢，将介绍由这些概念产生的一些实用的初级monad。
+第一部分理论部分都讲完了， 如果你读到这里还没有被这些{{{ruby(吊炸天,乱七八糟)}}}的概念搞daze，接下来可以看看它到底跟我们编程有鸟关系呢？第二部分将介绍这些概念产生的一些实用的monad
+
+- 👉 [[./part2.org][第二部分：{{{ruby(食用猫呢, Practical Monads)}}}]]
+- [[./part3.org][第三部分：{{{ruby(搞基猫呢, Advanced Monads)}}}]]
+
+当然我还没空全部写完，如果有很多人{{{ruby(预定,只要998)}}} Gumroad 上的 @@html: <script src="https://gumroad.com/js/gumroad.js"></script><a class="gumroad-button" href="https://gum.co/grokking-monad" target="_blank">Grokking Monad</a>@@ 电子书的话，我可能会稍微写得快一些。毕竟，写了也没人感兴趣也怪浪费时间的。不过，我猜也没几个人能看到这一行，就当是自言自语吧，怎么突然觉得自己好分裂。
+
+* Footnotes
+
+[fn:12] 即 =fmap f=
+
+[fn:11] (敲黑板) 就是紫色那根嘛!
+
+[fn:10] 这个是我瞎翻译的, 但是读出来就是这么个意思, 真的, 不骗你, 照这么读绝对装的一手好逼, 不会被嘲笑的
+
+[fn:9] 怎么说也是函数式编程的核心,怎么可以叫的这么low这么直接
+
+[fn:8] 当然, 单子是自函子，所以也可以是自函子范畴
+
+[fn:7] 也就不是不变态
+
+[fn:1] https://en.wikipedia.org/wiki/Cheshire_Cat
+
+[fn:2] 如果没看就刚好不要看了, 确实有些误导
+
+[fn:3] 等等, 写前端怎么了? JavaScript 只是我觉得顺手的若干语言之一, JS用户那么多, 写书当然要用 JS 啦, 难道用 Idris 那还能卖得掉吗? +当然最后用JS也没怎么卖掉...+
+
+[fn:4] 并不是说这两门语言一定在鄙视链顶端, 而是拥有强大类型系统的语言才能体现出范畴论的内容
+
+[fn:5] 这里可以把 Functor 的第一第二个参数消掉, 因为已经知道是在 Hask 范畴了
+
+[fn:6] 别急, 后面马上讲到
+

@@ -1,9 +1,12 @@
-#+TITLE: 范畴论完全装逼手册(二) / Grokking Monad
+#+TITLE: 范畴论完全装逼手册 / Grokking Monad
 #+Date: <2017-02-10 Fri>
 #+AUTHOR: 欧阳继超
 #+OPTIONS: ^:t
 #+MACRO: ruby @@html:<ruby>$1<rt>$2</rt></ruby>@@
 
+- [[./part1.org][第一部分：范畴论]]
+- *[[./part2.org][第二部分：食用猫呢]]* 👈
+- [[./part3.org][第三部分：搞基猫呢]]
 
 * COMMENT
 #+BEGIN_SRC emacs-lisp
@@ -28,7 +31,7 @@
 ** Identity
 这可能是最简单的 monad 了。不包含任何计算
 #+BEGIN_SRC haskell :session part2
-newtype Identity a = Identity { runIdentity :: a } 
+newtype Identity a = Identity { runIdentity :: a }
 #+END_SRC
 
 #+RESULTS:
@@ -91,7 +94,7 @@ Haskell中定义一个ADT十分简单，不像Scala那么啰嗦。左边是类�
 #+END_SRC
 
 #+CAPTION: fmap :: (a -> b) -> f a -> f b
-https://www.evernote.com/l/ABeKvGaM2S1LV5QzdmQv_U98pCX164j7-2MB/image.png
+[[file:images/p2-maybe-functor.png]]
 
 然后，还实现 Monad
 #+BEGIN_SRC haskell
@@ -102,7 +105,7 @@ https://www.evernote.com/l/ABeKvGaM2S1LV5QzdmQv_U98pCX164j7-2MB/image.png
 #+END_SRC
 
 #+CAPTION: 还记得第一部分提到的 Kleisli 范畴吗？
-https://www.evernote.com/l/ABfAhPgWI_5Awbov_2gLY_BcB9CwKyIJZjYB/image.png
+[[file:images/p2-maybe-kleisli.png]]
 
 Maybe 有用在于能合适的处理 /{{{ruby(偏函数, Partial Function)}}}/ 的返回值。偏函数相对于{{{ruby(全函数, Total Function)}}}，是指只能对部分输入返回输出的函数。
 
@@ -126,17 +129,17 @@ data Either a b = Left a | Right b
 那么我们先来看看什么是 Coproduct
 
 #+CAPTION: Coproduct
-https://www.evernote.com/l/ABeCtsXrN7xCWqa7bsNAU0eVQVTDdkRKqVEB/image.png
+[[file:images/p2-coproduct.png]]
 
 像这样，能通过两个箭头到达同一个东西，就是 Coproduct。这里箭头 =Left= 能让 =a= 到 =Either a b= ， 箭头 =Right= 也能让 =b= 到达 =Either a b=
 
 有意思的是还肯定存在一个 Coproduct 和 箭头，使得下图成立
-https://www.evernote.com/l/ABfP9Sz8diJFxoXCJpjHeo_gF5JAmsiFvPYB/image.png
+[[file:images/p2-coproduct-law.png]]
 
 箭头反过来，就是 Product, 比如 Tuple
 
 #+CAPTION: Product
-https://www.evernote.com/l/ABea91BEgH5OH41WorLYjqichYC0rmVCAXMB/image.png
+[[file:images/p2-product.png]]
 
 Tuple 的 =fst= 箭头能让 =(a, b)= 到达 =a= 对象，而箭头 =snd= 能让其到达 =b= 对象。
 
@@ -190,14 +193,14 @@ newtype Reader e a = Reader { runReader :: (e -> a) }
 那么，让我们来实现 Reader 的 monad instance，就可以描述一个可以 ask 的计算了。
 
 #+BEGIN_SRC haskell
-instance Monad (Reader e) where 
-    return a         = Reader $ \_ -> a 
+instance Monad (Reader e) where
+    return a         = Reader $ \_ -> a
     (Reader g) >>= f = Reader $ \e -> runReader (f (g e)) e
 #+END_SRC
 
 跟Either一样，我们只能定义 Reader e 的 monad instance。
 
-注意这里的 
+注意这里的
 - f 类型是 =(a -> Reader e a)=
 - g 其实就是是 destructure 出来的 runReader，也就是 e -> a
 - 所以 (g e) 返回 a
@@ -205,7 +208,7 @@ instance Monad (Reader e) where
 - 再 run 一把最后得到 a
 
 #+CAPTION: f 函数，接收 a 返回一个 从 e 到 a 的 Reader
-https://www.evernote.com/l/ABeL9xOcX7VNmJdaq49OSQf0ejRLsz_EWZ0B/image.png
+[[file:images/p2-reader-monad.png]]
 
 让我们来看看如何使用 Reader
 #+BEGIN_SRC haskell
@@ -229,10 +232,10 @@ https://www.evernote.com/l/ABeL9xOcX7VNmJdaq49OSQf0ejRLsz_EWZ0B/image.png
 这段代码很简单，helloworld 负责打招呼，也就是在名字前面加个 "Hello"，而跟谁打招呼，这个函数并不关心，而单纯的是向 Environment {{{ruby(问,asks)}}} 就好。
 
 #+CAPTION: asks 可以将 e -> a 的函数变换成 Reader e a
-https://www.evernote.com/l/ABejjs0RksRL_LOo2jgoUk1bT54BBfMCqNAB/image.png
+[[file:images/p2-reader-monad-ask.png]]
 
 在运行时，可以提供给 Reader 的输入 Env fistname lastname。
-https://www.evernote.com/l/ABc5cVh6zMND1KHY42FYTyRWzdfPcP4YYdEB/image.png
+[[file:images/p2-reader-monad-run.png]]
 
 *** do notation
 这可能是你第一次见到 =do= 和 =<-=. 如果不是，随意跳过这节。
@@ -271,7 +274,7 @@ output = runWriter example
 
 Writer 的定义更简单
 #+BEGIN_SRC haskell
-newtype Writer l a = Writer { runWriter :: (a,l) } 
+newtype Writer l a = Writer { runWriter :: (a,l) }
 #+END_SRC
 里面只是一个 tuple 而已
 - w 是 log
@@ -279,8 +282,8 @@ newtype Writer l a = Writer { runWriter :: (a,l) }
 
 看看如何实现 Writer monad
 #+BEGIN_SRC haskell
-  instance (Monoid w) => Monad (Writer w) where 
-      return a             = Writer (a,mempty) 
+  instance (Monoid w) => Monad (Writer w) where
+      return a             = Writer (a,mempty)
       (Writer (a,l)) >>= f = let (a',l') = runWriter $ f a in
                              Writer (a',l `mappend` l')
 #+END_SRC
@@ -289,11 +292,10 @@ newtype Writer l a = Writer { runWriter :: (a,l) }
 - f 的类型为 =a -> Writer l a=
 - =runWriter $ f a= 返回 =(a, l)=
 
-https://www.evernote.com/l/ABeB64fSK2BO27_IffFrMrIYjglJrp5rb5sB/image.png
+[[file:images/p2-writer-monad.png]]
 
 所以在 >>= 时，我们先把 f a 返回的 Writer run了，然后把两次 log =mappend= 起来。
-
-https://www.evernote.com/l/ABeLJJ_cN0JJa5PqDPVlKk4Tt0oAvBKnxf4B/image.png
+[[file:images/p2-writer-monad-bind.png]]
 
 ** State
 跟名字就看得出来 State monad 是为了处理状态。虽然函数式编程不应该有状态，不然会引用透明性。但是，state monad并不是在计算过程中修改状态，而是通过描述这种变化，然后需要时在运行返回最终结果。这一点跟 Reader 和 Writer 这两个看起来是副作用的 IO 是一样的。
@@ -307,19 +309,19 @@ newtype State s a = State { runState :: s -> (a, s) }
 
 通过实现 Monad，State 就可以实现命令式编程中的变量的功能。
 #+BEGIN_SRC haskell
-  instance Monad (State s) where 
+  instance Monad (State s) where
     return a        = State $ \s -> (a,s)
     (State x) >>= f = State $ \s -> let (v,s') = x s in
                                    runState (f v) s'
 #+END_SRC
 return 很简单，就不用解释了。
 
-https://www.evernote.com/l/ABdBcGXH7T9FDoePyOg564ey9Kg7kndHtNUB/image.png
+[[file:images/p2-state-monad.png]]
 
 x 类型是 =s -> (a, s)= ,所以 x s 之后会返回 结果和状态。也就是运行当前 State，把结果 v 传给函数 f，返回的 State 再接着上次状态运行。
 
 #+CAPTION: State x >>= f 后runState的数据流（啊啊啊，画歪了，感觉需要脉动一下）
-https://www.evernote.com/l/ABdHal0u69ZNBqHpPWJp-Dc6KC_yvQ1t3tsB/image.png
+[[file:images/p2-state-monad-bind.png]]
 
 使用起来也很方便，State 提供 =get= =put= =moidfy= 三个方便的函数可以生成修改状态的State monad
 
@@ -331,7 +333,7 @@ https://www.evernote.com/l/ABdHal0u69ZNBqHpPWJp-Dc6KC_yvQ1t3tsB/image.png
     modify (+1)
     b <- get
     return (a + b)
-  
+
   main = print $ show $ runState test 3
   -- (7, 4)
 #+END_SRC
@@ -477,11 +479,20 @@ add a b = return (a + b)
 
 #+BEGIN_SRC haskell
 instance Monad (Cont r) where
-    return a       = Cont $ \k -> k a
-    (Cont c) >>= f = Cont $ \k -> c (\a -> runCont (f a) k)
+    return a = Cont ($ a)
+    m >>= k  = Cont $ \c -> runCont m $ \a -> runCont (k a) c
 #+END_SRC
+
+=($ a)= 比较有意思, 我们都知道 =f $ g a= 其实就是 =f(g a)=, 所以 =$= 其实就是一个 apply 左边的函数到右边表达式的中缀函数, 如果写成前缀则是
+=($ (g a) f)=. 是反的是因为 =$= 是有结合, 需要右边表达式先求值, 所以只给一个 a 就相当于 =($ a) = \f -> f a=
+
+回到 Monad Cont...
 
 ** Summary
 第二部分食用部分也讲完了， 不知是否以及大致了解了monad的尿性各种基本玩法呢？通过这些常用的基本的 monad instance，解决命令式编程中的一些简单问题应该是够了。
 
 不过，接下来还有更变态的猫，就先叫她 +搞基+ 猫呢好了。
+
+- 👉 [[./part3.org][第三部分：{{{ruby(搞基猫呢, Advanced Monads)}}}]]
+
+当然我又还没空全部写完，如果还有很多人{{{ruby(预定,只要998)}}} Gumroad 上的 @@html: <script src="https://gumroad.com/js/gumroad.js"></script><a class="gumroad-button" href="https://gum.co/grokking-monad" target="_blank">Grokking Monad</a>@@ 电子书的话，我可能会稍微写得快一些。毕竟，写了也没人感兴趣也怪浪费时间的。不过，我猜也没几个人能看到这一行，就当是我又自言自语吧，怎么又突然觉得自己好分裂，诶~，为什么我要说又？
