@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-06-01 Sat 11:37 -->
+<!-- 2019-07-23 Tue 12:54 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grokking Monad in Scala</title>
@@ -88,12 +88,12 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org3146532">Type classes</a>
+<li><a href="#orgf2373d1">Type classes</a>
 <ul>
 <li><a href="#orgd5f2955">Algebraic Data Type</a></li>
 <li><a href="#orge45b937">Recursive Data Type</a></li>
 <li><a href="#org5a10c8d">Variance</a></li>
-<li><a href="#orgf2373d1">Type classes</a></li>
+<li><a href="#org9a7add6">Type classes</a></li>
 <li><a href="#orgde518f9">Type enrichment</a></li>
 </ul>
 </li>
@@ -118,19 +118,22 @@ for the JavaScript code in this tag.
 <li><a href="#org8cb63a2">Traverse</a></li>
 </ul>
 </li>
+<li><a href="#applied-category-theory-in-scala---choice">Choice</a>
+<ul>
+<li><a href="#rationale">Rationale</a></li>
+<li><a href="#applied">Applied</a>
+<ul>
+<li><a href="#httproutesf">HttpRoutes[F]</a></li>
+<li><a href="#middlewaref">Middleware[F]</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </nav>
-<p>
-&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
-</p>
-<p>
-<code>=====</code>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; b7e8e0202ff09dcfa9a2614945aaf8a6131c64e7
-</p>
-
 <ul class="org-ul">
-<li><b><a href="./part2.html">part2: Monads</a></b> 👈</li>
+<li><b><a href="./part2.html">part2: Applied Monads</a></b> 👈</li>
 <li><a href="./part3.html">part3: Advanced Monads</a></li>
 </ul>
 
@@ -145,12 +148,9 @@ you can actually run <code>sbt testOnly *&lt;className&gt;</code> to finish thes
 
 </blockquote></div>
 
-<p>
-&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
-</p>
-<div id="outline-container-org3146532" class="outline-2">
-<h2 id="org3146532">Type classes</h2>
-<div class="outline-text-2" id="text-org3146532">
+<div id="outline-container-orgf2373d1" class="outline-2">
+<h2 id="orgf2373d1">Type classes</h2>
+<div class="outline-text-2" id="text-orgf2373d1">
 <p>
 Type classes is somewhat like an FP design pattern, with type classes
 you can extend new functionality without touch any of your existing
@@ -294,9 +294,9 @@ Here <code>Nothing</code> is subtype of any type, since <code>A</code> is covari
 </div>
 </div>
 
-<div id="outline-container-orgf2373d1" class="outline-3">
-<h3 id="orgf2373d1">Type classes</h3>
-<div class="outline-text-3" id="text-orgf2373d1">
+<div id="outline-container-org9a7add6" class="outline-3">
+<h3 id="org9a7add6">Type classes</h3>
+<div class="outline-text-3" id="text-org9a7add6">
 <p>
 <code>Person</code> is a simple case class, when we want to print it nicely as JSON format, what we usually does is to create a
 interface e.g. <code>JsonWriter</code> with method <code>toJson</code> and implements it in <code>Person</code>. But if you think about it, if we need
@@ -961,13 +961,118 @@ asynchronously
   }
 }
 </code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org3930388" class="outline-2">
+<h2 id="applied-category-theory-in-scala---choice">Choice</h2>
+<div class="outline-text-2" id="text-applied-category-theory-in-scala---choice">
+</div>
+
+<div id="outline-container-orgbb6ee1e" class="outline-3">
+<h3 id="rationale">Rationale</h3>
+<div class="outline-text-3" id="text-rationale">
+<p>
+usually we deal with function more often, we're so familiar with <code>A =&gt; B</code>
+</p>
 
 <p>
-<code>=====</code>
+says if we have two function <code>A =&gt; C</code> and <code>B =&gt; C</code>
 </p>
+
 <p>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; b7e8e0202ff09dcfa9a2614945aaf8a6131c64e7
+how can we <b>compose</b> them into a <b>single function</b> that can take either
+A or B and produce a C?
 </p>
+
+<p>
+in Scala the return type will be like <code>Either[A, B] =&gt; C</code>
+</p>
+
+<p>
+This is exactly <code>Choice</code> <i>typeclass</i> for, replacing <code>=&gt;</code> with <code>F</code>, you
+will get a <code>Choice</code>
+</p>
+
+<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Choice</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>]] {
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">choice</span>(fac<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">C</span>], fbc<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">Either</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>], <span style="color: #6b8e23;">C</span>]
+}
+</code></pre>
+</div>
+</div>
+
+<div id="outline-container-orgaaf67d4" class="outline-3">
+<h3 id="applied">Applied</h3>
+<div class="outline-text-3" id="text-applied">
+<p>
+A very useful case of <code>Choice</code> typeclass would be like middleware in
+HTTP server.
+</p>
+
+<p>
+Take Http4s for example:
+</p>
+</div>
+
+<div id="outline-container-org2ce3fc0" class="outline-4">
+<h4 id="httproutesf">HttpRoutes[F]</h4>
+<div class="outline-text-4" id="text-httproutesf">
+<p>
+http4s defined routes using <code>Kleisli</code>
+</p>
+
+<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">HttpRoutes</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]]
+<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">routes</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">HttpRoutes</span>[<span style="color: #6b8e23;">F</span>] <span style="color: #00008b;">=</span> ???
+</code></pre>
+
+<p>
+But before going through <code>routes</code>, most request must pass middleware to
+ensure the request has correct or not.
+</p>
+
+<p>
+A authentication <code>middleware</code> could end up with 2 kinds of result
+</p>
+
+<ol class="org-ol">
+<li>return <code>Unauthorized</code> instantly while token is invalid</li>
+<li>Pass <code>Request[F]</code> through if token if valid</li>
+</ol>
+
+<p>
+So the return type of <code>middleware</code> will be like
+<code>Either[Response[F], Request[F]]</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc2f1267" class="outline-4">
+<h4 id="middlewaref">Middleware[F]</h4>
+<div class="outline-text-4" id="text-middlewaref">
+<p>
+if we define middleware like
+</p>
+
+<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Middleware</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Either</span>[<span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>]]]
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">passThrough</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>.ask[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]]
+<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">middleware</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">Middleware</span>[<span style="color: #6b8e23;">F</span>] <span style="color: #00008b;">=</span> ???
+</code></pre>
+
+
+<figure>
+<img src="https://user-images.githubusercontent.com/1235045/61630772-ea415700-accb-11e9-9b4b-5abffa0d5bf4.png" alt="61630772-ea415700-accb-11e9-9b4b-5abffa0d5bf4.png">
+
+</figure>
+
+<p>
+Compose middleware and routes together is now easy thanks to <code>Kleisli</code>
+has instance of <code>Choice</code>
+</p>
+
+<pre class="code"><code>middleware andThen passThrough.choice(routes)
+</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -975,7 +1080,7 @@ asynchronously
 <div id="postamble" class="status">
 <footer>
   <p>Author: root <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2019-06-01 Sat 11:37</p>
+  <p>Modified: 2019-07-23 Tue 12:54</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>

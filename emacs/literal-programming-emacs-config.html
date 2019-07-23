@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2019-06-01 Sat 11:37 -->
+<!-- 2019-07-23 Tue 12:54 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Literal Programming Emacs Configure Literal Programming Emacs Configure</title>
@@ -109,10 +109,11 @@ for the JavaScript code in this tag.
 <li><a href="#org99f7218">expand region</a></li>
 <li><a href="#org7e9e228">pallet</a></li>
 <li><a href="#org72da896">smartparens</a></li>
-<li><a href="#org1289991">ensime</a></li>
+<li><a href="#org597c948">Scala Metals</a></li>
 <li><a href="#org8e152e4">Flyspell</a></li>
 <li><a href="#org7629ec8">Langtool</a></li>
 <li><a href="#orgfd6951e">prompt</a></li>
+<li><a href="#orgd59d815">yasnippet</a></li>
 </ul>
 </li>
 </ul>
@@ -177,6 +178,21 @@ download <a href="https://larsenwork.com/monoid/">monoid</a> font
 <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">make unix lineendings default</span>
 (unicode-fonts-setup)
 (<span style="color: #00008b;">setq</span> default-buffer-file-coding-system 'utf-8-unix)
+(<span style="color: #00008b;">when</span> (eq system-type 'darwin)
+  (<span style="color: #00008b;">setq</span> mac-option-modifier 'alt)
+  (<span style="color: #00008b;">setq</span> mac-option-modifier 'super) <span style="color: #8c8c8c; font-style: italic;">; </span><span style="color: #8c8c8c; font-style: italic;">make opt key do Super</span>
+  (<span style="color: #00008b;">setq</span> mac-command-modifier 'meta))
+</code></pre>
+
+<pre class="code"><code>    (<span style="color: #00008b;">if</span> (eq system-type 'gnu/linux)
+(<span style="color: #00008b;">let</span> ((path-from-shell (shell-command-to-string <span style="color: #8b0000;">"/usr/bin/fish -c \"echo -n \\$PATH[1]; for val in \\$PATH[2..-1];echo -n \\\":\\$val\\\";end\""</span>)))
+  (setenv <span style="color: #8b0000;">"PATH"</span> path-from-shell)
+  (<span style="color: #00008b;">setq</span> exec-path (split-string path-from-shell <span style="color: #8b0000;">":"</span>)))
+(<span style="color: #00008b;">let</span> ((path-from-shell (shell-command-to-string <span style="color: #8b0000;">"/usr/local/bin/fish -c \"echo -n \\$PATH[1]; for val in \\$PATH[2..-1];echo -n \\\":\\$val\\\";end\""</span>)))
+  (setenv <span style="color: #8b0000;">"PATH"</span> path-from-shell)
+  (<span style="color: #00008b;">setq</span> exec-path (split-string path-from-shell <span style="color: #8b0000;">":"</span>)))
+        )
+
 </code></pre>
 </div>
 </div>
@@ -449,53 +465,47 @@ text completion framework
 <div id="outline-container-org72da896" class="outline-3">
 <h3 id="org72da896">smartparens</h3>
 <div class="outline-text-3" id="text-org72da896">
-<pre class="code"><code>(use-package smartparens
-  <span style="color: #228b22;">:bind</span>
-  (<span style="color: #8b0000;">"C-M-f"</span> . sp-forward-sexp)
-  (<span style="color: #8b0000;">"C-M-b"</span> . sp-backward-sexp)
-  (<span style="color: #8b0000;">"C-S-i"</span> . sp-down-sexp)
-  (<span style="color: #8b0000;">"C-S-o"</span> . sp-up-sexp)
-  (<span style="color: #8b0000;">"M-A-i"</span> . sp-backward-down-sexp)
-  (<span style="color: #8b0000;">"M-A-o"</span> . sp-backward-up-sexp)
-  (<span style="color: #8b0000;">"C-M-a"</span> . sp-beginning-of-sexp)
-  (<span style="color: #8b0000;">"C-M-e"</span> . sp-end-of-sexp)
-  (<span style="color: #8b0000;">"C-M-n"</span> . sp-next-sexp)
-  (<span style="color: #8b0000;">"C-M-p"</span> . sp-previous-sexp)
-  (<span style="color: #8b0000;">"C-M-d"</span> . sp-kill-sexp)
-  (<span style="color: #8b0000;">"C-M-&lt;backspace&gt;"</span> . sp-backward-kill-sexp)
-  (<span style="color: #8b0000;">"C-M-k"</span> . sp-kill-hybrid-sexp)
-  (<span style="color: #8b0000;">"C-M-w"</span> . sp-copy-sexp)
-  (<span style="color: #8b0000;">"C-M-["</span> . sp-backward-unwrap-sexp)
-  (<span style="color: #8b0000;">"C-M-]"</span> . sp-unwrap-sexp)
-  (<span style="color: #8b0000;">"C-&lt;right&gt;"</span> . sp-forward-slurp-sexp)
-  (<span style="color: #8b0000;">"C-&lt;left&gt;"</span> . sp-forward-barf-sexp)
-  (<span style="color: #8b0000;">"C-M-&lt;left&gt;"</span> . sp-backward-slurp-sexp)
-  (<span style="color: #8b0000;">"C-M-&lt;right&gt;"</span> . sp-backward-barf-sexp)
+<pre class="code"><code>(use-package smartparens-config
   <span style="color: #228b22;">:config</span>
-  (electric-pare-mode nil)
-  (<span style="color: #00008b;">require</span> '<span style="color: #6b8e23;">smartparens-config</span>)
-  (smartparens-global-mode t)
+   (smartparens-global-mode t)
   (show-smartparens-global-mode t))
 
 </code></pre>
 </div>
 </div>
 
-<div id="outline-container-org1289991" class="outline-3">
-<h3 id="org1289991">ensime</h3>
-<div class="outline-text-3" id="text-org1289991">
-<pre class="code"><code>(use-package ensime
-  <span style="color: #228b22;">:ensure</span> t
-  <span style="color: #228b22;">:pin</span> melpa-stable
-<span style="color: #228b22;">:config</span>
-(<span style="color: #00008b;">setq</span> ensime-startup-notification nil)
-)
+<div id="outline-container-org597c948" class="outline-3">
+<h3 id="org597c948">Scala Metals</h3>
+<div class="outline-text-3" id="text-org597c948">
+<pre class="code"><code>(use-package scala-mode
+  <span style="color: #228b22;">:mode</span> <span style="color: #8b0000;">"\\.s</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">(</span><span style="color: #8b0000;">cala</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">|</span><span style="color: #8b0000;">bt</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">)</span><span style="color: #8b0000;">$"</span>)
 
+(use-package sbt-mode
+  <span style="color: #228b22;">:commands</span> sbt-start sbt-command
+  <span style="color: #228b22;">:config</span>
+  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31</span>
+  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">allows using SPACE when in the minibuffer</span>
+  (substitute-key-definition
+   'minibuffer-complete-word
+   'self-insert-command
+   minibuffer-local-completion-map))
 
+<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable nice rendering of diagnostics like compile errors.</span>
+(use-package flycheck
+  <span style="color: #228b22;">:init</span> (global-flycheck-mode))
+
+(use-package lsp-mode
+  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Optional - enable lsp-mode automatically in scala files</span>
+  <span style="color: #228b22;">:hook</span> (scala-mode . lsp)
+  <span style="color: #228b22;">:config</span> (<span style="color: #00008b;">setq</span> lsp-prefer-flymake nil))
+
+(use-package lsp-ui)
+
+<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Add company-lsp backend for metals</span>
+(use-package company-lsp)
 </code></pre>
 </div>
 </div>
-
 <div id="outline-container-org8e152e4" class="outline-3">
 <h3 id="org8e152e4">Flyspell</h3>
 <div class="outline-text-3" id="text-org8e152e4">
@@ -559,12 +569,24 @@ extract them into <code>/usr/local/share/LanguageTool</code>
 </code></pre>
 </div>
 </div>
+
+
+<div id="outline-container-orgd59d815" class="outline-3">
+<h3 id="orgd59d815">yasnippet</h3>
+<div class="outline-text-3" id="text-orgd59d815">
+<pre class="code"><code>(use-package yasnippet
+<span style="color: #228b22;">:config</span>
+(yas-global-mode 1))
+
+</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div id="postamble" class="status">
 <footer>
   <p>Author: Jichao Ouyang <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2019-06-01 Sat 11:37</p>
+  <p>Modified: 2019-07-23 Tue 12:54</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
