@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2019-07-23 Tue 12:54 -->
+<!-- 2019-08-15 Thu 13:40 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>范畴论完全装逼手册 / Grokking Monad</title>
@@ -123,16 +123,34 @@ for the JavaScript code in this tag.
 <div id="outline-container-org2b83b31" class="outline-2">
 <h2 id="org2b83b31">第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></h2>
 <div class="outline-text-2" id="text-org2b83b31">
+
+<figure>
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Alice_through_the_looking_glass.jpg/761px-Alice_through_the_looking_glass.jpg" alt="761px-Alice_through_the_looking_glass.jpg">
+
+</figure>
+
+<div class="epigraph"><blockquote>
 <p>
-第一部分理论部分都讲完了， 如果你读到这里还没有被这些吊炸天的概念搞daze，接下来可以看看它到底跟我们编程有鸟关系呢？
+“If I had a world of my own, everything would be nonsense. 
+Nothing would be what it is, because everything would be what it isn't.
+And contrary wise, what is, it wouldn't be. And what it wouldn't be, it would. You see?”
+― Lewis Carroll, Alice's Adventures in Wonderland &amp; Through the Looking-Glass 
+</p>
+
+</blockquote></div>
+
+<p>
+如果有一个单子的世界, 那一切都说不通了.
+没有什么是应该的, 因为所有东西都是它不是的东西.
+反过来说, 是又不会是, 而不会是的又会是. 懂没?
 </p>
 
 <p>
-第二部分将介绍由这些概念产生的一些实用的monad instances，这些 monad 都通过同样的抽象方式，解决了分离计算与副作用的工作。
+到底什么是, 什么不是, 我们看编程世界里到底什么是单子？
 </p>
 
 <p>
-最后一部分，我们还可以像 IO monad 一样，通过 free 或者 Eff 自定义自己的计算，和可能带副作用的解释器。
+这一部分将介绍由一些实用的<ruby>单子实例<rt>monad instances</rt></ruby>，通过这些单子实例，解决了分离计算与副作用, 已经组合性的问题。
 </p>
 </div>
 
@@ -140,9 +158,12 @@ for the JavaScript code in this tag.
 <h3 id="org035524e">Identity</h3>
 <div class="outline-text-3" id="text-org035524e">
 <p>
-这可能是最简单的 monad 了。不包含任何计算
+这可能是最简单的单子了。它本身不包含任何计算
 </p>
 <pre class="code"><code><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Identity</span> a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Identity</span> { runIdentity <span style="color: #b8860b;">::</span> a }
+</code></pre>
+
+<pre class="code"><code><span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Identity</span>[<span style="color: #6b8e23;">A</span>](run<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)
 </code></pre>
 
 <p>
@@ -175,6 +196,9 @@ for the JavaScript code in this tag.
 <pre class="code"><code><span style="color: #6a5acd;">runIdentity</span> (<span style="color: #36648b;">Identity</span> 1)
 </code></pre>
 
+<pre class="code"><code><span style="color: #6b8e23;">Identity</span>(<span style="color: #6b8e23;">1</span>).run
+</code></pre>
+
 <p>
 会返回 1
 </p>
@@ -190,6 +214,10 @@ Identity 可以实现 Functor 和 Monad，就得到 Identity functor 和 Identit
   <span style="color: #36648b;">Identity</span> a <span style="color: #b8860b;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> f a
 </code></pre>
 
+<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">identityFunctor</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">Identity</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">Identity</span>] {
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fmap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Identity</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Identity</span>[<span style="color: #6b8e23;">B</span>]
+}
+</code></pre>
 <p>
 可以看到 Identity 即是构造器，也是解构器，在模式匹配是可以 destructure 值。例如上面Functor 实现中的 <code>fmap f (Identity a)</code> , 假如fmap的是 <code>Identity 1</code>, 那么这个模式匹配到 <code>(Identity a)</code> 时会把 <code>1</code> 放到 <code>a</code> 的位置。
 </p>
@@ -208,6 +236,12 @@ Identity 看起来什么也没有干，就跟 identity 函数一样，但是在�
 </p>
 <pre class="code"><code><span style="color: #00008b;">data</span> <span style="color: #36648b;">Maybe</span> a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Just</span> a <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Nothing</span>
 </code></pre>
+
+<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Option</span>[+<span style="color: #6b8e23;">A</span>]
+<span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Some</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>]
+<span style="color: #00008b;">case</span> <span style="color: #00008b;">object</span> <span style="color: #6b8e23;">None</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">Nothing</span>]
+</code></pre>
+
 <p>
 Haskell中定义一个ADT十分简单，不像Scala那么啰嗦。左边是类型构造器，右边有数据构造器，你会发现有一根竖线 <code>|</code> ， 它分隔着两个构造器
 </p>
@@ -234,7 +268,7 @@ Haskell中定义一个ADT十分简单，不像Scala那么啰嗦。左边是类�
 <figure>
 <img src="images/p2-maybe-functor.png" alt="p2-maybe-functor.png">
 
-<figcaption><span class="figure-number">Figure 1: </span>fmap :: (a -&gt; b) -&gt; f a -&gt; f b</figcaption>
+<figcaption><span class="figure-number">Figure 2: </span>fmap :: (a -&gt; b) -&gt; f a -&gt; f b</figcaption>
 </figure>
 
 <p>
@@ -250,7 +284,7 @@ Haskell中定义一个ADT十分简单，不像Scala那么啰嗦。左边是类�
 <figure>
 <img src="images/p2-maybe-kleisli.png" alt="p2-maybe-kleisli.png">
 
-<figcaption><span class="figure-number">Figure 2: </span>还记得第一部分提到的 Kleisli 范畴吗？</figcaption>
+<figcaption><span class="figure-number">Figure 3: </span>还记得第一部分提到的 Kleisli 范畴吗？</figcaption>
 </figure>
 
 <p>
@@ -294,7 +328,7 @@ Either 的定义也很简单
 <figure>
 <img src="images/p2-coproduct.png" alt="p2-coproduct.png">
 
-<figcaption><span class="figure-number">Figure 3: </span>Coproduct</figcaption>
+<figcaption><span class="figure-number">Figure 4: </span>Coproduct</figcaption>
 </figure>
 
 <p>
@@ -314,7 +348,7 @@ Either 的定义也很简单
 <figure>
 <img src="images/p2-product.png" alt="p2-product.png">
 
-<figcaption><span class="figure-number">Figure 4: </span>Product</figcaption>
+<figcaption><span class="figure-number">Figure 5: </span>Product</figcaption>
 </figure>
 
 <p>
@@ -427,7 +461,7 @@ Reader 的作用是给一个计算喂数据。
 <figure>
 <img src="images/p2-reader-monad.png" alt="p2-reader-monad.png">
 
-<figcaption><span class="figure-number">Figure 5: </span>f 函数，接收 a 返回一个 从 e 到 a 的 Reader</figcaption>
+<figcaption><span class="figure-number">Figure 6: </span>f 函数，接收 a 返回一个 从 e 到 a 的 Reader</figcaption>
 </figure>
 
 <p>
@@ -458,7 +492,7 @@ Reader 的作用是给一个计算喂数据。
 <figure>
 <img src="images/p2-reader-monad-ask.png" alt="p2-reader-monad-ask.png">
 
-<figcaption><span class="figure-number">Figure 6: </span>asks 可以将 e -&gt; a 的函数变换成 Reader e a</figcaption>
+<figcaption><span class="figure-number">Figure 7: </span>asks 可以将 e -&gt; a 的函数变换成 Reader e a</figcaption>
 </figure>
 
 <p>
@@ -602,7 +636,7 @@ x 类型是 <code>s -&gt; (a, s)</code> ,所以 x s 之后会返回 结果和状
 <figure>
 <img src="images/p2-state-monad-bind.png" alt="p2-state-monad-bind.png">
 
-<figcaption><span class="figure-number">Figure 9: </span>State x &gt;&gt;= f 后runState的数据流（啊啊啊，画歪了，感觉需要脉动一下）</figcaption>
+<figcaption><span class="figure-number">Figure 10: </span>State x &gt;&gt;= f 后runState的数据流（啊啊啊，画歪了，感觉需要脉动一下）</figcaption>
 </figure>
 
 <p>
@@ -862,7 +896,7 @@ Cont 是 <ruby>Continuation Passing Style<rt>CPS</rt></ruby> 的 monad，也就�
 <div id="postamble" class="status">
 <footer>
   <p>Author: 欧阳继超 <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
-  <p>Modified: 2019-07-23 Tue 12:54</p>
+  <p>Modified: 2019-08-15 Thu 13:40</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
