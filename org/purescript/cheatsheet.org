@@ -1,0 +1,230 @@
+#+TITLE: PureScript Cheat Sheet For JavaScript Developers
+#+Date: <2019-08-24 Sat>
+#+KEYWORDS: PureScript,JavaScript
+#+description: Coverting code from JavaScript to PureScript is very straight forward.
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="PureScript Cheat Sheet" />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+#+INDEX: Haskell!PureScript Cheat Sheet From JavaScript
+#+INDEX: FP!PureScript Cheat Sheet From JavaScript
+#+INDEX: PureScript!PureScript Cheat Sheet From JavaScript
+#+INDEX: JavaScript!PureScript Cheat Sheet From JavaScript
+
+* Literal
+** Number
+*** JS
+#+BEGIN_SRC js
+let a = 1
+let b = 1.2
+#+END_SRC
+
+*** PureScript
+#+BEGIN_SRC haskell
+a :: Int
+a = 1
+b :: Number
+b = 1.2
+#+END_SRC
+
+** String
+
+*** JS
+#+BEGIN_SRC js
+let a = "yay"
+let multiline = `first line
+second line
+third line`
+let concatString = "a" + "b"
+#+END_SRC
+
+*** PureScript
+#+BEGIN_SRC haskell
+a :: String
+a = "yay"
+multiline = """first line
+second line
+third line"""
+concatString = "a" <> "b"
+#+END_SRC
+
+** Boolean
+
+*** JS
+#+BEGIN_SRC js
+let a = true
+let b = false
+#+END_SRC
+
+*** PureScript
+#+BEGIN_SRC haskell
+a :: Boolean
+a = true
+
+b :: Boolean
+b = false
+#+END_SRC
+
+** Records
+
+*** JS
+#+BEGIN_SRC js
+  let a = {key1: "value1", key2: true}
+
+  let b = Object.assign({}, a, {key1: "new value1"})
+
+  function updateKey2To(record) {
+    return (value) => Object.assign({}, record, {key2: value})
+  }
+#+END_SRC
+
+*** PureScript
+#+BEGIN_SRC haskell
+a :: {key1:: String, key2:: Boolean}
+a = {key1: "value1", key2: true}
+
+b = a {key1 = "new value1"}
+
+updateKey2To = _ {key2 = _}
+#+END_SRC
+
+* Function
+
+*** JS
+#+BEGIN_SRC js
+function sum(x, y) { return x + y }
+let lambdaSum = (x, y) => (x + y)
+
+function fib(n) {
+  if(n == 0) return 1
+  else if(n == 1) return 1
+  else return fib(n-1) + fib(n-2)
+}
+#+END_SRC
+
+*** PureScript
+#+BEGIN_SRC haskell
+sum :: Int -> Int -> Int
+sum x y = x + y
+
+lambdaSum :: Int -> Int -> Int
+lambdaSum = \x y -> x + y
+
+fib :: Int -> Int -> Int
+fib 0 = 1
+fib 1 = 1
+fib n = fib (n-1) + fib (n-2)
+#+END_SRC
+
+* Control Flow
+
+** If-Else
+
+*** JS 
+#+BEGIN_SRC js
+let tof = true ? true : false
+#+END_SRC
+*** PureScript
+#+BEGIN_SRC haskell
+tof :: Boolean
+tof = if true then true else false
+#+END_SRC
+** Scope
+*** JS
+#+BEGIN_SRC js
+let a = 1
+function inScope() {
+  let a = 2
+  return a
+}
+#+END_SRC
+*** PureScript
+#+BEGIN_SRC haskell
+a = 1
+inScope = a
+  where a = 2
+-- or
+inScope = let a = 2
+  in a
+#+END_SRC
+
+** Pattern Matching
+
+*** JS [[https://github.com/tc39/proposal-pattern-matching][ES proposal]]
+#+BEGIN_SRC js
+  let res = {status: 404}
+  let entity = case (res) {
+    when {status: 200, body: b} ->
+      b
+    when {status: s} ->
+      throw "error" + s
+  }
+#+END_SRC
+
+*** PureScript
+#+BEGIN_SRC haskell
+res :: {status:: Int, body:: String}
+res = {status: 404, body: ""}
+
+entity = case res of
+  {status: 200, body: b} -> Right b
+  e -> Left $ show e
+#+END_SRC
+
+** Do Notaion / FlatMap
+
+*** JS
+JavaScript(ES2019) has =flatMap= for Array
+ #+BEGIN_SRC js
+   let a = [1,2,3]
+   let b = [2,3,4]
+   let c = a.flatMap(x=> b.flatMap(y => x+y))
+ #+END_SRC
+
+*** PureScript
+=flatMap= in PureScript is the same as Haskell ~>>=~
+#+BEGIN_SRC haskell
+a = [1,2,3]
+b = [2,3,4]
+c = a >>= \x -> (b >>= \y -> x + y)
+#+END_SRC
+
+and you can use do notation for nicer syntax
+
+#+BEGIN_SRC haskell
+a = [1,2,3]
+b = [2,3,4]
+c = do
+  x <- a
+  y <- b
+  pure x + y
+#+END_SRC
+
+not only =Array=, you can flatMap on any kind that has Monad instance i.e. =Maybe=
+
+* Modules
+** JS
+JavaScript modules are based on file directory
+#+BEGIN_SRC js
+// import module from somefile.js
+import {method} from './some-file'
+// export module
+const a = 1
+export a
+#+END_SRC
+** PureScript
+While PureScript is namespace based
+#+BEGIN_SRC haskell
+-- file ramdom-file-name.purs
+module A where
+a = 1
+#+END_SRC
+
+so just module name matter, the file name doesnot matter
+#+BEGIN_SRC haskell
+module B where
+import A
+-- not import './ramdom-file-name'
+#+END_SRC
+
+* Reference
+
+- https://github.com/purescript/documentation/blob/master/language/Syntax.md
