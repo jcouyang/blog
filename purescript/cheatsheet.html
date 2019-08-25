@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2019-08-25 Sun 06:25 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PureScript Cheat Sheet For JavaScript Developers</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="root">
+<meta name="description" content="Coverting code from JavaScript to PureScript is very straight forward."
+>
+<meta name="keywords" content="PureScript,JavaScript">
+<link rel="icon" href="/favicon.ico">
+<meta name="theme-color" content="#ffffff">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
+<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
+<meta property="og:title" content="PureScript Cheat Sheet" />
+<meta property="og:type" content="article" />
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="preamble" class="status">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJRFJGX"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header>
+    <a accesskey="h" href="/index.html"> HOME </a> |
+    <a href="#" id="edit-in-github">EDIT</a> |
+    <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
+</header>
+</div>
+<div id="content">
+<header>
+<h1 class="title">PureScript Cheat Sheet For JavaScript Developers</h1>
+</header><nav id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org5ee157c">Literal</a>
+<ul>
+<li><a href="#orgb1c8aa5">Number</a>
+<ul>
+<li><a href="#orgb0618c2">JS</a></li>
+<li><a href="#orgdf6d481">PureScript</a></li>
+</ul>
+</li>
+<li><a href="#org663db2a">String</a>
+<ul>
+<li><a href="#org62c52f4">JS</a></li>
+<li><a href="#orgdcfc625">PureScript</a></li>
+</ul>
+</li>
+<li><a href="#orgac44c7a">Boolean</a>
+<ul>
+<li><a href="#org5257057">JS</a></li>
+<li><a href="#orga19b4ca">PureScript</a></li>
+</ul>
+</li>
+<li><a href="#orgf2cf882">Records</a>
+<ul>
+<li><a href="#orgda93be9">JS</a></li>
+<li><a href="#orgcea34f7">PureScript</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org88b1595">Function</a>
+<ul>
+<li>
+<ul>
+<li><a href="#org8a88d05">JS</a></li>
+<li><a href="#org6c813e4">PureScript</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org9cda0a5">Control Flow</a>
+<ul>
+<li><a href="#org4f63e36">If-Else</a>
+<ul>
+<li><a href="#orgbb3182a">JS</a></li>
+<li><a href="#org52d4f85">PureScript</a></li>
+</ul>
+</li>
+<li><a href="#orgb761c92">Scope</a>
+<ul>
+<li><a href="#orge2f1667">JS</a></li>
+<li><a href="#orgb3fd8a8">PureScript</a></li>
+</ul>
+</li>
+<li><a href="#orgd126550">Pattern Matching</a>
+<ul>
+<li><a href="#org415b314">JS ES proposal</a></li>
+<li><a href="#org60f8ff4">PureScript</a></li>
+</ul>
+</li>
+<li><a href="#org4ef36f1">Do Notaion / FlatMap</a>
+<ul>
+<li><a href="#org7c123b3">JS</a></li>
+<li><a href="#org44dacfb">PureScript</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org0cb6e34">Modules</a>
+<ul>
+<li><a href="#orgb3a41c6">JS</a></li>
+<li><a href="#org1bc444a">PureScript</a></li>
+</ul>
+</li>
+<li><a href="#orgc9264e7">Reference</a></li>
+</ul>
+</div>
+</nav>
+
+<div id="outline-container-org5ee157c" class="outline-2">
+<h2 id="org5ee157c">Literal</h2>
+<div class="outline-text-2" id="text-org5ee157c">
+</div>
+<div id="outline-container-orgb1c8aa5" class="outline-3">
+<h3 id="orgb1c8aa5">Number</h3>
+<div class="outline-text-3" id="text-orgb1c8aa5">
+</div>
+<div id="outline-container-orgb0618c2" class="outline-4">
+<h4 id="orgb0618c2">JS</h4>
+<div class="outline-text-4" id="text-orgb0618c2">
+<pre class="code"><code><span style="color: #00008b;">let</span> <span style="color: #b8860b;">a</span> = 1
+<span style="color: #00008b;">let</span> <span style="color: #b8860b;">b</span> = 1.2
+</code></pre>
+</div>
+</div>
+
+<div id="outline-container-orgdf6d481" class="outline-4">
+<h4 id="orgdf6d481">PureScript</h4>
+<div class="outline-text-4" id="text-orgdf6d481">
+<pre class="code"><code><span style="color: #6a5acd;">a</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span>
+<span style="color: #6a5acd;">a</span> <span style="color: #b8860b;">=</span> 1
+<span style="color: #6a5acd;">b</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Number</span>
+<span style="color: #6a5acd;">b</span> <span style="color: #b8860b;">=</span> 1.2
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org663db2a" class="outline-3">
+<h3 id="org663db2a">String</h3>
+<div class="outline-text-3" id="text-org663db2a">
+</div>
+<div id="outline-container-org62c52f4" class="outline-4">
+<h4 id="org62c52f4">JS</h4>
+<div class="outline-text-4" id="text-org62c52f4">
+<pre class="code"><code><span style="color: #00008b;">let</span> <span style="color: #b8860b;">a</span> = <span style="color: #8b0000;">"yay"</span>
+<span style="color: #00008b;">let</span> <span style="color: #b8860b;">multiline</span> = <span style="color: #8b0000;">`first line</span>
+<span style="color: #8b0000;">second line</span>
+<span style="color: #8b0000;">third line`</span>
+<span style="color: #00008b;">let</span> <span style="color: #b8860b;">concatString</span> = <span style="color: #8b0000;">"a"</span> + <span style="color: #8b0000;">"b"</span>
+</code></pre>
+</div>
+</div>
+
+<div id="outline-container-orgdcfc625" class="outline-4">
+<h4 id="orgdcfc625">PureScript</h4>
+<div class="outline-text-4" id="text-orgdcfc625">
+<pre class="code"><code><span style="color: #6a5acd;">a</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span>
+<span style="color: #6a5acd;">a</span> <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"yay"</span>
+<span style="color: #6a5acd;">multiline</span> <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">""</span><span style="color: #d02090; font-weight: bold;">"</span><span style="color: #8b0000;">first line</span>
+<span style="color: #6a5acd;">second</span> line
+<span style="color: #6a5acd;">third</span> line<span style="color: #8b0000;">""</span><span style="color: #d02090; font-weight: bold;">"</span>
+<span style="color: #6a5acd;">concatString</span> <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"a"</span> <span style="color: #b8860b;">&lt;&gt;</span> <span style="color: #8b0000;">"b"</span>
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgac44c7a" class="outline-3">
+<h3 id="orgac44c7a">Boolean</h3>
+<div class="outline-text-3" id="text-orgac44c7a">
+</div>
+<div id="outline-container-org5257057" class="outline-4">
+<h4 id="org5257057">JS</h4>
+<div class="outline-text-4" id="text-org5257057">
+<pre class="code"><code><span style="color: #00008b;">let</span> <span style="color: #b8860b;">a</span> = <span style="color: #6b8e23;">true</span>
+<span style="color: #00008b;">let</span> <span style="color: #b8860b;">b</span> = <span style="color: #6b8e23;">false</span>
+</code></pre>
+</div>
+</div>
+
+<div id="outline-container-orga19b4ca" class="outline-4">
+<h4 id="orga19b4ca">PureScript</h4>
+<div class="outline-text-4" id="text-orga19b4ca">
+<pre class="code"><code><span style="color: #6a5acd;">a</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Boolean</span>
+<span style="color: #6a5acd;">a</span> <span style="color: #b8860b;">=</span> true
+
+<span style="color: #6a5acd;">b</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Boolean</span>
+<span style="color: #6a5acd;">b</span> <span style="color: #b8860b;">=</span> false
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf2cf882" class="outline-3">
+<h3 id="orgf2cf882">Records</h3>
+<div class="outline-text-3" id="text-orgf2cf882">
+</div>
+<div id="outline-container-orgda93be9" class="outline-4">
+<h4 id="orgda93be9">JS</h4>
+<div class="outline-text-4" id="text-orgda93be9">
+<pre class="code"><code><span style="color: #00008b;">let</span> <span style="color: #b8860b;">a</span> = {key1: <span style="color: #8b0000;">"value1"</span>, key2: <span style="color: #6b8e23;">true</span>}
+
+<span style="color: #00008b;">let</span> <span style="color: #b8860b;">b</span> = Object.assign({}, a, {key1: <span style="color: #8b0000;">"new value1"</span>})
+
+<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">updateKey2To</span>(<span style="color: #b8860b;">record</span>) {
+  <span style="color: #00008b;">return</span> (value) =&gt; Object.assign({}, record, {key2: value})
+}
+</code></pre>
+</div>
+</div>
+
+<div id="outline-container-orgcea34f7" class="outline-4">
+<h4 id="orgcea34f7">PureScript</h4>
+<div class="outline-text-4" id="text-orgcea34f7">
+<pre class="code"><code><span style="color: #6a5acd;">a</span> <span style="color: #b8860b;">::</span> {key1<span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span>, key2<span style="color: #b8860b;">::</span> <span style="color: #36648b;">Boolean</span>}
+<span style="color: #6a5acd;">a</span> <span style="color: #b8860b;">=</span> {key1<span style="color: #36648b;">:</span> <span style="color: #8b0000;">"value1"</span>, key2<span style="color: #36648b;">:</span> true}
+
+<span style="color: #6a5acd;">b</span> <span style="color: #b8860b;">=</span> a {key1 <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"new value1"</span>}
+
+<span style="color: #6a5acd;">updateKey2To</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">_</span> {key2 <span style="color: #b8860b;">=</span> <span style="color: #00008b;">_</span>}
+</code></pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org88b1595" class="outline-2">
+<h2 id="org88b1595">Function</h2>
+<div class="outline-text-2" id="text-org88b1595">
+</div>
+<div id="outline-container-org8a88d05" class="outline-4">
+<h4 id="org8a88d05">JS</h4>
+<div class="outline-text-4" id="text-org8a88d05">
+<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">sum</span>(<span style="color: #b8860b;">x</span>, <span style="color: #b8860b;">y</span>) { <span style="color: #00008b;">return</span> x + y }
+<span style="color: #00008b;">let</span> <span style="color: #b8860b;">lambdaSum</span> = (x, y) =&gt; (x + y)
+
+<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">fib</span>(<span style="color: #b8860b;">n</span>) {
+  <span style="color: #00008b;">if</span>(n == 0) <span style="color: #00008b;">return</span> 1
+  <span style="color: #00008b;">else</span> <span style="color: #00008b;">if</span>(n == 1) <span style="color: #00008b;">return</span> 1
+  <span style="color: #00008b;">else</span> <span style="color: #00008b;">return</span> fib(n-1) + fib(n-2)
+}
+</code></pre>
+</div>
+</div>
+
+<div id="outline-container-org6c813e4" class="outline-4">
+<h4 id="org6c813e4">PureScript</h4>
+<div class="outline-text-4" id="text-org6c813e4">
+<pre class="code"><code><span style="color: #6a5acd;">sum</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span>
+<span style="color: #6a5acd;">sum</span> x y <span style="color: #b8860b;">=</span> x <span style="color: #b8860b;">+</span> y
+
+<span style="color: #6a5acd;">lambdaSum</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span>
+<span style="color: #6a5acd;">lambdaSum</span> <span style="color: #b8860b;">=</span> <span style="color: #b8860b;">\</span>x y <span style="color: #b8860b;">-&gt;</span> x <span style="color: #b8860b;">+</span> y
+
+<span style="color: #6a5acd;">fib</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span>
+<span style="color: #6a5acd;">fib</span> 0 <span style="color: #b8860b;">=</span> 1
+<span style="color: #6a5acd;">fib</span> 1 <span style="color: #b8860b;">=</span> 1
+<span style="color: #6a5acd;">fib</span> n <span style="color: #b8860b;">=</span> fib (n<span style="color: #b8860b;">-</span>1) <span style="color: #b8860b;">+</span> fib (n<span style="color: #b8860b;">-</span>2)
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9cda0a5" class="outline-2">
+<h2 id="org9cda0a5">Control Flow</h2>
+<div class="outline-text-2" id="text-org9cda0a5">
+</div>
+<div id="outline-container-org4f63e36" class="outline-3">
+<h3 id="org4f63e36">If-Else</h3>
+<div class="outline-text-3" id="text-org4f63e36">
+</div>
+<div id="outline-container-orgbb3182a" class="outline-4">
+<h4 id="orgbb3182a">JS</h4>
+<div class="outline-text-4" id="text-orgbb3182a">
+<pre class="code"><code><span style="color: #00008b;">let</span> <span style="color: #b8860b;">tof</span> = <span style="color: #6b8e23;">true</span> ? <span style="color: #6b8e23;">true</span> : <span style="color: #6b8e23;">false</span>
+</code></pre>
+</div>
+</div>
+<div id="outline-container-org52d4f85" class="outline-4">
+<h4 id="org52d4f85">PureScript</h4>
+<div class="outline-text-4" id="text-org52d4f85">
+<pre class="code"><code><span style="color: #6a5acd;">tof</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Boolean</span>
+<span style="color: #6a5acd;">tof</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">if</span> true <span style="color: #00008b;">then</span> true <span style="color: #00008b;">else</span> false
+</code></pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgb761c92" class="outline-3">
+<h3 id="orgb761c92">Scope</h3>
+<div class="outline-text-3" id="text-orgb761c92">
+</div>
+<div id="outline-container-orge2f1667" class="outline-4">
+<h4 id="orge2f1667">JS</h4>
+<div class="outline-text-4" id="text-orge2f1667">
+<pre class="code"><code><span style="color: #00008b;">let</span> <span style="color: #b8860b;">a</span> = 1
+<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">inScope</span>() {
+  <span style="color: #00008b;">let</span> <span style="color: #b8860b;">a</span> = 2
+  <span style="color: #00008b;">return</span> a
+}
+</code></pre>
+</div>
+</div>
+<div id="outline-container-orgb3fd8a8" class="outline-4">
+<h4 id="orgb3fd8a8">PureScript</h4>
+<div class="outline-text-4" id="text-orgb3fd8a8">
+<pre class="code"><code><span style="color: #6a5acd;">a</span> <span style="color: #b8860b;">=</span> 1
+<span style="color: #6a5acd;">inScope</span> <span style="color: #b8860b;">=</span> a
+  <span style="color: #00008b;">where</span> a <span style="color: #b8860b;">=</span> 2
+<span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">or</span>
+<span style="color: #6a5acd;">inScope</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">let</span> a <span style="color: #b8860b;">=</span> 2
+  <span style="color: #00008b;">in</span> a
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd126550" class="outline-3">
+<h3 id="orgd126550">Pattern Matching</h3>
+<div class="outline-text-3" id="text-orgd126550">
+</div>
+<div id="outline-container-org415b314" class="outline-4">
+<h4 id="org415b314">JS <a href="https://github.com/tc39/proposal-pattern-matching">ES proposal</a></h4>
+<div class="outline-text-4" id="text-org415b314">
+<pre class="code"><code><span style="color: #00008b;">let</span> <span style="color: #b8860b;">res</span> = {status: 404}
+<span style="color: #00008b;">let</span> <span style="color: #b8860b;">entity</span> = <span style="color: #00008b;">case</span> (res) {
+  when {status: 200, body: b} -&gt;
+    b
+  when {status: s} -&gt;
+    <span style="color: #00008b;">throw</span> <span style="color: #8b0000;">"error"</span> + s
+}
+</code></pre>
+</div>
+</div>
+
+<div id="outline-container-org60f8ff4" class="outline-4">
+<h4 id="org60f8ff4">PureScript</h4>
+<div class="outline-text-4" id="text-org60f8ff4">
+<pre class="code"><code><span style="color: #6a5acd;">res</span> <span style="color: #b8860b;">::</span> {status<span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span>, body<span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span>}
+<span style="color: #6a5acd;">res</span> <span style="color: #b8860b;">=</span> {status<span style="color: #36648b;">:</span> 404, body<span style="color: #36648b;">:</span> <span style="color: #8b0000;">""</span>}
+
+<span style="color: #6a5acd;">entity</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">case</span> res <span style="color: #00008b;">of</span>
+  {status<span style="color: #36648b;">:</span> 200, body<span style="color: #36648b;">:</span> b} <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Right</span> b
+  e <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Left</span> <span style="color: #b8860b;">$</span> show e
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4ef36f1" class="outline-3">
+<h3 id="org4ef36f1">Do Notaion / FlatMap</h3>
+<div class="outline-text-3" id="text-org4ef36f1">
+</div>
+<div id="outline-container-org7c123b3" class="outline-4">
+<h4 id="org7c123b3">JS</h4>
+<div class="outline-text-4" id="text-org7c123b3">
+<p>
+JavaScript(ES2019) has <code>flatMap</code> for Array
+</p>
+<pre class="code"><code><span style="color: #00008b;">let</span> <span style="color: #b8860b;">a</span> = [1,2,3]
+<span style="color: #00008b;">let</span> <span style="color: #b8860b;">b</span> = [2,3,4]
+<span style="color: #00008b;">let</span> <span style="color: #b8860b;">c</span> = a.flatMap(x=&gt; b.flatMap(y =&gt; x+y))
+</code></pre>
+</div>
+</div>
+
+<div id="outline-container-org44dacfb" class="outline-4">
+<h4 id="org44dacfb">PureScript</h4>
+<div class="outline-text-4" id="text-org44dacfb">
+<p>
+<code>flatMap</code> in PureScript is the same as Haskell <code>&gt;&gt;=</code>
+</p>
+<pre class="code"><code><span style="color: #6a5acd;">a</span> <span style="color: #b8860b;">=</span> [1,2,3]
+<span style="color: #6a5acd;">b</span> <span style="color: #b8860b;">=</span> [2,3,4]
+<span style="color: #6a5acd;">c</span> <span style="color: #b8860b;">=</span> a <span style="color: #b8860b;">&gt;&gt;=</span> <span style="color: #b8860b;">\</span>x <span style="color: #b8860b;">-&gt;</span> (b <span style="color: #b8860b;">&gt;&gt;=</span> <span style="color: #b8860b;">\</span>y <span style="color: #b8860b;">-&gt;</span> x <span style="color: #b8860b;">+</span> y)
+</code></pre>
+
+<p>
+and you can use do notation for nicer syntax
+</p>
+
+<pre class="code"><code><span style="color: #6a5acd;">a</span> <span style="color: #b8860b;">=</span> [1,2,3]
+<span style="color: #6a5acd;">b</span> <span style="color: #b8860b;">=</span> [2,3,4]
+<span style="color: #6a5acd;">c</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
+  x <span style="color: #b8860b;">&lt;-</span> a
+  y <span style="color: #b8860b;">&lt;-</span> b
+  pure x <span style="color: #b8860b;">+</span> y
+</code></pre>
+
+<p>
+not only <code>Array</code>, you can flatMap on any kind that has Monad instance i.e. <code>Maybe</code>
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0cb6e34" class="outline-2">
+<h2 id="org0cb6e34">Modules</h2>
+<div class="outline-text-2" id="text-org0cb6e34">
+</div>
+<div id="outline-container-orgb3a41c6" class="outline-3">
+<h3 id="orgb3a41c6">JS</h3>
+<div class="outline-text-3" id="text-orgb3a41c6">
+<p>
+JavaScript modules are based on file directory
+</p>
+<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">import module from somefile.js</span>
+<span style="color: #00008b;">import</span> {method} from <span style="color: #8b0000;">'./some-file'</span>
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">export module</span>
+<span style="color: #00008b;">const</span> <span style="color: #b8860b;">a</span> = 1
+<span style="color: #00008b;">export</span> a
+</code></pre>
+</div>
+</div>
+<div id="outline-container-org1bc444a" class="outline-3">
+<h3 id="org1bc444a">PureScript</h3>
+<div class="outline-text-3" id="text-org1bc444a">
+<p>
+While PureScript is namespace based
+</p>
+<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">file ramdom-file-name.purs</span>
+<span style="color: #00008b;">module</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">where</span>
+<span style="color: #6a5acd;">a</span> <span style="color: #b8860b;">=</span> 1
+</code></pre>
+
+<p>
+so just module name matter, the file name doesnot matter
+</p>
+<pre class="code"><code><span style="color: #00008b;">module</span> <span style="color: #36648b;">B</span> <span style="color: #00008b;">where</span>
+<span style="color: #00008b;">import</span> <span style="color: #36648b;">A</span>
+<span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">not import './ramdom-file-name'</span>
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc9264e7" class="outline-2">
+<h2 id="orgc9264e7">Reference</h2>
+<div class="outline-text-2" id="text-orgc9264e7">
+<ul class="org-ul">
+<li><a href="https://github.com/purescript/documentation/blob/master/language/Syntax.md">https://github.com/purescript/documentation/blob/master/language/Syntax.md</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<footer>
+  <p>Author: root <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow @jcouyang</a></p>
+  <p>Modified: 2019-08-25 Sun 06:25</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.2.2) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
+  <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
+</footer>
+</div>
+</body>
+</html>
