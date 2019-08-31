@@ -1,0 +1,350 @@
+#+TITLE: Type-Driven Development with PureScript
+#+Date: <2019-08-30 Fri>
+#+Author: Jichao Ouyang
+#+KEYWORDS: PureScript,JavaScript,React,Type Driven,TodoMVC
+#+description: Let us Type-Driven a TodoMVC with PureScript
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="Type-Driven Development with PureScript" />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+#+INDEX: Haskell!Type-Driven Development with PureScript
+#+INDEX: FP!Type-Driven Development with PureScript
+#+INDEX: PureScript!Type-Driven Development with PureScript
+#+INDEX: JavaScript!Type-Driven Development with PureScript
+
+[[https://www.manning.com/books/type-driven-development-with-idris][Type-Driven Development with Idris]] is a good book, but it's not actually very practical in industry.
+
+In industry, Scala is wild adopted as Functional Programming language because it can benefit from both
+Scala community and Java community.
+
+On the other hand, PureScript is more likely the best language in front-end that play the duel role of Scala
+in back-end, because it can benefit from both PureScript community and JavaScript community.
+
+Further more PureScript supports Typed Holes, which is an powerful feature that you can Type-Driven your
+application.
+
+Let us start from Type and drive an simple [[http://todomvc.com/][Todo MVC]] app.
+
+There are 3 steps in Type-Driven Development.
+
+- *Type*: Either write a type to begin the process, or inspect the type of a hole to
+decide how to continue the process.
+- *Define*: Create the structure of a function definition either by creating an out-
+line of a definition or breaking it down into smaller components.
+- *Refine*: Improve an existing definition either by filling in a hole or making its
+type more precise.
+
+
+* Data Type
+
+To model the problem accurately, we need to know what behavior of Todo app would expected.
+
+#+BEGIN_QUOTE
+ User should be able to view a list of Todos.
+#+END_QUOTE
+
+Assuming we already have our restful back end developed.
+
+If you visit:
+https://jsonplaceholder.typicode.com/todos/
+
+It returns data in such schema:
+#+BEGIN_SRC js
+[
+  {
+    "userId": 1,
+    "id": 1,
+    "title": "delectus aut autem",
+    "completed": false
+  },
+  {
+    "userId": 1,
+    "id": 2,
+    "title": "quis ut nam facilis et officia qui",
+    "completed": false
+  }
+]
+#+END_SRC
+
+Ok, so this will clearly be the Data Type we need.
+
+** Type
+#+BEGIN_SRC purescript :tangle src/Data.Todo.purs :exports code
+  module Data.Todo where
+
+  type Todo = {
+    userId:: Int,
+    id:: Int,
+    title:: String,
+    completed:: Boolean
+  }
+
+  type Todos = Array Todo
+#+END_SRC
+
+To initiating the behavior, the data need to be load from remote server at the first place.
+
+Since all JavaScript request will be async, =Effect.Aff= would be the best type to describe
+such behavior. I supposed we need to specify a =Path= so that we know where to load the data
+from.
+
+#+BEGIN_SRC purescript
+  module Behavior.Load where
+  import Effect.Aff
+  import Data.Todo
+  import Prelude
+
+  type Path = String
+  load :: Path -> Aff (Array Todo)
+#+END_SRC
+
+Here is the type we need that can describe our behavior very accurate:
+
+providing the =Path=, we should able to get an Asynchronous Effect that eventually has value of =Array= of =Todo=
+
+Now we have a decent type, let us "Define" it, by pressing =C-c C-a=
+
+** Define
+#+BEGIN_SRC purescript :tangle src/Behavior.Load.purs :exports code
+    module Behavior.Load where
+    import Effect.Aff
+    import Data.Todo
+    import Prelude
+
+    type Path = String
+    load :: Path -> Aff (Array Todo)
+    load _ = ?load
+#+END_SRC
+
+Oh, compiler generate an function definition for us, let us hover the cursor on that question mark =?load= thing
+#+BEGIN_EXAMPLE
+  Hole 'load' has the inferred type
+
+    Aff
+      (Array
+         { completed :: Boolean
+         , id :: Int
+         , title :: String
+         , userId :: Int
+         }
+      )
+
+  You could substitute the hole with one of these values:
+
+    Control.Plus.empty  :: forall a f. Plus f => f a
+    Data.Monoid.mempty  :: forall m. Monoid m => m
+    Effect.Aff.never    :: forall a. Aff a
+
+
+in value declaration load
+ [HoleInferredType]
+#+END_EXAMPLE
+
+Mmm...very clear, compiler is guessing the implementation could be one of:
+
+- =Control.Plus.empty=
+- =Data.Monoid.mempty=
+- =Effect.Aff.never=
+
+But which one should I use?
+
+Let's try all of them, replace =?load= with =empty=
+#+BEGIN_SRC purescript
+    module Behavior.Load where
+    import Effect.Aff
+    import Data.Todo
+    import Prelude
+
+    type Path = String
+    load :: Path -> Aff (Array Todo)
+    load _ = empty
+#+END_SRC
+
+=C-c C-i= editor will ask you which Module to import from? Tell it =Control.Plus=
+
+#+BEGIN_SRC purescript
+  module Behavior.Load where
+
+  import Data.Todo
+  import Effect.Aff
+  import Prelude
+
+  import Control.Plus (empty)
+
+  type Path = String
+  load :: Path -> Aff (Array Todo)
+  load _ = empty
+#+END_SRC
+
+Oh my... it compiled. We just did it.
+
+** TODO But Why?
+
+Why =Control.Plus.empty= works?
+
+Actually all of them work.
+
+** Refine
+So, if we run it, what will happen?
+
+#+BEGIN_EXAMPLE
+> runAff_ (\x -> log (show x)) $ load "asdf"
+(Left Error: Always fails
+    at Object.exports.error (/home/jcouyang/Documents/blog/org/purescript/type-driven-development-with-purescript/.psci_modules/node_modules/Effect.Exception/foreign.js:8:10)
+    at Object.<anonymous> (/home/jcouyang/Documents/blog/org/purescript/type-driven-development-with-purescript/.psci_modules/node_modules/Effect.Aff/index.js:417:73)
+    at Module._compile (internal/modules/cjs/loader.js:776:30)
+    at Object.Module._extensions..js (internal/modules/cjs/loader.js:787:10)
+    at Module.load (internal/modules/cjs/loader.js:653:32)
+    at tryModuleLoad (internal/modules/cjs/loader.js:593:12)
+    at Function.Module._load (internal/modules/cjs/loader.js:585:3)
+    at Module.require (internal/modules/cjs/loader.js:690:17)
+    at require (internal/modules/cjs/helpers.js:25:18)
+    at Object.<anonymous> (/home/jcouyang/Documents/blog/org/purescript/type-driven-development-with-purescript/.psci_modules/node_modules/Behavior.Load/index.js:3:18))
+unit
+#+END_EXAMPLE
+
+Ok, it resolve as =Left Error=
+
+Seems we did not finish yet, we probably should be more specific about what should we do in defination
+
+Maybe?
+#+BEGIN_SRC purescript
+load path = ajax path
+#+END_SRC
+
+There are lot of implementation of making Ajax call for PureScript like [[https://github.com/slamdata/purescript-affjax][Affjax]], but I like to show how easy to make your own one by
+PureScript's FFI.
+
+A little bit JavaScript to call =window.fetch=, to make it FFI, we need to name it the same =Behavior.Load.js=
+#+BEGIN_SRC js  :tangle src/Behavior.Load.js :exports code
+  function get(url) {
+    return function(onError, onSuccess) {  
+      window.fetch(url).then(function(res){
+        return res.text()
+      })
+        .then(onSuccess)
+        .catch(onError)
+      return function(cancelError, cancelerError, cancelerSuccess) {
+        cancelerSuccess()
+      };
+    }
+  }
+#+END_SRC
+
+Now you can =foreign import= the =get= function from JavaScript
+
+#+BEGIN_SRC purescript
+import Effect.Aff.Compat (EffectFnAff(..))
+
+foreign import _get :: Path -> EffectFnAff String
+#+END_SRC
+
+
+So the =_get= function can take a =Path= and return =EffectFnAff String=.
+
+But =String= is not he value we need, what we need is =Todos=.
+
+Then another layer of abstraction to provide us the domain type is needed.
+
+Just call it =ajaxGet= for now.
+#+BEGIN_SRC purescript
+import Data.Either (Either)
+import Simple.JSON (class ReadForeign)
+
+ajaxGet :: forall a. ReadForeign a => Path -> Aff (Either Error a)
+ajaxGet _ = ?ajaxGet
+#+END_SRC
+
+Type of =ajaxGet= can read as "given type =a= which has instance of =ReadForeign a=,
+input a =Path= and it can return an =Aff= of =Either Error a=".
+
+=C-c C-a= compiler will define =ajaxGet _ = ?ajaxGet=
+
+Move cursor to =?ajaxGet= and...
+#+BEGIN_EXAMPLE
+  Hole 'ajaxGet' has the inferred type
+
+    Aff (Either Error a0)
+
+  You could substitute the hole with one of these values:
+
+    Control.Plus.empty  :: forall a f. Plus f => f a
+    Effect.Aff.never    :: forall a. Aff a
+
+
+in value declaration ajaxGet
+
+where a0 is a rigid type variable
+        bound at (line 0, column 0 - line 0, column 0)
+ [HoleInferredType]
+#+END_EXAMPLE
+
+Hmm, clearly we don't want an empty, look what we have currently
+#+BEGIN_SRC purescript
+_get :: Path -> EffectFnAff String -- FFI
+fromEffectFnAff :: forall a. EffectFnAff a -> Aff a -- from Effect.Aff.Compat
+readJSON :: forall a. ReadForeign a => String -> Either MultipleErrors a -- from Simple.JSON
+#+END_SRC
+
+It's like solve puzzles, return type of =_get= match =fromEffectFnAff= input type. Let us we compose, see what we got
+#+BEGIN_SRC purescript
+ajaxGet :: forall a. ReadForeign a => Path -> Aff (Either Error a)
+ajaxGet path = ?toJSON $ fromEffectFnAff (_get path)
+#+END_SRC
+
+Move cursor to =?toJSON= see what we need to put in here now.
+
+#+BEGIN_EXAMPLE
+  Hole 'toJson' has the inferred type
+
+    Aff String -> Aff (Either Error a0)
+#+END_EXAMPLE
+
+Great, we have 
+#+BEGIN_SRC purescript
+readJSON :: forall a. ReadForeign a => String -> Either MultipleErrors a
+#+END_SRC
+
+which is pretty similar though...
+
+How can we get rid of the high kind =Aff=?
+
+If we lift =String -> Either Error a= to Aff level, we should able to get =Aff String -> Aff (Either Error a)=.
+
+That is exactly =<>= does, put a =<>= around =$= and it will lift the left hand side
+
+#+BEGIN_SRC purescript
+ajaxGet :: forall a. ReadForeign a => Path -> Aff (Either Error a)
+ajaxGet path = ?toJSON <$> fromEffectFnAff (_get path)
+#+END_SRC
+
+Now compiler says:
+#+BEGIN_EXAMPLE
+  Hole 'toJson' has the inferred type
+
+    String -> Either Error a0
+#+END_EXAMPLE
+
+So close, now just need =Either MutipleErrors a -> Either Error a=, isn't that exactly type signature of =lmap=?
+#+BEGIN_SRC purescript
+ajaxGet path = (lmap ?adaptError <<< parseJSON )<$> fromEffectFnAff (_get path)
+  where
+    parseJSON :: String -> Either MultipleErrors a
+    parseJSON = readJSON
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+  Hole 'adaptError' has the inferred type
+
+    NonEmptyList ForeignError -> Error
+#+END_EXAMPLE
+
+Seems to be a very easy function to implement, finally!
+
+#+BEGIN_SRC purescript
+ajaxGet path = (lmap adaptError <<< parseJSON )<$> fromEffectFnAff (_get path)
+  where
+    parseJSON :: String -> Either MultipleErrors a
+    parseJSON = readJSON
+    adaptError :: MultipleErrors -> Error
+    adaptError = error <<< show
+#+END_SRC
+
