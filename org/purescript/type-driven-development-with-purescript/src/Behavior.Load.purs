@@ -12,7 +12,6 @@ import Foreign (MultipleErrors)
 import Simple.JSON (class ReadForeign, readJSON)
 
 type Path = String
-
 foreign import _get :: Path -> EffectFnAff String
 
 ajaxGet :: forall a. ReadForeign a => Path -> Aff (Either Error a)
@@ -30,7 +29,15 @@ load path = do
     where
       ajaxGetTodos :: Path -> Aff (Either Error (Array Todo))
       ajaxGetTodos = ajaxGet
-      
+
+type State = {
+             todos:: Todos
+             }
+reloadPage :: State -> Aff State
+reloadPage _ = do
+  entities <- load("https://jsonplaceholder.typicode.com/todos")
+  pure {todos: entities}
+
 class MonadAff m <= MonadEither m where
   liftEither :: Either Error ~> m
 
