@@ -6,6 +6,7 @@ import Prelude
 
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
+import Effect.Aff.Class (class MonadAff)
 import Effect.Aff.Compat (EffectFnAff(..), fromEffectFnAff)
 import Foreign (MultipleErrors)
 import Simple.JSON (class ReadForeign, readJSON)
@@ -24,10 +25,15 @@ ajaxGet path = (lmap adaptError <<< parseJSON ) <$> fromEffectFnAff (_get path)
 
 load :: Path -> Aff (Array Todo)
 load path = do
-  resp <- ajaxGetTodos path
-  case resp of
-    (Left e) -> throwError e
-    (Right v) -> pure v
-  where
-    ajaxGetTodos :: Path -> Aff (Either Error (Array Todo))
-    ajaxGetTodos = ajaxGet
+    resp <- ajaxGetTodos path
+    liftEither resp
+    where
+      ajaxGetTodos :: Path -> Aff (Either Error (Array Todo))
+      ajaxGetTodos = ajaxGet
+      
+class MonadAff m <= MonadEither m where
+  liftEither :: Either Error ~> m
+
+instance monadEitherAff :: MonadEither Aff where
+  liftEither (Left e) = throwError e
+  liftEither (Right v) = pure v

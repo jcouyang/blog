@@ -32,21 +32,15 @@ line of a definition or breaking it down into smaller components.
 - *Refine*: Improve an existing definition either by filling in a hole or making its
 type more precise.
 
-
-* Data Type
-
 To model the problem accurately, we need to know what behavior of Todo app would expected.
 
-#+BEGIN_QUOTE
- User should be able to view a list of Todos.
-#+END_QUOTE
-
+* User should be able to view a list of Todos
 Assuming we already have our restful back end developed.
 
 If you visit:
 https://jsonplaceholder.typicode.com/todos/
 
-It returns data in such schema:
+It returns data in such JSON format:
 #+BEGIN_SRC js
 [
   {
@@ -229,6 +223,8 @@ A little bit JavaScript to call =window.fetch=, to make it FFI, we need to name 
   }
 #+END_SRC
 
+
+** Type
 Now you can =foreign import= the =get= function from JavaScript
 
 #+BEGIN_SRC purescript
@@ -256,6 +252,7 @@ ajaxGet _ = ?ajaxGet
 Type of =ajaxGet= can read as "given type =a= which has instance of =ReadForeign a=,
 input a =Path= and it can return an =Aff= of =Either Error a=".
 
+** Define
 =C-c C-a= compiler will define =ajaxGet _ = ?ajaxGet=
 
 Move cursor to =?ajaxGet= and...
@@ -284,6 +281,7 @@ fromEffectFnAff :: forall a. EffectFnAff a -> Aff a -- from Effect.Aff.Compat
 readJSON :: forall a. ReadForeign a => String -> Either MultipleErrors a -- from Simple.JSON
 #+END_SRC
 
+** Refine
 It's like solve puzzles, return type of =_get= match =fromEffectFnAff= input type. Let us we compose, see what we got
 #+BEGIN_SRC purescript
 ajaxGet :: forall a. ReadForeign a => Path -> Aff (Either Error a)
@@ -323,6 +321,7 @@ Now compiler says:
     String -> Either Error a0
 #+END_EXAMPLE
 
+** Refine
 So close, now just need =Either MutipleErrors a -> Either Error a=, isn't that exactly type signature of =lmap=?
 #+BEGIN_SRC purescript
 ajaxGet path = (lmap ?adaptError <<< parseJSON )<$> fromEffectFnAff (_get path)
@@ -338,7 +337,7 @@ ajaxGet path = (lmap ?adaptError <<< parseJSON )<$> fromEffectFnAff (_get path)
 #+END_EXAMPLE
 
 Seems to be a very easy function to implement, finally!
-
+** Define
 #+BEGIN_SRC purescript
 ajaxGet path = (lmap adaptError <<< parseJSON )<$> fromEffectFnAff (_get path)
   where
@@ -348,3 +347,116 @@ ajaxGet path = (lmap adaptError <<< parseJSON )<$> fromEffectFnAff (_get path)
     adaptError = error <<< show
 #+END_SRC
 
+Without single line of test, and run time red-green. We just follow the compiler's hint, compose different pieces of type together
+and then form the type that just fit our domain problem. And the most amazing part is even without unit tested, I'm very confident that
+compiler
+already proven type is work, the code driven from type should be working fine too.
+
+However,
+I'm not saying we should not write any unit test, the part FFI calling the JavaScript function can not be proven by compiler that it is working.
+
+
+** Type
+
+Now that we have =ajaxGet=, we can replace =empty= in =load= with
+the real ajax call function.
+
+#+BEGIN_SRC purescript
+load :: Path -> Aff (Array Todo)
+load path = do
+  resp <- ?ajaxGetTodos path
+  ?doSomethingAbout resp
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+  Hole 'ajaxGetTodos' has the inferred type
+
+    String -> Aff t0
+#+END_EXAMPLE
+
+** Define
+That is =ajaxGet=, let us put that in
+#+BEGIN_SRC purescript
+  load :: Path -> Aff (Array Todo)
+  load path = do
+    resp <- ajaxGetTodos path
+    ?doSomethingAbout resp
+    where
+      ajaxGetTodos :: Path -> Aff (Either Error (Array Todo))
+      ajaxGetTodos = ajaxGet
+#+END_SRC
+
+
+** Type
+Now what is =?doSomethingAbout=
+#+BEGIN_EXAMPLE
+  Hole 'doSomethingAbout' has the inferred type
+
+    Either Error
+      (Array
+         { completed :: Boolean
+         , id :: Int
+         , title :: String
+         , userId :: Int
+         }
+      )
+    -> Aff
+         (Array
+            { completed :: Boolean
+            , id :: Int
+            , title :: String
+            , userId :: Int
+            }
+         )
+
+#+END_EXAMPLE
+
+I think we need a =liftEither :: forall a. Either Error a -> Aff a=,
+let us define it
+#+BEGIN_SRC purescript
+load :: Path -> Aff (Array Todo)
+load path = do
+    resp <- ajaxGetTodos path
+    liftEither resp
+    where
+      ajaxGetTodos :: Path -> Aff (Either Error (Array Todo))
+      ajaxGetTodos = ajaxGet
+      liftEither :: forall a. Either Error a -> Aff a
+      liftEither _ = ?liftEither
+#+END_SRC
+
+** Define
+
+=C-c C-c= on =_=, compiler will prompt you what type you what to split.
+
+Tell it =Either=
+#+BEGIN_SRC purescript
+      liftEither :: forall a. Either Error a -> Aff a
+      liftEither (Left _) = ?liftEither
+      liftEither (Right _) = ?liftEither
+#+END_SRC
+
+Now it's all clear, =?liftEither= is =Aff a=:
+#+BEGIN_SRC purescript
+      liftEither :: forall a. Either Error a -> Aff a
+      liftEither (Left e) = throwError e
+      liftEither (Right v) = pure v
+#+END_SRC
+
+All feature of =load= function is done since compiler is very
+happy about it. But, we never rich the *Refine* yet.
+
+** TODO Refine
+One thing that is able to refine is =liftEither=, maybe this
+is not the best time to refine, since only one place is using it.
+But it seems like it should be a typeclass not just a scoped function.
+Because it looks very generic.
+
+#+BEGIN_SRC purescript
+class MonadAff m <= MonadEither m where
+  liftEither :: Either Error ~> m
+
+instance monadEitherAff :: MonadEither Aff where
+  liftEither (Left e) = throwError e
+  liftEither (Right v) = pure v
+#+END_SRC
