@@ -28,7 +28,9 @@ function App() {
                 <ul className="todo-list">
                     {state.todos.map(todo =>
                         <li className="view">
-                            <input class="toggle" type="checkbox" checked={todo.completed}/>
+                            <input class="toggle"
+                                   type="checkbox"
+                                   defaultChecked={todo.completed}/>
                             <label>{todo.title}</label>
                         </li>
                     )
