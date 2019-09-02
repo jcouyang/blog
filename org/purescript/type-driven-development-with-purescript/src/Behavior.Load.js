@@ -10,5 +10,4 @@ function get(url) {
     };
   }
 }
-
 exports._get = get

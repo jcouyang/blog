@@ -11,7 +11,6 @@ import Effect.Aff.Compat (EffectFnAff(..), fromEffectFnAff)
 import Foreign (MultipleErrors)
 import Simple.JSON (class ReadForeign, readJSON)
 
-type Path = String
 foreign import _get :: Path -> EffectFnAff String
 
 ajaxGet :: forall a. ReadForeign a => Path -> Aff (Either Error a)
@@ -30,9 +29,6 @@ load path = do
       ajaxGetTodos :: Path -> Aff (Either Error (Array Todo))
       ajaxGetTodos = ajaxGet
 
-type State = {
-             todos:: Todos
-             }
 reloadPage :: State -> Aff State
 reloadPage _ = do
   entities <- load("https://jsonplaceholder.typicode.com/todos")

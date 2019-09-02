@@ -1,5 +1,7 @@
 module Data.Todo where
 
+type Path = String
+
 type Todo = {
   userId:: Int,
   id:: Int,
@@ -8,3 +10,7 @@ type Todo = {
 }
 
 type Todos = Array Todo
+
+type State = {
+             todos:: Todos
+             }
