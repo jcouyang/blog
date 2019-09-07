@@ -512,7 +512,196 @@ instance monadEitherAff :: MonadEither Aff where
   liftEither (Right v) = pure v
 #+END_SRC
 * User should be able to add new todo into list
+
+New story, similarly let us create a new file =src/Behavior.Add.purs=.
+#+BEGIN_SRC purescript
+module Behavior.Add where
+
+addTodo :: Todo -> State -> Aff State
+#+END_SRC
+
+=C-c C-a=
+
+#+BEGIN_SRC purescript
+addTodo :: Todo -> State -> Aff State
+addTodo _ _ = ?addTodo
+#+END_SRC
+
+What should we do first? post it to the server? Let us find out.
+
+#+BEGIN_SRC purescript
+addTodo todo state = do
+  status <- ?ajaxPost "https://jsonplaceholder.typicode.com/todos" todo
+  purs ?whatnext
+
+ajaxPost :: forall a. Path -> a -> Aff Int
+ajaxPost _ _ = ?ajaxPost
+#+END_SRC
+
+=ajaxPost= is very similar to =ajaxGet=
+
+we rely on js to actually send out the ajax request
+
+#+BEGIN_SRC purescript
+foreign import _post :: Path -> String -> EffectFnAff Int
+
+ajaxPost :: forall a. Path -> a -> Aff Int
+ajaxPost path body = fromEffectFnAff (_post path $ ?toJSON body)
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+  Hole 'toJSON' has the inferred type
+
+    a0 -> String
+#+END_EXAMPLE
+
+Clearly it should be =writeJSON= from simple-json, but if you don't know what to put in there
+try https://pursuit.purescript.org/search?q=a+-%3E+String
+
+#+BEGIN_SRC purescript
+writeJSON :: forall a. WriteForeign a => a -> String
+#+END_SRC
+
+Hmm, a need to have Typeclass =WriteForeign a= instance. Again, don't worry
+the compile will give you the hint if you did not add the TypeClass bound
+
+#+BEGIN_EXAMPLE
+  No type class instance was found for
+
+    Simple.JSON.WriteForeign a1
+#+END_EXAMPLE
+
+All set!
+#+BEGIN_SRC purescript
+ajaxPost :: forall a. WriteForeign a => Path -> a -> Aff Int
+ajaxPost path body = fromEffectFnAff (_post path $ writeJSON body)
+#+END_SRC
+
+Now hover back to =?ajaxPost= in =addTodo= see what happen.
+
+#+BEGIN_SRC purescript
+addTodo todo state = do
+  status <- ?ajaxPost "https://jsonplaceholder.typicode.com/todos" todo
+  pure ?whatnext
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+  Hole 'ajaxPost' has the inferred type
+
+    String
+    -> { completed :: Boolean
+       , id :: Int
+       , title :: String
+       , userId :: Int
+       }
+       -> Aff Int
+
+  You could substitute the hole with one of these values:
+
+    Behavior.Add.ajaxPost             :: forall a. WriteForeign a => String -> a -> Aff Int
+    Data.Variant.Internal.impossible  :: forall a. String -> a
+    Partial.Unsafe.unsafeCrashWith    :: forall a. String -> a
+    Record.Unsafe.unsafeGet           :: forall r a. String -> Record r -> a
+    Unsafe.Coerce.unsafeCoerce        :: forall a b. a -> b
+#+END_EXAMPLE
+
+Awesome, compile say you could substitute it with =Behavior.Add.ajaxPost=
+
+Simply remove the =?=.
+#+BEGIN_SRC purescript
+addTodo todo state = do
+  status <- ajaxPost "https://jsonplaceholder.typicode.com/todos" todo
+  pure ?whatnext
+#+END_SRC
+
+What next?
+#+BEGIN_EXAMPLE
+  Hole 'whatnext' has the inferred type
+
+    { todos :: Array
+                 { completed :: Boolean
+                 , id :: Int
+                 , title :: String
+                 , userId :: Int
+                 }
+    }
+#+END_EXAMPLE
+
+Now we are clear, we can put an =State= there, but what exactly?
+
+Recall our story, it is to post the todo, and based on the response
+of the request, we can do different things.
+
+#+BEGIN_SRC purescript
+addTodo todo state = do
+  status <- ajaxPost "https://jsonplaceholder.typicode.com/todos" todo
+  case status of
+    201 -> pure ?success
+    _ -> pure ?fail
+#+END_SRC
+
+Of cause =?fail= should do nothing, or add some error indicator in =State=
+but we do not have that yet, so put it the same for now. Meanwhile what
+should put into =?success=?
+
+For user, the first todo should be updated to the one just added.
+
+#+BEGIN_SRC purescript
+addTodo :: Todo -> State -> Aff State
+addTodo todo state = do
+  status <- ajaxPost "https://jsonplaceholder.typicode.com/todos" todo
+  case status of
+    201 -> pure $ state {todos = todo : state.todos}
+    _ -> pure state
+#+END_SRC
+
+And.. do not forget implement the JavaScript FFI =_post=
+#+BEGIN_SRC javascript :tangle src/Behavior.Add.js :exports code
+function post(url) {
+  return function(body) {
+    return function(onError, onSuccess) {  
+      window.fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: body
+      }).then(function(res){
+        return res.status
+      })
+        .then(onSuccess)
+        .catch(onError)
+      return function(cancelError, cancelerError, cancelerSuccess) {
+        cancelerSuccess()
+      };
+    }
+  }
+}
+exports._post = post
+#+END_SRC
+
+The whole piece of =Behavior.Add=.
+
 #+BEGIN_SRC purescript :tangle src/Behavior.Add.purs :exports code
 module Behavior.Add where
 
+import Data.Array
+import Data.Todo
+import Effect.Aff
+import Prelude
+
+import Effect.Aff.Compat (EffectFnAff(..), fromEffectFnAff)
+import Simple.JSON (class WriteForeign, writeJSON)
+
+addTodo :: Todo -> State -> Aff State
+addTodo todo state = do
+  status <- ajaxPost "https://jsonplaceholder.typicode.com/todos" todo
+  case status of
+    201 -> pure $ state {todos = todo : state.todos}
+    _ -> pure state
+
+foreign import _post :: Path -> String -> EffectFnAff Int
+
+ajaxPost :: forall a. WriteForeign a => Path -> a -> Aff Int
+ajaxPost path body = fromEffectFnAff (_post path $ writeJSON body)
 #+END_SRC
