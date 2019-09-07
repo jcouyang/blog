@@ -513,6 +513,7 @@ instance monadEitherAff :: MonadEither Aff where
 #+END_SRC
 * User should be able to add new todo into list
 
+** Type
 New story, similarly let us create a new file =src/Behavior.Add.purs=.
 #+BEGIN_SRC purescript
 module Behavior.Add where
@@ -526,7 +527,7 @@ addTodo :: Todo -> State -> Aff State
 addTodo :: Todo -> State -> Aff State
 addTodo _ _ = ?addTodo
 #+END_SRC
-
+** Define
 What should we do first? post it to the server? Let us find out.
 
 #+BEGIN_SRC purescript
@@ -542,6 +543,7 @@ ajaxPost _ _ = ?ajaxPost
 
 we rely on js to actually send out the ajax request
 
+** Define
 #+BEGIN_SRC purescript
 foreign import _post :: Path -> String -> EffectFnAff Int
 
@@ -558,6 +560,7 @@ ajaxPost path body = fromEffectFnAff (_post path $ ?toJSON body)
 Clearly it should be =writeJSON= from simple-json, but if you don't know what to put in there
 try https://pursuit.purescript.org/search?q=a+-%3E+String
 
+** Type
 #+BEGIN_SRC purescript
 writeJSON :: forall a. WriteForeign a => a -> String
 #+END_SRC
@@ -578,7 +581,7 @@ ajaxPost path body = fromEffectFnAff (_post path $ writeJSON body)
 #+END_SRC
 
 Now hover back to =?ajaxPost= in =addTodo= see what happen.
-
+** Type
 #+BEGIN_SRC purescript
 addTodo todo state = do
   status <- ?ajaxPost "https://jsonplaceholder.typicode.com/todos" todo
@@ -631,7 +634,7 @@ Now we are clear, we can put an =State= there, but what exactly?
 
 Recall our story, it is to post the todo, and based on the response
 of the request, we can do different things.
-
+** Define
 #+BEGIN_SRC purescript
 addTodo todo state = do
   status <- ajaxPost "https://jsonplaceholder.typicode.com/todos" todo
