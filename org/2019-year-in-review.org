@@ -1,0 +1,133 @@
+#+TITLE: 2019 Year in Review
+#+DATE: <2020-01-01 Wed>
+#+Author: Jichao Ouyang
+
+I've 2210 commits over the whole year.
+
+[[./images/Screenshot_2020-01-01%20jcouyang%20-%20Overview.png]]
+
+But actually only 450 is for open source, it is been a busy year in MYOB.
+
+* [[./scala/3-layer-cake.org][3 Layer Scala Cake]]
+By introducing the 3 layer cake concept to Scala,
+I also published the [[https://github.com/jcouyang/luci][luci]] lib to help building extensible Free Monad effects.
+
+* [[https://gumroad.com/l/grokking-monad][Grokking Monad]]
+
+[[./images/Screenshot_2020-01-01%20Gumroad%20-%20Analytics.png]]
+
+I was not actively updating this book in 2019.
+I hope all my readers are happy, I was told it is the best book
+about Category Theory in Chinese.
+Hoping there will be more time can be focus on updating it in 2020.
+
+[[https://gumroad.com/l/grokking-monad][Buy one]] if you can read Chinese and curious about Monad, now examples are available in
+both Haskell and Scala.
+
+* [[https://typelevel.org/cats/api/cats/data/Kleisli.html][Kleisli{F{_}, -A, B}]]
+I made a change to the =Kleisli= type so =A= is now contravariant =-A=.
+By Scala subtyping system, we can save a lot of contramaping.
+
+If you want to flatmap different input type of Kleisli before:
+#+BEGIN_SRC scala
+    val program = for {
+      k1 <- Kleisli((a: A1) => List(1)).local(identity[A1 with A2 with A3])
+      k2 <- Kleisli((a: A2) => List("2")).local(identity[A1 with A2 with A3])
+      k3 <- Kleisli((a: A3) => List(true)).local(identity[A1 with A2 with A3])
+    } yield (k1, k2, k3)
+#+END_SRC
+
+after cats 2.0 you can just:
+#+BEGIN_SRC scala
+    val program = for {
+      k1 <- Kleisli((a: A1) => List(1))
+      k2 <- Kleisli((a: A2) => List("2"))
+      k3 <- Kleisli((a: A3) => List(true))
+    } yield (k1, k2, k3)
+#+END_SRC
+
+since =-A= is contravariant, Scala can tell the =program= has type =Kleisli[List, A1 with A2 with A3, (Int, String, Boolean)]=
+
+The power of Kleisli subtyping lead to a very powerful lib that I recently
+published for our team - Zhuyu.
+
+* [[https://github.com/jcouyang/zhuyu][Zhuyu]]
+With the power of Kleisli, now all kind of effect is composable:
+#+BEGIN_SRC scala
+val program = for {
+ _ <- effects.Http4s(_.status(GET(uri"https://blog.oyanglul.us")))
+ _ <- effects.S3(_.putObject("example-bucket", "filename", "content"))
+ _ <- effects.Doobie(sql"select 250".query[Int].unique)
+} yield()
+// Kleisli[IO, HasHttp4s with HasS3 with HasDoobie, Unit]
+#+END_SRC
+
+More importantly Zhuyu provide a typesafe SQS worker, so you can safely consume
+messages from SQS, even spread more message back to the SQS, without worry about
+causing any loop in the queue, because now we can count at type level with shapeless.
+All these check happen in compile time so you know your code will cause a loop
+if it didn't compile.
+
+If you need a worker that consume SQS, just
+
+#+BEGIN_EXAMPLE
+sbt new jcouyang/zhuyu.g8
+#+END_EXAMPLE
+
+There is also a simple tutorial video in [[https://github.com/jcouyang/zhuyu.g8][README]]
+
+* [[https://github.com/milessabin/shapeless/blob/8626f15ed92b922a6381a9e11c3a34b76b55e337/core/src/main/scala/shapeless/ops/coproduct.scala#L107][IndexOf at Type Level]]
+Since zhuyu needs to find out the position of a type in coproduct type,
+I also made change to [[https://github.com/milessabin/shapeless][shapeless]] so we can find out the index of
+a specific type in coproduct
+#+BEGIN_SRC scala
+    type S = String; type I = Int; type D = Double; type C = Char
+    type SIDC = S :+: I :+: D :+: C :+: CNil
+
+    {
+      val r1 = IndexOf[SIDC, S].value
+      assertTypedEquals(0, r1)
+
+      val r2: Nat = IndexOf[SIDC, I].apply()
+      assertTypedEquals(Nat._1, r2)
+
+      val r3 = Coproduct[SIDC](1).indexOf[D]
+      assertTypedEquals(Nat._2, r3)
+
+      val r4 = IndexOf[SIDC, C].value
+      assertTypedEquals(3, r4)
+    }
+  }
+#+END_SRC
+
+* [[./purescript/type-driven-development-with-purescript/index.org][Type Driven Development with PureScript]]
+
+We are migrating our production UI codebase from TypeScript to PureScript.
+
+[[https://paper.dropbox.com/doc/PureScript-on-Production--AriMP07VB6jhwgqcUJnKSnaLAg-ST0wPhRDvFST3UemcvdVY][Here is detail why and how.]]
+
+At the end
+- we have 10% of PureScript on production.
+- code quality are increasing
+- bug rate decreasing
+- members are uplifted with functional programming skill
+- line of code decresing
+- React eco system and purescript coexist well so far
+
+Read the [[https://blog.oyanglul.us/purescript/cheatsheet][cheatsheet]] to find out how easy to convert from JS to PureScript
+
+* [[https://blog.oyanglul.us/scala/functional-caching][Functional Scala Cachinng]]
+We need to cache a lot of stuff on production, but it is hard to find a
+caching library with good functional DSL.
+
+So here is my answer [[https://github.com/jcouyang/jujiu][Jujiu]]
+
+It is just Kleisli and with fine with Tagless final as well.
+
+It is easy to compose your caching logic into your existing logic using the DSL
+, and run it on different interpreter later on. The builtin interpreter is [[https://github.com/ben-manes/caffeine][Caffeine]]
+and it's easy to [[https://github.com/jcouyang/jujiu#extensible][add Reddis support as well.]]
+
+* Owlet
+
+[[https://github.com/jcouyang/owlet][Owlet]] is now available in [[https://scalafiddle.io/sf/mDggvjd][ScalaFiddle]], please try it out online.
