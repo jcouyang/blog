@@ -1,0 +1,224 @@
+#+TITLE: Applied Evolutionary Design
+#+SUBTITLE: Chapter 1 - The Story
+#+Author: Jichao Ouyang
+#+Date: <2020-01-03 Fri>
+
+#+begin_quote
+1. Almost all the successful microservice stories have started with a monolith that got too big and was broken up
+2. Almost all the cases where I've heard of a system that was built as a microservice system from scratch, it has ended up in serious trouble.
+
+  -- [[https://www.martinfowler.com/bliki/MonolithFirst.html][Monolith First]] by Martin Fowler
+#+end_quote
+
+These are what Martin heard from teams, however, the whole article didn't explain
+*how* to evolve from a monolith to microservices.
+
+Those are all fair points of issues from the article, I don't think I can explain better than
+Martin.
+
+But I probably was in one of the teams that told the story, maybe I could try explaining how exactly does that work?
+
+
+* Drowsy Cafe
+Let us start from a story:
+
+#+begin_example
+As a sleepy guy, I need to buy a cup of coffee from cafe
+#+end_example
+
+It sounds like a simple story, but that is too high level and not doable, let us break into 3 stories:
+
+#+begin_example
+1. As a sleepy guy, I should able to order a latte from /Drowsy Cafe/
+#+end_example
+#+begin_example
+2. As a sleepy guy, I should able to pay for the latte with my master credit card
+#+end_example
+#+begin_example
+3. As a sleepy guy, I should able to get my latte 2 mins after the credit card transaction is done.
+#+end_example
+
+That is a lot better.
+
+It is not very hard to identify that we have 3 actors here:
+1. the sleepy guy
+2. /Drowsy Cafe/
+3. the bank
+
+Somehow they are all connected because of our story. So if we model these actors as relational database table, it would be something like:
+
+[[./images/schema-v1.png]]
+
+1. Guy has many Orders
+2. Cafe has many Products
+3. Products has many Orders
+4. Orders has many transactions(when card rejected, user should able to retry)
+
+BDD of Journey of the Guy
+
+#+begin_verse
+Given *Cafe* /Drowsy Cafe/ has *product* /Latte/
+And *Transaction* for any *Order* will success
+When *Guy* /sleepy/ order one *product* /Latte/
+Then an *Order* will be generated
+When *Guy* /sleepy/ swipe an credit card on pos terminal
+Then *Guy* receives his *product* /Latte/
+#+end_verse
+
+#+BEGIN_SRC scala
+  trait DrawsyCafeService {
+    type ProductId = Int
+    type OrderId = Int
+    type UserId = Int
+    type CreditCard = Int
+
+    object TransactionStatus extends Enumeration {
+      type Type = Value
+      val Success, Failed = Value
+    }
+    case class Transaction(
+      id: Int,
+      status: TransactionStatus.Type
+    )
+    case class Product(
+      id: Int,
+      name: String
+    )
+    def order(customer: UserId, product: ProductId): IO[OrderId]
+    def pay(order: OrderId, creditCard: CreditCard): IO[TransactionId]
+    def brew(product: ProductId): IO[Product]
+    def canIHaveALatte(user: UserId, card: CreditCard): IO[Product] = for {
+      orderId <- order(customer = user, product = 1)
+      transaction <- pay(orderId, creditCard = card)
+      coffee <- if (transaction.status == TransactionStatus.Success)
+        brew(product = 1) else IO.raise(new Exception("payment failed please retry"))
+    } yield coffee
+  }
+#+END_SRC
+
+Seems very straight forward, just few line of code, we should start
+with:
+1. one Database that has the schema
+2. one Service that can place order and process payment
+3. one deployment pipeline to deploy the service
+
+Which sounds like a Monolith, but not likely, since it is still very small, very easy
+to reason about and contribute features.
+
+
+This implementation works great even some error happened.
+#+begin_verse
+Given *Cafe* /Drowsy Cafe/ has *product* /Latte/
+_And *Transaction* for any *Order* will FAIL_
+When *Guy* /sleepy/ order one *product* /Latte/
+Then an *Order* will be generated
+When *Guy* /Sleepy/ swipe an credit card on pos terminal
+_Then *Guy* /Sleepy/ won't get his *product* /Latte/_
+#+end_verse
+
+[[./images/creditcard-rejected.png]]
+
+It is great, no transaction is success, the guy get nothing and safe to retry from the beginning.
+
+#+begin_verse
+Given *Cafe* /Drowsy Cafe/ has *product* /Latte/
+When *Guy* /Sleepy/ order one *product* /Latte/
+_Then an *Order* is NOT generated_
+_Then *Guy* /Sleepy/ can NOT swipe credit card_
+#+end_verse
+
+[[./images/order-rejected.png]]
+
+No problem, no order is generated, the guy can not even pay and safely retry from the beginning.
+
+
+When all these story is done, /Drowsy Cafe/ can open their service
+to the market.
+
+#+begin_example
+1. As a sleepy guy, I should able to order a latte from /Drowsy Cafe/
+#+end_example
+#+begin_example
+2. As a sleepy guy, I should able to pay for the latte with my master credit card
+#+end_example
+#+begin_example
+3. As a sleepy guy, I should able to get my latte 2 mins after the credit card transaction is done.
+#+end_example
+
+It is not perfect service since:
+1. the sleepy guy has to retry if anything wrong happen even to cafe or bank
+2. only one barista working both on baking coffee and taking order, only can
+serve one customer at a time.
+3. only sell latte
+4. one customer can only order one coffee, they have to swipe credit card twice
+if order two cups of coffee.
+
+Overall experience ain't perfect, but at least /Drowsy Cafe/ start selling coffee.
+
+* Drowsy Cafe 2.0
+Drowsy Cafe is the only cafe that sells Latte at the whole street, so it become
+so popular that one barista can not serve all customer in 2 mins.
+
+So they hire another one, now they can split the tasks of taking order and brewing coffee.
+
+[[./images/barista.png]]
+
+Now the /Drowsy Cafe/ become something like microservices, it evolves into two services.
+
+1. A service just take care of taking order, process payment
+2. A Service just take care of brewing coffee
+#+BEGIN_SRC scala
+    // This now become a remote call to another service
+    def brew(product: ProductId): IO[Product]
+#+END_SRC
+
+The investment of hiring another barista is soon paying back.
+
+1. Because barista only focus on one thing, now barista learn how to brew
+espresso and flat white. So /Drowsy Cafe/ now is selling 3 kinds of coffee.
+2. The other one just taking care of orders, they learn how to take multiple
+coffee in single order, which keep the queue short and more customers are served.
+
+It works great 99% of the time, and /Drowsy Cafe/ gain 10x of profit
+comparing to previous version.
+But sometimes maybe there is network issue,
+or the barista is offline:
+
+[[./images/barista-retry.png]]
+
+Such case lead to really troublesome situation, /Drowsy Cafe/ already debit
+the money, but customer get nothing.
+
+The customer rating is getting low and reputation is ruin. They're getting less
+and less customer because of the service availability is too low.
+
+/Drowsy Cafe/ 2.0 isn't that success for long term, yes it has more features, but
+sacrificed availability.
+
+What is the reason that causing all these issues?
+
+
+* How to Evolve to Microservices
+There are few things done wrong when we replacing current monolith with microservice.
+
+Of cause we done something right as well -- the services is split by domain context boundary.
+
+1. Order service focus on placing order and process payment, it does not need to have any context of how to brew a coffee.
+2. Brew service focus on brewing coffee, no need to have any context of how much the coffee cost or how to process the payment.
+
+Domain context boundary is very clear, however, the way we split microservices is not appropriate.
+
+Overall there are two kind of pattern that your monolith can split with:
+- *Request Response Messaging:* Message goes two way, request will get feedback of the result.
+- *One Way Messaging:* Message only goes one way, the only success response is just ACK(nowledge), which does not indicate the process result.
+
+Based on different business requirement, the best suitable pattern should be chose to achieve best result.
+
+Like what /Drowsy Cafe/ did to move =brew= function as remote service call, is using /Request Response Message/ pattern.
+When you call =brew= function, you can tell the coffee is ready or not by inspecting the response.
+
+But the thing is, =brew= is more suitable to fall into /One Way Messaging/ pattern:
+1. Since the customer's credit card is charged, Cafe should grantee the a coffee must be made, otherwise a refund process should kick in.
+2. Brewing coffee is time consuming process, there is no way to keep customer at the counter when coffee is brewing.
+
+
