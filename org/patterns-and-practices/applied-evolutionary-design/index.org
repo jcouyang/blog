@@ -21,22 +21,21 @@ But I probably was in one of the teams that told the story, maybe I could try ex
 
 * Drowsy Cafe
 Let us start from a story:
-
-#+begin_example
+#+BEGIN_CENTER
 As a sleepy guy, I need to buy a cup of coffee from cafe
-#+end_example
+#+END_CENTER
 
 It sounds like a simple story, but that is too high level and not doable, let us break into 3 stories:
 
-#+begin_example
+#+begin_center
 1. As a sleepy guy, I should able to order a latte from /Drowsy Cafe/
-#+end_example
-#+begin_example
+#+end_center
+#+begin_center
 2. As a sleepy guy, I should able to pay for the latte with my master credit card
-#+end_example
-#+begin_example
+#+end_center
+#+begin_center
 3. As a sleepy guy, I should able to get my latte 2 mins after the credit card transaction is done.
-#+end_example
+#+end_center
 
 That is a lot better.
 
@@ -65,6 +64,8 @@ When *Guy* /sleepy/ swipe an credit card on pos terminal
 Then *Guy* receives his *product* /Latte/
 #+end_verse
 
+The following is what the implementation will looks like in Scala.[fn:3]
+
 #+BEGIN_SRC scala
   trait DrawsyCafeService {
     type ProductId = Int
@@ -85,13 +86,13 @@ Then *Guy* receives his *product* /Latte/
       name: String
     )
     def order(customer: UserId, product: ProductId): IO[OrderId]
-    def pay(order: OrderId, creditCard: CreditCard): IO[TransactionId]
+    def pay(order: OrderId, creditCard: CreditCard): IO[Transaction]
     def brew(product: ProductId): IO[Product]
     def canIHaveALatte(user: UserId, card: CreditCard): IO[Product] = for {
       orderId <- order(customer = user, product = 1)
       transaction <- pay(orderId, creditCard = card)
       coffee <- if (transaction.status == TransactionStatus.Success)
-        brew(product = 1) else IO.raise(new Exception("payment failed please retry"))
+        brew(product = 1) else IO.raiseError(new Exception("payment failed please retry"))
     } yield coffee
   }
 #+END_SRC
@@ -149,17 +150,18 @@ It is not perfect service since:
 1. the sleepy guy has to retry if anything wrong happen even to cafe or bank
 2. only one barista working both on baking coffee and taking order, only can
 serve one customer at a time.
-3. only sell latte
+3. only sell Latte
 4. one customer can only order one coffee, they have to swipe credit card twice
 if order two cups of coffee.
 
 Overall experience ain't perfect, but at least /Drowsy Cafe/ start selling coffee.
 
 * Drowsy Cafe 2.0
+
 Drowsy Cafe is the only cafe that sells Latte at the whole street, so it become
 so popular that one barista can not serve all customer in 2 mins.
 
-So they hire another one, now they can split the tasks of taking order and brewing coffee.
+As business grow, service need to evolve as well, so they hire another one, now they can split the tasks of taking order and brewing coffee.
 
 [[./images/barista.png]]
 
@@ -172,7 +174,7 @@ Now the /Drowsy Cafe/ become something like microservices, it evolves into two s
     def brew(product: ProductId): IO[Product]
 #+END_SRC
 
-The investment of hiring another barista is soon paying back.
+The investment of hiring another barista is soon paying back.[fn:2]
 
 1. Because barista only focus on one thing, now barista learn how to brew
 espresso and flat white. So /Drowsy Cafe/ now is selling 3 kinds of coffee.
@@ -190,7 +192,7 @@ Such case lead to really troublesome situation, /Drowsy Cafe/ already debit
 the money, but customer get nothing.
 
 The customer rating is getting low and reputation is ruin. They're getting less
-and less customer because of the service availability is too low.
+and less customer because of the service availability is low.
 
 /Drowsy Cafe/ 2.0 isn't that success for long term, yes it has more features, but
 sacrificed availability.
@@ -198,7 +200,8 @@ sacrificed availability.
 What is the reason that causing all these issues?
 
 
-* How to Evolve to Microservices
+* How to Evolve to Microservices Properly
+
 There are few things done wrong when we replacing current monolith with microservice.
 
 Of cause we done something right as well -- the services is split by domain context boundary.
@@ -208,7 +211,7 @@ Of cause we done something right as well -- the services is split by domain cont
 
 Domain context boundary is very clear, however, the way we split microservices is not appropriate.
 
-Overall there are two kind of pattern that your monolith can split with:
+Overall there are two kinds of pattern that your monolith can split with:
 - *Request Response Messaging:* Message goes two way, request will get feedback of the result.
 - *One Way Messaging:* Message only goes one way, the only success response is just ACK(nowledge), which does not indicate the process result.
 
@@ -217,8 +220,18 @@ Based on different business requirement, the best suitable pattern should be cho
 Like what /Drowsy Cafe/ did to move =brew= function as remote service call, is using /Request Response Message/ pattern.
 When you call =brew= function, you can tell the coffee is ready or not by inspecting the response.
 
-But the thing is, =brew= is more suitable to fall into /One Way Messaging/ pattern:
-1. Since the customer's credit card is charged, Cafe should grantee the a coffee must be made, otherwise a refund process should kick in.
-2. Brewing coffee is time consuming process, there is no way to keep customer at the counter when coffee is brewing.
+But the thing is, =brew= is more likely to fall into /One Way Messaging/ pattern:
 
+1. Since the customer's credit card is charged, Cafe should grantee the a coffee must be made[fn:1], otherwise a refund process should kick in.
+2. Brewing coffee is time consuming process, it make no sense to keep customer at the counter when coffee is brewing.
+
+Next Chapter, we will go though the detail of how to apply /One Way Messaging/ pattern, to save /Drowsy Cafe 2.0/ business.
+
+* Footnotes
+
+[fn:3] I've tried in [[http://ammonite.io/#Ammonite-REPL][amm]], the code really compiles.
+
+[fn:2] Martin already summarized [[https://martinfowler.com/articles/microservice-trade-offs.html][Microservice Trade-Offs]]
+
+[fn:1] This is so call [[https://martinfowler.com/articles/microservice-trade-offs.html#consistency][/Eventually Consistency/]]
 
