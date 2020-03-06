@@ -1,0 +1,20 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build ORG files
+      run: docker run --rm -v $(pwd):/blog jcouyang/orgpress
+    - name: Publish
+      run: |
+        ls publish
+        git status
