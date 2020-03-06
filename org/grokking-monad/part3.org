@@ -170,6 +170,12 @@ ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 im
 data Free f a = Roll (f (Free f a)) | Return a
 #+END_SRC
 
+#+BEGIN_SRC scala
+  seal trait Free[F[_], A]
+  case class Roll[S[_], A](a: S[Free[S,A]]) extends Free[S, A]
+  case class Return[F[_], A](a: A) extends Free[S, A]
+#+END_SRC
+
 其中 =f= 就是你业务需要的 effect 类型, =a= 是这个 effect 所产生的返回值类型。
 
 右边两种构造函数，如果把 =Role= 改成 =Cons=, =Return= 改成 =Nil= 的话, 是不是跟 List 其实是 {{{ruby(同构,isomophic)}}} 的呢? 所以如果想象成 List, 那么 =f= 在这里就相当于 List 中的一个元素.
@@ -184,6 +190,17 @@ instance Functor f => Monad (Free f) where
   Roll ffa >>= fn = Roll $ fmap (>>= fn) ffa
 #+END_SRC
 
+#+BEGIN_SRC scala
+implicit def monadForFree[S[_]](implicit F:Functor[S]): Monad[Free[S, ?]] =
+  new Monad[Free[S, ?]] {
+    def pure[A](a: A): Free[S, A] = Return(a)
+    def map[A, B](fa: Free[S, A])(f: A => B): Free[S, B] = fa.flatMap(a=>Return(f(a)))
+    def flatMap[A, B](a: Free[S, A])(f: A => Free[S, B]): Free[S, B] = a match {
+      case Return(a) => f(a)
+      case Roll(a) => Roll(F.map(a)(_.flatMap(f)))
+    }
+  }
+#+END_SRC
 你会发现 ~>>=~ 会递归的 =fmap= 到 =Roll= 上, 直到最后一个 =Return=.
 
 比如, 如果你有一个 program 有三种副作用 Eff1, Eff2, Eff3
@@ -195,6 +212,22 @@ program = do
  b <- liftF $ Eff2 2
  c <- liftF $ Eff3 3
  return a + b + c
+#+END_SRC
+#+BEGIN_SRC scala
+  sealed trait Eff[A] {
+    def eff1[A](a: A): Eff[A] = Free.liftF[Eff, A](Eff1(a))
+    def eff2[A](a: A): Eff[A] = Free.liftF[Eff, A](Eff2(a))
+    def eff3[A](a: A): Eff[A] = Free.liftF[Eff, A](Eff3(a))
+  }
+  case class Eff1[A](a: A) extends Eff[A]
+  case class Eff2[A](a: A) extends Eff[A]
+  case class Eff3[A](a: A) extends Eff[A]
+
+  val program = for {
+    a <- eff1(1)
+    b <- eff2(2)
+    c <- eff3(3)
+  } yield a + b + c
 #+END_SRC
 
 如果我们把 program 展开, 每一步 ~>>=~ 大概是这样:
@@ -217,6 +250,14 @@ Roll (Eff1 (Return 1))
      return a + b + c
 #+END_SRC
 
+#+BEGIN_SRC scala
+  val program = Roll(Eff1(Return(1))).flatMap(a=>
+    for {
+      b <- eff2(2)
+      c <- eff3(3)
+    } yield a + b + c
+  )
+#+END_SRC
 用 Free 的 ~>>=~ 公式 ~Roll ffa >>= fn = Roll $ fmap (>>= fn) ffa~ 去展开上面就得到:
 
 #+BEGIN_SRC haskell
@@ -227,6 +268,15 @@ Roll (Eff1 (Return 1))
      return a + b + c
 #+END_SRC
 
+#+BEGIN_SRC scala
+  val fn1 = (a: Int) =>
+      for {
+        b <- eff2(2)
+        c <- eff3(3)
+      } yield a + b + c
+
+  val program = Roll(Eff1(Return(1).flatMap(fn1)))
+#+END_SRC
 ~Return 1 >>= fn1~ 我们都知道怎么展开:
 
 #+BEGIN_SRC haskell
@@ -235,6 +285,16 @@ Roll (Eff1 (Return 1))
      b <- liftF $ Eff2 2
      c <- liftF $ Eff3 3
      return a + b + c
+#+END_SRC
+
+#+BEGIN_SRC scala
+  val fn1 = (a: Int) =>
+      for {
+        b <- eff2(2)
+        c <- eff3(3)
+      } yield a + b + c
+
+  val program = Roll(Eff1(fn1(1)))
 #+END_SRC
 
 展开 =fn1=
@@ -246,6 +306,12 @@ Roll (Eff1 (Return 1))
      return 1 + b + c
 #+END_SRC
 
+#+BEGIN_SRC scala
+  val program = Roll(Eff1(for {
+        b <- eff2(2)
+        c <- eff3(3)
+      } yield 1 + b + c))
+#+END_SRC
 
 同样的步骤展开 Eff2
 #+BEGIN_SRC haskell
@@ -254,11 +320,21 @@ Roll (Eff1 (Return 1))
      return 1 + 2 + c
 #+END_SRC
 
+#+BEGIN_SRC scala
+  val program = Roll(Eff1(Roll(Eff2(for {
+        c <- eff3(3)
+      } yield 1 + 2 + c))))
+#+END_SRC
+
 和 Eff3
 
 #+BEGIN_SRC haskell
   program = Roll $ Eff1 $ Roll $ Eff2 $ Roll $ Eff3 do
      return 1 + 2 + 3
+#+END_SRC
+
+#+BEGIN_SRC scala
+  val program = Roll(Eff1(Roll(Eff2(Roll(Eff3(Return(1 + 2 + 3)))))))
 #+END_SRC
 
 最后的 program 是不是很像 List 的 Cons 和 Nil 呢?
@@ -278,6 +354,22 @@ Roll (Eff1 (Return 1))
 data CoYoneda f a = forall b. CoYoneda (b -> a) (f b)
 #+END_SRC
 
+#+BEGIN_SRC scala
+  trait CoYoneda[F[_], A] {
+    type P
+    val fi: F[P]
+    val ks: P => A
+  }
+  object CoYoneda{
+    type Aux[F[_], A, B] = CoYoneda[F, A] { type P = B }
+    def apply[F[_], A, B](f: B => A)(fa: F[B]): Aux[F, A, B] = new CoYoneda[F, A] {
+      type P = B
+      val fi = fa
+      val ks = f
+    }
+  }
+#+END_SRC
+
 [[file:images/p3-CoYoneda.png]]
 
 事实上很简单可以把任何 =f= 变成 =CoYoneda f=
@@ -285,6 +377,10 @@ data CoYoneda f a = forall b. CoYoneda (b -> a) (f b)
 #+BEGIN_SRC haskell
 phi :: f a -> CoYoneda f a
 phi fa = CoYoneda id fa
+#+END_SRC
+
+#+BEGIN_SRC scala
+  def phi[F[_], A](fa: F[A]): Aux[F, A, A] = apply(identity)(fa)
 #+END_SRC
 
 [[file:images/p3-CoYoneda-phi.png]]
@@ -298,6 +394,10 @@ psi :: Functor f => CoYoneda f a -> f a
 psi (CoYoneda g fa) = fmap g fa
 #+END_SRC
 
+#+BEGIN_SRC scala
+  def psi[F[_]:Functor, A](fa: CoYoneda[F, A]): F[A] = Functor[F].map(fa.fi)(fa.ki)
+#+END_SRC
+
 [[file:images/p3-CoYoneda-psi.png]]
 
 反过来的这个不重要, 重要的是 =phi=, 因为如果你可以把任何 =f= 变成 =CoYoneda f=, 而 =CoYoneda f= 又是 =Functor=,
@@ -308,12 +408,26 @@ instance Functor (Coyoneda f) where
   fmap f (Coyoneda g fb) = Coyoneda (f . g) fb
 #+END_SRC
 
+#+BEGIN_SRC scala
+  implicit def freeFunctorForCoyoneda[F[_]]: Functor[CoYoneda[F, _]] =
+    new Functor[CoYoneda[F, _]] {
+      def map[A, B, C](cfa: Aux[F, A, C])(f: A => B): Aux[F, B, C] = new CoYoneda[F, B] {
+        type P = C
+        val fi: F[C] = cfa.fi
+        val ki: C => B = f compose cfa.ki
+      }
+    }
+#+END_SRC
 *** Free Functor
 比如我们的 =Eff= 就可以直接通过 =phi= 变成 =CoYoneda Eff=, 从而得到免费的 Functor
 
 #+BEGIN_SRC haskell
 data Eff a = Eff1 a | Eff2 a | Eff3 a
 program = Roll (phi (Eff1 (Roll (phi (Eff2 (Return Int))))))
+#+END_SRC
+
+#+BEGIN_SRC scala
+val program = Roll(phi(Eff1(Roll((phi(Eff2(Roll(phi(Eff3(Return(1 + 2 + 3)))))))))))
 #+END_SRC
 
 [[file:images/p3-Free.png]]
@@ -328,6 +442,12 @@ foldMap _ (Return a)  = return a
 foldMap f (Roll a) = f a >>= foldMap f
 #+END_SRC
 
+#+BEGIN_SRC scala
+  def foldMap[F[_], M[_]: Monad, A](free: Free[F, A])(fk: F ~> M): M[A] = free match {
+    case Return(a) => Monad[M].pure(a)
+    case Roll(a) => fk(a).flatMap(foldMap(_)(fk))
+  }
+#+END_SRC
 ** TODO Free Monoid
 ** TODO Eff
 
