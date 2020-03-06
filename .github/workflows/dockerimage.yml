@@ -12,9 +12,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - uses: actions/checkout@v2
+      with:
+        ref: gh-pages
+        path: public
     - name: Build ORG files
-      run: docker run --rm -v $(pwd):/blog jcouyang/orgpress
+      run: |
+        rm public/*
+        docker run --rm -v $(pwd):/blog jcouyang/orgpress
     - name: Publish
       run: |
-        ls publish
+        ls public
+        cd public
         git status
+        git add .
+        git commit -m "orgpress ci publish"
+        git push origin gh-pages
