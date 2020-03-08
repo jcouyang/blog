@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-06 Fri 12:45 -->
+<!-- 2020-03-08 Sun 02:09 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>范畴论完全装逼手册 / Grokking Monad</title>
@@ -21,7 +21,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -85,31 +85,31 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org2b83b31">第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></a>
+<li><a href="#org1faecc9">第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></a>
 <ul>
-<li><a href="#orgba82471">Identity 本身就有</a></li>
-<li><a href="#orgf8c951a">Maybe 可能会有</a></li>
-<li><a href="#org1c69b13">Either 要么有要么有</a>
+<li><a href="#org10aaeef">Identity 本身就有</a></li>
+<li><a href="#org69a0ed0">Maybe 可能会有</a></li>
+<li><a href="#org3972adf">Either 要么有要么有</a>
 <ul>
-<li><a href="#org17bfad6">Product &amp; Coproduct</a></li>
-<li><a href="#orge19ba66">Either Monad</a></li>
+<li><a href="#orgf06c4c4">Product &amp; Coproduct</a></li>
+<li><a href="#orgb016202">Either Monad</a></li>
 </ul>
 </li>
-<li><a href="#orgec20723">Reader 差一点就有</a>
+<li><a href="#orgde5da65">Reader 差一点就有</a>
 <ul>
-<li><a href="#org59b28eb">do notation</a></li>
+<li><a href="#org7d0ee4f">do notation</a></li>
 </ul>
 </li>
-<li><a href="#org7505ce4">Writer 光出进没有</a></li>
-<li><a href="#org30a3b76">State 变化会有</a></li>
-<li><a href="#org105da09">Validation 检查检查</a>
+<li><a href="#org960ad04">Writer 光出进没有</a></li>
+<li><a href="#orgb5c9952">State 变化会有</a></li>
+<li><a href="#org6cb4de8">Validation 检查检查</a>
 <ul>
-<li><a href="#org9f94784"><ruby>含幺半群<rt>Monoid</rt></ruby></a></li>
-<li><a href="#orgd0bcad5">回到 Validation</a></li>
+<li><a href="#orgc060df2"><ruby>含幺半群<rt>Monoid</rt></ruby></a></li>
+<li><a href="#orgf7cd4e2">回到 Validation</a></li>
 </ul>
 </li>
-<li><a href="#orgbfc4526">Cont 接下来有</a></li>
-<li><a href="#org05e7f17">Summary</a></li>
+<li><a href="#org2e494e6">Cont 接下来有</a></li>
+<li><a href="#org3f4fcdc">Summary</a></li>
 </ul>
 </li>
 </ul>
@@ -121,9 +121,9 @@ for the JavaScript code in this tag.
 <li><a href="./part3.html">第三部分：搞基猫呢</a></li>
 </ul>
 
-<div id="outline-container-org2b83b31" class="outline-2">
-<h2 id="org2b83b31">第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></h2>
-<div class="outline-text-2" id="text-org2b83b31">
+<div id="outline-container-org1faecc9" class="outline-2">
+<h2 id="org1faecc9">第二部分：<ruby>食用猫呢<rt> Practical Monads</rt></ruby></h2>
+<div class="outline-text-2" id="text-org1faecc9">
 
 <figure>
 <img src="./images/Alice_through_the_looking_glass.jpg" alt="Alice_through_the_looking_glass.jpg">
@@ -155,11 +155,11 @@ And contrary wise, what is, it wouldn't be. And what it wouldn't be, it would. Y
 </p>
 </div>
 
-<div id="outline-container-orgba82471" class="outline-3">
-<h3 id="orgba82471">Identity 本身就有<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+<div id="outline-container-org10aaeef" class="outline-3">
+<h3 id="org10aaeef">Identity 本身就有<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
 从来没见过有人给这些数据类型按过中文名字, 不然我来, 这样也更好的体会这些数据类型的意图.
 </span></h3>
-<div class="outline-text-3" id="text-orgba82471">
+<div class="outline-text-3" id="text-org10aaeef">
 <p>
 <ruby>本身就有单子<rt> Identity Monad</rt></ruby> 可能是最简单的单子了。本身不包含任何计算, 且只有一个构造器:
 </p>
@@ -171,7 +171,7 @@ And contrary wise, what is, it wouldn't be. And what it wouldn't be, it would. Y
 
 <p>
 这里使用 <code>newtype</code> 而不是 <code>data</code> 是因为 <code>Identity</code> 与 <code>runIdentity</code> 是同构的<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
-见 <a href="part1.html#orgf0aed70">第一部分 伴随函子</a>
+见 第一部分 伴随函子
 </span>.
 </p>
 
@@ -256,9 +256,9 @@ Identity 看起来什么也没有干，就跟 identity 函数一样，但是实�
 </div>
 </div>
 
-<div id="outline-container-orgf8c951a" class="outline-3">
-<h3 id="orgf8c951a">Maybe 可能会有</h3>
-<div class="outline-text-3" id="text-orgf8c951a">
+<div id="outline-container-org69a0ed0" class="outline-3">
+<h3 id="org69a0ed0">Maybe 可能会有</h3>
+<div class="outline-text-3" id="text-org69a0ed0">
 <p>
 <ruby>可能会有单子<rt>Maybe Monad</rt></ruby>是一个超级简单的但比本身就有稍稍复杂的单子.
 </p>
@@ -379,9 +379,9 @@ Maybe 有用在于能合适的处理 <i><ruby>偏函数<rt> Partial Function</rt
 </div>
 </div>
 
-<div id="outline-container-org1c69b13" class="outline-3">
-<h3 id="org1c69b13">Either 要么有要么有</h3>
-<div class="outline-text-3" id="text-org1c69b13">
+<div id="outline-container-org3972adf" class="outline-3">
+<h3 id="org3972adf">Either 要么有要么有</h3>
+<div class="outline-text-3" id="text-org3972adf">
 <p>
 Either 的定义也很简单
 </p>
@@ -395,9 +395,9 @@ Either 的定义也很简单
 </div>
 
 
-<div id="outline-container-org17bfad6" class="outline-4">
-<h4 id="org17bfad6">Product &amp; Coproduct</h4>
-<div class="outline-text-4" id="text-org17bfad6">
+<div id="outline-container-orgf06c4c4" class="outline-4">
+<h4 id="orgf06c4c4">Product &amp; Coproduct</h4>
+<div class="outline-text-4" id="text-orgf06c4c4">
 <p>
 看过第一部分应该还能记得有一个东西叫 Duel，所以见到如果范畴上有 Coproduct 那么肯定在duel范畴上会有同样的东西叫 Product。
 </p>
@@ -439,9 +439,9 @@ Tuple 的 <code>fst</code> 箭头能让 <code>(a, b)</code> 到达 <code>a</code
 </div>
 </div>
 
-<div id="outline-container-orge19ba66" class="outline-4">
-<h4 id="orge19ba66">Either Monad</h4>
-<div class="outline-text-4" id="text-orge19ba66">
+<div id="outline-container-orgb016202" class="outline-4">
+<h4 id="orgb016202">Either Monad</h4>
+<div class="outline-text-4" id="text-orgb016202">
 <p>
 确切的说，Either 不是 monad， <code>Either a</code> 才是。还记得 monad 的 class 定义吗？
 </p>
@@ -480,9 +480,9 @@ t a 的 kind 是 *，所以 t 必须是 kind * -&gt; *
 </div>
 
 
-<div id="outline-container-orgec20723" class="outline-3">
-<h3 id="orgec20723">Reader 差一点就有</h3>
-<div class="outline-text-3" id="text-orgec20723">
+<div id="outline-container-orgde5da65" class="outline-3">
+<h3 id="orgde5da65">Reader 差一点就有</h3>
+<div class="outline-text-3" id="text-orgde5da65">
 <p>
 Reader 的作用是给一个计算喂数据。
 </p>
@@ -583,9 +583,9 @@ Reader 的作用是给一个计算喂数据。
 </p>
 </div>
 
-<div id="outline-container-org59b28eb" class="outline-4">
-<h4 id="org59b28eb">do notation</h4>
-<div class="outline-text-4" id="text-org59b28eb">
+<div id="outline-container-org7d0ee4f" class="outline-4">
+<h4 id="org7d0ee4f">do notation</h4>
+<div class="outline-text-4" id="text-org7d0ee4f">
 <p>
 这可能是你第一次见到 <code>do</code> 和 <code>&lt;-</code>. 如果不是，随意跳过这节。
 </p>
@@ -608,9 +608,9 @@ Reader 的作用是给一个计算喂数据。
 </div>
 
 
-<div id="outline-container-org7505ce4" class="outline-3">
-<h3 id="org7505ce4">Writer 光出进没有</h3>
-<div class="outline-text-3" id="text-org7505ce4">
+<div id="outline-container-org960ad04" class="outline-3">
+<h3 id="org960ad04">Writer 光出进没有</h3>
+<div class="outline-text-3" id="text-org960ad04">
 <p>
 除了返回值，计算会需要产生一些额外的数据，比如 log
 </p>
@@ -675,9 +675,9 @@ Writer 的定义更简单
 </div>
 </div>
 
-<div id="outline-container-org30a3b76" class="outline-3">
-<h3 id="org30a3b76">State 变化会有</h3>
-<div class="outline-text-3" id="text-org30a3b76">
+<div id="outline-container-orgb5c9952" class="outline-3">
+<h3 id="orgb5c9952">State 变化会有</h3>
+<div class="outline-text-3" id="text-orgb5c9952">
 <p>
 跟名字就看得出来 State monad 是为了处理状态。虽然函数式编程不应该有状态，不然会引用透明性。但是，state monad并不是在计算过程中修改状态，而是通过描述这种变化，然后需要时在运行返回最终结果。这一点跟 Reader 和 Writer 这两个看起来是副作用的 IO 是一样的。
 </p>
@@ -740,9 +740,9 @@ x 类型是 <code>s -&gt; (a, s)</code> ,所以 x s 之后会返回 结果和状
 </div>
 
 
-<div id="outline-container-org105da09" class="outline-3">
-<h3 id="org105da09">Validation 检查检查</h3>
-<div class="outline-text-3" id="text-org105da09">
+<div id="outline-container-org6cb4de8" class="outline-3">
+<h3 id="org6cb4de8">Validation 检查检查</h3>
+<div class="outline-text-3" id="text-org6cb4de8">
 <p>
 如果你有注意到，前面的 Either 可以用在处理错误和正确的路径分支，但是问题是错误只发生一次。
 </p>
@@ -769,9 +769,9 @@ ADT定义看起来跟 Either 是一样的，不同的是 <ruby>左边<rt>Left</r
 </p>
 </div>
 
-<div id="outline-container-org9f94784" class="outline-4">
-<h4 id="org9f94784"><ruby>含幺半群<rt>Monoid</rt></ruby></h4>
-<div class="outline-text-4" id="text-org9f94784">
+<div id="outline-container-orgc060df2" class="outline-4">
+<h4 id="orgc060df2"><ruby>含幺半群<rt>Monoid</rt></ruby></h4>
+<div class="outline-text-4" id="text-orgc060df2">
 <p>
 monoid 首先得是 <ruby>半群<rt>Semigroup</rt></ruby> ，然后再 含幺。
 </p>
@@ -815,9 +815,9 @@ Monoid 的 <code>&lt;&gt;</code> 满足：
 </ul>
 </div>
 </div>
-<div id="outline-container-orgd0bcad5" class="outline-4">
-<h4 id="orgd0bcad5">回到 Validation</h4>
-<div class="outline-text-4" id="text-orgd0bcad5">
+<div id="outline-container-orgf7cd4e2" class="outline-4">
+<h4 id="orgf7cd4e2">回到 Validation</h4>
+<div class="outline-text-4" id="text-orgf7cd4e2">
 <p>
 现在让 Failure e 满足 Monoid，就可以 <code>mappend</code> 错误信息了。
 </p>
@@ -891,9 +891,9 @@ notEmpty 检查字符是否为空，如果是空返回 Failure 包含错误信�
 </div>
 </div>
 
-<div id="outline-container-orgbfc4526" class="outline-3">
-<h3 id="orgbfc4526">Cont 接下来有</h3>
-<div class="outline-text-3" id="text-orgbfc4526">
+<div id="outline-container-org2e494e6" class="outline-3">
+<h3 id="org2e494e6">Cont 接下来有</h3>
+<div class="outline-text-3" id="text-org2e494e6">
 <p>
 Cont 是 <ruby>Continuation Passing Style<rt>CPS</rt></ruby> 的 monad，也就是说，它是包含 cps 计算 monad。
 </p>
@@ -953,9 +953,9 @@ Cont 是 <ruby>Continuation Passing Style<rt>CPS</rt></ruby> 的 monad，也就�
 </div>
 </div>
 
-<div id="outline-container-org05e7f17" class="outline-3">
-<h3 id="org05e7f17">Summary</h3>
-<div class="outline-text-3" id="text-org05e7f17">
+<div id="outline-container-org3f4fcdc" class="outline-3">
+<h3 id="org3f4fcdc">Summary</h3>
+<div class="outline-text-3" id="text-org3f4fcdc">
 <p>
 第二部分食用部分也讲完了， 不知是否以及大致了解了monad的尿性各种基本玩法呢？通过这些常用的基本的 monad instance，解决命令式编程中的一些简单问题应该是够了。
 </p>
@@ -983,7 +983,7 @@ Cont 是 <ruby>Continuation Passing Style<rt>CPS</rt></ruby> 的 monad，也就�
 </p></div></div>
 
 <div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
-见 <a href="part1.html#orgf0aed70">第一部分 伴随函子</a>
+见 第一部分 伴随函子
 </p></div></div>
 
 <div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
@@ -1008,7 +1008,7 @@ Cont 是 <ruby>Continuation Passing Style<rt>CPS</rt></ruby> 的 monad，也就�
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
   </p>
   <p>Created: 2017-02-10 Fri 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.2 (<a href="https://orgmode.org">Org</a> mode 9.2.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

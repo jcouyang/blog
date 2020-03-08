@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-06 Fri 12:45 -->
+<!-- 2020-03-08 Sun 02:08 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Into ReaderT-verse</title>
@@ -26,7 +26,7 @@ for most case. So, let's dive into the ReaderT universe and see how can we facto
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -90,24 +90,24 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org321d773">The Program</a></li>
-<li><a href="#orga662e40">The Problem</a></li>
-<li><a href="#org2fb5ab6">A better version with ReaderT</a>
+<li><a href="#orgc3ea460">The Program</a></li>
+<li><a href="#org2d831fa">The Problem</a></li>
+<li><a href="#orge1ef84d">A better version with ReaderT</a>
 <ul>
-<li><a href="#org5a80742">Layer 2</a></li>
-<li><a href="#org1e9716d">Layer 3</a></li>
+<li><a href="#org6159c21">Layer 2</a></li>
+<li><a href="#orge62a4aa">Layer 3</a></li>
 </ul>
 </li>
-<li><a href="#org0fedb75">ReaderT-verse</a></li>
+<li><a href="#orgf12be94">ReaderT-verse</a></li>
 </ul>
 </div>
 </nav>
 <p>
 To keep this article reletively small, lets scope our problem smaller
 </p>
-<div id="outline-container-org321d773" class="outline-2">
-<h2 id="org321d773">The Program</h2>
-<div class="outline-text-2" id="text-org321d773">
+<div id="outline-container-orgc3ea460" class="outline-2">
+<h2 id="orgc3ea460">The Program</h2>
+<div class="outline-text-2" id="text-orgc3ea460">
 <p>
 I'll start with a simple deja vu program.
 </p>
@@ -136,9 +136,9 @@ It's pretty simple program:
 </div>
 
 
-<div id="outline-container-orga662e40" class="outline-2">
-<h2 id="orga662e40">The Problem</h2>
-<div class="outline-text-2" id="text-orga662e40">
+<div id="outline-container-org2d831fa" class="outline-2">
+<h2 id="org2d831fa">The Problem</h2>
+<div class="outline-text-2" id="text-org2d831fa">
 <p>
 Such program looks pretty clean and readable but implementation like this is never good enough for production because it lack of:
 </p>
@@ -185,9 +185,9 @@ this is an absolutly crap, the core process of the program is totally lost in th
 </div>
 </div>
 
-<div id="outline-container-org2fb5ab6" class="outline-2">
-<h2 id="org2fb5ab6">A better version with ReaderT</h2>
-<div class="outline-text-2" id="text-org2fb5ab6">
+<div id="outline-container-orge1ef84d" class="outline-2">
+<h2 id="orge1ef84d">A better version with ReaderT</h2>
+<div class="outline-text-2" id="text-orge1ef84d">
 <p>
 With ReaderT, we will get a better version of:
 </p>
@@ -252,9 +252,9 @@ Not bad but not good either, we can avoid mocking and stubing by abstract anothe
 </p>
 </div>
 
-<div id="outline-container-org5a80742" class="outline-3">
-<h3 id="org5a80742">Layer 2</h3>
-<div class="outline-text-3" id="text-org5a80742">
+<div id="outline-container-org6159c21" class="outline-3">
+<h3 id="org6159c21">Layer 2</h3>
+<div class="outline-text-3" id="text-org6159c21">
 <pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Interpreter</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] {
     <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">getObject</span>(bucketName<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, fileName<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">String</span>]
     <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">putObject</span>(bucketName<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, fileName<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, content<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">PutObjectResult</span>]
@@ -263,9 +263,9 @@ Not bad but not good either, we can avoid mocking and stubing by abstract anothe
 </div>
 </div>
 
-<div id="outline-container-org1e9716d" class="outline-3">
-<h3 id="org1e9716d">Layer 3</h3>
-<div class="outline-text-3" id="text-org1e9716d">
+<div id="outline-container-orge62a4aa" class="outline-3">
+<h3 id="orge62a4aa">Layer 3</h3>
+<div class="outline-text-3" id="text-orge62a4aa">
 <pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">ReaderT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Interpreter</span>[<span style="color: #6b8e23;">IO</span>], <span style="color: #6b8e23;">PutObjectResult</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
   content <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>(<span style="color: #00008b;">_</span>.getObject(sourceBucketName, fileName))
   result <span style="color: #00008b;">=</span> pureBusinessProcess(content)
@@ -288,9 +288,9 @@ program.run(<span style="color: #00008b;">new</span> <span style="color: #36648b
 </div>
 </div>
 
-<div id="outline-container-org0fedb75" class="outline-2">
-<h2 id="org0fedb75">ReaderT-verse</h2>
-<div class="outline-text-2" id="text-org0fedb75">
+<div id="outline-container-orgf12be94" class="outline-2">
+<h2 id="orgf12be94">ReaderT-verse</h2>
+<div class="outline-text-2" id="text-orgf12be94">
 <p>
 Finally we just need to refactor a bit and it's production ready:
 </p>
@@ -364,7 +364,7 @@ Same as Tagless Final
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
   </p>
   <p>Created: 2019-04-06 Sat 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.2 (<a href="https://orgmode.org">Org</a> mode 9.2.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-06 Fri 12:45 -->
+<!-- 2020-03-08 Sun 02:09 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>范畴论完全装逼手册 / Grokking Monad</title>
@@ -21,7 +21,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -85,28 +85,28 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org701798e">第三部分:<ruby>搞基猫呢<rt>Advanced Monads</rt></ruby></a>
+<li><a href="#org9d9ec5e">第三部分:<ruby>搞基猫呢<rt>Advanced Monads</rt></ruby></a>
 <ul>
-<li><a href="#orge038dcf">RWS</a></li>
-<li><a href="#org1359962">Monad Transform</a>
+<li><a href="#org94a258b">RWS</a></li>
+<li><a href="#org2d76bbe">Monad Transform</a>
 <ul>
-<li><a href="#org933b1fe">ReaderT</a></li>
+<li><a href="#orga95d62b">ReaderT</a></li>
 </ul>
 </li>
-<li><a href="#org5b96e49">Alternative</a></li>
-<li><a href="#org7aa39d2">MonadPlus</a></li>
-<li><a href="#orgfb563d0">ST Monad</a></li>
-<li><a href="#org120cadb">Free Monad</a>
+<li><a href="#org4cd7db0">Alternative</a></li>
+<li><a href="#org3847a38">MonadPlus</a></li>
+<li><a href="#orgde953a0">ST Monad</a></li>
+<li><a href="#orgd7125c4">Free Monad</a>
 <ul>
-<li><a href="#orgf74c4ea">Free</a></li>
-<li><a href="#org66ee4d6">Coyoneda</a></li>
-<li><a href="#org3d94ff0">Free Functor</a></li>
-<li><a href="#org67c3737">Interpreter</a></li>
+<li><a href="#org39f2302">Free</a></li>
+<li><a href="#org4526f48">Coyoneda</a></li>
+<li><a href="#org3872010">Free Functor</a></li>
+<li><a href="#orgf41b63e">Interpreter</a></li>
 </ul>
 </li>
-<li><a href="#orgf736452"><span class="todo TODO">TODO</span> Free Monoid</a></li>
-<li><a href="#org93965d0"><span class="todo TODO">TODO</span> Eff</a></li>
-<li><a href="#org6661053"><span class="todo TODO">TODO</span> Comonad</a></li>
+<li><a href="#orgdaccf82"><span class="todo TODO">TODO</span> Free Monoid</a></li>
+<li><a href="#org12cde21"><span class="todo TODO">TODO</span> Eff</a></li>
+<li><a href="#orgffa68b7"><span class="todo TODO">TODO</span> Comonad</a></li>
 </ul>
 </li>
 </ul>
@@ -118,9 +118,9 @@ for the JavaScript code in this tag.
 <li><a href="./part3.html"><b>第三部分：搞基猫呢</b></a> 👈</li>
 </ul>
 
-<div id="outline-container-org701798e" class="outline-2">
-<h2 id="org701798e">第三部分:<ruby>搞基猫呢<rt>Advanced Monads</rt></ruby></h2>
-<div class="outline-text-2" id="text-org701798e">
+<div id="outline-container-org9d9ec5e" class="outline-2">
+<h2 id="org9d9ec5e">第三部分:<ruby>搞基猫呢<rt>Advanced Monads</rt></ruby></h2>
+<div class="outline-text-2" id="text-org9d9ec5e">
 <p>
 第二部分介绍了一些实用的monad instances，这些 monad 都通过同样的抽象方式，解决了分离计算与副作用的工作。
 </p>
@@ -135,9 +135,9 @@ for the JavaScript code in this tag.
 </p>
 </div>
 
-<div id="outline-container-orge038dcf" class="outline-3">
-<h3 id="orge038dcf">RWS</h3>
-<div class="outline-text-3" id="text-orge038dcf">
+<div id="outline-container-org94a258b" class="outline-3">
+<h3 id="org94a258b">RWS</h3>
+<div class="outline-text-3" id="text-org94a258b">
 <p>
 RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。如果已经忘记 Reader Writer 或者 State，请到第二部分复习一下。
 </p>
@@ -167,9 +167,9 @@ RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。�
 </div>
 </div>
 
-<div id="outline-container-org1359962" class="outline-3">
-<h3 id="org1359962">Monad Transform</h3>
-<div class="outline-text-3" id="text-org1359962">
+<div id="outline-container-org2d76bbe" class="outline-3">
+<h3 id="org2d76bbe">Monad Transform</h3>
+<div class="outline-text-3" id="text-org2d76bbe">
 <p>
 你会发现 RWS 一起用挺好的，能读能写能打 log，但是已经固定好搭配了，只能是 RWS ，如果我还想加入其它的 Monad，该怎么办呢？
 </p>
@@ -179,9 +179,9 @@ RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。�
 </p>
 </div>
 
-<div id="outline-container-org933b1fe" class="outline-4">
-<h4 id="org933b1fe">ReaderT</h4>
-<div class="outline-text-4" id="text-org933b1fe">
+<div id="outline-container-orga95d62b" class="outline-4">
+<h4 id="orga95d62b">ReaderT</h4>
+<div class="outline-text-4" id="text-orga95d62b">
 <p>
 让我来通过简单的 ReaderT 来解释到底什么是 T 吧, 首先跟 Reader 一样我们有个 runReaderT
 </p>
@@ -262,9 +262,9 @@ RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。�
 </div>
 </div>
 
-<div id="outline-container-org5b96e49" class="outline-3">
-<h3 id="org5b96e49">Alternative</h3>
-<div class="outline-text-3" id="text-org5b96e49">
+<div id="outline-container-org4cd7db0" class="outline-3">
+<h3 id="org4cd7db0">Alternative</h3>
+<div class="outline-text-3" id="text-org4cd7db0">
 <p>
 这个 typeclass 提供 <code>&lt;|&gt;</code> 函数, 表示要么计算左边, 要么计算右边
 </p>
@@ -295,9 +295,9 @@ RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。�
 </div>
 </div>
 
-<div id="outline-container-org7aa39d2" class="outline-3">
-<h3 id="org7aa39d2">MonadPlus</h3>
-<div class="outline-text-3" id="text-org7aa39d2">
+<div id="outline-container-org3847a38" class="outline-3">
+<h3 id="org3847a38">MonadPlus</h3>
+<div class="outline-text-3" id="text-org3847a38">
 <p>
 这跟 Alternative 是一毛一样的, 只是限制的更细, 必须是 Monad才行
 </p>
@@ -315,9 +315,9 @@ RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。�
 </div>
 </div>
 
-<div id="outline-container-orgfb563d0" class="outline-3">
-<h3 id="orgfb563d0">ST Monad</h3>
-<div class="outline-text-3" id="text-orgfb563d0">
+<div id="outline-container-orgde953a0" class="outline-3">
+<h3 id="orgde953a0">ST Monad</h3>
+<div class="outline-text-3" id="text-orgde953a0">
 <p>
 ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 immutable 的, 而是 "immutable" 的在原地做修改. 改完之后 runST 又然他回到了 immutable 的 Haskell 世界.
 </p>
@@ -332,9 +332,9 @@ ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 im
 </div>
 </div>
 
-<div id="outline-container-org120cadb" class="outline-3">
-<h3 id="org120cadb">Free Monad</h3>
-<div class="outline-text-3" id="text-org120cadb">
+<div id="outline-container-orgd7125c4" class="outline-3">
+<h3 id="orgd7125c4">Free Monad</h3>
+<div class="outline-text-3" id="text-orgd7125c4">
 <p>
 上一章说过的 RWS Monad 毕竟是固定搭配，当你的业务需要更多的 Monad 来表示 Effect 时，
 我们就需要有那么个小猪手帮我们定义自己的 Monad。
@@ -345,9 +345,9 @@ ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 im
 </p>
 </div>
 
-<div id="outline-container-orgf74c4ea" class="outline-4">
-<h4 id="orgf74c4ea">Free</h4>
-<div class="outline-text-4" id="text-orgf74c4ea">
+<div id="outline-container-org39f2302" class="outline-4">
+<h4 id="org39f2302">Free</h4>
+<div class="outline-text-4" id="text-org39f2302">
 <p>
 先看 Free 什么定义:
 </p>
@@ -543,9 +543,9 @@ ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 im
 </div>
 </div>
 
-<div id="outline-container-org66ee4d6" class="outline-4">
-<h4 id="org66ee4d6">Coyoneda</h4>
-<div class="outline-text-4" id="text-org66ee4d6">
+<div id="outline-container-org4526f48" class="outline-4">
+<h4 id="org4526f48">Coyoneda</h4>
+<div class="outline-text-4" id="text-org4526f48">
 <p>
 希望你还依然记得第一部分的米田 <del>共</del> 引理
 </p>
@@ -632,9 +632,9 @@ ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 im
 </code></pre>
 </div>
 </div>
-<div id="outline-container-org3d94ff0" class="outline-4">
-<h4 id="org3d94ff0">Free Functor</h4>
-<div class="outline-text-4" id="text-org3d94ff0">
+<div id="outline-container-org3872010" class="outline-4">
+<h4 id="org3872010">Free Functor</h4>
+<div class="outline-text-4" id="text-org3872010">
 <p>
 比如我们的 <code>Eff</code> 就可以直接通过 <code>phi</code> 变成 <code>CoYoneda Eff</code>, 从而得到免费的 Functor
 </p>
@@ -654,9 +654,9 @@ ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 im
 </div>
 </div>
 
-<div id="outline-container-org67c3737" class="outline-4">
-<h4 id="org67c3737">Interpreter</h4>
-<div class="outline-text-4" id="text-org67c3737">
+<div id="outline-container-orgf41b63e" class="outline-4">
+<h4 id="orgf41b63e">Interpreter</h4>
+<div class="outline-text-4" id="text-orgf41b63e">
 <p>
 构造完一个 free program 后,我们得到的是一个嵌套的数据结构, 当我们需要 run 这个 program 时, 我们需要 foldMap 一个
 Interpreter 去一层层拨开 这个 free program.
@@ -675,15 +675,15 @@ Interpreter 去一层层拨开 这个 free program.
 </div>
 </div>
 </div>
-<div id="outline-container-orgf736452" class="outline-3">
-<h3 id="orgf736452"><span class="todo TODO">TODO</span> Free Monoid</h3>
+<div id="outline-container-orgdaccf82" class="outline-3">
+<h3 id="orgdaccf82"><span class="todo TODO">TODO</span> Free Monoid</h3>
 </div>
-<div id="outline-container-org93965d0" class="outline-3">
-<h3 id="org93965d0"><span class="todo TODO">TODO</span> Eff</h3>
+<div id="outline-container-org12cde21" class="outline-3">
+<h3 id="org12cde21"><span class="todo TODO">TODO</span> Eff</h3>
 </div>
 
-<div id="outline-container-org6661053" class="outline-3">
-<h3 id="org6661053"><span class="todo TODO">TODO</span> Comonad</h3>
+<div id="outline-container-orgffa68b7" class="outline-3">
+<h3 id="orgffa68b7"><span class="todo TODO">TODO</span> Comonad</h3>
 </div>
 </div>
 </div>
@@ -694,7 +694,7 @@ Interpreter 去一层层拨开 这个 free program.
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
   </p>
   <p>Created: 2018-07-28 Sat 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.2 (<a href="https://orgmode.org">Org</a> mode 9.2.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

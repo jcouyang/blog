@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-06 Fri 12:45 -->
+<!-- 2020-03-08 Sun 02:08 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>JavaScript玩转Clojure大法之Transducer</title>
@@ -22,7 +22,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -86,19 +86,19 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgcecb230">Reducer</a>
+<li><a href="#orgc781b12">Reducer</a>
 <ul>
-<li><a href="#org7a696a3">transform</a></li>
-<li><a href="#orgcd00ef4">Reducer</a>
+<li><a href="#org9f850d9">transform</a></li>
+<li><a href="#orgc56937d">Reducer</a>
 <ul>
-<li><a href="#org36af1c8">Reducible</a></li>
+<li><a href="#orgc3b98fb">Reducible</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org884c419">Transducer</a></li>
-<li><a href="#org84f4b9d">Is it Curry?</a></li>
-<li><a href="#orge7a2b59">完整例子</a></li>
+<li><a href="#org4f0de4b">Transducer</a></li>
+<li><a href="#org217a674">Is it Curry?</a></li>
+<li><a href="#orgceb46bd">完整例子</a></li>
 </ul>
 </div>
 </nav>
@@ -126,9 +126,9 @@ Clojure的作者
 <a href="http://clojure.com/blog/2012/05/15/anatomy-of-reducer.html">Reducer</a> 却没那么 <b>高调</b>. 在解释transducer之前, 先看看什么是Reducer, 如果能看懂, 再接着看Transducer.
 </p>
 
-<div id="outline-container-orgcecb230" class="outline-2">
-<h2 id="orgcecb230">Reducer</h2>
-<div class="outline-text-2" id="text-orgcecb230">
+<div id="outline-container-orgc781b12" class="outline-2">
+<h2 id="orgc781b12">Reducer</h2>
+<div class="outline-text-2" id="text-orgc781b12">
 <p>
 说道reduce这个词, 想必JS Developer大多会用过underscore<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
 我是故意吧reduce的参数顺序写"反"的, 原来underscore是先消费collection的. 至于为什么要反过来
@@ -179,9 +179,9 @@ Terminology:
 来看看更好的解法
 </p>
 </div>
-<div id="outline-container-org7a696a3" class="outline-3">
-<h3 id="org7a696a3">transform</h3>
-<div class="outline-text-3" id="text-org7a696a3">
+<div id="outline-container-org9f850d9" class="outline-3">
+<h3 id="org9f850d9">transform</h3>
+<div class="outline-text-3" id="text-org9f850d9">
 <p>
 reduce函数需要等待map返回新的coll后才能reduce, 那么可不可以一步直接算出来呢?
 </p>
@@ -227,9 +227,9 @@ yeah, 现在只需要一步就reduce出来结果了, reduce应用 <code>map(inc)
 </div>
 </div>
 
-<div id="outline-container-orgcd00ef4" class="outline-3">
-<h3 id="orgcd00ef4"><a href="https://clojure.org/reducers">Reducer</a></h3>
-<div class="outline-text-3" id="text-orgcd00ef4">
+<div id="outline-container-orgc56937d" class="outline-3">
+<h3 id="orgc56937d"><a href="https://clojure.org/reducers">Reducer</a></h3>
+<div class="outline-text-3" id="text-orgc56937d">
 <p>
 但是如果我们不想改变map函数的接口, 原始形式的接口还是比较好写好读的
 </p>
@@ -254,9 +254,9 @@ yeah, 现在只需要一步就reduce出来结果了, reduce应用 <code>map(inc)
 </div>
 
 
-<div id="outline-container-org36af1c8" class="outline-4">
-<h4 id="org36af1c8">Reducible</h4>
-<div class="outline-text-4" id="text-org36af1c8">
+<div id="outline-container-orgc3b98fb" class="outline-4">
+<h4 id="orgc3b98fb">Reducible</h4>
+<div class="outline-text-4" id="text-orgc3b98fb">
 <p>
 答案是, 反转reduce的关系, 原来reduce用sum去计算结果, 现在,我们调用reducible的reduce方法来计算结果
 </p>
@@ -301,9 +301,9 @@ reducer接收coll和xf, 返回reducible函数. 这一切都是lazy的, 直到rre
 </div>
 </div>
 
-<div id="outline-container-org884c419" class="outline-2">
-<h2 id="org884c419">Transducer</h2>
-<div class="outline-text-2" id="text-org884c419">
+<div id="outline-container-org4f0de4b" class="outline-2">
+<h2 id="org4f0de4b">Transducer</h2>
+<div class="outline-text-2" id="text-org4f0de4b">
 <p>
 说了半天Reducer,明明说好的要解释的Transducer呢?
 </p>
@@ -359,9 +359,9 @@ chan(1, xform) <span style="color: #8c8c8c; font-style: italic;">// </span><span
 </div>
 
 
-<div id="outline-container-org84f4b9d" class="outline-2">
-<h2 id="org84f4b9d">Is it Curry?</h2>
-<div class="outline-text-2" id="text-org84f4b9d">
+<div id="outline-container-org217a674" class="outline-2">
+<h2 id="org217a674">Is it Curry?</h2>
+<div class="outline-text-2" id="text-org217a674">
 <p>
 怎么看着有点像柯里化, 一样么?
 </p>
@@ -395,9 +395,9 @@ mapinc([1,2,3])
 </div>
 </div>
 
-<div id="outline-container-orge7a2b59" class="outline-2">
-<h2 id="orge7a2b59">完整例子</h2>
-<div class="outline-text-2" id="text-orge7a2b59">
+<div id="outline-container-orgceb46bd" class="outline-2">
+<h2 id="orgceb46bd">完整例子</h2>
+<div class="outline-text-2" id="text-orgceb46bd">
 <a class="jsbin-embed" href="https://jsbin.com/sulaxe/1/embed?html,js,console">JS Bin</a><script src="https://static.jsbin.com/js/embed.js"></script>
 </div>
 </div>
@@ -429,7 +429,7 @@ clojure中的数据结构和函数. document严重过时, 建议看导入的<a h
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
   </p>
   <p>Created: 2015-05-16 Sat 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.2 (<a href="https://orgmode.org">Org</a> mode 9.2.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

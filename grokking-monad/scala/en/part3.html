@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2020-03-06 Fri 12:45 -->
+<!-- 2020-03-08 Sun 02:08 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grokking Monad in Scala - Free</title>
@@ -25,7 +25,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -89,22 +89,22 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org728b601">Kind</a>
+<li><a href="#org201698a">Kind</a>
 <ul>
-<li><a href="#org3c58e5b">FunctionK</a></li>
-<li><a href="#orge75a47a">Kind Projector</a></li>
-<li><a href="#orgaa9617a">Rank N Type</a></li>
-<li><a href="#org1b216c5">Natural Transformation</a></li>
+<li><a href="#org15246b4">FunctionK</a></li>
+<li><a href="#org4a1d7f2">Kind Projector</a></li>
+<li><a href="#org7d82be9">Rank N Type</a></li>
+<li><a href="#orgbaddedb">Natural Transformation</a></li>
 </ul>
 </li>
-<li><a href="#org6137622">Free</a>
+<li><a href="#org7efcaaa">Free</a>
 <ul>
-<li><a href="#org916fb63">Free Structure</a></li>
-<li><a href="#org34cb168">CoYoneda Lemma (Trick)</a></li>
-<li><a href="#orgfad855a">Effects</a></li>
-<li><a href="#org786125c">Free your program</a></li>
-<li><a href="#orgf7ee2c9">Interpret your program</a></li>
-<li><a href="#orgfeb6c0f"><span class="todo TODO">TODO</span> What really happened here</a></li>
+<li><a href="#org7688e0d">Free Structure</a></li>
+<li><a href="#org26f7fc5">CoYoneda Lemma (Trick)</a></li>
+<li><a href="#org3929f95">Effects</a></li>
+<li><a href="#orgeb1270c">Free your program</a></li>
+<li><a href="#org1cb33ec">Interpret your program</a></li>
+<li><a href="#orge922336"><span class="todo TODO">TODO</span> What really happened here</a></li>
 </ul>
 </li>
 </ul>
@@ -126,9 +126,9 @@ you can actually run <code>sbt "testOnly *Kind"</code> and <code>sbt "testOnly *
 
 </blockquote></div>
 
-<div id="outline-container-org728b601" class="outline-2">
-<h2 id="org728b601">Kind</h2>
-<div class="outline-text-2" id="text-org728b601">
+<div id="outline-container-org201698a" class="outline-2">
+<h2 id="org201698a">Kind</h2>
+<div class="outline-text-2" id="text-org201698a">
 <p>
 Kinds are types for types. Like a function for parameters of type and return a type.
 e.g. <code>List[_]</code> is a Kind, it has a <code>hole</code> represented as <code>_</code> in it, which is like parameter in function.
@@ -147,9 +147,9 @@ You can also define a function over Kind <code>F[_] -&gt; G[_]</code>, which is 
 </div>
 
 
-<div id="outline-container-org3c58e5b" class="outline-3">
-<h3 id="org3c58e5b">FunctionK</h3>
-<div class="outline-text-3" id="text-org3c58e5b">
+<div id="outline-container-org15246b4" class="outline-3">
+<h3 id="org15246b4">FunctionK</h3>
+<div class="outline-text-3" id="text-org15246b4">
 <p>
 to define a FuntionK in cats, we can simply use fish arrow <code>~&gt;</code>
 </p>
@@ -166,9 +166,9 @@ e.g. a FuntionK from <code>List</code> to <code>Option</code>
 </div>
 </div>
 
-<div id="outline-container-orge75a47a" class="outline-3">
-<h3 id="orge75a47a">Kind Projector</h3>
-<div class="outline-text-3" id="text-orge75a47a">
+<div id="outline-container-org4a1d7f2" class="outline-3">
+<h3 id="org4a1d7f2">Kind Projector</h3>
+<div class="outline-text-3" id="text-org4a1d7f2">
 <p>
 you'll notice that we've include a compiler plugin <code>kind-projector</code><label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
 <a href="https://github.com/non/kind-projector">https://github.com/non/kind-projector</a>
@@ -188,9 +188,9 @@ which will be expanded to exactly the same code as what we defined before.
 </div>
 </div>
 
-<div id="outline-container-orgaa9617a" class="outline-3">
-<h3 id="orgaa9617a">Rank N Type</h3>
-<div class="outline-text-3" id="text-orgaa9617a">
+<div id="outline-container-org7d82be9" class="outline-3">
+<h3 id="org7d82be9">Rank N Type</h3>
+<div class="outline-text-3" id="text-org7d82be9">
 <p>
 But why this is useful than function, the <code>fnk</code> in <code>spherePrintable</code> can be easily replace with a
 simple function and it should behave still the same.
@@ -231,9 +231,9 @@ To make such code compile, you'll need to make <code>fn</code> as <code>Rank 2 T
 </div>
 </div>
 
-<div id="outline-container-org1b216c5" class="outline-3">
-<h3 id="org1b216c5">Natural Transformation</h3>
-<div class="outline-text-3" id="text-org1b216c5">
+<div id="outline-container-orgbaddedb" class="outline-3">
+<h3 id="orgbaddedb">Natural Transformation</h3>
+<div class="outline-text-3" id="text-orgbaddedb">
 <p>
 If your kinds are happened to be a Functor, then this functionK becomes <i>Natural Transformation</i>
 </p>
@@ -256,17 +256,17 @@ hence <code>fnk(fa.map(f))</code> is exactly the same as <code>fnk(fa).map(f)</c
 </div>
 </div>
 
-<div id="outline-container-org6137622" class="outline-2">
-<h2 id="org6137622">Free</h2>
-<div class="outline-text-2" id="text-org6137622">
+<div id="outline-container-org7efcaaa" class="outline-2">
+<h2 id="org7efcaaa">Free</h2>
+<div class="outline-text-2" id="text-org7efcaaa">
 <p>
 <i>Free Monad</i> means you can get a <b><b>free</b></b> monad from any <code>Functor</code>
 </p>
 </div>
 
-<div id="outline-container-org916fb63" class="outline-3">
-<h3 id="org916fb63">Free Structure</h3>
-<div class="outline-text-3" id="text-org916fb63">
+<div id="outline-container-org7688e0d" class="outline-3">
+<h3 id="org7688e0d">Free Structure</h3>
+<div class="outline-text-3" id="text-org7688e0d">
 <p>
 A Free Structure is basically very similar to <code>Cons</code> and <code>Nil</code> of
 <code>List</code>, we call such similarity <i>Isomorphic</i>
@@ -303,9 +303,9 @@ while you probably noticed that we need <code>S</code> to be a <code>Functor</co
 </div>
 </div>
 
-<div id="outline-container-org34cb168" class="outline-3">
-<h3 id="org34cb168">CoYoneda Lemma (Trick)</h3>
-<div class="outline-text-3" id="text-org34cb168">
+<div id="outline-container-org26f7fc5" class="outline-3">
+<h3 id="org26f7fc5">CoYoneda Lemma (Trick)</h3>
+<div class="outline-text-3" id="text-org26f7fc5">
 <p>
 The problem becomes "how can we get a free functor from any <code>S[_]</code>?" then
 </p>
@@ -376,9 +376,9 @@ To construct a Free Monad, we can use the CoYoneda Trick to lift any <code>F[_]<
 </div>
 </div>
 
-<div id="outline-container-orgfad855a" class="outline-3">
-<h3 id="orgfad855a">Effects</h3>
-<div class="outline-text-3" id="text-orgfad855a">
+<div id="outline-container-org3929f95" class="outline-3">
+<h3 id="org3929f95">Effects</h3>
+<div class="outline-text-3" id="text-org3929f95">
 <p>
 Let's forget about CoYoneda<label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
 it's totally fine if you didn't follow, you don't actually need to understand how Free is implemented to use it.
@@ -454,13 +454,13 @@ no database interaction will actually happen when you construct those ADTs
 </div>
 </div>
 
-<div id="outline-container-org786125c" class="outline-3">
-<h3 id="org786125c">Free your program</h3>
-<div class="outline-text-3" id="text-org786125c">
+<div id="outline-container-orgeb1270c" class="outline-3">
+<h3 id="orgeb1270c">Free your program</h3>
+<div class="outline-text-3" id="text-orgeb1270c">
 <p>
 to lift those ADTs into Free, simply using <code>liftF</code> <label for="5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="5" class="margin-toggle"/><span class="sidenote">
 here we're using cats free implementation, which already have CoYoneda embedded in <code>Free</code> implementation, so we don't need to <code>lift</code> the value to <code>CoYoneda</code> our self.
-</span> we've introduced in <a href="#org34cb168">CoYoneda Lemma (Trick)</a>
+</span> we've introduced in <a href="#org26f7fc5">CoYoneda Lemma (Trick)</a>
 </p>
 
 <pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">DbEff</span> {
@@ -496,13 +496,13 @@ Just like that, every thing just lifted in to Free, instead of actually querying
 </div>
 </div>
 
-<div id="outline-container-orgf7ee2c9" class="outline-3">
-<h3 id="orgf7ee2c9">Interpret your program</h3>
-<div class="outline-text-3" id="text-orgf7ee2c9">
+<div id="outline-container-org1cb33ec" class="outline-3">
+<h3 id="org1cb33ec">Interpret your program</h3>
+<div class="outline-text-3" id="text-org1cb33ec">
 <p>
 Since our program is organized, we can define an interpreter just for test, without actually talk to database, but
 simulating the interactions between your program and database. <label for="6" class="margin-toggle sidenote-number"></label><input type="checkbox" id="6" class="margin-toggle"/><span class="sidenote">
-remember the <code>Lambda</code> trick from <a href="#orge75a47a">Kind Projector</a> ?
+remember the <code>Lambda</code> trick from <a href="#org4a1d7f2">Kind Projector</a> ?
 </span>
 </p>
 
@@ -525,8 +525,8 @@ You'll know what to fix, seems we have some business bug in <code>freeProgram</c
 </div>
 </div>
 
-<div id="outline-container-orgfeb6c0f" class="outline-3">
-<h3 id="orgfeb6c0f"><span class="todo TODO">TODO</span> What really happened here</h3>
+<div id="outline-container-orge922336" class="outline-3">
+<h3 id="orge922336"><span class="todo TODO">TODO</span> What really happened here</h3>
 </div>
 </div>
 <div id="footnotes">
@@ -554,7 +554,7 @@ here we're using cats free implementation, which already have CoYoneda embedded 
 </p></div></div>
 
 <div class="footdef"><sup><a id="fn.6" class="footnum" href="#fnr.6">6</a></sup> <div class="footpara"><p class="footpara">
-remember the <code>Lambda</code> trick from <a href="#orge75a47a">Kind Projector</a> ?
+remember the <code>Lambda</code> trick from <a href="#org4a1d7f2">Kind Projector</a> ?
 </p></div></div>
 
 
@@ -567,7 +567,7 @@ remember the <code>Lambda</code> trick from <a href="#orge75a47a">Kind Projector
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
   </p>
   <p>Created: 2018-11-19 Mon 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.2 (<a href="https://orgmode.org">Org</a> mode 9.2.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

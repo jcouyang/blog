@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-06 Fri 12:45 -->
+<!-- 2020-03-08 Sun 02:08 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>范畴论完全装逼手册 / Grokking Monad</title>
@@ -21,7 +21,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -85,32 +85,32 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgb7f1190">第一部分：<ruby>猫论<rt>Catergory Theory</rt></ruby></a>
+<li><a href="#orgd9a36f1">第一部分：<ruby>猫论<rt>Catergory Theory</rt></ruby></a>
 <ul>
-<li><a href="#org83d8864"><i>Category</i></a>
+<li><a href="#orgbf900a8"><i>Category</i></a>
 <ul>
-<li><a href="#org5c97389"><i>Hask</i></a></li>
-<li><a href="#org9a82ec5"><i>Duel</i></a></li>
+<li><a href="#org1dc3286"><i>Hask</i></a></li>
+<li><a href="#org52ba652"><i>Duel</i></a></li>
 </ul>
 </li>
-<li><a href="#orgc8c5e99">函子 / Functor</a></li>
-<li><a href="#orgce9eab7"><span class="todo TODO">TODO</span> <i><ruby>Cat<rt> +猫+</rt></ruby></i></a></li>
-<li><a href="#org909b145">自然变换 / Natural Transformations </a></li>
-<li><a href="#orgd1d808d">String Diagram</a></li>
-<li><a href="#orgf0aed70"><i>Adjunction Functor</i> 伴随函子</a></li>
-<li><a href="#orgd645bd0">从伴随函子到 <ruby>单子<rt> Monad</rt></ruby></a>
+<li><a href="#orgea2dda4">函子 / Functor</a></li>
+<li><a href="#org6e0cc40"><span class="todo TODO">TODO</span> <i><ruby>Cat<rt> +猫+</rt></ruby></i></a></li>
+<li><a href="#org5305314">自然变换 / Natural Transformations </a></li>
+<li><a href="#org55c5c26">String Diagram</a></li>
+<li><a href="#org02ba778"><i>Adjunction Functor</i> 伴随函子</a></li>
+<li><a href="#org157f17f">从伴随函子到 <ruby>单子<rt> Monad</rt></ruby></a>
 <ul>
-<li><a href="#org31a5364">三角等式</a></li>
-<li><a href="#org3216554">结合律</a></li>
+<li><a href="#orgca7d5a1">三角等式</a></li>
+<li><a href="#orgf2a5830">结合律</a></li>
 </ul>
 </li>
-<li><a href="#orgd752015">Yoneda lemma / <del>米田共</del> 米田引理</a>
+<li><a href="#org1a754d9">Yoneda lemma / <del>米田共</del> 米田引理</a>
 <ul>
-<li><a href="#org8596200">Rank N Type</a></li>
+<li><a href="#orgade6eef">Rank N Type</a></li>
 </ul>
 </li>
-<li><a href="#org75d0f2e"><i>Kleisli Catergory</i></a></li>
-<li><a href="#org6a26972">Summary</a></li>
+<li><a href="#org733f8e7"><i>Kleisli Catergory</i></a></li>
+<li><a href="#orgc07522e">Summary</a></li>
 </ul>
 </li>
 </ul>
@@ -121,9 +121,9 @@ for the JavaScript code in this tag.
 <li><a href="./part2.html">第二部分：食用猫呢</a></li>
 <li><a href="./part3.html">第三部分：搞基猫呢</a></li>
 </ul>
-<div id="outline-container-orgb7f1190" class="outline-2">
-<h2 id="orgb7f1190">第一部分：<ruby>猫论<rt>Catergory Theory</rt></ruby></h2>
-<div class="outline-text-2" id="text-orgb7f1190">
+<div id="outline-container-orgd9a36f1" class="outline-2">
+<h2 id="orgd9a36f1">第一部分：<ruby>猫论<rt>Catergory Theory</rt></ruby></h2>
+<div class="outline-text-2" id="text-orgd9a36f1">
 <p>
 <img src="./images/Cheshire_Cat.png" alt="Cheshire_Cat.png"> <label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
 <a href="https://en.wikipedia.org/wiki/Cheshire_Cat">https://en.wikipedia.org/wiki/Cheshire_Cat</a>
@@ -209,9 +209,9 @@ Alice didn’t think that proved it at all; however, she went on `And how do you
 </p>
 </div>
 
-<div id="outline-container-org83d8864" class="outline-3">
-<h3 id="org83d8864"><i>Category</i></h3>
-<div class="outline-text-3" id="text-org83d8864">
+<div id="outline-container-orgbf900a8" class="outline-3">
+<h3 id="orgbf900a8"><i>Category</i></h3>
+<div class="outline-text-3" id="text-orgbf900a8">
 <p>
 一个 <i><ruby>范畴<rt>Category</rt></ruby></i> 包含两个玩意
 </p>
@@ -306,9 +306,9 @@ scala 中用 <code>&lt;&lt;&lt;</code> 或者 <code>compose</code>
 </p>
 </div>
 
-<div id="outline-container-org5c97389" class="outline-4">
-<h4 id="org5c97389"><i>Hask</i></h4>
-<div class="outline-text-4" id="text-org5c97389">
+<div id="outline-container-org1dc3286" class="outline-4">
+<h4 id="org1dc3286"><i>Hask</i></h4>
+<div class="outline-text-4" id="text-org1dc3286">
 <p>
 Haskell 类型系统范畴叫做 Hask
 </p>
@@ -353,9 +353,9 @@ a <span style="color: #b8860b;">-&gt;</span> a <span style="color: #8c8c8c; font
 </code></pre>
 </div>
 </div>
-<div id="outline-container-org9a82ec5" class="outline-4">
-<h4 id="org9a82ec5"><i>Duel</i></h4>
-<div class="outline-text-4" id="text-org9a82ec5">
+<div id="outline-container-org52ba652" class="outline-4">
+<h4 id="org52ba652"><i>Duel</i></h4>
+<div class="outline-text-4" id="text-org52ba652">
 <p>
 每个 Category 还有一个镜像，什么都一样，除了箭头是反的
 </p>
@@ -363,9 +363,9 @@ a <span style="color: #b8860b;">-&gt;</span> a <span style="color: #8c8c8c; font
 </div>
 </div>
 
-<div id="outline-container-orgc8c5e99" class="outline-3">
-<h3 id="orgc8c5e99">函子 / Functor</h3>
-<div class="outline-text-3" id="text-orgc8c5e99">
+<div id="outline-container-orgea2dda4" class="outline-3">
+<h3 id="orgea2dda4">函子 / Functor</h3>
+<div class="outline-text-3" id="text-orgea2dda4">
 <p>
 两个范畴中间可以用叫 Functor 的东西来连接起来，简称 T。
 </p>
@@ -449,9 +449,9 @@ Sorry, your browser does not support SVG.</object>
 </div>
 </div>
 
-<div id="outline-container-orgce9eab7" class="outline-3">
-<h3 id="orgce9eab7"><span class="todo TODO">TODO</span> <i><ruby>Cat<rt> +猫+</rt></ruby></i></h3>
-<div class="outline-text-3" id="text-orgce9eab7">
+<div id="outline-container-org6e0cc40" class="outline-3">
+<h3 id="org6e0cc40"><span class="todo TODO">TODO</span> <i><ruby>Cat<rt> +猫+</rt></ruby></i></h3>
+<div class="outline-text-3" id="text-org6e0cc40">
 <p>
 递归的, 当我们可以把一个 Category 看成一个 object，functor 看成箭头，那么我们又得到了一个 Category，这种 object 是 category 的 category 我们叫它 &#x2013; <i>Cat</i>
 </p>
@@ -462,9 +462,9 @@ Sorry, your browser does not support SVG.</object>
 </div>
 </div>
 
-<div id="outline-container-org909b145" class="outline-3">
-<h3 id="org909b145">自然变换 / Natural Transformations <a id="orgc0bd1a8"></a></h3>
-<div class="outline-text-3" id="text-org909b145">
+<div id="outline-container-org5305314" class="outline-3">
+<h3 id="org5305314">自然变换 / Natural Transformations <a id="orgb1490d8"></a></h3>
+<div class="outline-text-3" id="text-org5305314">
 <p>
 Functor 是范畴间的映射，所以在这个 Cat 范畴中, 把范畴看成是对象, 那么 Functor 在 Cat 范畴又是个箭头
 </p>
@@ -556,9 +556,9 @@ Sorry, your browser does not support SVG.</object>
 </div>
 </div>
 
-<div id="outline-container-orgd1d808d" class="outline-3">
-<h3 id="orgd1d808d">String Diagram</h3>
-<div class="outline-text-3" id="text-orgd1d808d">
+<div id="outline-container-org55c5c26" class="outline-3">
+<h3 id="org55c5c26">String Diagram</h3>
+<div class="outline-text-3" id="text-org55c5c26">
 <p>
 String Diagram 的概念很简单，就是点变线线变点。
 </p>
@@ -580,9 +580,9 @@ compose的方向是从右往左，从下到上。
 </div>
 </div>
 
-<div id="outline-container-orgf0aed70" class="outline-3">
-<h3 id="orgf0aed70"><i>Adjunction Functor</i> 伴随函子</h3>
-<div class="outline-text-3" id="text-orgf0aed70">
+<div id="outline-container-org02ba778" class="outline-3">
+<h3 id="org02ba778"><i>Adjunction Functor</i> 伴随函子</h3>
+<div class="outline-text-3" id="text-org02ba778">
 <p>
 范畴C和D直接有来有回的函子，为什么要介绍这个，因为它直接可以推出 Monad
 </p>
@@ -653,9 +653,9 @@ String Diagram 神奇的地方是所有线都可以拉上下两端，这个技�
 </div>
 </div>
 
-<div id="outline-container-orgd645bd0" class="outline-3">
-<h3 id="orgd645bd0">从伴随函子到 <ruby>单子<rt> Monad</rt></ruby></h3>
-<div class="outline-text-3" id="text-orgd645bd0">
+<div id="outline-container-org157f17f" class="outline-3">
+<h3 id="org157f17f">从伴随函子到 <ruby>单子<rt> Monad</rt></ruby></h3>
+<div class="outline-text-3" id="text-org157f17f">
 <p>
 有了伴随函子，很容易推出单子，让我们先来看看什么是单子
 </p>
@@ -716,9 +716,9 @@ String Diagram 神奇的地方是所有线都可以拉上下两端，这个技�
 </figure>
 </div>
 
-<div id="outline-container-org31a5364" class="outline-4">
-<h4 id="org31a5364">三角等式</h4>
-<div class="outline-text-4" id="text-org31a5364">
+<div id="outline-container-orgca7d5a1" class="outline-4">
+<h4 id="orgca7d5a1">三角等式</h4>
+<div class="outline-text-4" id="text-orgca7d5a1">
 <p>
 三角等式是指 &mu; . T &eta; = T = &mu; . &eta; T
 </p>
@@ -771,9 +771,9 @@ T &eta; 就是 fmap eta
 </div>
 </div>
 
-<div id="outline-container-org3216554" class="outline-4">
-<h4 id="org3216554">结合律</h4>
-<div class="outline-text-4" id="text-org3216554">
+<div id="outline-container-orgf2a5830" class="outline-4">
+<h4 id="orgf2a5830">结合律</h4>
+<div class="outline-text-4" id="text-orgf2a5830">
 <p>
 单子另一大定律是结合律，让我们从伴随函子推起
 </p>
@@ -819,9 +819,9 @@ T &eta; 就是 fmap eta
 </div>
 </div>
 
-<div id="outline-container-orgd752015" class="outline-3">
-<h3 id="orgd752015">Yoneda lemma / <del>米田共</del> 米田引理</h3>
-<div class="outline-text-3" id="text-orgd752015">
+<div id="outline-container-org1a754d9" class="outline-3">
+<h3 id="org1a754d9">Yoneda lemma / <del>米田共</del> 米田引理</h3>
+<div class="outline-text-3" id="text-org1a754d9">
 <p>
 米田引理是说所有Functor <code>f a</code> 一定存在 embed 和 unembed，使得 <code>f a</code> 和 <code>(a -&gt; b) -&gt; F b</code> isomorphic 同构
 </p>
@@ -840,7 +840,7 @@ haskell还要先打开 RankNTypes 的 feature
 </code></pre>
 
 <p>
-Scala 语言没有 Rank N Type支持, 但是 <a href="#orgc0bd1a8"><ruby>自然变换<rt>Natural Transformations</rt></ruby></a> 提到过可以用 <code>apply</code> 来模拟. 其实可以使用 Cats 的 <a href="https://typelevel.org/cats/datatypes/functionk.html">FunctionK(~&gt;)</a> 更方便:
+Scala 语言没有 Rank N Type支持, 但是 <a href="#orgb1490d8"><ruby>自然变换<rt>Natural Transformations</rt></ruby></a> 提到过可以用 <code>apply</code> 来模拟. 其实可以使用 Cats 的 <a href="https://typelevel.org/cats/datatypes/functionk.html">FunctionK(~&gt;)</a> 更方便:
 </p>
 <pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">embed</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>](fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])(<span style="color: #228b22;">implicit</span> f<span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">F</span>])<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">A</span> <span style="color: #00008b;">=&gt;</span> ?) ~&gt; <span style="color: #6b8e23;">F</span> <span style="color: #00008b;">=</span>
   <span style="color: #6b8e23;">Lambda</span>[(<span style="color: #6b8e23;">A</span> <span style="color: #00008b;">=&gt;</span> ?) ~&gt; <span style="color: #6b8e23;">F</span>](f.fmap(<span style="color: #00008b;">_</span>)(fa))
@@ -868,9 +868,9 @@ Sorry, your browser does not support SVG.</object>
 </figure>
 </div>
 
-<div id="outline-container-org8596200" class="outline-4">
-<h4 id="org8596200">Rank N Type</h4>
-<div class="outline-text-4" id="text-org8596200">
+<div id="outline-container-orgade6eef" class="outline-4">
+<h4 id="orgade6eef">Rank N Type</h4>
+<div class="outline-text-4" id="text-orgade6eef">
 <p>
 说好的要解释 Rank N Type
 </p>
@@ -947,9 +947,9 @@ f 在 <code>f True</code> 是确定 a 是 Boolean，在rank1多态是时就确�
 </div>
 </div>
 
-<div id="outline-container-org75d0f2e" class="outline-3">
-<h3 id="org75d0f2e"><i>Kleisli Catergory</i></h3>
-<div class="outline-text-3" id="text-org75d0f2e">
+<div id="outline-container-org733f8e7" class="outline-3">
+<h3 id="org733f8e7"><i>Kleisli Catergory</i></h3>
+<div class="outline-text-3" id="text-org733f8e7">
 
 <figure>
 <object type="image/svg+xml" data="images/kleisli.svg" class="org-svg">
@@ -1024,9 +1024,9 @@ Sorry, your browser does not support SVG.</object>
 </div>
 </div>
 
-<div id="outline-container-org6a26972" class="outline-3">
-<h3 id="org6a26972">Summary</h3>
-<div class="outline-text-3" id="text-org6a26972">
+<div id="outline-container-orgc07522e" class="outline-3">
+<h3 id="orgc07522e">Summary</h3>
+<div class="outline-text-3" id="text-orgc07522e">
 <p>
 第一部分理论部分都讲完了， 如果你读到这里还没有被这些<ruby>吊炸天<rt>乱七八糟</rt></ruby>的概念搞daze，接下来可以看看它到底跟我们编程有鸟关系呢？第二部分将介绍这些概念产生的一些实用的monad
 </p>
@@ -1104,7 +1104,7 @@ Sorry, your browser does not support SVG.</object>
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
   </p>
   <p>Created: 2017-02-10 Fri 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.2 (<a href="https://orgmode.org">Org</a> mode 9.2.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

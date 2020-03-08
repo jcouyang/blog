@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2020-03-06 Fri 12:45 -->
+<!-- 2020-03-08 Sun 02:08 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grokking Monad in Scala</title>
@@ -25,7 +25,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -89,34 +89,34 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org52dc567">Type classes</a>
+<li><a href="#orgc06743c">Type classes</a>
 <ul>
-<li><a href="#orgd5f2955">Algebraic Data Type</a></li>
-<li><a href="#orge45b937">Recursive Data Type</a></li>
-<li><a href="#org5a10c8d">Variance</a></li>
-<li><a href="#org4cb5705">Type classes</a></li>
-<li><a href="#orgde518f9">Type enrichment</a></li>
+<li><a href="#org341891f">Algebraic Data Type</a></li>
+<li><a href="#org37e9dc3">Recursive Data Type</a></li>
+<li><a href="#org0be981a">Variance</a></li>
+<li><a href="#org6ccab7c">Type classes</a></li>
+<li><a href="#orgc1b2f83">Type enrichment</a></li>
 </ul>
 </li>
-<li><a href="#org92f987b">Monad</a>
+<li><a href="#orgacb9cde">Monad</a>
 <ul>
-<li><a href="#org57e81a8">Functor</a>
+<li><a href="#org4fb10f0">Functor</a>
 <ul>
-<li><a href="#org6405d4b">Contravariant Functor</a></li>
+<li><a href="#org1dc9598">Contravariant Functor</a></li>
 </ul>
 </li>
-<li><a href="#orgc96e0ed">Identity Monad</a></li>
-<li><a href="#org298bbdb">Reader Writer Monad</a>
+<li><a href="#org2545482">Identity Monad</a></li>
+<li><a href="#orgc0d163a">Reader Writer Monad</a>
 <ul>
-<li><a href="#org3a0d22f">Writer Monad</a></li>
-<li><a href="#orgb51a35a">Reader Monad</a></li>
+<li><a href="#org111f0ed">Writer Monad</a></li>
+<li><a href="#orgecd8e75">Reader Monad</a></li>
 </ul>
 </li>
-<li><a href="#org5a6c5a5">State Monad</a></li>
-<li><a href="#org677aaff">Monad Transformer</a></li>
-<li><a href="#org9fafb70">Semigroupal a.k.a Cartesian</a></li>
-<li><a href="#org6a83594">Validated</a></li>
-<li><a href="#org8cb63a2">Traverse</a></li>
+<li><a href="#orgc05b29d">State Monad</a></li>
+<li><a href="#org9591faf">Monad Transformer</a></li>
+<li><a href="#org858b215">Semigroupal a.k.a Cartesian</a></li>
+<li><a href="#orgd630163">Validated</a></li>
+<li><a href="#org52064e6">Traverse</a></li>
 </ul>
 </li>
 <li><a href="#applied-category-theory-in-scala---choice">Choice</a>
@@ -149,9 +149,9 @@ you can actually run <code>sbt testOnly *&lt;className&gt;</code> to finish thes
 
 </blockquote></div>
 
-<div id="outline-container-org52dc567" class="outline-2">
-<h2 id="org52dc567">Type classes</h2>
-<div class="outline-text-2" id="text-org52dc567">
+<div id="outline-container-orgc06743c" class="outline-2">
+<h2 id="orgc06743c">Type classes</h2>
+<div class="outline-text-2" id="text-orgc06743c">
 <p>
 Type classes is somewhat like an FP design pattern, with type classes
 you can extend new functionality without touch any of your existing
@@ -196,9 +196,9 @@ But FP has pretty elegant [way](<a href="https://oleksandrmanzyuk.wordpress.com/
 </p>
 </div>
 
-<div id="outline-container-orgd5f2955" class="outline-3">
-<h3 id="orgd5f2955">Algebraic Data Type</h3>
-<div class="outline-text-3" id="text-orgd5f2955">
+<div id="outline-container-org341891f" class="outline-3">
+<h3 id="org341891f">Algebraic Data Type</h3>
+<div class="outline-text-3" id="text-org341891f">
 <p>
 We all familiar with how to implement traffic light in OO with class and interface. Simply 3 classes Red Green Yellow extend a TrafficLight interface, and implement <code>next</code>
 method in each of the 3 classes.
@@ -228,9 +228,9 @@ then it will make more sense.
 </div>
 </div>
 
-<div id="outline-container-orge45b937" class="outline-3">
-<h3 id="orge45b937">Recursive Data Type</h3>
-<div class="outline-text-3" id="text-orge45b937">
+<div id="outline-container-org37e9dc3" class="outline-3">
+<h3 id="org37e9dc3">Recursive Data Type</h3>
+<div class="outline-text-3" id="text-org37e9dc3">
 <p>
 with ADT it's very easy to implement a linked list in Scala as well.
 Try using sum and product type to implement a <code>LinkedList</code>. Type can be recursive as well.
@@ -253,9 +253,9 @@ it should <span style="color: #8b0000;">"throw error Out of Boundary exception i
 </div>
 </div>
 
-<div id="outline-container-org5a10c8d" class="outline-3">
-<h3 id="org5a10c8d">Variance</h3>
-<div class="outline-text-3" id="text-org5a10c8d">
+<div id="outline-container-org0be981a" class="outline-3">
+<h3 id="org0be981a">Variance</h3>
+<div class="outline-text-3" id="text-org0be981a">
 <p>
 You may realize that <code>End</code> does not have to be a <code>case class</code>, it doesn't have any value in it, and we
 just need one instance of <code>End</code>.
@@ -295,9 +295,9 @@ Here <code>Nothing</code> is subtype of any type, since <code>A</code> is covari
 </div>
 </div>
 
-<div id="outline-container-org4cb5705" class="outline-3">
-<h3 id="org4cb5705">Type classes</h3>
-<div class="outline-text-3" id="text-org4cb5705">
+<div id="outline-container-org6ccab7c" class="outline-3">
+<h3 id="org6ccab7c">Type classes</h3>
+<div class="outline-text-3" id="text-org6ccab7c">
 <p>
 <code>Person</code> is a simple case class, when we want to print it nicely as JSON format, what we usually does is to create a
 interface e.g. <code>JsonWriter</code> with method <code>toJson</code> and implements it in <code>Person</code>. But if you think about it, if we need
@@ -348,9 +348,9 @@ it should <span style="color: #8b0000;">"be very easy to convert to JSON"</span>
 </div>
 </div>
 
-<div id="outline-container-orgde518f9" class="outline-3">
-<h3 id="orgde518f9">Type enrichment</h3>
-<div class="outline-text-3" id="text-orgde518f9">
+<div id="outline-container-orgc1b2f83" class="outline-3">
+<h3 id="orgc1b2f83">Type enrichment</h3>
+<div class="outline-text-3" id="text-orgc1b2f83">
 <p>
 With implicit class, you can magically add methods to any Type
 </p>
@@ -399,13 +399,13 @@ How can we have a generic <code>writeJson</code> method which automatically work
 </div>
 
 
-<div id="outline-container-org92f987b" class="outline-2">
-<h2 id="org92f987b">Monad</h2>
-<div class="outline-text-2" id="text-org92f987b">
+<div id="outline-container-orgacb9cde" class="outline-2">
+<h2 id="orgacb9cde">Monad</h2>
+<div class="outline-text-2" id="text-orgacb9cde">
 </div>
-<div id="outline-container-org57e81a8" class="outline-3">
-<h3 id="org57e81a8">Functor</h3>
-<div class="outline-text-3" id="text-org57e81a8">
+<div id="outline-container-org4fb10f0" class="outline-3">
+<h3 id="org4fb10f0">Functor</h3>
+<div class="outline-text-3" id="text-org4fb10f0">
 <p>
 Function is a Typeclass that generic abstract the <code>map</code> behavior.
 </p>
@@ -432,9 +432,9 @@ it should <span style="color: #8b0000;">"have implicit map method automatically"
 }
 </code></pre>
 </div>
-<div id="outline-container-org6405d4b" class="outline-4">
-<h4 id="org6405d4b">Contravariant Functor</h4>
-<div class="outline-text-4" id="text-org6405d4b">
+<div id="outline-container-org1dc9598" class="outline-4">
+<h4 id="org1dc9598">Contravariant Functor</h4>
+<div class="outline-text-4" id="text-org1dc9598">
 <p>
 There's another variant of Functor with a reverse "arrow" of map, which we call it <code>contramap</code>
 </p>
@@ -471,9 +471,9 @@ it should <span style="color: #8b0000;">"print anything that can be converted to
 </div>
 </div>
 
-<div id="outline-container-orgc96e0ed" class="outline-3">
-<h3 id="orgc96e0ed">Identity Monad</h3>
-<div class="outline-text-3" id="text-orgc96e0ed">
+<div id="outline-container-org2545482" class="outline-3">
+<h3 id="org2545482">Identity Monad</h3>
+<div class="outline-text-3" id="text-org2545482">
 <p>
 Monad is also a Functor, but with two more method <code>pure</code> and <code>flatMap</code>.
 The simplest Monad is Id Monad, which has type:
@@ -522,9 +522,9 @@ it should <span style="color: #8b0000;">"able to use Id monad to lower the type 
 </div>
 </div>
 
-<div id="outline-container-org298bbdb" class="outline-3">
-<h3 id="org298bbdb">Reader Writer Monad</h3>
-<div class="outline-text-3" id="text-org298bbdb">
+<div id="outline-container-orgc0d163a" class="outline-3">
+<h3 id="orgc0d163a">Reader Writer Monad</h3>
+<div class="outline-text-3" id="text-orgc0d163a">
 <pre class="code"><code><span style="color: #00008b;">package</span> <span style="color: #8b0000;">monad</span>
 
 <span style="color: #00008b;">import</span> org.scalatest.<span style="color: #00008b;">_</span>
@@ -533,9 +533,9 @@ it should <span style="color: #8b0000;">"able to use Id monad to lower the type 
 <span style="color: #00008b;">class</span> <span style="color: #36648b;">`3.3.ReaderWriter`</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">AsyncFlatSpec</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">Matchers</span> {
 </code></pre>
 </div>
-<div id="outline-container-org3a0d22f" class="outline-4">
-<h4 id="org3a0d22f">Writer Monad</h4>
-<div class="outline-text-4" id="text-org3a0d22f">
+<div id="outline-container-org111f0ed" class="outline-4">
+<h4 id="org111f0ed">Writer Monad</h4>
+<div class="outline-text-4" id="text-org111f0ed">
 <p>
 Writer monad is very useful for logging, especially in a concurrent system, for example the following
  <code>factorial</code> may executed concurrently, if it's not implemented in Writer, will be something looks like this:
@@ -581,9 +581,9 @@ it should <span style="color: #8b0000;">"logs are not interleave"</span> in {
 </div>
 </div>
 
-<div id="outline-container-orgb51a35a" class="outline-4">
-<h4 id="orgb51a35a">Reader Monad</h4>
-<div class="outline-text-4" id="text-orgb51a35a">
+<div id="outline-container-orgecd8e75" class="outline-4">
+<h4 id="orgecd8e75">Reader Monad</h4>
+<div class="outline-text-4" id="text-orgecd8e75">
 <p>
 One common use for Readers is dependency injection. If we have a number of operations that all depend on some external configuration.
 </p>
@@ -635,9 +635,9 @@ it should <span style="color: #8b0000;">"check login"</span> in {
 </div>
 </div>
 
-<div id="outline-container-org5a6c5a5" class="outline-3">
-<h3 id="org5a6c5a5">State Monad</h3>
-<div class="outline-text-3" id="text-org5a6c5a5">
+<div id="outline-container-orgc05b29d" class="outline-3">
+<h3 id="orgc05b29d">State Monad</h3>
+<div class="outline-text-3" id="text-orgc05b29d">
 <p>
 Same as a Writer Monad providing atomic logging, a State Monad will provide you thread safe atomic state operations.
 </p>
@@ -691,9 +691,9 @@ it should <span style="color: #8b0000;">"be pure and composable"</span> in {
 </div>
 </div>
 
-<div id="outline-container-org677aaff" class="outline-3">
-<h3 id="org677aaff">Monad Transformer</h3>
-<div class="outline-text-3" id="text-org677aaff">
+<div id="outline-container-org9591faf" class="outline-3">
+<h3 id="org9591faf">Monad Transformer</h3>
+<div class="outline-text-3" id="text-org9591faf">
 <pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">ErrorOr</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Either</span>[<span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">A</span>]
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">ihave10</span><span style="color: #00008b;">:</span><span style="color: #36648b;">ErrorOr</span>[<span style="color: #6b8e23;">Int</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Right</span>(<span style="color: #6b8e23;">Some</span>(<span style="color: #6b8e23;">10</span>)
 </code></pre>
@@ -772,9 +772,9 @@ it should <span style="color: #8b0000;">"return a error msg when Bumblebee and S
 </div>
 </div>
 
-<div id="outline-container-org9fafb70" class="outline-3">
-<h3 id="org9fafb70">Semigroupal a.k.a Cartesian</h3>
-<div class="outline-text-3" id="text-org9fafb70">
+<div id="outline-container-org858b215" class="outline-3">
+<h3 id="org858b215">Semigroupal a.k.a Cartesian</h3>
+<div class="outline-text-3" id="text-org858b215">
 <p>
 Semigroupal is a type class that allows us to combine contexts with method <code>product</code>
 </p>
@@ -826,9 +826,9 @@ Try create a Cat with some Future value using <code>tupled</code> and map:
 </div>
 </div>
 
-<div id="outline-container-org6a83594" class="outline-3">
-<h3 id="org6a83594">Validated</h3>
-<div class="outline-text-3" id="text-org6a83594">
+<div id="outline-container-orgd630163" class="outline-3">
+<h3 id="orgd630163">Validated</h3>
+<div class="outline-text-3" id="text-orgd630163">
 <div class="epigraph"><blockquote>
 <p>
 Hint: There is also a shortcut for <code>tupled</code> and <code>map</code> &#x2013; <code>mapN</code> from <code>cats.syntax.apply</code>
@@ -882,9 +882,9 @@ it should <span style="color: #8b0000;">"be the same as mapN"</span> in {
 </div>
 </div>
 
-<div id="outline-container-org8cb63a2" class="outline-3">
-<h3 id="org8cb63a2">Traverse</h3>
-<div class="outline-text-3" id="text-org8cb63a2">
+<div id="outline-container-org52064e6" class="outline-3">
+<h3 id="org52064e6">Traverse</h3>
+<div class="outline-text-3" id="text-org52064e6">
 <p>
 All Traversable need to be Foldable, but Traversable provide a more convenient, more powerful pattern for iteration.
 Let's say we have a list of hosts and we need to check if all of them are up and running well.
@@ -966,12 +966,12 @@ asynchronously
 </div>
 </div>
 
-<div id="outline-container-org3930388" class="outline-2">
+<div id="outline-container-org1cecf7b" class="outline-2">
 <h2 id="applied-category-theory-in-scala---choice">Choice</h2>
 <div class="outline-text-2" id="text-applied-category-theory-in-scala---choice">
 </div>
 
-<div id="outline-container-orgbb6ee1e" class="outline-3">
+<div id="outline-container-orgae83b0a" class="outline-3">
 <h3 id="rationale">Rationale</h3>
 <div class="outline-text-3" id="text-rationale">
 <p>
@@ -1003,7 +1003,7 @@ will get a <code>Choice</code>
 </div>
 </div>
 
-<div id="outline-container-orgaaf67d4" class="outline-3">
+<div id="outline-container-org10a8de7" class="outline-3">
 <h3 id="applied">Applied</h3>
 <div class="outline-text-3" id="text-applied">
 <p>
@@ -1016,7 +1016,7 @@ Take Http4s for example:
 </p>
 </div>
 
-<div id="outline-container-org2ce3fc0" class="outline-4">
+<div id="outline-container-org453d443" class="outline-4">
 <h4 id="httproutesf">HttpRoutes[F]</h4>
 <div class="outline-text-4" id="text-httproutesf">
 <p>
@@ -1048,7 +1048,7 @@ So the return type of <code>middleware</code> will be like
 </div>
 </div>
 
-<div id="outline-container-orgc2f1267" class="outline-4">
+<div id="outline-container-orgf10c7a0" class="outline-4">
 <h4 id="middlewaref">Middleware[F]</h4>
 <div class="outline-text-4" id="text-middlewaref">
 <p>
@@ -1085,7 +1085,7 @@ has instance of <code>Choice</code>
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
   </p>
   <p>Created: 2018-11-28 Wed 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.2 (<a href="https://orgmode.org">Org</a> mode 9.2.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

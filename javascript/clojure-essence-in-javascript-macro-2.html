@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-06 Fri 12:45 -->
+<!-- 2020-03-08 Sun 02:08 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>自制语言初试 - 入lang</title>
@@ -20,7 +20,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -84,29 +84,29 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgb7f49f3">Rationale(为毛要整一门语言)</a>
+<li><a href="#orgd31dde2">Rationale(为毛要整一门语言)</a>
 <ul>
-<li><a href="#org1737a38">ClojureScript怎么就不好了</a></li>
-<li><a href="#org1c0d89e">ClojureScript的数据结构移植</a></li>
-<li><a href="#org694d199">那macro呢</a></li>
+<li><a href="#org5299ffe">ClojureScript怎么就不好了</a></li>
+<li><a href="#org01af989">ClojureScript的数据结构移植</a></li>
+<li><a href="#orgcbe1a0d">那macro呢</a></li>
 </ul>
 </li>
-<li><a href="#orgd5aca4a">Ru-lang, The First Attampt</a>
+<li><a href="#orgb77ca7a">Ru-lang, The First Attampt</a>
 <ul>
-<li><a href="#org82ee776">lambda</a></li>
-<li><a href="#org6a24820">Let</a>
+<li><a href="#org69367e6">lambda</a></li>
+<li><a href="#org5c9a127">Let</a>
 <ul>
-<li><a href="#org49673ab">block scope binding</a></li>
-<li><a href="#org7925741">destruture array</a></li>
-<li><a href="#org88ce3b8">looprecur</a></li>
+<li><a href="#org4d7976a">block scope binding</a></li>
+<li><a href="#org7b8c104">destruture array</a></li>
+<li><a href="#orgd243782">looprecur</a></li>
 </ul>
 </li>
-<li><a href="#org74cdc5e">Existential ?</a>
+<li><a href="#org682bbf1">Existential ?</a>
 <ul>
-<li><a href="#org658d7f5">Infix macro</a></li>
+<li><a href="#org28ab83b">Infix macro</a></li>
 </ul>
 </li>
-<li><a href="#org20ee69d">在哪里才能买到呢</a></li>
+<li><a href="#org69718a4">在哪里才能买到呢</a></li>
 </ul>
 </li>
 </ul>
@@ -116,9 +116,9 @@ for the JavaScript code in this tag.
 
 <a href="https://news.ycombinator.com/submit" class="hn-button" data-url="http://ru-lang.org" data-count="horizontal">Vote on Hacker News</a><script type="text/javascript">var HN=[];HN.factory=function(e){return function(){HN.push([e].concat(Array.prototype.slice.call(arguments,0)))};},HN.on=HN.factory("on"),HN.once=HN.factory("once"),HN.off=HN.factory("off"),HN.emit=HN.factory("emit"),HN.load=function(){var e="hn-button.js";if(document.getElementById(e))return;var t=document.createElement("script");t.id=e,t.src="//hn-button.herokuapp.com/hn-button.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(t,n)},HN.load();</script>
 
-<div id="outline-container-orgb7f49f3" class="outline-2">
-<h2 id="orgb7f49f3">Rationale(为毛要整一门语言)</h2>
-<div class="outline-text-2" id="text-orgb7f49f3">
+<div id="outline-container-orgd31dde2" class="outline-2">
+<h2 id="orgd31dde2">Rationale(为毛要整一门语言)</h2>
+<div class="outline-text-2" id="text-orgd31dde2">
 
 <figure>
 <img src="./images/tv-giving-me-reason-to-live.gif" alt="tv-giving-me-reason-to-live.gif">
@@ -126,9 +126,9 @@ for the JavaScript code in this tag.
 </figure>
 </div>
 
-<div id="outline-container-org1737a38" class="outline-3">
-<h3 id="org1737a38">ClojureScript怎么就不好了</h3>
-<div class="outline-text-3" id="text-org1737a38">
+<div id="outline-container-org5299ffe" class="outline-3">
+<h3 id="org5299ffe">ClojureScript怎么就不好了</h3>
+<div class="outline-text-3" id="text-org5299ffe">
 <p>
 接上篇简单的介绍sweet.js之后, 萌发了特别crazy的idea. 如果CoffeeScript或者LiveScript也算
 语言的话, 其实单单用sweet.js自制一堆macro就能实现类似的语言. 当然, 这两门语言都比较奇特, 一个
@@ -143,9 +143,9 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-org1c0d89e" class="outline-3">
-<h3 id="org1c0d89e">ClojureScript的数据结构移植</h3>
-<div class="outline-text-3" id="text-org1c0d89e">
+<div id="outline-container-org01af989" class="outline-3">
+<h3 id="org01af989">ClojureScript的数据结构移植</h3>
+<div class="outline-text-3" id="text-org01af989">
 <p>
 ClojureScript的作者David做了一个非常有意思的项目,把ClojureScript的数据结构单独导出来做成类似underscore的库 - <a href="https://github.com/swannodette/mori">mori</a>.
 官方的解释是
@@ -166,9 +166,9 @@ A simple bridge to ClojureScript's persistent data structures and supporting API
 </div>
 </div>
 
-<div id="outline-container-org694d199" class="outline-3">
-<h3 id="org694d199">那macro呢</h3>
-<div class="outline-text-3" id="text-org694d199">
+<div id="outline-container-orgcbe1a0d" class="outline-3">
+<h3 id="orgcbe1a0d">那macro呢</h3>
+<div class="outline-text-3" id="text-orgcbe1a0d">
 <p>
 David导出了所有的数据结构以及function, 但是像macro却不可能直接导成JavaScript, 因为是编译时
 扩展的.
@@ -194,9 +194,9 @@ Hacker News 上的讨论 <a href="https://news.ycombinator.com/item?id=9749286">
 </div>
 </div>
 
-<div id="outline-container-orgd5aca4a" class="outline-2">
-<h2 id="orgd5aca4a">Ru-lang, The First Attampt</h2>
-<div class="outline-text-2" id="text-orgd5aca4a">
+<div id="outline-container-orgb77ca7a" class="outline-2">
+<h2 id="orgb77ca7a">Ru-lang, The First Attampt</h2>
+<div class="outline-text-2" id="text-orgb77ca7a">
 <p>
 叫做  <a href="http://ru-lang.org">ru-lang</a> 有两层意思
 </p>
@@ -206,9 +206,9 @@ Hacker News 上的讨论 <a href="https://news.ycombinator.com/item?id=9749286">
 </ul>
 </div>
 
-<div id="outline-container-org82ee776" class="outline-3">
-<h3 id="org82ee776">lambda</h3>
-<div class="outline-text-3" id="text-org82ee776">
+<div id="outline-container-org69367e6" class="outline-3">
+<h3 id="org69367e6">lambda</h3>
+<div class="outline-text-3" id="text-org69367e6">
 <p>
 Clojure有一个很cool的macro, <code>#{}</code>, 匿名函数的macro, cool的地方是它可以用 <code>%1</code>, <code>%2</code>
 代表第几个参数. 特别方便比如是在用map的时候
@@ -277,9 +277,9 @@ Clojure有一个很cool的macro, <code>#{}</code>, 匿名函数的macro, cool的
 </div>
 </div>
 
-<div id="outline-container-org6a24820" class="outline-3">
-<h3 id="org6a24820">Let</h3>
-<div class="outline-text-3" id="text-org6a24820">
+<div id="outline-container-org5c9a127" class="outline-3">
+<h3 id="org5c9a127">Let</h3>
+<div class="outline-text-3" id="text-org5c9a127">
 <p>
 let 怎么就难了&#x2026;
 </p>
@@ -308,9 +308,9 @@ let 怎么就难了&#x2026;
 </p>
 </div>
 
-<div id="outline-container-org49673ab" class="outline-4">
-<h4 id="org49673ab">block scope binding</h4>
-<div class="outline-text-4" id="text-org49673ab">
+<div id="outline-container-org4d7976a" class="outline-4">
+<h4 id="org4d7976a">block scope binding</h4>
+<div class="outline-text-4" id="text-org4d7976a">
 <p>
 我们都知道js var是function scope, 也就是说可以
 </p>
@@ -370,9 +370,9 @@ so easy, <del>block scope binding</del>
 </div>
 </div>
 
-<div id="outline-container-org7925741" class="outline-4">
-<h4 id="org7925741">destruture array</h4>
-<div class="outline-text-4" id="text-org7925741">
+<div id="outline-container-org7b8c104" class="outline-4">
+<h4 id="org7b8c104">destruture array</h4>
+<div class="outline-text-4" id="text-org7b8c104">
 <p>
 这个就稍微有那么点难度, 我们先把它分解成小问题
 </p>
@@ -446,9 +446,9 @@ destructure object 的过程也非常类似, 我就懒得实现了
 </p>
 </div>
 </div>
-<div id="outline-container-org88ce3b8" class="outline-4">
-<h4 id="org88ce3b8">looprecur</h4>
-<div class="outline-text-4" id="text-org88ce3b8">
+<div id="outline-container-orgd243782" class="outline-4">
+<h4 id="orgd243782">looprecur</h4>
+<div class="outline-text-4" id="text-orgd243782">
 <p>
 looprecur其实就是let的尾递归, 很容易变成循环
 </p>
@@ -496,9 +496,9 @@ let都实现了, 实现这也太容易了
 </div>
 </div>
 </div>
-<div id="outline-container-org74cdc5e" class="outline-3">
-<h3 id="org74cdc5e">Existential ?</h3>
-<div class="outline-text-3" id="text-org74cdc5e">
+<div id="outline-container-org682bbf1" class="outline-3">
+<h3 id="org682bbf1">Existential ?</h3>
+<div class="outline-text-3" id="text-org682bbf1">
 <p>
 只移植 clojure 是不是开始有点无聊了, 让我们换换口味. CoffeeScript的判空我一直是非常喜欢, 不如试试也移过来,就可以这样了.
 </p>
@@ -516,9 +516,9 @@ let都实现了, 实现这也太容易了
 </figure>
 </div>
 
-<div id="outline-container-org658d7f5" class="outline-4">
-<h4 id="org658d7f5">Infix macro</h4>
-<div class="outline-text-4" id="text-org658d7f5">
+<div id="outline-container-org28ab83b" class="outline-4">
+<h4 id="org28ab83b">Infix macro</h4>
+<div class="outline-text-4" id="text-org28ab83b">
 <p>
 还记得 <a href="./clojure-essence-in-javascript-macro.html">上篇</a> 提到这次要讲 Infix macro吗, 恩, 要实现 <code>?</code> 我们必不可少需要使用Infix macro.
 </p>
@@ -575,9 +575,9 @@ case macro
 </div>
 </div>
 
-<div id="outline-container-org20ee69d" class="outline-3">
-<h3 id="org20ee69d">在哪里才能买到呢</h3>
-<div class="outline-text-3" id="text-org20ee69d">
+<div id="outline-container-org69718a4" class="outline-3">
+<h3 id="org69718a4">在哪里才能买到呢</h3>
+<div class="outline-text-3" id="text-org69718a4">
 
 <figure>
 <img src="./images/shut-up-and-take-my-money.gif" alt="shut-up-and-take-my-money.gif">
@@ -616,7 +616,7 @@ case macro
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
   </p>
   <p>Created: 2015-06-22 Mon 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.2 (<a href="https://orgmode.org">Org</a> mode 9.2.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
