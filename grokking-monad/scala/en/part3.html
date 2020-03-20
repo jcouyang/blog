@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2020-03-08 Sun 02:17 -->
+<!-- 2020-03-20 Fri 01:47 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grokking Monad in Scala - Free</title>
@@ -158,11 +158,13 @@ to define a FuntionK in cats, we can simply use fish arrow <code>~&gt;</code>
 e.g. a FuntionK from <code>List</code> to <code>Option</code>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">import</span> cats.~&gt;
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">import</span> cats.~&gt;
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">first</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> (<span style="color: #6b8e23;">List</span> ~&gt; <span style="color: #6b8e23;">Option</span>) {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">A</span>](l<span style="color: #00008b;">:</span><span style="color: #36648b;">List</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> l.headOption
 }
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 
@@ -179,8 +181,10 @@ you'll notice that we've include a compiler plugin <code>kind-projector</code><l
 it provides us pretty syntactic suger for such case
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">first</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Lambda</span>[<span style="color: #6b8e23;">List</span> ~&gt; <span style="color: #6b8e23;">Option</span>](<span style="color: #00008b;">_</span>.headOption)
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">first</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Lambda</span>[<span style="color: #6b8e23;">List</span> ~&gt; <span style="color: #6b8e23;">Option</span>](<span style="color: #00008b;">_</span>.headOption)
+</pre>
+</div>
 
 <p>
 which will be expanded to exactly the same code as what we defined before.
@@ -272,10 +276,12 @@ A Free Structure is basically very similar to <code>Cons</code> and <code>Nil</c
 <code>List</code>, we call such similarity <i>Isomorphic</i>
 </p>
 
-<pre class="code"><code>seal <span style="color: #00008b;">trait</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>]
+<div class="org-src-container">
+<pre class="src src-scala">seal <span style="color: #00008b;">trait</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>]
 <span style="color: #228b22;">final</span> <span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Pure</span>[<span style="color: #6b8e23;">S</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">A</span>]
 <span style="color: #228b22;">final</span> <span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Suspend</span>[<span style="color: #6b8e23;">S</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">S</span>[<span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">S</span>,<span style="color: #6b8e23;">A</span>]]) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">A</span>]
-</code></pre>
+</pre>
+</div>
 
 <p>
 <code>Pure</code> is like <code>Nil</code> representing the end of structure, and <code>Suspend</code>
@@ -285,7 +291,8 @@ to <code>Cons</code> means there is something else left behind.
 <p>
 To make it a Monad, which could be something like
 </p>
-<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">catsFreeMonadForFree</span>[<span style="color: #6b8e23;">S</span>[<span style="color: #00008b;">_</span>]](<span style="color: #228b22;">implicit</span> <span style="color: #6b8e23;">F</span><span style="color: #00008b;">:</span><span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">S</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">S</span>, ?]] <span style="color: #00008b;">=</span>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">catsFreeMonadForFree</span>[<span style="color: #6b8e23;">S</span>[<span style="color: #00008b;">_</span>]](<span style="color: #228b22;">implicit</span> <span style="color: #6b8e23;">F</span><span style="color: #00008b;">:</span><span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">S</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">S</span>, ?]] <span style="color: #00008b;">=</span>
   <span style="color: #00008b;">new</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">S</span>, ?]] {
     <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">pure</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Pure</span>(a)
     <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">A</span>])(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> fa.flatMap(a<span style="color: #00008b;">=&gt;</span><span style="color: #6b8e23;">Pure</span>(f(a)))
@@ -294,7 +301,8 @@ To make it a Monad, which could be something like
       <span style="color: #00008b;">case</span> <span style="color: #36648b;">Suspend</span>(<span style="color: #b8860b;">a</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Suspend</span>(<span style="color: #6b8e23;">F</span>.map(a)(next<span style="color: #00008b;">=&gt;</span>next.flatMap(f)))
     }
   }
-</code></pre>
+</pre>
+</div>
 
 <p>
 while you probably noticed that we need <code>S</code> to be a <code>Functor</code> first, so that we can
@@ -331,18 +339,22 @@ can simply add <code>B</code> into the type parameter of <code>CoYoneda</code> a
 which we could simply represent it as scala case class:
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](fb<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>], f<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">A</span>)
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](fb<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>], f<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">A</span>)
+</pre>
+</div>
 
 <p>
 And define a functor over CoYoneda is very straightforward:
 </p>
-<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">functorForCoyoneda</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>, ?, <span style="color: #6b8e23;">B</span>]] {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">functorForCoyoneda</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>, ?, <span style="color: #6b8e23;">B</span>]] {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">C</span>](fa<span style="color: #00008b;">:</span><span style="color: #36648b;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>])(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span><span style="color: #00008b;">=&gt;</span><span style="color: #6b8e23;">C</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">C</span>, <span style="color: #6b8e23;">B</span>] {
     <span style="color: #6b8e23;">CoYoneda</span>(fa.fb, (f compose fa.f)) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">(f compose fa.f) has type B =&gt; C</span>
   }
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 It's actully very similar to <i>Continuation Passing Style</i>, which just continous composing function
@@ -363,16 +375,20 @@ The trick is to use the magical <code>identity</code> function <code>A=&gt;A</co
 , and eventually, <code>F[_]</code> become a Functor because any <code>CoYoneda</code> is Functor.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">lift</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>](fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span><span style="color: #36648b;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">lift</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>](fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span><span style="color: #36648b;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span>
   <span style="color: #6b8e23;">CoYoneda</span>(fa, identity<span style="color: #00008b;">:</span><span style="color: #36648b;">A</span><span style="color: #00008b;">=&gt;</span><span style="color: #6b8e23;">A</span>)
-</code></pre>
+</pre>
+</div>
 
 <p>
 To construct a Free Monad, we can use the CoYoneda Trick to lift any <code>F[_]</code>, and put the CoYoneda to Free.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">liftF</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>](value<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Suspend</span>(lift(value))
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">liftF</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>](value<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Suspend</span>(lift(value))
+</pre>
+</div>
 </div>
 </div>
 
@@ -398,7 +414,8 @@ Imagine we have a document database to query, it's easy to abstract 3 method on 
 <li><code>delete(key: String)</code></li>
 </ul>
 
-<pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Database</span> {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Database</span> {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">get</span>(key<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span> <span style="color: #00008b;">=</span> {
     println(<span style="color: #8b0000;">"querying database"</span>)
     s<span style="color: #8b0000;">"value for key </span><span style="color: #b8860b;">$key</span><span style="color: #8b0000;">"</span>
@@ -412,7 +429,8 @@ Imagine we have a document database to query, it's easy to abstract 3 method on 
     println(s<span style="color: #8b0000;">"deleteing </span><span style="color: #b8860b;">$key</span><span style="color: #8b0000;">"</span>)
   }
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 All of these actions are actually effects, because they will potentially cause some state changes outside the scope where the method is executed.
@@ -438,11 +456,13 @@ It's hard to test because:
 To make your program more declarative and testable, we can describe all database interactions using ADT
 </p>
 
-<pre class="code"><code><span style="color: #228b22;">sealed</span> <span style="color: #00008b;">trait</span> <span style="color: #36648b;">DbEff</span>[<span style="color: #6b8e23;">A</span>]
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #228b22;">sealed</span> <span style="color: #00008b;">trait</span> <span style="color: #36648b;">DbEff</span>[<span style="color: #6b8e23;">A</span>]
 <span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Put</span>(key<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, value<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">DbEff</span>[<span style="color: #6b8e23;">Unit</span>]
 <span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Get</span>(key<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">DbEff</span>[<span style="color: #6b8e23;">String</span>]
 <span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Delete</span>(key<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">DbEff</span>[<span style="color: #6b8e23;">Unit</span>]
-</code></pre>
+</pre>
+</div>
 
 <p>
 All these ADTs is just describing what kind of behavior a database can provide, and what value they should return.
@@ -463,12 +483,14 @@ here we're using cats free implementation, which already have CoYoneda embedded 
 </span> we've introduced in <a href="#org26f7fc5">CoYoneda Lemma (Trick)</a>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">DbEff</span> {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">DbEff</span> {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">get</span>(key<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">DbEff</span>, <span style="color: #6b8e23;">String</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Free</span>.liftF[<span style="color: #6b8e23;">DbEff</span>, <span style="color: #6b8e23;">String</span>](<span style="color: #6b8e23;">Get</span>(key))
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">put</span>(key<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, v<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">DbEff</span>, <span style="color: #6b8e23;">Unit</span>] <span style="color: #00008b;">=</span> ???
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">delete</span>(key<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">DbEff</span>, <span style="color: #6b8e23;">Unit</span>] <span style="color: #00008b;">=</span> ???
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 <code>put</code> and <code>delete</code> should be pretty much the same
@@ -478,7 +500,8 @@ here we're using cats free implementation, which already have CoYoneda embedded 
 to lift your <code>program</code> defined before to free, the simplest trick is to change all <code>=</code> to <code>&lt;-</code> and remove <code>val</code>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">program</span> {                         <span style="color: #00008b;">object</span> <span style="color: #6b8e23;">freeProgram</span> {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">program</span> {                         <span style="color: #00008b;">object</span> <span style="color: #6b8e23;">freeProgram</span> {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>() <span style="color: #00008b;">=</span> {                          <span style="color: #00008b;">val</span> <span style="color: #b8860b;">oldKey</span> <span style="color: #00008b;">=</span> <span style="color: #8b0000;">"123"</span>
     <span style="color: #00008b;">val</span> <span style="color: #b8860b;">oldKey</span> <span style="color: #00008b;">=</span> <span style="color: #8b0000;">"123"</span>                     <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>() <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
     <span style="color: #00008b;">val</span> <span style="color: #b8860b;">oldVal</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Database</span>.get(oldKey)        oldVal <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">DbEff</span>.get(oldKey)
@@ -488,7 +511,8 @@ to lift your <code>program</code> defined before to free, the simplest trick is 
     <span style="color: #6b8e23;">Database</span>.delete(oldKey)                  <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">DbEff</span>.delete(oldKey)
   }                                        } <span style="color: #00008b;">yield</span> ()
 }                                        }
-</code></pre>
+</pre>
+</div>
 
 <p>
 Just like that, every thing just lifted in to Free, instead of actually querying the database.

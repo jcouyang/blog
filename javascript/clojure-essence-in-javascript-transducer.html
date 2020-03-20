@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-08 Sun 02:17 -->
+<!-- 2020-03-20 Fri 01:47 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>JavaScript玩转Clojure大法之Transducer</title>
@@ -135,8 +135,10 @@ Clojure的作者
 可以参考<a href="https://blog.oyanglul.us/javascript/functional-javascript.html#sec-3-2">这个解释</a>
 </span>(或类似)的reduce方法, 大概形式是这样
 </p>
-<pre class="code"><code>_.reduce(fn, 0, [1,2,3])
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-js">_.reduce(fn, 0, [1,2,3])
+</pre>
+</div>
 <p>
 大概意思是初始为0, 应用fn到每一个collection(检测coll)元素上,得到一个新的值.
 </p>
@@ -147,8 +149,10 @@ clojurescript作者把clojurescript的一些数据结构和函数编译成javasc
 clojure中的数据结构和函数. document严重过时, 建议看导入的<a href="https://github.com/swannodette/mori/blob/master/src/mori.cljs">源代码</a>, 以及clojure的文档, 接口和clojure基本一致.
 </span> 了)
 </p>
-<pre class="code"><code>reduce(sum, 0, map(inc [1,2,3]))
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">reduce(sum, 0, map(inc [1,2,3]))
+</pre>
+</div>
 
 <div class="epigraph"><blockquote>
 <p>
@@ -196,21 +200,25 @@ xf(reduceFn) -&gt; anotherReduceFn
 <p>
 再假如我们的新map函数可以做这种转换
 </p>
-<pre class="code"><code>map(inc)(sum) -&gt; aShinyNewReduceFn
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">map(inc)(sum) -&gt; aShinyNewReduceFn
+</pre>
+</div>
 
 <div class="epigraph"><blockquote>
 <p>
 map 函数的简单transform实现可以这样实现,如果你感兴趣的话
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">map</span>(<span style="color: #b8860b;">fn</span>){
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">map</span>(<span style="color: #b8860b;">fn</span>){
   <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">reduceFn</span>){
     <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">result</span>, <span style="color: #b8860b;">input</span>){
       reduceFn(result, fn(input))
     }
   }
 }
-</code></pre>
+</pre>
+</div>
 
 </blockquote></div>
 
@@ -218,8 +226,10 @@ map 函数的简单transform实现可以这样实现,如果你感兴趣的话
 那么我们之前的reduce就可以写成
 </p>
 
-<pre class="code"><code>reduce(map(inc)(sum),0,[1,2,3])
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">reduce(map(inc)(sum),0,[1,2,3])
+</pre>
+</div>
 
 <p>
 yeah, 现在只需要一步就reduce出来结果了, reduce应用 <code>map(inc)(sum)</code> 来计算值, 只需要遍历一遍coll
@@ -233,20 +243,26 @@ yeah, 现在只需要一步就reduce出来结果了, reduce应用 <code>map(inc)
 <p>
 但是如果我们不想改变map函数的接口, 原始形式的接口还是比较好写好读的
 </p>
-<pre class="code"><code>reduce(sum, 0, map(inc [1,2,3]))
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">reduce(sum, 0, map(inc [1,2,3]))
+</pre>
+</div>
 <p>
 那么需要进一步的抽象, 我把新的map函数叫做rmap好了
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">rmap</span>(<span style="color: #b8860b;">fn</span>, <span style="color: #b8860b;">coll</span>){
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">rmap</span>(<span style="color: #b8860b;">fn</span>, <span style="color: #b8860b;">coll</span>){
   reducer(coll, map(fn))
 }
-</code></pre>
+</pre>
+</div>
 <p>
 跟以前接口一样,接收函数和coll,但是返回一个由reducer生成的reducible, 所以就变成了
 </p>
-<pre class="code"><code>reduce(sum, 0, reducer([1,2,3], map(inc)))
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">reduce(sum, 0, reducer([1,2,3], map(inc)))
+</pre>
+</div>
 
 <p>
 等等,怎么做到的&#x2026;你已经消费了coll了, 那reducing函数怎么进来的, reducer怎么知道用sum去reduce呢.
@@ -278,24 +294,30 @@ yeah, 现在只需要一步就reduce出来结果了, reduce应用 <code>map(inc)
 <p>
 也就是reduce函数现在应该长这样, 我们暂且叫它 <code>rreduce</code>
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">rreduce</span>(<span style="color: #b8860b;">reduceFn</span>, <span style="color: #b8860b;">init</span>, <span style="color: #b8860b;">reducible</span>){
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">rreduce</span>(<span style="color: #b8860b;">reduceFn</span>, <span style="color: #b8860b;">init</span>, <span style="color: #b8860b;">reducible</span>){
   reducible(reduceFn, init)
 }
-</code></pre>
+</pre>
+</div>
 <p>
 那么我们的例子就变成了这样
 </p>
-<pre class="code"><code>reducer([1,2,3], map(inc))(sum, 0)
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">reducer([1,2,3], map(inc))(sum, 0)
+</pre>
+</div>
 <p>
 reducer接收coll和xf, 返回reducible函数. 这一切都是lazy的, 直到rreduce调用<a href="#coderef-coll" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-coll');" onmouseout="CodeHighlightOff(this, 'coderef-coll');">第coll行</a>才执行.
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">reducer</span>(<span style="color: #b8860b;">coll</span>, <span style="color: #b8860b;">xf</span>){
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">reducer</span>(<span style="color: #b8860b;">coll</span>, <span style="color: #b8860b;">xf</span>){
   <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">reduceFn</span>, <span style="color: #b8860b;">init</span>){
 <span id="coderef-coll" class="coderef-off">    <span style="color: #00008b;">return</span> coll.reduce(xf(reduceFn), init) (coll)</span>
   }
 }
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 </div>
@@ -323,8 +345,10 @@ reducer接收coll和xf, 返回reducible函数. 这一切都是lazy的, 直到rre
 <p>
 Transducer就是那个xf
 </p>
-<pre class="code"><code>reduce(map(inc)(sum),0,[1,2,3])
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">reduce(map(inc)(sum),0,[1,2,3])
+</pre>
+</div>
 <p>
 也就是这里面的 <code>map(inc)</code>
 </p>
@@ -338,8 +362,10 @@ Transducer就是那个xf
 另外一种reduce api
 </p>
 
-<pre class="code"><code>transduce(map(inc), sum, 0, [1,2,3])
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">transduce(map(inc), sum, 0, [1,2,3])
+</pre>
+</div>
 <p>
 transduce接收一个transducer,一个reducing function, 一个初始值, 一个coll. 这段代码跟前面干的事情一模一样.
 </p>
@@ -351,10 +377,12 @@ transduce接收一个transducer,一个reducing function, 一个初始值, 一个
 <p>
 可以用在任何地方
 </p>
-<pre class="code"><code>seq(xf data) <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">&#29983;&#25104;&#19968;&#20010;lazy&#30340;&#24207;&#21015;, &#21516;&#26102;lazy transform, &#27599;&#27425;&#21462;&#30340;&#26102;&#20505;data&#20250;&#34987;transform</span>
+<div class="org-src-container">
+<pre class="src src-javascript">seq(xf data) <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">&#29983;&#25104;&#19968;&#20010;lazy&#30340;&#24207;&#21015;, &#21516;&#26102;lazy transform, &#27599;&#27425;&#21462;&#30340;&#26102;&#20505;data&#20250;&#34987;transform</span>
 into([], xf data) <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">&#25226; data transform&#21518;&#25918;&#21040;&#19968;&#20010;&#25968;&#32452;&#37324;</span>
 chan(1, xform) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&#24403;&#25968;&#25454;&#32463;&#36807;CSP&#30340;channel&#26102;&#34987;transform</span>
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 
@@ -373,15 +401,19 @@ chan(1, xform) <span style="color: #8c8c8c; font-style: italic;">// </span><span
 <p>
 比如一个柯里化的map可以
 </p>
-<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">mapinc</span> = map(inc)
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">mapinc</span> = map(inc)
 mapinc([1,2,3])
-</code></pre>
+</pre>
+</div>
 
 <p>
 而不能
 </p>
-<pre class="code"><code>mapinc(sum)
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">mapinc(sum)
+</pre>
+</div>
 <p>
 因为map就俩参数, 第一个是函数第二个是data, 如果再给data会错误
 </p>
@@ -389,9 +421,11 @@ mapinc([1,2,3])
 <p>
 但是tranceducer只是转换, 所以只接受reducing函数
 </p>
-<pre class="code"><code>reduce(mapinc(sum), 0, [1,2,3])
+<div class="org-src-container">
+<pre class="src src-javascript">reduce(mapinc(sum), 0, [1,2,3])
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; 9</span>
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 

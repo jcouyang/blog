@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<!-- 2020-03-08 Sun 02:17 -->
+<!-- 2020-03-20 Fri 01:47 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>看我们3天 hackday 都干了些什么</title>
@@ -219,7 +219,8 @@ All data flows through the dispatcher as a central hub. Actions most often origi
 <p>
 思想是不错，但是看看例子，这个dispacher 是怎么个回事
 </p>
-<pre class="code"><code>AppDispatcher.register(<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">action</span>) {
+<div class="org-src-container">
+<pre class="src src-js">AppDispatcher.register(<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">action</span>) {
   <span style="color: #00008b;">var</span> <span style="color: #b8860b;">text</span>;
 
   <span style="color: #00008b;">switch</span>(action.actionType) {
@@ -240,7 +241,8 @@ All data flows through the dispatcher as a central hub. Actions most often origi
       TodoStore.emitChange();
       <span style="color: #00008b;">break</span>;
 ...
-</code></pre>
+</pre>
+</div>
 <p>
 我一直以为 dispatcher 应该自动给我 dispatcher 才对，我自己都 dispatcher 完了还要 dispatcher 干什么？
 </p>
@@ -253,7 +255,8 @@ All data flows through the dispatcher as a central hub. Actions most often origi
 <p>
 于是 redux 出来把 dispatcher 这一步去掉了，然后放到了 reducer 里：
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">counter</span>(<span style="color: #b8860b;">state</span> = 0, <span style="color: #b8860b;">action</span>) {
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">counter</span>(<span style="color: #b8860b;">state</span> = 0, <span style="color: #b8860b;">action</span>) {
   <span style="color: #00008b;">switch</span> (action.type) {
   <span style="color: #00008b;">case</span> <span style="color: #8b0000;">'INCREMENT'</span>:
     <span style="color: #00008b;">return</span> state + 1
@@ -263,7 +266,8 @@ All data flows through the dispatcher as a central hub. Actions most often origi
     <span style="color: #00008b;">return</span> state
   }
 }
-</code></pre>
+</pre>
+</div>
 
 
 <p>
@@ -348,12 +352,14 @@ Channel 是 CSP<label for="1" class="margin-toggle sidenote-number"></label><inp
 </span> 的概念，类似一个队列，一边进，一边出。 不过进和出都是异步的
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">const</span> {chan, take, put} = require(<span style="color: #8b0000;">'con.js/async'</span>).<span style="color: #00008b;">async</span>
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #00008b;">const</span> {chan, take, put} = require(<span style="color: #8b0000;">'con.js/async'</span>).<span style="color: #00008b;">async</span>
 <span style="color: #00008b;">let</span> <span style="color: #b8860b;">c</span> = chan()
 take(c).then(_=&gt;console.log(_))
 put(c, <span style="color: #8b0000;">'hehe'</span>)
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">"hehe"</span>
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 
@@ -364,7 +370,8 @@ put(c, <span style="color: #8b0000;">'hehe'</span>)
 Pub(blication) 可以指定把 Channel 的某一部分发布出去，让 Sub(scribe) 来 订阅。
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">const</span> {chan, take, put, pub, sub} = require(<span style="color: #8b0000;">'con.js/async'</span>).<span style="color: #00008b;">async</span>
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #00008b;">const</span> {chan, take, put, pub, sub} = require(<span style="color: #8b0000;">'con.js/async'</span>).<span style="color: #00008b;">async</span>
 <span style="color: #00008b;">let</span> <span style="color: #b8860b;">inputChan</span> = chan()
 <span style="color: #00008b;">let</span> <span style="color: #b8860b;">actionPub</span> = pub(inputChan, _=&gt;_.action)
 <span style="color: #00008b;">let</span> <span style="color: #b8860b;">outputChan</span> = chan()
@@ -373,7 +380,8 @@ put(inputChan, {action: <span style="color: #8b0000;">'greeting'</span>, value: 
 put(inputChan, {action: <span style="color: #8b0000;">'party'</span>, value: <span style="color: #8b0000;">'wheeeee'</span>})
 take(outputChan).then(_=&gt;console.log(_))
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">{action: 'greeting', value: 'Hello Clojure pubsub'}</span>
-</code></pre>
+</pre>
+</div>
 
 <p>
 绑定到 outputChan 的 sub 只会接收 action 为 greeting 的消息
@@ -394,13 +402,15 @@ take(outputChan).then(_=&gt;console.log(_))
 </span>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">const</span> {chan, map, take, put} = require(<span style="color: #8b0000;">'con.js/async'</span>).<span style="color: #00008b;">async</span>
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #00008b;">const</span> {chan, map, take, put} = require(<span style="color: #8b0000;">'con.js/async'</span>).<span style="color: #00008b;">async</span>
 <span style="color: #00008b;">let</span> <span style="color: #b8860b;">xf</span> = map(_=&gt;_*2)
 <span style="color: #00008b;">let</span> <span style="color: #b8860b;">c</span> = chan(32, xf)
 put(c, 3)
 take(c, _=&gt;console.log(_))
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">6</span>
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 
@@ -486,7 +496,8 @@ take(c, _=&gt;console.log(_))
 <p>
 来看看我们 EDD 的<a href="https://github.com/jcouyang/transdux/blob/5da5107cb2de11414c5b3c2659cf19e790264ff9/src/components/MainSection.jsx#L33">第一版实现</a>，是多么的简单
 </p>
-<pre class="code"><code><span class="linenr"> 1: </span>componentDidMount(){
+<div class="org-src-container">
+<pre class="src src-js"><span class="linenr"> 1: </span>componentDidMount(){
 <span class="linenr"> 2: </span>  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">-------vv code user should write vv------------------</span>
 <span id="coderef-complete" class="coderef-off"><span class="linenr"> 3: </span>  <span style="color: #00008b;">function</span> <span style="color: #6a5acd;">complete</span>(<span style="color: #b8860b;">msg</span>){</span>
 <span class="linenr"> 4: </span>    <span style="color: #00008b;">return</span> state=&gt;map(todo=&gt;{
@@ -514,7 +525,8 @@ take(c, _=&gt;console.log(_))
 <span class="linenr">26: </span>  })
 <span class="linenr">27: </span>  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">----------</span>
 <span class="linenr">28: </span>}
-</code></pre>
+</pre>
+</div>
 
 <p>
  没有错，跟 TDD 一样，先实现，在重构
@@ -558,15 +570,18 @@ take(c, _=&gt;console.log(_))
 <p>
 所以，transdux 提供一个 wrapper component <i>Transdux</i>
 </p>
-<pre class="code"><code>&lt;<span style="color: #6a5acd;">Transdux</span>&gt;
+<div class="org-src-container">
+<pre class="src src-html">&lt;<span style="color: #6a5acd;">Transdux</span>&gt;
     &lt;<span style="color: #6a5acd;">App</span>/&gt;
 &lt;/<span style="color: #6a5acd;">Transdux</span>&gt;
-</code></pre>
+</pre>
+</div>
 
 <p>
 只需要用 Transdux component 包住你的 component 即可，如果你有两个 App，那么分别 wrap 可以保证他们用的是两套 transdux 的 channel，pubsub而互相不受干扰。
 </p>
-<pre class="code"><code>&lt;<span style="color: #6a5acd;">div</span>&gt;
+<div class="org-src-container">
+<pre class="src src-html">&lt;<span style="color: #6a5acd;">div</span>&gt;
   &lt;<span style="color: #6a5acd;">Transdux</span>&gt;
     &lt;<span style="color: #6a5acd;">App</span>/&gt;
   &lt;/<span style="color: #6a5acd;">Transdux</span>&gt;
@@ -574,13 +589,15 @@ take(c, _=&gt;console.log(_))
     &lt;<span style="color: #6a5acd;">App2</span>/&gt;
   &lt;/<span style="color: #6a5acd;">Transdux</span>&gt;
 &lt;/<span style="color: #6a5acd;">div</span>&gt; 
-</code></pre>
+</pre>
+</div>
 
 <p>
 具体实现也不难，利用 React 的 child context
 </p>
 
-<pre class="code"><code>childContextTypes: {
+<div class="org-src-container">
+<pre class="src src-js">childContextTypes: {
     transduxChannel: React.PropTypes.object,
     transduxPublication: React.PropTypes.object,
   },
@@ -591,7 +608,8 @@ take(c, _=&gt;console.log(_))
       transduxPublication: pub(inputchan, _=&gt;_[<span style="color: #8b0000;">'action'</span>]),
     }
   },
-</code></pre>
+</pre>
+</div>
 
 <p>
 <a href="https://facebook.github.io/react/docs/context.html">child context</a> 是 React 一个 给子 component 传递 context 是一种方式， 通过这样就无需父 component 一层一层传下去，而在所有的子 component 都随时可以从 <code>this.context</code> 中找到父 component <code>getChildContext</code>  返回的值。
@@ -615,7 +633,8 @@ take(c, _=&gt;console.log(_))
 </p>
 
 </blockquote></div>
-<pre class="code"><code><span style="color: #00008b;">import</span> MainSection from <span style="color: #8b0000;">'./MainSection'</span>
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #00008b;">import</span> MainSection from <span style="color: #8b0000;">'./MainSection'</span>
 <span style="color: #00008b;">let</span> <span style="color: #b8860b;">TodoItem</span> = React.createClass({
     mixins: [TxMixin],
  ...
@@ -623,7 +642,8 @@ take(c, _=&gt;console.log(_))
 ...
     }
 })
-</code></pre>
+</pre>
+</div>
 
 <p>
 这样的消息非常清晰，而且永远不可能发错消息，除非 require 错了 component。
@@ -648,7 +668,8 @@ take(c, _=&gt;console.log(_))
 <p>
 把第一版实现的代码包到 mixin 中，会是这样的：
 </p>
-<pre class="code"><code><span class="linenr"> 1: </span>bindActions(actions, imm=id, unimm=id) {
+<div class="org-src-container">
+<pre class="src src-js"><span class="linenr"> 1: </span>bindActions(actions, imm=id, unimm=id) {
 <span class="linenr"> 2: </span>  <span style="color: #00008b;">let</span> <span style="color: #b8860b;">atomState</span> = atom(imm(<span style="color: #6b8e23;">this</span>.getInitialState()))
 <span class="linenr"> 3: </span>  <span style="color: #00008b;">for</span>(<span style="color: #00008b;">let</span> <span style="color: #b8860b;">name</span> <span style="color: #00008b;">in</span> actions){
 <span class="linenr"> 4: </span>    <span style="color: #00008b;">let</span> <span style="color: #b8860b;">tx</span> = map((msg)=&gt;{
@@ -661,7 +682,8 @@ take(c, _=&gt;console.log(_))
 <span id="coderef-observe" class="coderef-off"><span class="linenr">11: </span>    observe(actionChan, (newstate)=&gt;{});</span>
 <span class="linenr">12: </span>  }
 <span class="linenr">13: </span>},
-</code></pre>
+</pre>
+</div>
 
 <ul class="org-ul">
 <li>还记得之前说的 atom 吗？<a href="#coderef-swap" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-swap');" onmouseout="CodeHighlightOff(this, 'coderef-swap');">这里</a> swap 尝试将 <code>msg.value</code> 和 <code>state</code> 传入 <code>actions[name]</code> ，将其返回值换入 atom 内。</li>
@@ -669,12 +691,14 @@ take(c, _=&gt;console.log(_))
 <li>在第<a href="#coderef-sub" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-sub');" onmouseout="CodeHighlightOff(this, 'coderef-sub');">10</a>行把该 class 生成的 uuid 和 action 的名字作为 action 的唯一标识。由于是 mixin，所以直接能获得该 component 上的 publication</li>
 <li>最后 observe 一下就好了，其实 observer 什么都没干，其实可以看看我的 <a href="https://github.com/jcouyang/conjs/blob/master/src/mori/core.async.cljs#L17">observe 实现</a>，只是一个简单的 go-loop，不停的 take channel 的消息。不然没人 take 消息会堆积满，就再也 put 不进来了。</li>
 </ul>
-<pre class="code"><code>(<span style="color: #00008b;">defn</span> ^<span style="color: #6b8e23;">:export</span> <span style="color: #6a5acd;">observe</span> [chan cb]
+<div class="org-src-container">
+<pre class="src src-clojure">(<span style="color: #00008b;">defn</span> ^<span style="color: #6b8e23;">:export</span> <span style="color: #6a5acd;">observe</span> [chan cb]
   (go-loop []
     (<span style="color: #00008b;">let</span> [v (<span style="color: #36648b;">async</span>/&lt;! chan)]
       (cb v)
       (<span style="color: #00008b;">recur</span>))))
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 </div>
@@ -721,16 +745,19 @@ take(c, _=&gt;console.log(_))
 <div id="outline-container-org3322f68" class="outline-3">
 <h3 id="org3322f68">1. 把你的 component 包到 Transdux 里</h3>
 <div class="outline-text-3" id="text-org3322f68">
-<pre class="code"><code>&lt;<span style="color: #6a5acd;">Transdux</span>&gt;
+<div class="org-src-container">
+<pre class="src src-html">&lt;<span style="color: #6a5acd;">Transdux</span>&gt;
     &lt;<span style="color: #6a5acd;">App</span>/&gt;
 &lt;/<span style="color: #6a5acd;">Transdux</span>&gt;
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 <div id="outline-container-orgb64b2bf" class="outline-3">
 <h3 id="orgb64b2bf">2. 定义你的 component 能干什么？你的状态能怎么变？</h3>
 <div class="outline-text-3" id="text-orgb64b2bf">
-<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">MainSection.jsx</span>
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">MainSection.jsx</span>
 <span style="color: #00008b;">import</span> {TxMixin} from <span style="color: #8b0000;">'transdux'</span>
 <span style="color: #00008b;">let</span> <span style="color: #b8860b;">actions</span> = {
   complete(msg, state){
@@ -755,12 +782,14 @@ take(c, _=&gt;console.log(_))
   },
   ...
 })
-</code></pre>
+</pre>
+</div>
 
 <p>
 然后，就可以开始 <b>发消息</b> 了
 </p>
-<pre class="code"><code>//TodoItem.jsx
+<div class="org-src-container">
+<pre class="src src-jsx">//TodoItem.jsx
 import MainSection from './MainSection'
 let TodoItem = React.createClass({
     mixins: [TxMixin],
@@ -769,7 +798,8 @@ let TodoItem = React.createClass({
     ...
     }
 })
-</code></pre>
+</pre>
+</div>
 
 <p>
 最后，要感谢我们棒棒的 Team member <a href="https://github.com/SanCoder-Q">@SanCoder-Q</a> <a href="https://github.com/zhangyaxuan">@zhangyaxuan</a> <a href="https://github.com/nihaokid">@nihaokid</a> <a href="https://github.com/xiaoyanzhuzzh">@xiaoyanzhuzzh</a> 

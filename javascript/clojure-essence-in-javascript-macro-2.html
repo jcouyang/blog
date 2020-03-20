@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-08 Sun 02:17 -->
+<!-- 2020-03-20 Fri 01:47 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>自制语言初试 - 入lang</title>
@@ -213,8 +213,10 @@ Hacker News 上的讨论 <a href="https://news.ycombinator.com/item?id=9749286">
 Clojure有一个很cool的macro, <code>#{}</code>, 匿名函数的macro, cool的地方是它可以用 <code>%1</code>, <code>%2</code>
 代表第几个参数. 特别方便比如是在用map的时候
 </p>
-<pre class="code"><code>(map #(<span style="color: #b8860b;">%</span>+3) [1,2,3,4])
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-clojure">(map #(<span style="color: #b8860b;">%</span>+3) [1,2,3,4])
+</pre>
+</div>
 
 <p>
 移植这个macro还是比较简单的, 虽然真正的 <code>#</code> 在clojure中是一个切换reader table的标志, 可能
@@ -225,8 +227,10 @@ Clojure有一个很cool的macro, <code>#{}</code>, 匿名函数的macro, cool的
 由于#算是sweetjs的保留字符, 我把 <code>#</code> 换成 <code>fn</code> 来代替, <code>%</code> 在js里又是运算符, 改用 <code>$</code> 代替, 
 那么ru-lang版的匿名函数就变成了
 </p>
-<pre class="code"><code>map(fn($+3), [1,2,3,4])
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">map(fn($+3), [1,2,3,4])
+</pre>
+</div>
 
 <p>
 很像clojure对不对, 但是又还是保留了js的语法, 是不是有点感觉怪怪的东西悄悄乱入了
@@ -241,7 +245,8 @@ Clojure有一个很cool的macro, <code>#{}</code>, 匿名函数的macro, cool的
 <li>用js的匿名函数包上, 返回</li>
 </ol>
 
-<pre class="code"><code>macro fn {
+<div class="org-src-container">
+<pre class="src src-javascript">macro fn {
 <span style="color: #00008b;">case</span> {
   $ctx
   ($body:expr)
@@ -265,7 +270,8 @@ Clojure有一个很cool的macro, <code>#{}</code>, 匿名函数的macro, cool的
 }
 
 <span style="color: #00008b;">export</span> fn;
-</code></pre>
+</pre>
+</div>
 
 <p>
 注意 <code>replace_args</code> 是递归的去替换所有token以及token的inner token
@@ -314,22 +320,26 @@ let 怎么就难了&#x2026;
 <p>
 我们都知道js var是function scope, 也就是说可以
 </p>
-<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span> =1;
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span> =1;
 <span style="color: #00008b;">for</span>(<span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span>=0;a&lt;3;a++){
   <span style="color: #00008b;">var</span> <span style="color: #b8860b;">b</span> = a+1
 }
 console.log(a, b)<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; 3,3</span>
-</code></pre>
+</pre>
+</div>
 
 <p>
 所有的var会被hoist到函数的顶部, 相当于
 </p>
-<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span>,<span style="color: #b8860b;">b</span>;
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span>,<span style="color: #b8860b;">b</span>;
 a=1
   <span style="color: #00008b;">for</span>(a=0;a&lt;3;a++){
     b = a+1
   }
-</code></pre>
+</pre>
+</div>
 
 <p>
 虽然 <a href="./essential-ecmascript6.html">es6 支持了 let block scope</a> 局部变量的定义, 但还是没有类似clojure的 let 表达式
@@ -339,22 +349,27 @@ a=1
 我喜欢能有这样一个东西
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">let</span>(a=1,b=2){a+b} === 3
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">let</span>(a=1,b=2){a+b} === 3
+</pre>
+</div>
 
 <p>
 由于js只有function scope, 所以应该要扩展成
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span>(<span style="color: #b8860b;">a</span>,<span style="color: #b8860b;">b</span>){
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">function</span>(<span style="color: #b8860b;">a</span>,<span style="color: #b8860b;">b</span>){
   <span style="color: #00008b;">return</span> a+b
 }(1,2)
-</code></pre>
+</pre>
+</div>
 
 
 <p>
 用macro实现这个再简单不过了
 </p>
-<pre class="code"><code>macro <span style="color: #00008b;">let</span> {
+<div class="org-src-container">
+<pre class="src src-javascript">macro <span style="color: #00008b;">let</span> {
   rule { ($($key:ident=$val:expr) (,)...){$body:expr...$last:expr} } =&gt;{
     (<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">$key</span>(,)...){
       $body...
@@ -362,7 +377,8 @@ a=1
     })($val(,)...)
   }
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 so easy, <del>block scope binding</del>
@@ -379,38 +395,51 @@ so easy, <del>block scope binding</del>
 <ol class="org-ol">
 <li>一个空的binding返回空</li>
 </ol>
-<pre class="code"><code>[]=[1,2,3] -&gt; nothing
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">[]=[1,2,3] -&gt; nothing
+</pre>
+</div>
 <ol class="org-ol">
 <li>一个正常的binding还是它自己</li>
 </ol>
-<pre class="code"><code>a=[1,2,3] -&gt; a=[1,2,3]
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">a=[1,2,3] -&gt; a=[1,2,3]
+</pre>
+</div>
 <ol class="org-ol">
 <li>单个元素的destruct, 等于第一个元素</li>
 </ol>
-<pre class="code"><code>[a] = [1,2,3] -&gt; a=[1,2,3][0]
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">[a] = [1,2,3] -&gt; a=[1,2,3][0]
+</pre>
+</div>
 <ol class="org-ol">
 <li>多个元素的destruct, 等于用第4部destruct头元素, 用5递归destruct尾部元素</li>
 </ol>
-<pre class="code"><code>[a,b,c] = [1,2,3] -&gt; destruct2(a=1), destruct5([,b,c]=[,2,3])
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">[a,b,c] = [1,2,3] -&gt; destruct2(a=1), destruct5([,b,c]=[,2,3])
+</pre>
+</div>
 <ol class="org-ol">
 <li>尾部的destruct, 同样取第一个元素destruct, 然后自递归</li>
 </ol>
-<pre class="code"><code>[,b,c] = [,2,3] -&gt; destruct2(b=2), destruct5([,c]=[,3])
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">[,b,c] = [,2,3] -&gt; destruct2(b=2), destruct5([,c]=[,3])
+</pre>
+</div>
 <ol class="org-ol">
 <li>最后一个元素的destruct</li>
 </ol>
-<pre class="code"><code>[,c] =[,3] -&gt; c=3
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">[,c] =[,3] -&gt; c=3
+</pre>
+</div>
 
 <p>
 phewww&#x2026;&#x2026;分解完好像覆盖了所有情况了, 现在用macro实现就太简单了
 </p>
-<pre class="code"><code>macro destruct {
+<div class="org-src-container">
+<pre class="src src-javascript">macro destruct {
   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">1</span>
   rule {[]=$val:expr} =&gt; {}
   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">2</span>
@@ -424,22 +453,27 @@ phewww&#x2026;&#x2026;分解完好像覆盖了所有情况了, 现在用macro实
   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">4</span>
   rule {[$id:ident $tail...]=$val:expr} =&gt; {destruct $id=($val.shift()), destruct [$tail...]=$val.slice(1)}
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 完了吗? 好像还没有, 万一有嵌套呢, 比如这样
 </p>
-<pre class="code"><code>[a, [b,c]] =[1,[2,3],4]
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">[a, [b,c]] =[1,[2,3],4]
+</pre>
+</div>
 
 <p>
 好吧, 不就是再多一层递归么, 拨开便好了
 </p>
-<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">&#22836;&#37096;&#23884;&#22871;, &#25320;&#24320;</span>
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">&#22836;&#37096;&#23884;&#22871;, &#25320;&#24320;</span>
 rule {[[$id:ident]]=$val:expr} =&gt; { destruct [$id]=($val[0]) }
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&#23614;&#37096;&#23884;&#22871;, &#25320;&#24320;&#25320;&#24320;</span>
 rule { [,[$last:ident]]=$val:expr}=&gt;{destruct [$last]=($val[0])}
-</code></pre>
+</pre>
+</div>
 
 <p>
 destructure object 的过程也非常类似, 我就懒得实现了
@@ -452,12 +486,14 @@ destructure object 的过程也非常类似, 我就懒得实现了
 <p>
 looprecur其实就是let的尾递归, 很容易变成循环
 </p>
-<pre class="code"><code>loop(a=1,b=18){
+<div class="org-src-container">
+<pre class="src src-javascript">loop(a=1,b=18){
   <span style="color: #00008b;">if</span> (a &gt; b)
     <span style="color: #00008b;">return</span> a
   recur (a++,b--)
 }
-</code></pre>
+</pre>
+</div>
 <p>
 其实就是特殊的let, 只是在尾部从新绑定了 a 和 b 的值, 然后在let一下, 虽然是 clojure的东东, 但是这里
 是不是看起来非常的像JS原生呢:)
@@ -466,7 +502,8 @@ looprecur其实就是let的尾递归, 很容易变成循环
 <p>
 好了, 我们期待的当然是直接优化成循环了
 </p>
-<pre class="code"><code>(fucntion (a,b) {
+<div class="org-src-container">
+<pre class="src src-javascript">(fucntion (a,b) {
   <span style="color: #00008b;">while</span>(<span style="color: #6b8e23;">true</span>){
     <span style="color: #00008b;">if</span>(a&gt;b)
       <span style="color: #00008b;">return</span> a
@@ -474,12 +511,14 @@ looprecur其实就是let的尾递归, 很容易变成循环
     b--;
   }
 })(1,18)
-</code></pre>
+</pre>
+</div>
 
 <p>
 let都实现了, 实现这也太容易了
 </p>
-<pre class="code"><code>macro loop {
+<div class="org-src-container">
+<pre class="src src-javascript">macro loop {
   rule {($params...){$body... recur($binding:expr(,)...)}} =&gt; {
     <span style="color: #00008b;">let</span>($params...){
       <span style="color: #00008b;">while</span> (<span style="color: #6b8e23;">true</span>) {
@@ -489,7 +528,8 @@ let都实现了, 实现这也太容易了
     }
   }
 }
-</code></pre>
+</pre>
+</div>
 <p>
 直接调用let就好了, 只要把body循环那么一下, binding放到循环最后.
 </p>
@@ -502,8 +542,10 @@ let都实现了, 实现这也太容易了
 <p>
 只移植 clojure 是不是开始有点无聊了, 让我们换换口味. CoffeeScript的判空我一直是非常喜欢, 不如试试也移过来,就可以这样了.
 </p>
-<pre class="code"><code>a?.b?().c?=1
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-javascript">a?.b?().c?=1
+</pre>
+</div>
 
 <p>
 比起嵌套一大堆if else或者是 Haskell fancy的 maybe monad, 这样的判空操作非常简单而且可读.
@@ -540,7 +582,8 @@ let都实现了, 实现这也太容易了
 则与后面的token连上(把 <code>?</code> 去掉)
 </p>
 
-<pre class="code"><code>macro (?) {
+<div class="org-src-container">
+<pre class="src src-javascript">macro (?) {
   rule infix {$left:expr | $right... } =&gt; {
     (<span style="color: #00008b;">function</span>(){
       <span style="color: #00008b;">if</span>(<span style="color: #00008b;">typeof</span> $left!==<span style="color: #8b0000;">'undefined'</span> &amp;&amp; $left!==<span style="color: #6b8e23;">null</span>){
@@ -549,13 +592,15 @@ let都实现了, 实现这也太容易了
     })()
   }
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 注意 infix macro 需要在 rule 后加上 <code>infix</code> 的keyword. 当然 infix 不仅可以用于 rule macro, 同样也可以用到
 case macro
 </p>
-<pre class="code"><code>macro (?) {
+<div class="org-src-container">
+<pre class="src src-javascript">macro (?) {
   <span style="color: #00008b;">case</span> infix {$left:expr |$name $right... } =&gt; {
     <span style="color: #00008b;">return</span> #{
       (<span style="color: #00008b;">function</span>(){
@@ -566,7 +611,8 @@ case macro
     }
   }
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 稍微不一样的是原来case macro的第一个参数要放到 <code>|</code> 后面了

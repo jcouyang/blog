@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-08 Sun 02:17 -->
+<!-- 2020-03-20 Fri 01:47 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>范畴论完全装逼手册 / Grokking Monad</title>
@@ -252,20 +252,24 @@ Sorry, your browser does not support SVG.</object>
 这些玩意对应到 haskell 的 typeclass 大致就是这样:
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">Category</span> (c <span style="color: #b8860b;">::</span> <span style="color: #b8860b;">*</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #b8860b;">*</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #b8860b;">*</span>) <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Category</span> (c <span style="color: #b8860b;">::</span> <span style="color: #b8860b;">*</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #b8860b;">*</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #b8860b;">*</span>) <span style="color: #00008b;">where</span>
   id <span style="color: #b8860b;">::</span> c a a
   (<span style="color: #b8860b;">.</span>) <span style="color: #b8860b;">::</span> c y z <span style="color: #b8860b;">-&gt;</span> c x y <span style="color: #b8860b;">-&gt;</span> c x z
-</code></pre>
+</pre>
+</div>
 
 
 <p>
 而 Scala 可以用 trait 来表示这个 typeclass:
 </p>
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Category</span>[<span style="color: #6b8e23;">C</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>]] {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Category</span>[<span style="color: #6b8e23;">C</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>]] {
   <span style="color: #00008b;">val</span> <span style="color: #b8860b;">id</span>[<span style="color: #6b8e23;">A</span>]<span style="color: #00008b;">:</span> <span style="color: #36648b;">C</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">A</span>]
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">&lt;&lt;&lt;</span>(a<span style="color: #00008b;">:</span> <span style="color: #36648b;">C</span>[<span style="color: #6b8e23;">Y</span>, <span style="color: #6b8e23;">Z</span>], b<span style="color: #00008b;">:</span> <span style="color: #36648b;">C</span>[<span style="color: #6b8e23;">X</span>, <span style="color: #6b8e23;">Y</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">C</span>[<span style="color: #6b8e23;">X</span>, <span style="color: #6b8e23;">Z</span>] 
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 如果这是你第一次见到 Haskell 代码，没有关系，语法真的很简单 <del>才怪</del>
@@ -323,20 +327,24 @@ Haskell 类型系统范畴叫做 Hask
 <li>compose 当然就是函数组合的类型</li>
 </ul>
 
-<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #36648b;">Hask</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">(-&gt;)</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">type</span> <span style="color: #36648b;">Hask</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">(-&gt;)</span>
 <span style="color: #00008b;">instance</span> <span style="color: #36648b;">Category</span> (<span style="color: #36648b;">Hask</span><span style="color: #b8860b;">::</span> <span style="color: #b8860b;">*</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #b8860b;">*</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #b8860b;">*</span>) <span style="color: #00008b;">where</span>
   (f <span style="color: #b8860b;">.</span> g) x <span style="color: #b8860b;">=</span> f (g x)
-</code></pre>
+</pre>
+</div>
 
 <p>
 我们看见新的关键字 <code>instance</code> ，这表示 Hask 是 Type class Category 的实例类型，也就是说对任意Hask类型, 那么就能找到它的 id 和 compose
 </p>
 
-<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">haskCat</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Category</span>[<span style="color: #6b8e23;">Hask</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Category</span>[<span style="color: #6b8e23;">Hask</span>] {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">haskCat</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Category</span>[<span style="color: #6b8e23;">Hask</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Category</span>[<span style="color: #6b8e23;">Hask</span>] {
   <span style="color: #00008b;">val</span> <span style="color: #b8860b;">id</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> identity[<span style="color: #6b8e23;">A</span>]
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">&lt;&lt;&lt;</span>[<span style="color: #6b8e23;">X</span>, <span style="color: #6b8e23;">Y</span>, <span style="color: #6b8e23;">Z</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Hask</span>[<span style="color: #6b8e23;">Y</span>, <span style="color: #6b8e23;">Z</span>], b<span style="color: #00008b;">:</span> <span style="color: #36648b;">Hask</span>[<span style="color: #6b8e23;">X</span>, <span style="color: #6b8e23;">Y</span>]) <span style="color: #00008b;">=</span> a compose b
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 Scala 中, 只需要 new 这个 trait 就可以实现这个 typeclass
@@ -345,12 +353,16 @@ Scala 中, 只需要 new 这个 trait 就可以实现这个 typeclass
 <p>
 其中: identity <code>Hask a a</code> 就是
 </p>
-<pre class="code"><code><span style="color: #36648b;">(-&gt;)</span> a a <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">or</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #36648b;">(-&gt;)</span> a a <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">or</span>
 a <span style="color: #b8860b;">-&gt;</span> a <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">&#22240;&#20026; -&gt; &#26159;&#20013;&#32512;&#26500;&#36896;&#22120;</span>
-</code></pre>
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #6b8e23;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">A</span>
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #6b8e23;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">A</span>
+</pre>
+</div>
 </div>
 </div>
 <div id="outline-container-org52ba652" class="outline-4">
@@ -392,14 +404,18 @@ Sorry, your browser does not support SVG.</object>
 </ul></li>
 </ul>
 
-<pre class="code"><code><span style="color: #00008b;">class</span> (<span style="color: #36648b;">Category</span> c, <span style="color: #36648b;">Category</span> d) <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Functor</span> c d t <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> (<span style="color: #36648b;">Category</span> c, <span style="color: #36648b;">Category</span> d) <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Functor</span> c d t <span style="color: #00008b;">where</span>
   fmap <span style="color: #b8860b;">::</span> c a b <span style="color: #b8860b;">-&gt;</span> d (t a) (t b)
-</code></pre>
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">C</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">D</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">T</span>[<span style="color: #00008b;">_</span>]] {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">C</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">D</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">T</span>[<span style="color: #00008b;">_</span>]] {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fmap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](c<span style="color: #00008b;">:</span> <span style="color: #36648b;">C</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">D</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">A</span>], <span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">B</span>]]
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 <code>Functor c d t</code> 这表示从范畴 c 到范畴 d 的一个 Functor t
@@ -409,14 +425,18 @@ Sorry, your browser does not support SVG.</object>
 如果把范畴 c 和 d 都限制到 Hask 范畴
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">Functor</span> <span style="color: #36648b;">(-&gt;)</span> <span style="color: #36648b;">(-&gt;)</span> t <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Functor</span> <span style="color: #36648b;">(-&gt;)</span> <span style="color: #36648b;">(-&gt;)</span> t <span style="color: #00008b;">where</span>
   fmap <span style="color: #b8860b;">::</span> <span style="color: #36648b;">(-&gt;)</span> a b <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">(-&gt;)</span> (t a) (t b)
-</code></pre>
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Functor</span>[<span style="color: #00008b;">=&gt;</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>], <span style="color: #00008b;">=&gt;</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">T</span>[<span style="color: #00008b;">_</span>]] {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Functor</span>[<span style="color: #00008b;">=&gt;</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>], <span style="color: #00008b;">=&gt;</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">T</span>[<span style="color: #00008b;">_</span>]] {
  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fmap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](c<span style="color: #00008b;">:</span> <span style="color: #00008b;">=&gt;</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>])<span style="color: #00008b;">:</span> <span style="color: #00008b;">=&gt;</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">A</span>], <span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">B</span>]]
 }
-</code></pre>
+</pre>
+</div>
 <p>
 <code>-&gt;</code> 在 Haskell 中是中缀类型构造器，所以是可以写在中间的
 </p>
@@ -427,14 +447,18 @@ Sorry, your browser does not support SVG.</object>
 </span>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">Functor</span> t <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Functor</span> t <span style="color: #00008b;">where</span>
   fmap <span style="color: #b8860b;">::</span> (a <span style="color: #b8860b;">-&gt;</span> b) <span style="color: #b8860b;">-&gt;</span> (t a <span style="color: #b8860b;">-&gt;</span> t b)
-</code></pre>
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #00008b;">_</span>]] {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #00008b;">_</span>]] {
  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fmap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](c<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">T</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">B</span>]
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 而 <i><ruby>自函子<rt>endofunctor</rt></ruby></i> 就是这种连接相同范畴的 Functor，因为它从范畴 Hask 到达同样的范畴 Hask
@@ -483,31 +507,39 @@ Sorry, your browser does not support SVG.</object>
 <p>
 范畴 c 上的函子 f 到 g 的自然变化就可以表示成
 </p>
-<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #36648b;">Nat</span> c f g <span style="color: #b8860b;">=</span> c (f a) (g a)
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">type</span> <span style="color: #36648b;">Nat</span> c f g <span style="color: #b8860b;">=</span> c (f a) (g a)
+</pre>
+</div>
 
 <p>
 Scala 没有 rank n type<label for="6" class="margin-toggle sidenote-number"></label><input type="checkbox" id="6" class="margin-toggle"/><span class="sidenote">
 别急, 后面马上讲到
 </span>, 只能靠 apply 来 meme 了
 </p>
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Nat</span>[<span style="color: #6b8e23;">C</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">G</span>[<span style="color: #00008b;">_</span>]] {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Nat</span>[<span style="color: #6b8e23;">C</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">G</span>[<span style="color: #00008b;">_</span>]] {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">A</span>]<span style="color: #00008b;">:</span> <span style="color: #36648b;">C</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">A</span>], <span style="color: #6b8e23;">G</span>[<span style="color: #6b8e23;">A</span>]]
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 Hask 范畴上的自然变化就变成了
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #36648b;">NatHask</span> f g <span style="color: #b8860b;">=</span> f a <span style="color: #b8860b;">-&gt;</span> g a
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">type</span> <span style="color: #36648b;">NatHask</span> f g <span style="color: #b8860b;">=</span> f a <span style="color: #b8860b;">-&gt;</span> g a
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">NatHask</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">G</span>[<span style="color: #00008b;">_</span>]] {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">NatHask</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">G</span>[<span style="color: #00008b;">_</span>]] {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">A</span>]<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">G</span>[<span style="color: #6b8e23;">A</span>]
 }
 
-</code></pre>
+</pre>
+</div>
 
 <p>
 有趣的是, 还可以继续升维度, 比如
@@ -613,9 +645,11 @@ compose的方向是从右往左，从下到上。
 <p>
 同构指的是若是有
 </p>
-<pre class="code"><code><span style="color: #6a5acd;">f</span> <span style="color: #b8860b;">::</span> a <span style="color: #b8860b;">-&gt;</span> b
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">f</span> <span style="color: #b8860b;">::</span> a <span style="color: #b8860b;">-&gt;</span> b
 f'<span style="color: #b8860b;">::</span> b <span style="color: #b8860b;">-&gt;</span> a
-</code></pre>
+</pre>
+</div>
 
 <p>
 那么 f 与 f' 同构，因为 f . f' = id = f' . f
@@ -672,29 +706,37 @@ String Diagram 神奇的地方是所有线都可以拉上下两端，这个技�
 
 </figure>
 
-<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">Endofunctor</span> c t <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> c t <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Endofunctor</span> c t <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> c t <span style="color: #00008b;">where</span>
   eta <span style="color: #b8860b;">::</span> c a (t a)
   mu  <span style="color: #b8860b;">::</span> c (t (t a)) (t a)
-</code></pre>
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">C</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">T</span>[<span style="color: #00008b;">_</span>]]] <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Endofunctor</span>[<span style="color: #6b8e23;">C</span>, <span style="color: #6b8e23;">T</span>] {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">C</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">T</span>[<span style="color: #00008b;">_</span>]]] <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Endofunctor</span>[<span style="color: #6b8e23;">C</span>, <span style="color: #6b8e23;">T</span>] {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">eta</span>[<span style="color: #6b8e23;">A</span>]<span style="color: #00008b;">:</span> <span style="color: #36648b;">C</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">A</span>]]
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">mu</span>[<span style="color: #6b8e23;">A</span>]<span style="color: #00008b;">:</span> <span style="color: #36648b;">C</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">A</span>]], <span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">A</span>]]
 }
-</code></pre>
+</pre>
+</div>
 <p>
 同样，把 c = Hask 替换进去，就得到更类似我们 Haskell 中 Monad 的定义
 </p>
-<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">Endofunctor</span> m <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> m <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Endofunctor</span> m <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> m <span style="color: #00008b;">where</span>
   eta <span style="color: #b8860b;">::</span> a <span style="color: #b8860b;">-&gt;</span> (m a)
   mu <span style="color: #b8860b;">::</span> m m a <span style="color: #b8860b;">-&gt;</span> m a
-</code></pre>
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">M</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Endofunctor</span>[<span style="color: #6b8e23;">M</span>] {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">M</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Endofunctor</span>[<span style="color: #6b8e23;">M</span>] {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">eta</span>[<span style="color: #6b8e23;">A</span>]<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">M</span>[<span style="color: #6b8e23;">A</span>]
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">mu</span>[<span style="color: #6b8e23;">A</span>]<span style="color: #00008b;">:</span> <span style="color: #36648b;">M</span>[<span style="color: #6b8e23;">M</span>[<span style="color: #6b8e23;">A</span>]] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">M</span>[<span style="color: #6b8e23;">A</span>]
 }
-</code></pre>
+</pre>
+</div>
 <p>
 要推出单子的 &eta; 变换，只需要让 FG = T
 </p>
@@ -742,8 +784,10 @@ String Diagram 神奇的地方是所有线都可以拉上下两端，这个技�
 <p>
 换到代码上来说
 </p>
-<pre class="code"><code>(mu <span style="color: #b8860b;">.</span> eta) m <span style="color: #b8860b;">=</span> m
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell">(mu <span style="color: #b8860b;">.</span> eta) m <span style="color: #b8860b;">=</span> m
+</pre>
+</div>
 
 <p>
 同样的，左右翻转也成立
@@ -759,15 +803,19 @@ String Diagram 神奇的地方是所有线都可以拉上下两端，这个技�
 <img src="images/p1-monad-triangle-reverse.png" alt="p1-monad-triangle-reverse.png">
 T &eta; 就是 fmap eta
 </p>
-<pre class="code"><code>(mu <span style="color: #b8860b;">.</span> fmap eta) m <span style="color: #b8860b;">=</span> m
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell">(mu <span style="color: #b8860b;">.</span> fmap eta) m <span style="color: #b8860b;">=</span> m
+</pre>
+</div>
 
 <p>
 如果把 <code>mu . fmap</code> 写成 <code>&gt;&gt;=</code> , 就有了
 </p>
 
-<pre class="code"><code>m <span style="color: #6a5acd;">&gt;&gt;=</span> eta <span style="color: #b8860b;">=</span> m
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell">m <span style="color: #6a5acd;">&gt;&gt;=</span> eta <span style="color: #b8860b;">=</span> m
+</pre>
+</div>
 </div>
 </div>
 
@@ -809,8 +857,10 @@ T &eta; 就是 fmap eta
 <p>
 结合律反映到代码中就是
 </p>
-<pre class="code"><code>mu <span style="color: #6a5acd;">.</span> fmap mu <span style="color: #b8860b;">=</span> mu <span style="color: #b8860b;">.</span> mu
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell">mu <span style="color: #6a5acd;">.</span> fmap mu <span style="color: #b8860b;">=</span> mu <span style="color: #b8860b;">.</span> mu
+</pre>
+</div>
 
 <p>
 代码很难看出结合在哪里，因为正常的结合律应该是这样的 (1+2)+3 = 1+(2+3)，但是不想加法的维度不一样，这里说的是自然变换维度的结合，可以通过String Diagram 很清楚的看见结合的过程，即 &mu; 左边的两个T和先 &mu; 右边两个 T 是相等的。
@@ -830,23 +880,27 @@ T &eta; 就是 fmap eta
 haskell还要先打开 RankNTypes 的 feature
 </p>
 
-<pre class="code"><code><span style="color: #228b22;">{-# LANGUAGE RankNTypes #-}</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #228b22;">{-# LANGUAGE RankNTypes #-}</span>
 
 <span style="color: #6a5acd;">embed</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Functor</span> f <span style="color: #b8860b;">=&gt;</span> f a <span style="color: #b8860b;">-&gt;</span> (<span style="color: #00008b;">forall</span> b <span style="color: #b8860b;">.</span> (a <span style="color: #b8860b;">-&gt;</span> b) <span style="color: #b8860b;">-&gt;</span> f b)
 <span style="color: #6a5acd;">embed</span> x f <span style="color: #b8860b;">=</span> fmap f x
 
 <span style="color: #6a5acd;">unembed</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Functor</span> f <span style="color: #b8860b;">=&gt;</span> (<span style="color: #00008b;">forall</span> b <span style="color: #b8860b;">.</span> (a <span style="color: #b8860b;">-&gt;</span> b) <span style="color: #b8860b;">-&gt;</span> f b) <span style="color: #b8860b;">-&gt;</span> f a
 <span style="color: #6a5acd;">unembed</span> f <span style="color: #b8860b;">=</span> f id
-</code></pre>
+</pre>
+</div>
 
 <p>
 Scala 语言没有 Rank N Type支持, 但是 <a href="#orgb1490d8"><ruby>自然变换<rt>Natural Transformations</rt></ruby></a> 提到过可以用 <code>apply</code> 来模拟. 其实可以使用 Cats 的 <a href="https://typelevel.org/cats/datatypes/functionk.html">FunctionK(~&gt;)</a> 更方便:
 </p>
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">embed</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>](fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])(<span style="color: #228b22;">implicit</span> f<span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">F</span>])<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">A</span> <span style="color: #00008b;">=&gt;</span> ?) ~&gt; <span style="color: #6b8e23;">F</span> <span style="color: #00008b;">=</span>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">embed</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>](fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])(<span style="color: #228b22;">implicit</span> f<span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">F</span>])<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">A</span> <span style="color: #00008b;">=&gt;</span> ?) ~&gt; <span style="color: #6b8e23;">F</span> <span style="color: #00008b;">=</span>
   <span style="color: #6b8e23;">Lambda</span>[(<span style="color: #6b8e23;">A</span> <span style="color: #00008b;">=&gt;</span> ?) ~&gt; <span style="color: #6b8e23;">F</span>](f.fmap(<span style="color: #00008b;">_</span>)(fa))
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">unembed</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]](fnk<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">A</span> <span style="color: #00008b;">=&gt;</span> ?) ~&gt; <span style="color: #6b8e23;">F</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span>
   fnk(identity)
-</code></pre>
+</pre>
+</div>
 
 <p>
 embed 可以把 functor <code>f a</code> 变成 <code>(a -&gt; b) -&gt; f b</code>
@@ -909,17 +963,21 @@ Haskell 中可以不用声明类型, 但是其实是省略掉 universally quanti
 比如:
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">rank2</span> <span style="color: #b8860b;">::</span> <span style="color: #00008b;">forall</span> b c <span style="color: #b8860b;">.</span> b <span style="color: #b8860b;">-&gt;</span> c <span style="color: #b8860b;">-&gt;</span> (<span style="color: #00008b;">forall</span> a<span style="color: #b8860b;">.</span> a <span style="color: #b8860b;">-&gt;</span> a) <span style="color: #b8860b;">-&gt;</span> (b, c)
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">rank2</span> <span style="color: #b8860b;">::</span> <span style="color: #00008b;">forall</span> b c <span style="color: #b8860b;">.</span> b <span style="color: #b8860b;">-&gt;</span> c <span style="color: #b8860b;">-&gt;</span> (<span style="color: #00008b;">forall</span> a<span style="color: #b8860b;">.</span> a <span style="color: #b8860b;">-&gt;</span> a) <span style="color: #b8860b;">-&gt;</span> (b, c)
 <span style="color: #6a5acd;">rank2</span> b c f <span style="color: #b8860b;">=</span> (f b, f c)
 
 <span style="color: #6a5acd;">rank2</span> <span style="color: #36648b;">True</span> <span style="color: #8b0000;">'a'</span> id
 <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">(True, 'a')</span>
-</code></pre>
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">rank2</span>[<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>](b<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span>, c<span style="color: #00008b;">:</span> <span style="color: #36648b;">C</span>)(fnk<span style="color: #00008b;">:</span> <span style="color: #36648b;">Id</span> ~&gt; <span style="color: #6b8e23;">Id</span>)<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>) <span style="color: #00008b;">=</span>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">rank2</span>[<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>](b<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span>, c<span style="color: #00008b;">:</span> <span style="color: #36648b;">C</span>)(fnk<span style="color: #00008b;">:</span> <span style="color: #36648b;">Id</span> ~&gt; <span style="color: #6b8e23;">Id</span>)<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>) <span style="color: #00008b;">=</span>
   (fnk(b), fnk(c))
 rank2(<span style="color: #6b8e23;">true</span>, <span style="color: #8b0000;">'a'</span>)(<span style="color: #6b8e23;">FunctionK</span>.id[<span style="color: #6b8e23;">Id</span>])
-</code></pre>
+</pre>
+</div>
 
 <ul class="org-ul">
 <li>f 在 <code>f True</code> 时类型 <code>Boolean -&gt; Boolean</code> 是符合 <code>forall a. a-&gt;a</code> 的</li>
@@ -929,13 +987,17 @@ rank2(<span style="color: #6b8e23;">true</span>, <span style="color: #8b0000;">'
 <p>
 如果是 rank1 类型系统就懵逼了:
 </p>
-<pre class="code"><code><span style="color: #6a5acd;">rank1</span> <span style="color: #b8860b;">::</span> <span style="color: #00008b;">forall</span> a b c <span style="color: #b8860b;">.</span> b <span style="color: #b8860b;">-&gt;</span> c <span style="color: #b8860b;">-&gt;</span> (a <span style="color: #b8860b;">-&gt;</span> a) <span style="color: #b8860b;">-&gt;</span> (b, c)
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">rank1</span> <span style="color: #b8860b;">::</span> <span style="color: #00008b;">forall</span> a b c <span style="color: #b8860b;">.</span> b <span style="color: #b8860b;">-&gt;</span> c <span style="color: #b8860b;">-&gt;</span> (a <span style="color: #b8860b;">-&gt;</span> a) <span style="color: #b8860b;">-&gt;</span> (b, c)
 <span style="color: #6a5acd;">rank1</span> b c f <span style="color: #b8860b;">=</span> (f b, f c)
-</code></pre>
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">rank1</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>](b<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span>, c<span style="color: #00008b;">:</span> <span style="color: #36648b;">C</span>)(fn<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">A</span>)<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>) <span style="color: #00008b;">=</span>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">rank1</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>](b<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span>, c<span style="color: #00008b;">:</span> <span style="color: #36648b;">C</span>)(fn<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">A</span>)<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>) <span style="color: #00008b;">=</span>
   (fn(b), fn(c))
-</code></pre>
+</pre>
+</div>
 <p>
 f 在 <code>f True</code> 是确定 a 是 Boolean，在rank1多态是时就确定了 <code>a-&gt;a</code> 的类型一定是 <code>Boolean -&gt; Boolean</code>
 </p>
@@ -984,43 +1046,57 @@ Sorry, your browser does not support SVG.</object>
 </span>
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">f</span> <span style="color: #b8860b;">::</span> b <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">T</span> c
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">f</span> <span style="color: #b8860b;">::</span> b <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">T</span> c
 <span style="color: #6a5acd;">fmap</span> f <span style="color: #b8860b;">::</span> <span style="color: #36648b;">T</span> b <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">T</span> <span style="color: #36648b;">T</span> c
 <span style="color: #6a5acd;">mu</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">T</span> <span style="color: #36648b;">T</span> c <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">T</span> c
-</code></pre>
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">f</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>](b<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">T</span>[<span style="color: #6b8e23;">C</span>]
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">f</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>](b<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">T</span>[<span style="color: #6b8e23;">C</span>]
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fmap</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">C</span>)(tb<span style="color: #00008b;">:</span> <span style="color: #36648b;">T</span>[<span style="color: #6b8e23;">B</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">T</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">C</span>]]
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">mu</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">C</span>](ttc<span style="color: #00008b;">:</span> <span style="color: #36648b;">T</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">C</span>]])<span style="color: #00008b;">:</span> <span style="color: #36648b;">T</span>[<span style="color: #6b8e23;">C</span>]
-</code></pre>
+</pre>
+</div>
 
 <p>
 紫色的箭头 <code>T f</code><label for="12" class="margin-toggle sidenote-number"></label><input type="checkbox" id="12" class="margin-toggle"/><span class="sidenote">
 即 <code>fmap f</code>
 </span> 和紫色的虚线箭头 &mu; 连起来就是 <code>T f'</code>, 那么最出名的 <code>&gt;&gt;=</code> 符号终于出来了:
 </p>
-<pre class="code"><code>tb <span style="color: #6a5acd;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> (mu <span style="color: #b8860b;">.</span> fmap f) tb
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell">tb <span style="color: #6a5acd;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> (mu <span style="color: #b8860b;">.</span> fmap f) tb
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">flatMap</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">C</span>])(tb<span style="color: #00008b;">:</span> <span style="color: #36648b;">T</span>[<span style="color: #6b8e23;">B</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">T</span>[<span style="color: #6b8e23;">C</span>] <span style="color: #00008b;">=</span> (mu compose fmap(f))(tb)
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">flatMap</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">C</span>])(tb<span style="color: #00008b;">:</span> <span style="color: #36648b;">T</span>[<span style="color: #6b8e23;">B</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">T</span>[<span style="color: #6b8e23;">C</span>] <span style="color: #00008b;">=</span> (mu compose fmap(f))(tb)
+</pre>
+</div>
 
 <p>
 下面这个大火箭 <code>&lt;=&lt;</code> 可以把蓝色箭头组合起来.
 </p>
-<pre class="code"><code>(f <span style="color: #b8860b;">&lt;=&lt;</span> g) <span style="color: #b8860b;">=</span> mu <span style="color: #b8860b;">.</span> <span style="color: #36648b;">T</span> f <span style="color: #b8860b;">.</span> g <span style="color: #b8860b;">=</span> mu <span style="color: #b8860b;">.</span> fmap f <span style="color: #b8860b;">.</span> g
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell">(f <span style="color: #b8860b;">&lt;=&lt;</span> g) <span style="color: #b8860b;">=</span> mu <span style="color: #b8860b;">.</span> <span style="color: #36648b;">T</span> f <span style="color: #b8860b;">.</span> g <span style="color: #b8860b;">=</span> mu <span style="color: #b8860b;">.</span> fmap f <span style="color: #b8860b;">.</span> g
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">&lt;=&lt;</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">C</span>])(g<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">B</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">C</span>] <span style="color: #00008b;">=</span>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">&lt;=&lt;</span>[<span style="color: #6b8e23;">T</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">C</span>])(g<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">B</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">T</span>[<span style="color: #6b8e23;">C</span>] <span style="color: #00008b;">=</span>
   mu compose fmap(f) compose g
-</code></pre>
+</pre>
+</div>
 
 <p>
 因此大火箭就是 Kleisli 范畴的 <code>compose</code>
 </p>
 
-<pre class="code"><code>(<span style="color: #6a5acd;">&lt;=&lt;</span>) <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Monad</span> <span style="color: #36648b;">T</span> <span style="color: #b8860b;">=&gt;</span> (b <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">T</span> c) <span style="color: #b8860b;">-&gt;</span> (a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">T</span> b) <span style="color: #b8860b;">-&gt;</span> (a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">T</span> c)
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell">(<span style="color: #6a5acd;">&lt;=&lt;</span>) <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Monad</span> <span style="color: #36648b;">T</span> <span style="color: #b8860b;">=&gt;</span> (b <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">T</span> c) <span style="color: #b8860b;">-&gt;</span> (a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">T</span> b) <span style="color: #b8860b;">-&gt;</span> (a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">T</span> c)
+</pre>
+</div>
 </div>
 </div>
 

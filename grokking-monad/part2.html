@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-08 Sun 02:17 -->
+<!-- 2020-03-20 Fri 01:48 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>范畴论完全装逼手册 / Grokking Monad</title>
@@ -163,11 +163,15 @@ And contrary wise, what is, it wouldn't be. And what it wouldn't be, it would. Y
 <p>
 <ruby>本身就有单子<rt> Identity Monad</rt></ruby> 可能是最简单的单子了。本身不包含任何计算, 且只有一个构造器:
 </p>
-<pre class="code"><code><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Identity</span> a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Identity</span> { runIdentity <span style="color: #b8860b;">::</span> a }
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Identity</span> a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Identity</span> { runIdentity <span style="color: #b8860b;">::</span> a }
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Identity</span>[<span style="color: #6b8e23;">A</span>](run<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Identity</span>[<span style="color: #6b8e23;">A</span>](run<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)
+</pre>
+</div>
 
 <p>
 这里使用 <code>newtype</code> 而不是 <code>data</code> 是因为 <code>Identity</code> 与 <code>runIdentity</code> 是同构的<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
@@ -175,9 +179,11 @@ And contrary wise, what is, it wouldn't be. And what it wouldn't be, it would. Y
 </span>.
 </p>
 
-<pre class="code"><code><span style="color: #36648b;">Identity</span> <span style="color: #b8860b;">::</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Identity</span> a
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #36648b;">Identity</span> <span style="color: #b8860b;">::</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Identity</span> a
 <span style="color: #6a5acd;">runIdentity</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Identity</span> a <span style="color: #b8860b;">-&gt;</span> a
-</code></pre>
+</pre>
+</div>
 
 <p>
 你看 <code>runIdentity . Identity = id</code> ，所以他们是同构的。
@@ -200,11 +206,15 @@ And contrary wise, what is, it wouldn't be. And what it wouldn't be, it would. Y
 <p>
 大括号比较诡异，可以想象成给 <code>a</code> 一个 key，同过这个 key 可以把 a 取出来，比如
 </p>
-<pre class="code"><code><span style="color: #6a5acd;">runIdentity</span> (<span style="color: #36648b;">Identity</span> 1)
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">runIdentity</span> (<span style="color: #36648b;">Identity</span> 1)
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #6b8e23;">Identity</span>(<span style="color: #6b8e23;">1</span>).run
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #6b8e23;">Identity</span>(<span style="color: #6b8e23;">1</span>).run
+</pre>
+</div>
 
 <p>
 会返回 1
@@ -214,19 +224,22 @@ And contrary wise, what is, it wouldn't be. And what it wouldn't be, it would. Y
 Identity 可以实现 Functor 和 Monad，就得到 Identity functor 和 Identity monad:
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Functor</span> <span style="color: #36648b;">Identity</span> <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Functor</span> <span style="color: #36648b;">Identity</span> <span style="color: #00008b;">where</span>
   fmap f (<span style="color: #36648b;">Identity</span> a) <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Identity</span> (f a)
 
 <span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> <span style="color: #36648b;">Identity</span> <span style="color: #00008b;">where</span>
   return a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Identity</span> a
   <span style="color: #36648b;">Identity</span> a <span style="color: #b8860b;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> f a
-</code></pre>
+</pre>
+</div>
 
 <p>
 而 Scala 则需要用 <code>implicit</code> 来实现 typeclass:
 </p>
 
-<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">identityFunctor</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">Identity</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">Identity</span>] {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">identityFunctor</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">Identity</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">Identity</span>] {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fmap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Identity</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Identity</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> {
     <span style="color: #00008b;">case</span> <span style="color: #36648b;">Identity</span>(<span style="color: #b8860b;">a</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Identity</span>(f(a))
   }
@@ -238,7 +251,8 @@ Identity 可以实现 Functor 和 Monad，就得到 Identity functor 和 Identit
     <span style="color: #00008b;">case</span> <span style="color: #36648b;">Identity</span>(<span style="color: #b8860b;">a</span>) <span style="color: #00008b;">=&gt;</span> f(a)
   }
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 可以看到 Identity 即是<ruby>构造器<rt>constructor</rt></ruby>，也是<ruby>解构器<rt>destructure</rt></ruby>，利用模式匹配是可以解构出值的。
@@ -267,8 +281,10 @@ Identity 看起来什么也没有干，就跟 identity 函数一样，但是实�
 因为它拥有比本身就有多一个的类型构造器，类似这样的叫做 <ruby>代数数据类型<rt> Algebra Data Type(ADT)</rt></ruby>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">data</span> <span style="color: #36648b;">Maybe</span> a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Just</span> a <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Nothing</span>
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">data</span> <span style="color: #36648b;">Maybe</span> a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Just</span> a <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Nothing</span>
+</pre>
+</div>
 
 <p>
 你看, 不管是 <code>Just</code> 还是 <code>Nothing</code> 都可以构造出一个 <code>Maybe</code> 类型的数据来.
@@ -278,10 +294,12 @@ Identity 看起来什么也没有干，就跟 identity 函数一样，但是实�
 ADT 在 Scala 可以用 trait 表示, 而且, Scala 中的 <code>Maybe</code> 叫做 <code>Option</code>:
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Option</span>[+<span style="color: #6b8e23;">A</span>]
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Option</span>[+<span style="color: #6b8e23;">A</span>]
 <span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Some</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>]
 <span style="color: #00008b;">case</span> <span style="color: #00008b;">object</span> <span style="color: #6b8e23;">None</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">Nothing</span>]
-</code></pre>
+</pre>
+</div>
 
 <p>
 Haskell 中定义一个 ADT 十分简单，不像 Scala 那么啰嗦。左边是类型构造器，右边有数据构造器，你会发现有一根竖线 <code>|</code> ， 它分隔着两个构造器
@@ -307,18 +325,22 @@ Haskell 中定义一个 ADT 十分简单，不像 Scala 那么啰嗦。左边是
 <p>
 总之我们有了构造器可以构造出 <code>Maybe</code> 类型，而这个类型能做的事情，就要取决它实现了哪些 typeclass 的 instance 了。比如它可以是一个函子.
 </p>
-<pre class="code"><code><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Functor</span> <span style="color: #36648b;">Maybe</span> <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Functor</span> <span style="color: #36648b;">Maybe</span> <span style="color: #00008b;">where</span>
   fmap f (<span style="color: #36648b;">Just</span> a) <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Just</span> (f a)
   fmap f <span style="color: #36648b;">Nothing</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Nothing</span>
-</code></pre>
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">optionFunctor</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">Option</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">Option</span>] {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">optionFunctor</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">Option</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">Option</span>] {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fmap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> {
     <span style="color: #00008b;">case</span> <span style="color: #36648b;">Some</span>(<span style="color: #b8860b;">a</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Some</span>(f(a))
     <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">None</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">None</span>
   }
 }
-</code></pre>
+</pre>
+</div>
 
 
 <figure>
@@ -338,19 +360,23 @@ Haskell 中定义一个 ADT 十分简单，不像 Scala 那么啰嗦。左边是
 <p>
 不仅如此，还可以实现单子:
 </p>
-<pre class="code"><code><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> <span style="color: #36648b;">Maybe</span> <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> <span style="color: #36648b;">Maybe</span> <span style="color: #00008b;">where</span>
   return a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Just</span> a
   (<span style="color: #36648b;">Just</span> a) <span style="color: #b8860b;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> f a
   <span style="color: #36648b;">Nothing</span> <span style="color: #b8860b;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Nothing</span>
-</code></pre>
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">optionMonad</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">Option</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">Option</span>] {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">optionMonad</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">Option</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">Option</span>] {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">flatMap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">B</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> {
     <span style="color: #00008b;">case</span> <span style="color: #36648b;">Some</span>(<span style="color: #b8860b;">a</span>) <span style="color: #00008b;">=&gt;</span> f(a)
     <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">None</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">None</span>
   }
 }
-</code></pre>
+</pre>
+</div>
 
 
 <figure>
@@ -367,11 +393,15 @@ Maybe 有用在于能合适的处理 <i><ruby>偏函数<rt> Partial Function</rt
 <p>
 比如一个取数组某一位上的值的函数，就是偏函数，因为假设你想取第4位的值，但不是所有数组长度都大于4，就会有获取不了的尴尬情况。
 </p>
-<pre class="code"><code>[1,2,3] <span style="color: #b8860b;">!!</span> 4
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell">[1,2,3] <span style="color: #b8860b;">!!</span> 4
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #6b8e23;">List</span>(<span style="color: #6b8e23;">1</span>,<span style="color: #6b8e23;">2</span>,<span style="color: #6b8e23;">3</span>).get(<span style="color: #6b8e23;">4</span>)
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #6b8e23;">List</span>(<span style="color: #6b8e23;">1</span>,<span style="color: #6b8e23;">2</span>,<span style="color: #6b8e23;">3</span>).get(<span style="color: #6b8e23;">4</span>)
+</pre>
+</div>
 
 <p>
 如果使用 Maybe 把偏函数处理不了的输入都返回成 Nothing，这样结果依然保持 Maybe 类型，不影响后面的计算。
@@ -385,13 +415,17 @@ Maybe 有用在于能合适的处理 <i><ruby>偏函数<rt> Partial Function</rt
 <p>
 Either 的定义也很简单
 </p>
-<pre class="code"><code><span style="color: #00008b;">data</span> <span style="color: #36648b;">Either</span> a b <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Left</span> a <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Right</span> b
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">data</span> <span style="color: #36648b;">Either</span> a b <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Left</span> a <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Right</span> b
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Either</span>[+<span style="color: #6b8e23;">A</span>, +<span style="color: #6b8e23;">B</span>]
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Either</span>[+<span style="color: #6b8e23;">A</span>, +<span style="color: #6b8e23;">B</span>]
 <span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Left</span>[+<span style="color: #6b8e23;">A</span>, +<span style="color: #6b8e23;">B</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Either</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>]
 <span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Right</span>[+<span style="color: #6b8e23;">A</span>, +<span style="color: #6b8e23;">B</span>](b<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Either</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>]
-</code></pre>
+</pre>
+</div>
 </div>
 
 
@@ -445,16 +479,20 @@ Tuple 的 <code>fst</code> 箭头能让 <code>(a, b)</code> 到达 <code>a</code
 <p>
 确切的说，Either 不是 monad， <code>Either a</code> 才是。还记得 monad 的 class 定义吗？
 </p>
-<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">Endofunctor</span> m <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> m <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Endofunctor</span> m <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> m <span style="color: #00008b;">where</span>
   eta <span style="color: #b8860b;">::</span> a <span style="color: #b8860b;">-&gt;</span> (m a)
   mu <span style="color: #b8860b;">::</span> m m a <span style="color: #b8860b;">-&gt;</span> m a
-</code></pre>
+</pre>
+</div>
 <p>
 所以 m 必须是个 Endofunctor，也就是要满足 Functor
 </p>
-<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">Functor</span> t <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Functor</span> t <span style="color: #00008b;">where</span>
   fmap <span style="color: #b8860b;">::</span> (a <span style="color: #b8860b;">-&gt;</span> b) <span style="color: #b8860b;">-&gt;</span> (t a <span style="color: #b8860b;">-&gt;</span> t b)
-</code></pre>
+</pre>
+</div>
 <p>
 t a 的 kind 是 *，所以 t 必须是 kind * -&gt; *
 也就是说，m 必须是接收一个类型参数的类型构造器
@@ -467,10 +505,12 @@ t a 的 kind 是 *，所以 t 必须是 kind * -&gt; *
 <p>
 所以只能定义 Either a 的 Monad
 </p>
-<pre class="code"><code><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> (<span style="color: #36648b;">Either</span> a) <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> (<span style="color: #36648b;">Either</span> a) <span style="color: #00008b;">where</span>
   <span style="color: #36648b;">Left</span>  l <span style="color: #b8860b;">&gt;&gt;=</span> <span style="color: #00008b;">_</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Left</span> l
   <span style="color: #36648b;">Right</span> r <span style="color: #b8860b;">&gt;&gt;=</span> k <span style="color: #b8860b;">=</span> k r
-</code></pre>
+</pre>
+</div>
 
 <p>
 很明显的，&gt;&gt;= 任何函数到<ruby>左边<rt> Left</rt></ruby> 都不会改变，只有 &gt;&gt;= 右边才能产生新的计算。
@@ -498,8 +538,10 @@ Reader 的作用是给一个计算喂数据。
 <p>
 跟 Identity 一样，我们用 newtype 来定义一个同构的 Reader 类型
 </p>
-<pre class="code"><code><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Reader</span> e a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Reader</span> { runReader <span style="color: #b8860b;">::</span> (e <span style="color: #b8860b;">-&gt;</span> a) }
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Reader</span> e a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Reader</span> { runReader <span style="color: #b8860b;">::</span> (e <span style="color: #b8860b;">-&gt;</span> a) }
+</pre>
+</div>
 
 <p>
 其中
@@ -519,10 +561,12 @@ Reader 的作用是给一个计算喂数据。
 那么，让我们来实现 Reader 的 monad instance，就可以描述一个可以 ask 的计算了。
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> (<span style="color: #36648b;">Reader</span> e) <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> (<span style="color: #36648b;">Reader</span> e) <span style="color: #00008b;">where</span>
     return a         <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Reader</span> <span style="color: #b8860b;">$</span> <span style="color: #b8860b;">\</span><span style="color: #00008b;">_</span> <span style="color: #b8860b;">-&gt;</span> a
     (<span style="color: #36648b;">Reader</span> g) <span style="color: #b8860b;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Reader</span> <span style="color: #b8860b;">$</span> <span style="color: #b8860b;">\</span>e <span style="color: #b8860b;">-&gt;</span> runReader (f (g e)) e
-</code></pre>
+</pre>
+</div>
 
 <p>
 跟Either一样，我们只能定义 Reader e 的 monad instance。
@@ -549,7 +593,8 @@ Reader 的作用是给一个计算喂数据。
 <p>
 让我们来看看如何使用 Reader
 </p>
-<pre class="code"><code><span style="color: #00008b;">import</span> <span style="color: #36648b;">Control.Monad.Reader</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">import</span> <span style="color: #36648b;">Control.Monad.Reader</span>
 
 <span style="color: #00008b;">data</span> <span style="color: #36648b;">Environment</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Env</span>
   { fistName <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span>
@@ -564,7 +609,8 @@ Reader 的作用是给一个计算喂数据。
 
 <span style="color: #6a5acd;">runHelloworld</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span>
 <span style="color: #6a5acd;">runHelloworld</span> <span style="color: #b8860b;">=</span> runReader helloworld <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Env</span> <span style="color: #8b0000;">"Jichao"</span> <span style="color: #8b0000;">"Ouyang"</span>
-</code></pre>
+</pre>
+</div>
 
 <p>
 这段代码很简单，helloworld 负责打招呼，也就是在名字前面加个 "Hello"，而跟谁打招呼，这个函数并不关心，而单纯的是向 Environment <ruby>问<rt>asks</rt></ruby> 就好。
@@ -599,10 +645,12 @@ Reader 的作用是给一个计算喂数据。
 <p>
 看起来像命令式的语句，其实只是 <code>&gt;&gt;=</code> 的语法糖，但是明显用do可读性要高很多。
 </p>
-<pre class="code"><code><span style="color: #6a5acd;">helloworld</span> <span style="color: #b8860b;">=</span> (asks firstName) <span style="color: #b8860b;">&gt;&gt;=</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">helloworld</span> <span style="color: #b8860b;">=</span> (asks firstName) <span style="color: #b8860b;">&gt;&gt;=</span>
   <span style="color: #b8860b;">\</span>f <span style="color: #b8860b;">-&gt;</span> (asks lastName) <span style="color: #b8860b;">&gt;&gt;=</span>
        <span style="color: #b8860b;">\</span>l <span style="color: #b8860b;">-&gt;</span> return <span style="color: #8b0000;">"Hello "</span> <span style="color: #b8860b;">++</span> f <span style="color: #b8860b;">++</span> l
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 </div>
@@ -623,7 +671,8 @@ Reader 的作用是给一个计算喂数据。
 限制是 log 的类型必须是个 <ruby>含幺半群<rt>monoid</rt></ruby>
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">example</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Writer</span> <span style="color: #36648b;">String</span> <span style="color: #36648b;">String</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">example</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Writer</span> <span style="color: #36648b;">String</span> <span style="color: #36648b;">String</span>
 <span style="color: #6a5acd;">example</span>  <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
   tell <span style="color: #8b0000;">"How are you?"</span>
   tell <span style="color: #8b0000;">"I'm fine thank you, and you?"</span>
@@ -632,13 +681,16 @@ Reader 的作用是给一个计算喂数据。
 <span style="color: #6a5acd;">output</span> <span style="color: #b8860b;">::</span> (<span style="color: #36648b;">String</span>, <span style="color: #36648b;">String</span>)
 <span style="color: #6a5acd;">output</span> <span style="color: #b8860b;">=</span> runWriter example
 <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">("Hehe Da~", "How are you?I'm fine thank you, and you?")</span>
-</code></pre>
+</pre>
+</div>
 
 <p>
 Writer 的定义更简单
 </p>
-<pre class="code"><code><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Writer</span> l a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Writer</span> { runWriter <span style="color: #b8860b;">::</span> (a,l) }
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Writer</span> l a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Writer</span> { runWriter <span style="color: #b8860b;">::</span> (a,l) }
+</pre>
+</div>
 <p>
 里面只是一个 tuple 而已
 </p>
@@ -650,11 +702,13 @@ Writer 的定义更简单
 <p>
 看看如何实现 Writer monad
 </p>
-<pre class="code"><code><span style="color: #00008b;">instance</span> (<span style="color: #36648b;">Monoid</span> w) <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> (<span style="color: #36648b;">Writer</span> w) <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> (<span style="color: #36648b;">Monoid</span> w) <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> (<span style="color: #36648b;">Writer</span> w) <span style="color: #00008b;">where</span>
     return a             <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Writer</span> (a,mempty)
     (<span style="color: #36648b;">Writer</span> (a,l)) <span style="color: #b8860b;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> <span style="color: #00008b;">let</span> (a',l') <span style="color: #b8860b;">=</span> runWriter <span style="color: #b8860b;">$</span> f a <span style="color: #00008b;">in</span>
                            <span style="color: #36648b;">Writer</span> (a',l <span style="color: #b8860b;">`mappend`</span> l')
-</code></pre>
+</pre>
+</div>
 
 <ul class="org-ul">
 <li>return 不会有任何 log，l 是 monoid 的 mempty</li>
@@ -685,8 +739,10 @@ Writer 的定义更简单
 <p>
 先看下 State 类型的定义
 </p>
-<pre class="code"><code><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">State</span> s a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">State</span> { runState <span style="color: #b8860b;">::</span> s <span style="color: #b8860b;">-&gt;</span> (a, s) }
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">State</span> s a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">State</span> { runState <span style="color: #b8860b;">::</span> s <span style="color: #b8860b;">-&gt;</span> (a, s) }
+</pre>
+</div>
 
 <p>
 可以看到 State 只包含一个 从旧状态 s 到新状态 s 和返回值 a 的 Tuple 的函数。
@@ -695,11 +751,13 @@ Writer 的定义更简单
 <p>
 通过实现 Monad，State 就可以实现命令式编程中的变量的功能。
 </p>
-<pre class="code"><code><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> (<span style="color: #36648b;">State</span> s) <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> (<span style="color: #36648b;">State</span> s) <span style="color: #00008b;">where</span>
   return a        <span style="color: #b8860b;">=</span> <span style="color: #36648b;">State</span> <span style="color: #b8860b;">$</span> <span style="color: #b8860b;">\</span>s <span style="color: #b8860b;">-&gt;</span> (a,s)
   (<span style="color: #36648b;">State</span> x) <span style="color: #b8860b;">&gt;&gt;=</span> f <span style="color: #b8860b;">=</span> <span style="color: #36648b;">State</span> <span style="color: #b8860b;">$</span> <span style="color: #b8860b;">\</span>s <span style="color: #b8860b;">-&gt;</span> <span style="color: #00008b;">let</span> (v,s') <span style="color: #b8860b;">=</span> x s <span style="color: #00008b;">in</span>
                                  runState (f v) s'
-</code></pre>
+</pre>
+</div>
 <p>
 return 很简单，就不用解释了。
 </p>
@@ -725,7 +783,8 @@ x 类型是 <code>s -&gt; (a, s)</code> ,所以 x s 之后会返回 结果和状
 使用起来也很方便，State 提供 <code>get</code> <code>put</code> <code>moidfy</code> 三个方便的函数可以生成修改状态的State monad
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">import</span> <span style="color: #36648b;">Control.Monad.Trans.State.Strict</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">import</span> <span style="color: #36648b;">Control.Monad.Trans.State.Strict</span>
 <span style="color: #6a5acd;">test</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">State</span> <span style="color: #36648b;">Int</span> <span style="color: #36648b;">Int</span>
 <span style="color: #6a5acd;">test</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
   a <span style="color: #b8860b;">&lt;-</span> get
@@ -735,7 +794,8 @@ x 类型是 <code>s -&gt; (a, s)</code> ,所以 x s 之后会返回 结果和状
 
 <span style="color: #6a5acd;">main</span> <span style="color: #b8860b;">=</span> print <span style="color: #b8860b;">$</span> show <span style="color: #b8860b;">$</span> runState test 3
 <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">(7, 4)</span>
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 
@@ -761,8 +821,10 @@ Validation 没有在标准库中，但是我觉得好有用啊，你可以在 ek
 <p>
 针对这种情况， Validation 更适合
 </p>
-<pre class="code"><code><span style="color: #00008b;">data</span> <span style="color: #36648b;">Validation</span> e a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Failure</span> e <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Success</span> a
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">data</span> <span style="color: #36648b;">Validation</span> e a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Failure</span> e <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Success</span> a
+</pre>
+</div>
 
 <p>
 ADT定义看起来跟 Either 是一样的，不同的是 <ruby>左边<rt>Left</rt></ruby> Failure 是 <ruby>含幺半群<rt>Monoid</rt></ruby>
@@ -775,10 +837,12 @@ ADT定义看起来跟 Either 是一样的，不同的是 <ruby>左边<rt>Left</r
 <p>
 monoid 首先得是 <ruby>半群<rt>Semigroup</rt></ruby> ，然后再 含幺。
 </p>
-<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">Semigroup</span> a <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Semigroup</span> a <span style="color: #00008b;">where</span>
   (<span style="color: #b8860b;">&lt;&gt;</span>) <span style="color: #b8860b;">::</span> a <span style="color: #b8860b;">-&gt;</span> a <span style="color: #b8860b;">-&gt;</span> a
   (<span style="color: #b8860b;">&lt;&gt;</span>) <span style="color: #b8860b;">=</span> mappend
-</code></pre>
+</pre>
+</div>
 
 <p>
 半群非常简单，只要是可以 <code>&lt;&gt;</code> (mappend) 的类型就是了。
@@ -787,24 +851,30 @@ monoid 首先得是 <ruby>半群<rt>Semigroup</rt></ruby> ，然后再 含幺。
 <p>
 含幺只需要有一个 <code>mempty</code> 的 幺元就行
 </p>
-<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">Monoid</span> a <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Monoid</span> a <span style="color: #00008b;">where</span>
   mempty  <span style="color: #b8860b;">::</span> a
   mappend <span style="color: #b8860b;">::</span> a <span style="color: #b8860b;">-&gt;</span> a <span style="color: #b8860b;">-&gt;</span> a
-</code></pre>
+</pre>
+</div>
 
 <p>
 比如 List 就是 Semigroup
 </p>
-<pre class="code"><code><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Semigroup</span> [a] <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Semigroup</span> [a] <span style="color: #00008b;">where</span>
   (<span style="color: #b8860b;">&lt;&gt;</span>) <span style="color: #b8860b;">=</span> (<span style="color: #b8860b;">++</span>)
-</code></pre>
+</pre>
+</div>
 <p>
 也是 Monoid
 </p>
-<pre class="code"><code><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monoid</span> [a] <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monoid</span> [a] <span style="color: #00008b;">where</span>
   mempty  <span style="color: #b8860b;">=</span> <span style="color: #36648b;">[]</span>
   mappend <span style="color: #b8860b;">=</span> (<span style="color: #b8860b;">++</span>)
-</code></pre>
+</pre>
+</div>
 
 <p>
 Monoid 的 <code>&lt;&gt;</code> 满足：
@@ -821,12 +891,14 @@ Monoid 的 <code>&lt;&gt;</code> 满足：
 <p>
 现在让 Failure e 满足 Monoid，就可以 <code>mappend</code> 错误信息了。
 </p>
-<pre class="code"><code><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Semigroup</span> e <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Semigroup</span> (<span style="color: #36648b;">Validation</span> e a) <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Semigroup</span> e <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Semigroup</span> (<span style="color: #36648b;">Validation</span> e a) <span style="color: #00008b;">where</span>
   <span style="color: #36648b;">Failure</span> e1 <span style="color: #b8860b;">&lt;&gt;</span> <span style="color: #36648b;">Failure</span> e2 <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Failure</span> (e1 <span style="color: #b8860b;">&lt;&gt;</span> e2)
   <span style="color: #36648b;">Failure</span> <span style="color: #00008b;">_</span>  <span style="color: #b8860b;">&lt;&gt;</span> <span style="color: #36648b;">Success</span> a2 <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Success</span> a2
   <span style="color: #36648b;">Success</span> a1 <span style="color: #b8860b;">&lt;&gt;</span> <span style="color: #36648b;">Failure</span> <span style="color: #00008b;">_</span>  <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Success</span> a1
   <span style="color: #36648b;">Success</span> a1 <span style="color: #b8860b;">&lt;&gt;</span> <span style="color: #36648b;">Success</span> <span style="color: #00008b;">_</span>  <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Success</span> a1
-</code></pre>
+</pre>
+</div>
 
 <p>
 下来，我们用一个简单的例子来看看 Validation 与 Either 有什么区别。
@@ -839,16 +911,20 @@ Monoid 的 <code>&lt;&gt;</code> 满足：
 <p>
 首先，我们需要有一个函数去创建包含姓名和电话的model
 </p>
-<pre class="code"><code><span style="color: #00008b;">data</span> <span style="color: #36648b;">Info</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Info</span> {name<span style="color: #36648b;">:</span> <span style="color: #36648b;">String</span>, phone<span style="color: #36648b;">:</span> <span style="color: #36648b;">String</span>} <span style="color: #00008b;">deriving</span> <span style="color: #36648b;">Show</span>
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">data</span> <span style="color: #36648b;">Info</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Info</span> {name<span style="color: #36648b;">:</span> <span style="color: #36648b;">String</span>, phone<span style="color: #36648b;">:</span> <span style="color: #36648b;">String</span>} <span style="color: #00008b;">deriving</span> <span style="color: #36648b;">Show</span>
+</pre>
+</div>
 
 <p>
 然后我们需要验证函数
 </p>
-<pre class="code"><code><span style="color: #6a5acd;">notEmpty</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Validation</span> [<span style="color: #36648b;">String</span>] <span style="color: #36648b;">String</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">notEmpty</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Validation</span> [<span style="color: #36648b;">String</span>] <span style="color: #36648b;">String</span>
 <span style="color: #6a5acd;">notEmpty</span> desc <span style="color: #8b0000;">""</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Failure</span> [desc <span style="color: #b8860b;">&lt;&gt;</span> <span style="color: #8b0000;">" cannot be empty!"</span>]
 <span style="color: #6a5acd;">notEmpty</span> <span style="color: #00008b;">_</span> field <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Success</span> field
-</code></pre>
+</pre>
+</div>
 <p>
 notEmpty 检查字符是否为空，如果是空返回 Failure 包含错误信息，若是非空则返回 Success 包含 field
 </p>
@@ -856,37 +932,45 @@ notEmpty 检查字符是否为空，如果是空返回 Failure 包含错误信�
 <p>
 同样的可以创建 11位数字的验证函数
 </p>
-<pre class="code"><code><span style="color: #6a5acd;">phoneNumberLength</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Validation</span> [<span style="color: #36648b;">String</span>] <span style="color: #36648b;">String</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">phoneNumberLength</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Validation</span> [<span style="color: #36648b;">String</span>] <span style="color: #36648b;">String</span>
 <span style="color: #6a5acd;">phoneNumberLength</span> desc field <span style="color: #b8860b;">|</span> (length field) <span style="color: #b8860b;">==</span> 11 <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Success</span> field
                              <span style="color: #b8860b;">|</span> otherwise <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Failure</span> [desc <span style="color: #b8860b;">&lt;&gt;</span> <span style="color: #8b0000;">"'s length is not 11"</span>]
-</code></pre>
+</pre>
+</div>
 <p>
 实现 Validation 的 Applicative instance，这样就可以把函数调用lift成带有验证的 Applicative
 </p>
-<pre class="code"><code><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Semigroup</span> e <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Applicative</span> (<span style="color: #36648b;">Validation</span> e) <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Semigroup</span> e <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Applicative</span> (<span style="color: #36648b;">Validation</span> e) <span style="color: #00008b;">where</span>
   pure <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Success</span>
   <span style="color: #36648b;">Failure</span> e1 <span style="color: #b8860b;">&lt;*&gt;</span> <span style="color: #36648b;">Failure</span> e2 <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Failure</span> e1 <span style="color: #b8860b;">&lt;&gt;</span> <span style="color: #36648b;">Failure</span> e2
   <span style="color: #36648b;">Failure</span> e1 <span style="color: #b8860b;">&lt;*&gt;</span> <span style="color: #36648b;">Success</span> <span style="color: #00008b;">_</span>  <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Failure</span> e1
   <span style="color: #36648b;">Success</span> <span style="color: #00008b;">_</span>  <span style="color: #b8860b;">&lt;*&gt;</span> <span style="color: #36648b;">Failure</span> e2 <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Failure</span> e2
   <span style="color: #36648b;">Success</span> f <span style="color: #b8860b;">&lt;*&gt;</span> <span style="color: #36648b;">Success</span> a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Success</span> (f a)
-</code></pre>
+</pre>
+</div>
 <ul class="org-ul">
 <li>失败应用到失败会 concat 起来</li>
 <li>失败跟应用或被成功应用还是失败</li>
 <li>只有成功应用到成功才能成功，这很符合验证的逻辑，一旦验证中发生任何错误，都应该返回失败。</li>
 </ul>
 
-<pre class="code"><code><span style="color: #6a5acd;">createInfo</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Validation</span> [<span style="color: #36648b;">String</span>] <span style="color: #36648b;">Info</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">createInfo</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Validation</span> [<span style="color: #36648b;">String</span>] <span style="color: #36648b;">Info</span>
 <span style="color: #6a5acd;">createInfo</span> name phone <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Info</span> <span style="color: #b8860b;">&lt;$&gt;</span> notEmpty <span style="color: #8b0000;">"name"</span> name <span style="color: #b8860b;">&lt;*&gt;</span> phoneNumberLength <span style="color: #8b0000;">"phone"</span> phone
-</code></pre>
+</pre>
+</div>
 
 <p>
 现在我们就可以使用带validation的 createInfo 来安全的创建 Info 了
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">createInfo</span> <span style="color: #8b0000;">"jichao"</span> <span style="color: #8b0000;">"12345678910"</span> <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">Success Info "jichao" "12345678910"</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">createInfo</span> <span style="color: #8b0000;">"jichao"</span> <span style="color: #8b0000;">"12345678910"</span> <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">Success Info "jichao" "12345678910"</span>
 <span style="color: #6a5acd;">createInfo</span> <span style="color: #8b0000;">""</span> <span style="color: #8b0000;">"123"</span> <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">Failure ["name cannot be empty!", "phone's length is not 11"]</span>
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 </div>
@@ -901,22 +985,28 @@ Cont 是 <ruby>Continuation Passing Style<rt>CPS</rt></ruby> 的 monad，也就�
 <p>
 先看一下什么是 CPS，比如有一个加法
 </p>
-<pre class="code"><code><span style="color: #6a5acd;">add</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">add</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span>
 <span style="color: #6a5acd;">add</span> <span style="color: #b8860b;">=</span> (<span style="color: #b8860b;">+</span>)
-</code></pre>
+</pre>
+</div>
 
 <p>
 但是如果你想在算法加法后，能够继续进行一个其他的计算，那么就可以写一个 cps版本的加法
 </p>
-<pre class="code"><code><span style="color: #6a5acd;">addCPS</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> (<span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> r) <span style="color: #b8860b;">-&gt;</span> r
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">addCPS</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> (<span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> r) <span style="color: #b8860b;">-&gt;</span> r
 <span style="color: #6a5acd;">addCPS</span> a b k <span style="color: #b8860b;">=</span> k (a <span style="color: #b8860b;">+</span> b)
-</code></pre>
+</pre>
+</div>
 
 <p>
 非常简单，现在我们可以看看为什么需要一个 Cont monad 来包住 CPS 计算，首先，来看 ADT 定义
 </p>
-<pre class="code"><code><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Cont</span> r a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Cont</span> { runCont <span style="color: #b8860b;">::</span> ((a <span style="color: #b8860b;">-&gt;</span> r) <span style="color: #b8860b;">-&gt;</span> r) }
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Cont</span> r a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Cont</span> { runCont <span style="color: #b8860b;">::</span> ((a <span style="color: #b8860b;">-&gt;</span> r) <span style="color: #b8860b;">-&gt;</span> r) }
+</pre>
+</div>
 
 <p>
 又是一个同构的类型，Cont 构造器只需要一个 runCount，也就是让他能继续计算的一个函数。
@@ -925,9 +1015,11 @@ Cont 是 <ruby>Continuation Passing Style<rt>CPS</rt></ruby> 的 monad，也就�
 <p>
 完了之后来把之前的 addCPS 改成 Cont
 </p>
-<pre class="code"><code><span style="color: #6a5acd;">add</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Cont</span> k <span style="color: #36648b;">Int</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">add</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Cont</span> k <span style="color: #36648b;">Int</span>
 <span style="color: #6a5acd;">add</span> a b <span style="color: #b8860b;">=</span> return (a <span style="color: #b8860b;">+</span> b)
-</code></pre>
+</pre>
+</div>
 
 <p>
 注意到 addCPS 接收到 a 和 b 之后返回的类型是 <code>(Int -&gt; r) -&gt; r</code> ，而 Cont 版本的 <code>add</code> 返回 <code>Cont k Int</code>
@@ -937,10 +1029,12 @@ Cont 是 <ruby>Continuation Passing Style<rt>CPS</rt></ruby> 的 monad，也就�
 明显构造 <code>Cont k Int</code> 也正是需要 <code>(Int -&gt; r) -&gt; r</code> ，所以 Cont 就是算了 k 的抽象了。
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> (<span style="color: #36648b;">Cont</span> r) <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Monad</span> (<span style="color: #36648b;">Cont</span> r) <span style="color: #00008b;">where</span>
     return a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Cont</span> (<span style="color: #b8860b;">$</span> a)
     m <span style="color: #b8860b;">&gt;&gt;=</span> k  <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Cont</span> <span style="color: #b8860b;">$</span> <span style="color: #b8860b;">\</span>c <span style="color: #b8860b;">-&gt;</span> runCont m <span style="color: #b8860b;">$</span> <span style="color: #b8860b;">\</span>a <span style="color: #b8860b;">-&gt;</span> runCont (k a) c
-</code></pre>
+</pre>
+</div>
 
 <p>
 <code>($ a)</code> 比较有意思, 我们都知道 <code>f $ g a</code> 其实就是 <code>f(g a)</code>, 所以 <code>$</code> 其实就是一个 apply 左边的函数到右边表达式的中缀函数, 如果写成前缀则是

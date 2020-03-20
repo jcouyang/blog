@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-08 Sun 02:17 -->
+<!-- 2020-03-20 Fri 01:47 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>用Haskell48小时写你个Scheme</title>
@@ -246,13 +246,15 @@ for the JavaScript code in this tag.
 一切从hello开始，说好的用Haskell实现，先来看Haskell写一个hello world <del>有多麻烦</del>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">module</span> <span style="color: #36648b;">Main</span> <span style="color: #00008b;">where</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">module</span> <span style="color: #36648b;">Main</span> <span style="color: #00008b;">where</span>
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">System.Environment</span>
 <span style="color: #6a5acd;">main</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">IO</span> <span style="color: #36648b;">()</span>
 <span style="color: #6a5acd;">main</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
   args <span style="color: #b8860b;">&lt;-</span> getArgs
   putStrLn (<span style="color: #8b0000;">"Hello, "</span> <span style="color: #b8860b;">++</span> args <span style="color: #b8860b;">!!</span> 0)
-</code></pre>
+</pre>
+</div>
 
 <p>
 module 可以稍后介绍，其中
@@ -272,8 +274,10 @@ module 可以稍后介绍，其中
 原因是 do 只是 <code>&gt;&gt;=</code> (aka <code>flatMap</code>) 和 <code>&gt;&gt;</code> 的语法糖，flatmap 永远应该返回同样类型的 Monad
 </p>
 
-<pre class="code"><code>getArgs <span style="color: #6a5acd;">&gt;&gt;=</span> (<span style="color: #b8860b;">\</span>args <span style="color: #b8860b;">-&gt;</span> putStrLn (<span style="color: #8b0000;">"Hello, "</span> <span style="color: #b8860b;">++</span> args <span style="color: #b8860b;">!!</span> 0))
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell">getArgs <span style="color: #6a5acd;">&gt;&gt;=</span> (<span style="color: #b8860b;">\</span>args <span style="color: #b8860b;">-&gt;</span> putStrLn (<span style="color: #8b0000;">"Hello, "</span> <span style="color: #b8860b;">++</span> args <span style="color: #b8860b;">!!</span> 0))
+</pre>
+</div>
 
 </blockquote></div>
 
@@ -460,16 +464,20 @@ cabal install parsec
 <div id="outline-container-orgbe24ef7" class="outline-4">
 <h4 id="orgbe24ef7">定义 parser</h4>
 <div class="outline-text-4" id="text-orgbe24ef7">
-<pre class="code"><code><span style="color: #00008b;">import</span> <span style="color: #36648b;">Text.ParserCombinators.Parsec</span> <span style="color: #00008b;">hiding</span> (spaces)
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">import</span> <span style="color: #36648b;">Text.ParserCombinators.Parsec</span> <span style="color: #00008b;">hiding</span> (spaces)
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">System.Environment</span>
-</code></pre>
+</pre>
+</div>
 
 <p>
 然后实现一个简单的可以解析一些 scheme 符号的 parser
 </p>
-<pre class="code"><code><span style="color: #6a5acd;">symbol</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">Char</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">symbol</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">Char</span>
 <span style="color: #6a5acd;">symbol</span> <span style="color: #b8860b;">=</span> oneOf <span style="color: #8b0000;">"!#$%&amp;|*+-/:&lt;=&gt;?@^_~"</span>
-</code></pre>
+</pre>
+</div>
 
 <p>
 symbol 等于 <code>oneOf blahblah</code>, 返回一个 Parser Monad， 里面是 Char 类型
@@ -483,11 +491,13 @@ symbol 等于 <code>oneOf blahblah</code>, 返回一个 Parser Monad， 里面�
 下面我们用这个 parser 试试 parse 一下
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">readExpr</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">readExpr</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
 <span style="color: #6a5acd;">readExpr</span> input <span style="color: #b8860b;">=</span> <span style="color: #00008b;">case</span> parse symbol <span style="color: #8b0000;">"lisp"</span> input <span style="color: #00008b;">of</span>
     <span style="color: #36648b;">Left</span> err <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"No match: "</span> <span style="color: #b8860b;">++</span> show err
     <span style="color: #36648b;">Right</span> val <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"Found value"</span>
-</code></pre>
+</pre>
+</div>
 
 <p>
 tadah， 这时出现了 <code>case</code>, 如果用 scala 的童鞋就毫不陌生了,没用过 pattern matching的童鞋看过来
@@ -573,18 +583,22 @@ parse
 现在我们能拿到 scheme 的 symbol 了, 作为一个 parser 还需要过滤掉一些没用的空白符, 比如说空格先:
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">spaces</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">()</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">spaces</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">()</span>
 <span style="color: #6a5acd;">spaces</span> <span style="color: #b8860b;">=</span> skipMany1 space
-</code></pre>
+</pre>
+</div>
 
 <p>
 这里我们定义了 <code>spaces</code> 函数, 这也是为什么要在之前的 <code>import</code> 的时候 <code>hiding</code> 掉 <code>Parsec</code> 里的 <code>spaces</code>
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">readExpr</span> input <span style="color: #b8860b;">=</span> <span style="color: #00008b;">case</span> parse (spaces <span style="color: #b8860b;">&gt;&gt;</span> symbol) <span style="color: #8b0000;">"lisp"</span> input <span style="color: #00008b;">of</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">readExpr</span> input <span style="color: #b8860b;">=</span> <span style="color: #00008b;">case</span> parse (spaces <span style="color: #b8860b;">&gt;&gt;</span> symbol) <span style="color: #8b0000;">"lisp"</span> input <span style="color: #00008b;">of</span>
     <span style="color: #36648b;">Left</span> err <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"No match: "</span> <span style="color: #b8860b;">++</span> show err
     <span style="color: #36648b;">Right</span> val <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"Found value"</span>
-</code></pre>
+</pre>
+</div>
 
 <p>
 这里将 <code>spaces</code> 用 <code>&gt;&gt;</code> 拼到 <code>symbol</code> 前面, <code>&gt;&gt;</code> 读 bind, 在不同的 monad 中, <code>&gt;&gt;</code> 的行为也不一样, 这里作为 Parsec Monad, <code>&gt;&gt;</code> 意思是用 spaces 去 parse, 结果丢弃掉, 然后再用 symbol 去 parse.
@@ -602,13 +616,15 @@ parse
 <p>
 所以假设我们先来实现将读入的字符转换成值, scheme 的值有这么几种
 </p>
-<pre class="code"><code><span style="color: #00008b;">data</span> <span style="color: #36648b;">LispVal</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Atom</span> <span style="color: #36648b;">String</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">data</span> <span style="color: #36648b;">LispVal</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Atom</span> <span style="color: #36648b;">String</span>
              <span style="color: #b8860b;">|</span> <span style="color: #36648b;">List</span> [<span style="color: #36648b;">LispVal</span>]
              <span style="color: #b8860b;">|</span> <span style="color: #36648b;">DottedList</span> [<span style="color: #36648b;">LispVal</span>] <span style="color: #36648b;">LispVal</span>
              <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Number</span> <span style="color: #36648b;">Integer</span>
              <span style="color: #b8860b;">|</span> <span style="color: #36648b;">String</span> <span style="color: #36648b;">String</span>
              <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Bool</span> <span style="color: #36648b;">Bool</span>
-</code></pre>
+</pre>
+</div>
 
 <p>
 如果你还记得之前提到的 Either 是 ADT, 那么现在这个 <code>LispVal</code> 就是一个 ADT, 在 haskell 定义一个 ADT 特别简单, 关键字 <code>data</code> 声明 <code>LispVal</code> 是一个ADT, 等号右边是构造器, 比如
@@ -640,13 +656,15 @@ parse
 有了这个抽象数据类型 ADT,我们就可以将parse的内容转换成 scheme 的 ADT, 首先,试试 parse 个 String
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">parseString</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">parseString</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
 <span style="color: #6a5acd;">parseString</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
                 char <span style="color: #8b0000;">'"'</span>
                 x <span style="color: #b8860b;">&lt;-</span> many (noneOf <span style="color: #8b0000;">"\""</span>)
                 char <span style="color: #8b0000;">'"'</span>
                 return <span style="color: #b8860b;">$</span> <span style="color: #36648b;">String</span> x
-</code></pre>
+</pre>
+</div>
 
 <p>
 首先, <code>parseString</code> 返回类型 <code>Parser LispVal</code>, 实现中把 char, many和 char 都链起来, 意思是先 parse 一个双引号字符, 再 parse many 个不是双引号字符的字符, 返回的 Parser 的内容放入 x, 继续 parse 一个双引号. 最后用我们刚构造的 ADT 构造一个 String 出来.
@@ -674,7 +692,8 @@ atom 的parser 也比较直接, 正常的 atom
 <li><code>#t</code> 是 True, <code>#f</code> 是 False</li>
 </ul>
 
-<pre class="code"><code><span style="color: #6a5acd;">parseAtom</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">parseAtom</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
 <span style="color: #6a5acd;">parseAtom</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span> 
               first <span style="color: #b8860b;">&lt;-</span> letter <span style="color: #b8860b;">&lt;|&gt;</span> symbol
               rest <span style="color: #b8860b;">&lt;-</span> many (letter <span style="color: #b8860b;">&lt;|&gt;</span> digit <span style="color: #b8860b;">&lt;|&gt;</span> symbol)
@@ -683,7 +702,8 @@ atom 的parser 也比较直接, 正常的 atom
                          <span style="color: #8b0000;">"#t"</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Bool</span> <span style="color: #36648b;">True</span>
                          <span style="color: #8b0000;">"#f"</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Bool</span> <span style="color: #36648b;">False</span>
                          <span style="color: #00008b;">_</span>    <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Atom</span> atom
-</code></pre>
+</pre>
+</div>
 
 <p>
 这里出现了另外一个Parsec的组合子 <code>&lt;|&gt;</code>, 其实是 Parser monad 的或, 也就是如果前面的成功, 就不会继续尝试后面的 Parser.
@@ -702,9 +722,11 @@ atom 的parser 也比较直接, 正常的 atom
 <div id="outline-container-org73709da" class="outline-4">
 <h4 id="org73709da">parseNumber</h4>
 <div class="outline-text-4" id="text-org73709da">
-<pre class="code"><code><span style="color: #6a5acd;">parseNumber</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">parseNumber</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
 <span style="color: #6a5acd;">parseNumber</span> <span style="color: #b8860b;">=</span> liftM (<span style="color: #36648b;">Number</span> <span style="color: #b8860b;">.</span> read) <span style="color: #b8860b;">$</span> many1 digit
-</code></pre>
+</pre>
+</div>
 
 <p>
 <code>many1 digit</code> 匹配一个或多个数字, 返回一个 <code>Parser String</code>
@@ -731,21 +753,25 @@ atom 的parser 也比较直接, 正常的 atom
 有了这几个 parser, 可以用我们刚见过的 <code>&lt;|&gt;</code> 把它们拼起来
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">parseExpr</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">parseExpr</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Parser</span> <span style="color: #36648b;">LispVal</span>
 <span style="color: #6a5acd;">parseExpr</span> <span style="color: #b8860b;">=</span> parseAtom
          <span style="color: #b8860b;">&lt;|&gt;</span> parseString
          <span style="color: #b8860b;">&lt;|&gt;</span> parseNumber
-</code></pre>
+</pre>
+</div>
 
 <p>
 用我们的新 parser 放到 <code>readExpr</code> 中:
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">readExpr</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">readExpr</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
 <span style="color: #6a5acd;">readExpr</span> input <span style="color: #b8860b;">=</span> <span style="color: #00008b;">case</span> parse parseExpr <span style="color: #8b0000;">"lisp"</span> input <span style="color: #00008b;">of</span>
     <span style="color: #36648b;">Left</span> err <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"No match: "</span> <span style="color: #b8860b;">++</span> show err
     <span style="color: #36648b;">Right</span> <span style="color: #00008b;">_</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"Found value"</span>
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 </div>
@@ -765,13 +791,15 @@ atom 的parser 也比较直接, 正常的 atom
 <p>
 简单的实现 premitive 类型
 </p>
-<pre class="code"><code><span class="linenr">1: </span><span style="color: #6a5acd;">showVal</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">LispVal</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span class="linenr">1: </span><span style="color: #6a5acd;">showVal</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">LispVal</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
 <span class="linenr">2: </span><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">String</span> contents) <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"\""</span> <span style="color: #b8860b;">++</span> contents <span style="color: #b8860b;">++</span> <span style="color: #8b0000;">"\""</span>
 <span class="linenr">3: </span><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">Atom</span> name) <span style="color: #b8860b;">=</span> name
 <span class="linenr">4: </span><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">Number</span> contents) <span style="color: #b8860b;">=</span> show contents
 <span class="linenr">5: </span><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">Bool</span> <span style="color: #36648b;">True</span>) <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"#t"</span>
 <span class="linenr">6: </span><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">Bool</span> <span style="color: #36648b;">False</span>) <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"#f"</span>
-</code></pre>
+</pre>
+</div>
 
 <p>
 注意看 2,3,4 行, 还记得之前说过的 <i>模式匹配</i> 吗? 这里是定义带模式匹配的函数,也就是说函数 <code>showVal</code> 会根据匹配参数 <code>LispVal</code> 来找到对应真正要使用的函数. 更重要的是, 模式匹配可以 destructure 数据, 比如 <code>(String contents)</code> 就会匹配 String 类型的数据, 并将内容绑定到 <code>contents</code> 上. 这样, 后面就可以使用 <code>contents</code> 了.
@@ -781,9 +809,11 @@ atom 的parser 也比较直接, 正常的 atom
 处理完这些 premitive 类型, 接下来看看如何打印稍微复杂一些的 <code>List</code> 和 <code>DottedList</code> 吧.
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">List</span> contents) <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"("</span> <span style="color: #b8860b;">++</span> unwordsList contents <span style="color: #b8860b;">++</span> <span style="color: #8b0000;">")"</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">List</span> contents) <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"("</span> <span style="color: #b8860b;">++</span> unwordsList contents <span style="color: #b8860b;">++</span> <span style="color: #8b0000;">")"</span>
 <span style="color: #6a5acd;">showVal</span> (<span style="color: #36648b;">DottedList</span> head tail) <span style="color: #b8860b;">=</span> <span style="color: #8b0000;">"("</span> <span style="color: #b8860b;">++</span> unwordsList head <span style="color: #b8860b;">++</span> <span style="color: #8b0000;">" . "</span> <span style="color: #b8860b;">++</span> showVal tail <span style="color: #b8860b;">++</span> <span style="color: #8b0000;">")"</span>
-</code></pre>
+</pre>
+</div>
 
 <p>
 scheme 的 List 用括号括起来, 内容则是用空格分开的一个个元素, 例如 <code>(1 2 3 4)</code>. DottedList 则跟名字一样, 是 head 和 tail 中间都了一个点 <code>.</code>
@@ -793,9 +823,11 @@ scheme 的 List 用括号括起来, 内容则是用空格分开的一个个元�
 其中的 <code>unwordsList</code> 会将内容的元素的 showVal 值用空格连接起来.
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">unwordsList</span> <span style="color: #b8860b;">::</span> [<span style="color: #36648b;">LispVal</span>] <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">unwordsList</span> <span style="color: #b8860b;">::</span> [<span style="color: #36648b;">LispVal</span>] <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
 <span style="color: #6a5acd;">unwordsList</span> <span style="color: #b8860b;">=</span> unwords <span style="color: #b8860b;">.</span> map showVal
-</code></pre>
+</pre>
+</div>
 
 <p>
 利用的是 Haskell 的 unwords 函数, 类似于其他语言的 <code>join(' ')</code>
@@ -813,8 +845,10 @@ scheme 的 List 用括号括起来, 内容则是用空格分开的一个个元�
 同样的我们可以实现让 <code>LispVal</code> 类型实现类型类 <code>Show</code>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Show</span> <span style="color: #36648b;">LispVal</span> <span style="color: #00008b;">where</span> show <span style="color: #b8860b;">=</span> showVal
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Show</span> <span style="color: #36648b;">LispVal</span> <span style="color: #00008b;">where</span> show <span style="color: #b8860b;">=</span> showVal
+</pre>
+</div>
 
 <p>
 同时实现类型类 <code>Show</code> 中的函数 <code>show</code>, 恩,这有些像 Interface
@@ -824,17 +858,21 @@ scheme 的 List 用括号括起来, 内容则是用空格分开的一个个元�
 下面,我们就可以修改 <code>readExpr</code> 函数, 让他打印出 parse 出来的值
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">readExpr</span> input <span style="color: #b8860b;">=</span> <span style="color: #00008b;">case</span> parse parseExpr <span style="color: #8b0000;">"lisp"</span> input <span style="color: #00008b;">of</span>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">readExpr</span> input <span style="color: #b8860b;">=</span> <span style="color: #00008b;">case</span> parse parseExpr <span style="color: #8b0000;">"lisp"</span> input <span style="color: #00008b;">of</span>
     <span style="color: #36648b;">Left</span> err <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"No match: "</span> <span style="color: #b8860b;">++</span> show err
     <span style="color: #36648b;">Right</span> val <span style="color: #b8860b;">-&gt;</span> <span style="color: #8b0000;">"Found "</span> <span style="color: #b8860b;">++</span> show val
-</code></pre>
+</pre>
+</div>
 
 <p>
 输出
 </p>
-<pre class="code"><code>ghc -package parsec -o parser src/listing4.1.hs
+<div class="org-src-container">
+<pre class="src src-sh">ghc -package parsec -o parser src/listing4.1.hs
 ./parser <span style="color: #8b0000;">"(1 2 2)"</span>
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 </div>

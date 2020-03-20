@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-08 Sun 02:17 -->
+<!-- 2020-03-20 Fri 01:47 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Clojure 风格的 JavaScript 并发编程</title>
@@ -244,7 +244,8 @@ Event loop 模式非常简单, 浏览器运行javascript就是从 event loop 里
 
 </figure>
 
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">a</span>(){
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">a</span>(){
   console.log(<span style="color: #8b0000;">'a'</span>);
 }
 <span style="color: #00008b;">function</span> <span style="color: #6a5acd;">b</span>(){
@@ -259,7 +260,8 @@ b();
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; "a"</span>
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; "b"</span>
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; "timeout"</span>
-</code></pre>
+</pre>
+</div>
 
 <p>
 所以这样一行代码的消息队列应该是这样的(处理顺序从左至右)
@@ -362,7 +364,8 @@ CSP 的概念非常简单, 想象一下 event loop
 等等, 还是刚才发短信的例子, 我们来用CSP实现一遍
 </p>
 
-<pre class="code"><code>(<span style="color: #00008b;">def</span> <span style="color: #b8860b;">working</span> (chan))
+<div class="org-src-container">
+<pre class="src src-clojure">(<span style="color: #00008b;">def</span> <span style="color: #b8860b;">working</span> (chan))
 (<span style="color: #00008b;">def</span> <span style="color: #b8860b;">texting</span> (chan))
 
 (<span style="color: #00008b;">defn</span> <span style="color: #6a5acd;">boss-yelling</span> []
@@ -392,7 +395,8 @@ CSP 的概念非常简单, 想象一下 event loop
 (work)
 (reading-text)
 
-</code></pre>
+</pre>
+</div>
 <a class="jsbin-embed" href="https://jsbin.com/muliva/2/embed?console">JS Bin</a><script src="https://static.jsbin.com/js/embed.js"></script>
 
 <p>
@@ -462,7 +466,8 @@ goroutines 其实就是一个状态机, generator为输入
 <li>如果该步的返回值状态为 park, <a href="#coderef-parking" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-parking');" onmouseout="CodeHighlightOff(this, 'coderef-parking');">那么就是什么也不做, 过一会再来进入状态机尝试</a></li>
 <li>如果为 continue, <a href="#coderef-continue" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-continue');" onmouseout="CodeHighlightOff(this, 'coderef-continue');">这接着generator下一步, 继续循环</a></li>
 </ul>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">go_</span>(<span style="color: #b8860b;">machine</span>, <span style="color: #b8860b;">step</span>) {
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">go_</span>(<span style="color: #b8860b;">machine</span>, <span style="color: #b8860b;">step</span>) {
   <span style="color: #00008b;">while</span>(!step.done) {
     <span style="color: #00008b;">var</span> <span style="color: #b8860b;">arr</span>   = step.value(),
         state = arr[0],
@@ -482,7 +487,8 @@ goroutines 其实就是一个状态机, generator为输入
 <span id="coderef-generator" class="coderef-off">  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">gen</span> = machine();</span>
   go_(gen, gen.next());
 }
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 
@@ -493,12 +499,14 @@ goroutines 其实就是一个状态机, generator为输入
 一个类似于 thread sleep 的功能, 想让任务能等待个一段时间再执行,
 只需要在 <code>go_</code> 中加入一个 timeout 的 <code>case</code> 就好了
 </p>
-<pre class="code"><code>...
+<div class="org-src-container">
+<pre class="src src-javascript">...
   <span style="color: #00008b;">case</span> <span style="color: #8b0000;">'timeout'</span>:
     setTimeout(<span style="color: #00008b;">function</span>(){ go_(machine, machine.next());}, value);
     <span style="color: #00008b;">return</span>;
 ...
-</code></pre>
+</pre>
+</div>
 <p>
 如果状态是timeout, 那么等待 <code>value</code> 那么长的时间再执行generator下一步.
 </p>
@@ -506,12 +514,14 @@ goroutines 其实就是一个状态机, generator为输入
 <p>
 另外还需要一个返回 timeout channel 的函数
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">timeout</span>(<span style="color: #b8860b;">interval</span>){
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">timeout</span>(<span style="color: #b8860b;">interval</span>){
   <span style="color: #00008b;">var</span> <span style="color: #b8860b;">chan</span> = [interval];
   chan.name = <span style="color: #8b0000;">'timeout'</span>;
   <span style="color: #00008b;">return</span> chan;
 }
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 
@@ -527,7 +537,8 @@ goroutines 其实就是一个状态机, generator为输入
 <li>如果是 timeout channel, 状态置成 timeout</li>
 </ul>
 
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">take</span>(<span style="color: #b8860b;">chan</span>) {
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">take</span>(<span style="color: #b8860b;">chan</span>) {
   <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>() {
     <span style="color: #00008b;">if</span>(chan.name === <span style="color: #8b0000;">'timeout'</span>){
       <span style="color: #00008b;">return</span> [<span style="color: #8b0000;">'timeout'</span>, chan.pop()];
@@ -539,7 +550,8 @@ goroutines 其实就是一个状态机, generator为输入
     }
   };
 }
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 
@@ -554,7 +566,8 @@ goroutines 其实就是一个状态机, generator为输入
 <li>如果 channel 非空, parking</li>
 </ul>
 
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">put</span>(<span style="color: #b8860b;">chan</span>, <span style="color: #b8860b;">val</span>) {
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">put</span>(<span style="color: #b8860b;">chan</span>, <span style="color: #b8860b;">val</span>) {
   <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>() {
     <span style="color: #00008b;">if</span>(chan.length === 0) {
       chan.unshift(val);
@@ -564,7 +577,8 @@ goroutines 其实就是一个状态机, generator为输入
     }
   };
 }
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 
@@ -574,7 +588,8 @@ goroutines 其实就是一个状态机, generator为输入
 <p>
 现在可以原原本本的将之前的clojure的例子翻译成JavaScript了
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">boss_yelling</span>(){
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">boss_yelling</span>(){
   go(<span style="color: #00008b;">function</span>*(){
     <span style="color: #00008b;">for</span>(<span style="color: #00008b;">var</span> <span style="color: #b8860b;">i</span>=0;;i++){
       <span style="color: #00008b;">yield</span> take(timeout(1000));
@@ -613,7 +628,8 @@ boss_yelling();
 wife_texting();
 working();
 texting();
-</code></pre>
+</pre>
+</div>
 
 <p>
 完整代码

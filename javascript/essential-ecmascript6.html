@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-08 Sun 02:17 -->
+<!-- 2020-03-20 Fri 01:47 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Essential EcmaScript 6</title>
@@ -182,7 +182,8 @@ a.map(x =&gt; x*2);
 <p>
 想想以前 <code>var</code> 的scope是什么, <code>function</code>
 </p>
-<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span> = <span style="color: #8b0000;">'first assign'</span>
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span> = <span style="color: #8b0000;">'first assign'</span>
 <span style="color: #00008b;">function</span> <span style="color: #6a5acd;">b</span> (){
     <span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span> = <span style="color: #8b0000;">'second assign'</span>
     console.log(a)
@@ -190,23 +191,28 @@ a.map(x =&gt; x*2);
 console.log(a)
 b()
 console.log(a)
-</code></pre>
+</pre>
+</div>
 
 <p>
 来看看 lisp 给了我们很好的模范如何解决绑定这种问题.
 </p>
-<pre class="code"><code>(<span style="color: #00008b;">let</span> ((something 2))
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00008b;">let</span> ((something 2))
   (+ something 1)
   ) <span style="color: #8c8c8c; font-style: italic;">; </span><span style="color: #8c8c8c; font-style: italic;">=&gt; 3</span>
-</code></pre>
+</pre>
+</div>
 
 <p>
 es5 的 <code>let</code> 完全等价应该是
 </p>
-<pre class="code"><code>(<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">something</span>){
+<div class="org-src-container">
+<pre class="src src-javascript">(<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">something</span>){
     <span style="color: #00008b;">return</span> something +=1
 }).call(<span style="color: #6b8e23;">this</span>, 2)
-</code></pre>
+</pre>
+</div>
 
 <p>
 <code>let</code> 内的任何操作都不会影响外部绑定. 这样更安全而且容易推断, 这也是很多库用来封装js模块的方式, 比如jquery, 比如coffee会自动
@@ -216,13 +222,15 @@ es5 的 <code>let</code> 完全等价应该是
 <p>
 而es6, <code>let</code> 给我们带来了scope. 注意看,除了括号成了中括号,好像就是 lisp 那个意思了.
 </p>
-<pre class="code"><code><span style="color: #00008b;">let</span> <span style="color: #b8860b;">a</span> = <span style="color: #8b0000;">'first assign'</span>
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">let</span> <span style="color: #b8860b;">a</span> = <span style="color: #8b0000;">'first assign'</span>
 {
     <span style="color: #00008b;">let</span> <span style="color: #b8860b;">a</span> = <span style="color: #8b0000;">'second assign'</span>
     console.log(a)
 }
 console.log(a)
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 
@@ -240,7 +248,8 @@ JavaScript是动态语言,也就是说最关心的事情是行为.所以行为�
 <p>
 试试把下列代码考到Firefox的Console中
 </p>
-<pre class="code"><code>  <span style="color: #00008b;">let</span> <span style="color: #b8860b;">github_api</span> = <span style="color: #00008b;">function</span>(){};
+<div class="org-src-container">
+<pre class="src src-javascript">  <span style="color: #00008b;">let</span> <span style="color: #b8860b;">github_api</span> = <span style="color: #00008b;">function</span>(){};
   github_api.path=<span style="color: #8b0000;">'https://api.github.com'</span>;
   <span style="color: #00008b;">let</span> <span style="color: #b8860b;">restful</span> = <span style="color: #00008b;">function</span> restfulize(<span style="color: #b8860b;">api</span>){
       <span style="color: #00008b;">return</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Proxy</span>(api, {
@@ -256,7 +265,8 @@ JavaScript是动态语言,也就是说最关心的事情是行为.所以行为�
 
 <span id="coderef-jcouyang" class="coderef-off">  restful(github_api).user.jcouyang()</span>
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; "sending request to https://api.github.com/user/jcouyang"</span>
-</code></pre>
+</pre>
+</div>
 
 <p>
 简单的几行代码,我们就自制了一个接口非常流畅的restful api client. 再也不用麻烦的拼接字符串,
@@ -288,26 +298,32 @@ magic到底在哪呢, <code>proxy</code> 给目标函数代理了两个方法, �
 
 </figure>
 
-<pre class="code"><code>(<span style="color: #00008b;">let</span> [[first &amp; rest] [1 2 3 4 5]]
+<div class="org-src-container">
+<pre class="src src-clojure">(<span style="color: #00008b;">let</span> [[first &amp; rest] [1 2 3 4 5]]
      rest
      ) <span style="color: #8c8c8c; font-style: italic;">; =&gt; (2 3 4 5)</span>
-</code></pre>
+</pre>
+</div>
 
 <p>
 终于也可以在 JavaScript 里面这样干了.
 </p>
-<pre class="code"><code><span style="color: #00008b;">let</span> [&#23380;&#36830;&#39034;, &#24352;&#20840;&#34507;] = [<span style="color: #8b0000;">'&#22899;&#31070;'</span>, <span style="color: #8b0000;">'&#30007;&#31070;'</span>]
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">let</span> [&#23380;&#36830;&#39034;, &#24352;&#20840;&#34507;] = [<span style="color: #8b0000;">'&#22899;&#31070;'</span>, <span style="color: #8b0000;">'&#30007;&#31070;'</span>]
 &#23380;&#36830;&#39034; <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; &#30007;&#31070;1</span>
 &#24352;&#20840;&#34507; <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; &#30007;&#31070;2</span>
-</code></pre>
+</pre>
+</div>
 
 <p>
 当然可以对Map这样干
 </p>
-<pre class="code"><code><span style="color: #00008b;">let</span> {&#22899;&#31070;, &#30007;&#31070;} = {<span style="color: #8b0000;">'&#30007;&#31070;'</span>: [<span style="color: #8b0000;">'&#21776;&#39532;&#20754;'</span>, <span style="color: #8b0000;">'&#24352;&#20840;&#34507;'</span>], <span style="color: #8b0000;">'&#22899;&#31070;'</span>: <span style="color: #8b0000;">'&#23380;&#36830;&#39034;'</span>}
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">let</span> {&#22899;&#31070;, &#30007;&#31070;} = {<span style="color: #8b0000;">'&#30007;&#31070;'</span>: [<span style="color: #8b0000;">'&#21776;&#39532;&#20754;'</span>, <span style="color: #8b0000;">'&#24352;&#20840;&#34507;'</span>], <span style="color: #8b0000;">'&#22899;&#31070;'</span>: <span style="color: #8b0000;">'&#23380;&#36830;&#39034;'</span>}
 &#22899;&#31070; <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; &#23380;&#36830;&#39034;</span>
 &#30007;&#31070; <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; ['&#21776;&#39532;&#20754;', '&#24352;&#20840;&#34507;']</span>
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 
@@ -330,17 +346,20 @@ magic到底在哪呢, <code>proxy</code> 给目标函数代理了两个方法, �
 优化过的尾递归.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">a</span>(<span style="color: #b8860b;">b</span>){
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">a</span>(<span style="color: #b8860b;">b</span>){
   <span style="color: #00008b;">if</span>(b&lt;0)<span style="color: #00008b;">return</span> <span style="color: #8b0000;">"hehe"</span>
   <span style="color: #00008b;">return</span> a(b-1)
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 duang的一下就变成了循环. 妈的再也不用担心我的 <del>菊花</del> 栈被爆了.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">a</span>(<span style="color: #b8860b;">_x</span>) {
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">a</span>(<span style="color: #b8860b;">_x</span>) {
   <span style="color: #00008b;">var</span> <span style="color: #b8860b;">_again</span> = <span style="color: #6b8e23;">true</span>;
 
   _function: <span style="color: #00008b;">while</span> (_again) {
@@ -354,7 +373,8 @@ duang的一下就变成了循环. 妈的再也不用担心我的 <del>菊花</de
     <span style="color: #00008b;">continue</span> _function;
   }
 }
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 
@@ -364,20 +384,24 @@ duang的一下就变成了循环. 妈的再也不用担心我的 <del>菊花</de
 <p>
 ruby和coffeescript里面这个很fancy的东西
 </p>
-<pre class="code"><code>hi=<span style="color: #8b0000;">'&#20182;&#26159;'</span>
+<div class="org-src-container">
+<pre class="src src-ruby">hi=<span style="color: #8b0000;">'&#20182;&#26159;'</span>
 <span style="color: #228b22;">puts</span> <span style="color: #8b0000;">"</span><span style="color: #b8860b;">#{hi}</span><span style="color: #8b0000;"> &#20320;&#22969;&#22969;"</span>
-</code></pre>
+</pre>
+</div>
 <p>
 终于要可以在js里原生使用了
 </p>
-<pre class="code"><code><span style="color: #00008b;">let</span> <span style="color: #b8860b;">i</span> = <span style="color: #8b0000;">'&#20320;&#20204;'</span>,
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">let</span> <span style="color: #b8860b;">i</span> = <span style="color: #8b0000;">'&#20320;&#20204;'</span>,
     love = <span style="color: #8b0000;">'&#19981;&#33021;&#22312;&#19968;&#36215;'</span>,
     your = <span style="color: #8b0000;">'&#20182;&#26159;'</span>,
     sister = <span style="color: #8b0000;">'&#20320;&#22969;&#22969;'</span>
 
 console.log(<span style="color: #8b0000;">`${i} ${love} ${your} ${sister}`</span>)
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; "&#20320;&#20204; &#19981;&#33021;&#22312;&#19968;&#36215; &#20182;&#26159; &#20320;&#22969;&#22969;"</span>
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 
@@ -389,7 +413,8 @@ console.log(<span style="color: #8b0000;">`${i} ${love} ${your} ${sister}`</span
 虽然只是 syntax sugar, 但是终于不用怪怪的用函数当对象模板了. 木哈哈哈
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">class</span> Duck <span style="color: #00008b;">extends</span> Bird {
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">class</span> Duck <span style="color: #00008b;">extends</span> Bird {
     constructor() {
         <span style="color: #00008b;">super</span>();
         <span style="color: #6b8e23;">this</span>.name = <span style="color: #8b0000;">"donald"</span>
@@ -402,7 +427,8 @@ console.log(<span style="color: #8b0000;">`${i} ${love} ${your} ${sister}`</span
         <span style="color: #00008b;">return</span> <span style="color: #8b0000;">"quack"</span>;
     }
 }
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 
@@ -412,7 +438,8 @@ console.log(<span style="color: #8b0000;">`${i} ${love} ${your} ${sister}`</span
 <p>
 虽然已经习惯用更强大的 <a href="https://github.com/cujojs/when">第三方库</a> 干这个事情, 但是原生支持的话也是极好的.
 </p>
-<pre class="code"><code><span style="color: #00008b;">new</span> <span style="color: #36648b;">Promise</span>((resolve, reject) =&gt; {
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">new</span> <span style="color: #36648b;">Promise</span>((resolve, reject) =&gt; {
     console.log(<span style="color: #8b0000;">'first'</span>)
     setTimeout(resolve, 1000);
 }).then(() =&gt; {
@@ -421,7 +448,8 @@ console.log(<span style="color: #8b0000;">`${i} ${love} ${your} ${sister}`</span
 }).<span style="color: #00008b;">catch</span>(err =&gt; {
     console.log(<span style="color: #8b0000;">'finally error'</span>)
 })
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 
@@ -438,7 +466,8 @@ console.log(<span style="color: #8b0000;">`${i} ${love} ${your} ${sister}`</span
 
 </figure>
 
-<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">fibonacci</span> = {
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">fibonacci</span> = {
 <span id="coderef-iterator" class="coderef-off">  [Symbol.iterator]: <span style="color: #00008b;">function</span>*() {</span>
     <span style="color: #00008b;">var</span> <span style="color: #b8860b;">pre</span> = 0, <span style="color: #b8860b;">cur</span> = 1;
     <span style="color: #00008b;">for</span> (;;) {
@@ -449,7 +478,8 @@ console.log(<span style="color: #8b0000;">`${i} ${love} ${your} ${sister}`</span
     }
   }
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 这短短几行代码里有三个es6的新feature
@@ -459,12 +489,14 @@ console.log(<span style="color: #8b0000;">`${i} ${love} ${your} ${sister}`</span
 <li>Symbol: es6的新的primitive类型, <a href="#coderef-iterator" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-iterator');" onmouseout="CodeHighlightOff(this, 'coderef-iterator');"><code>Symbol.iterator</code></a> 是一个全局的symbol</li>
 <li>Iterator: 对象的 <a href="#coderef-iterator" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-iterator');" onmouseout="CodeHighlightOff(this, 'coderef-iterator');"><code>iterator</code></a> 上挂的函数会在被遍历的时候x调用, 如 <a href="#coderef-forof" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-forof');" onmouseout="CodeHighlightOff(this, 'coderef-forof');"><code>for..of</code></a></li>
 </ul>
-<pre class="code"><code><span id="coderef-forof" class="coderef-off"><span style="color: #00008b;">for</span> (<span style="color: #00008b;">var</span> <span style="color: #b8860b;">n</span> of fibonacci) {</span>
+<div class="org-src-container">
+<pre class="src src-javascript"><span id="coderef-forof" class="coderef-off"><span style="color: #00008b;">for</span> (<span style="color: #00008b;">var</span> <span style="color: #b8860b;">n</span> of fibonacci) {</span>
   <span style="color: #00008b;">if</span> (n &gt; 100)
     <span style="color: #00008b;">break</span>;
   console.log(n);
 }
-</code></pre>
+</pre>
+</div>
 <ul class="org-ul">
 <li>Generator: <a href="#coderef-iterator" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-iterator');" onmouseout="CodeHighlightOff(this, 'coderef-iterator');"><code>function*</code></a> 声明该函数为生成器函数, 在每次被调用的时候返回 <a href="#coderef-yield" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-yield');" onmouseout="CodeHighlightOff(this, 'coderef-yield');"><code>yield</code></a> 的值.</li>
 </ul>

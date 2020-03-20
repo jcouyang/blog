@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-08 Sun 02:17 -->
+<!-- 2020-03-20 Fri 01:47 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Functional Scala Caching</title>
@@ -133,7 +133,8 @@ libraryDependencies += "us.oyanglul" %% "jujiu" % "0.2.1"
 <div id="outline-container-org4646257" class="outline-2">
 <h2 id="making-caffeine-cats-friendly-badge">Making <a href="https://github.com/ben-manes/caffeine">Caffeine </a><img src="https://typelevel.org/cats/img/cats-badge-tiny.png" alt="cats-badge-tiny.png"></h2>
 <div class="outline-text-2" id="text-making-caffeine-cats-friendly-badge">
-<pre class="code"><code><span class="linenr"> 1: </span><span style="color: #8b0000;">"it should able to get and set cache"</span> &gt;&gt; {
+<div class="org-src-container">
+<pre class="src src-scala"><span class="linenr"> 1: </span><span style="color: #8b0000;">"it should able to get and set cache"</span> &gt;&gt; {
 <span id="coderef-dsl" class="coderef-off"><span class="linenr"> 2: </span>  <span style="color: #00008b;">object</span> <span style="color: #6b8e23;">cacheDsl</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">CaffeineCache</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">String</span>]   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span></span>
 <span class="linenr"> 3: </span>  <span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
 <span id="coderef-fetch" class="coderef-off"><span class="linenr"> 4: </span>    r1 <span style="color: #00008b;">&lt;-</span> cacheDsl.fetch(<span style="color: #8b0000;">"not exist yet"</span>)                     <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span></span>
@@ -146,7 +147,8 @@ libraryDependencies += "us.oyanglul" %% "jujiu" % "0.2.1"
 <span id="coderef-run" class="coderef-off"><span class="linenr">11: </span>  program(<span style="color: #6b8e23;">Caffeine</span>().sync)                                    <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span></span>
 <span class="linenr">12: </span>    .unsafeRunSync() must_== ((<span style="color: #6b8e23;">None</span>, <span style="color: #8b0000;">"default"</span>, <span style="color: #6b8e23;">Some</span>(<span style="color: #8b0000;">"now exist"</span>), <span style="color: #6b8e23;">None</span>))
 <span class="linenr">13: </span>}
-</code></pre>
+</pre>
+</div>
 
 <div class="epigraph"><blockquote>
 <p>
@@ -197,7 +199,8 @@ and provide <code>cacheProvider</code> implicitly, since you are not using Kleis
 these DSLs will run on
 </p>
 
-<pre class="code"><code>  <span style="color: #8b0000;">"loading cache"</span> &gt;&gt; {
+<div class="org-src-container">
+<pre class="src src-scala">  <span style="color: #8b0000;">"loading cache"</span> &gt;&gt; {
     <span style="color: #00008b;">val</span> <span style="color: #b8860b;">c</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">LoadingCache</span>[<span style="color: #6b8e23;">IO</span>, cache.<span style="color: #6b8e23;">LoadingCache</span>, <span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">String</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">CaffeineLoadingCache</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">String</span>] {}
     <span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">cacheProvider</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">cache</span>.<span style="color: #6b8e23;">LoadingCache</span>[<span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">String</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Caffeine</span>().sync(identity)
     <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span> <span style="color: #00008b;">=</span>
@@ -210,7 +213,8 @@ these DSLs will run on
     program.unsafeRunSync() must_== ((<span style="color: #8b0000;">"1"</span>, <span style="color: #6b8e23;">List</span>(<span style="color: #8b0000;">"2"</span>, <span style="color: #8b0000;">"3"</span>), <span style="color: #6b8e23;">List</span>(<span style="color: #8b0000;">"4"</span>, <span style="color: #8b0000;">"5"</span>)))
   }
 }
-</code></pre>
+</pre>
+</div>
 
 <div class="epigraph"><blockquote>
 <p>
@@ -243,10 +247,13 @@ A good example is the Async Loading Cache
 <p>
 First you will need caffeine builder syntax
 </p>
-<pre class="code"><code><span style="color: #00008b;">import</span> us.oyanglul.jujiu.syntax.caffeine.<span style="color: #00008b;">_</span>
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">import</span> us.oyanglul.jujiu.syntax.caffeine.<span style="color: #00008b;">_</span>
+</pre>
+</div>
 
-<pre class="code"><code><span style="color: #8b0000;">"it should able to get and set async loading cache"</span> &gt;&gt; {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #8b0000;">"it should able to get and set async loading cache"</span> &gt;&gt; {
   <span style="color: #00008b;">object</span> <span style="color: #6b8e23;">cache</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">CaffeineAsyncLoadingCache</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Integer</span>, <span style="color: #6b8e23;">String</span>] {
 <span id="coderef-executionContext" class="coderef-off">    <span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">executionContext</span> <span style="color: #00008b;">=</span> global          <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;--</span> (executionContext)</span>
   }
@@ -284,7 +291,8 @@ First you will need caffeine builder syntax
   program(<span style="color: #6b8e23;">Caffeine</span>().async(<span style="color: #00008b;">_</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>.raiseError(<span style="color: #00008b;">new</span> <span style="color: #36648b;">Exception</span>(<span style="color: #8b0000;">"something wrong"</span>))))
     .unsafeRunSync() must throwA[<span style="color: #6b8e23;">Exception</span>]
 }
-</code></pre>
+</pre>
+</div>
 
 <ul class="org-ul">
 <li><a href="#coderef-executionContext" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-executionContext');" onmouseout="CodeHighlightOff(this, 'coderef-executionContext');">line-executionContext</a> Async Loading Cache need an Execution Context to execute the Java
@@ -315,7 +323,8 @@ No matter what style of effect abstraction you project is using, Jujiu can easil
 <p>
 i.e. Tagless Final
 </p>
-<pre class="code"><code><span style="color: #8b0000;">"works with tagless final"</span> &gt;&gt; {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #8b0000;">"works with tagless final"</span> &gt;&gt; {
   <span style="color: #00008b;">import</span> us.oyanglul.jujiu.syntax.cache.<span style="color: #00008b;">_</span>
   <span style="color: #00008b;">trait</span> <span style="color: #36648b;">LogDsl</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] {
     <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>(msg<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">Unit</span>]
@@ -340,7 +349,8 @@ i.e. Tagless Final
     program[<span style="color: #6b8e23;">IO</span>](dsl).unsafeRunSync() must_== <span style="color: #6b8e23;">None</span>
   }
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 just <code>extends CaffeineCache[F, K, V]</code> and provide <code>cacheProvider</code>
@@ -354,7 +364,8 @@ just <code>extends CaffeineCache[F, K, V]</code> and provide <code>cacheProvider
 <p>
 if your code is in ReaderT pattern, good, it will fit in more naturally
 </p>
-<pre class="code"><code><span style="color: #8b0000;">"works with tagless final style readerT"</span> &gt;&gt; {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #8b0000;">"works with tagless final style readerT"</span> &gt;&gt; {
   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">Layer 1: Environment</span>
   <span style="color: #00008b;">trait</span> <span style="color: #36648b;">HasLogger</span> {
     <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">logger</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">org</span>.log4s.<span style="color: #6b8e23;">Logger</span>
@@ -390,7 +401,8 @@ if your code is in ReaderT pattern, good, it will fit in more naturally
     })
     .unsafeRunSync() must_== <span style="color: #6b8e23;">None</span>
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 notice that proper contravariant adapt need <code>.local[Env](_.cacheProvider)</code>
@@ -405,7 +417,8 @@ notice that proper contravariant adapt need <code>.local[Env](_.cacheProvider)</
 it's extensible by design as Kleisli, if you provider another cache provider, the same dsl
 will work.
 </p>
-<pre class="code"><code><span style="color: #8b0000;">"run on redis"</span> &gt;&gt; {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #8b0000;">"run on redis"</span> &gt;&gt; {
   <span style="color: #00008b;">import</span> redis.clients.jedis.<span style="color: #00008b;">_</span>
 
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]<span style="color: #00008b;">:</span> <span style="color: #36648b;">Async</span>, <span style="color: #6b8e23;">S</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>]](dsl<span style="color: #00008b;">:</span> <span style="color: #36648b;">Cache</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">String</span>]) <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
@@ -439,7 +452,8 @@ will work.
      <span style="color: #00008b;">new</span> <span style="color: #36648b;">Jedis</span>(<span style="color: #8b0000;">"localhost"</span>)
   ).unsafeRunSync() must_== ((<span style="color: #6b8e23;">None</span>, <span style="color: #8b0000;">"default"</span>, <span style="color: #6b8e23;">Some</span>(<span style="color: #8b0000;">"now exist"</span>), <span style="color: #6b8e23;">None</span>))
 }.pendingUntilFixed(<span style="color: #8b0000;">"Redis"</span>)
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 </div>

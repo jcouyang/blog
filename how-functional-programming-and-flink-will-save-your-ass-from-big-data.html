@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-08 Sun 02:17 -->
+<!-- 2020-03-20 Fri 01:47 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>使用 Flink 解救多线程 Scala 应用</title>
@@ -123,7 +123,8 @@ pecentile XX <a href="https://en.wikipedia.org/wiki/Percentile">https://en.wikip
 <li>结果写入某个数据存储</li>
 </ol>
 
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">datasources</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">CollectorService</span>.datasources
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">datasources</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">CollectorService</span>.datasources
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">singleProcess</span>(datasource) <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
   traces <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">ZipkinService</span>.getTraces(source)
   metrics <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">MetricService</span>.calculateMetrics(traces, source)
@@ -131,7 +132,8 @@ pecentile XX <a href="https://en.wikipedia.org/wiki/Percentile">https://en.wikip
 } <span style="color: #00008b;">yield</span> ()
 
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> datasources.map(<span style="color: #00008b;">_</span> map singleProcess)
-</code></pre>
+</pre>
+</div>
 
 <p>
 <code>datasoures</code> 和 <code>singleProcess</code> 都是 <code>Free[Program, ?]</code> <label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
@@ -148,8 +150,10 @@ Free Monad, 免费获得自定义数据类型的 Monad, 好将副作用与业务
 <a href="https://typelevel.org/cats-effect/datatypes/io.html#parsequence"><code>parSequence</code></a> 多线程并发执行计算.<label for="4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="4" class="margin-toggle"/><span class="sidenote">
 并行化代码基本上只需要这么一行
 
+<div class="org-src-container">
 (program unsafeRunSync ()).parSequence
-</code></span>
+
+</div></span>
 </p>
 
 <p>
@@ -167,7 +171,8 @@ Free Monad, 免费获得自定义数据类型的 Monad, 好将副作用与业务
 将一天的数据 map 成多份来进行处理, 最后 reduce 到一起来算 pXX.
 </p>
 
-<pre class="code"><code><span id="coderef-environment" class="coderef-off"><span class="linenr"> 1: </span><span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">env</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">ExecutionEnvironment</span>.getExecutionEnvironment <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;= 1</span></span>
+<div class="org-src-container">
+<pre class="src src-scala"><span id="coderef-environment" class="coderef-off"><span class="linenr"> 1: </span><span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">env</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">ExecutionEnvironment</span>.getExecutionEnvironment <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;= 1</span></span>
 <span class="linenr"> 2: </span>
 <span class="linenr"> 3: </span><span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">rawSources</span> <span style="color: #00008b;">=</span> (<span style="color: #6b8e23;">ZipkinClient</span>.datasources foldMap interp) unsafeRunSync ()
 <span class="linenr"> 4: </span>
@@ -187,7 +192,8 @@ Free Monad, 免费获得自定义数据类型的 Monad, 好将副作用与业务
 <span class="linenr">18: </span>    (<span style="color: #6b8e23;">CollectorService</span>
 <span class="linenr">19: </span>      .writeMetrics(metrics._1, <span style="color: #6b8e23;">Vector</span>(metrics._2)) foldMap interp) unsafeRunSync ())
 <span class="linenr">20: </span>
-</code></pre>
+</pre>
+</div>
 
 <ol class="org-ol">
 <li><a href="#coderef-environment" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-environment');" onmouseout="CodeHighlightOff(this, 'coderef-environment');">当前执行环境</a>, 例如跑在 cluster 上, 还是 jvm 里</li>
@@ -213,10 +219,12 @@ Free Monad, 免费获得自定义数据类型的 Monad, 好将副作用与业务
 <b>但是</b> 跑cluster 在单个 jvm 中会耗费大量资源, 所以最佳实践其实是根据运行环境, 选择不同的 <code>ExecutionEnvironment</code>
 </p>
 
-<pre class="code"><code><span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">env</span> <span style="color: #00008b;">=</span> envOrNone(<span style="color: #8b0000;">"EXECUTION_IN_LOCAL"</span>)
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">env</span> <span style="color: #00008b;">=</span> envOrNone(<span style="color: #8b0000;">"EXECUTION_IN_LOCAL"</span>)
   .map(<span style="color: #00008b;">_</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">ExecutionEnvironment</span>.createCollectionsEnvironment)
   .getOrElse(<span style="color: #6b8e23;">ExecutionEnvironment</span>.getExecutionEnvironment)
-</code></pre>
+</pre>
+</div>
 
 <p>
 若是在本地运行, 比如跑功能测试或集成测试, 使用 <code>CollectionsEnvironment</code> 会省不少资源
@@ -230,7 +238,8 @@ Free Monad, 免费获得自定义数据类型的 Monad, 好将副作用与业务
 <p>
 若是想要把 cluster 运行在 docker 中, 也是十分简易的事情
 </p>
-<pre class="code"><code>flink:
+<div class="org-src-container">
+<pre class="src src-yaml">flink:
   image: flink
   volumes:
     - ./target:/target
@@ -259,7 +268,8 @@ taskmanager:
     - "jobmanager:jobmanager"
   environment:
     - JOB_MANAGER_RPC_ADDRESS=jobmanager
-</code></pre>
+</pre>
+</div>
 
 <p>
 其中 flink 是启动 flink job 的服务, 里面跑 <code>flink run</code> 命令
@@ -312,8 +322,10 @@ Free Monad, 免费获得自定义数据类型的 Monad, 好将副作用与业务
 <div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara">
 并行化代码基本上只需要这么一行
 </p>
-<pre class="code"><code>(program unsafeRunSync ()).parSequence
-</code></pre></div></div>
+<div class="org-src-container">
+<pre class="src src-scala">(program unsafeRunSync ()).parSequence
+</pre>
+</div></div></div>
 
 
 </div>

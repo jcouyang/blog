@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-08 Sun 02:17 -->
+<!-- 2020-03-20 Fri 01:47 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Applied Category Theory in Scala</title>
@@ -135,10 +135,12 @@ This is exactly <code>Choice</code> <i>typeclass</i> for, replacing <code>=&gt;<
 will get a <code>Choice</code>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Choice</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>]] {
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Choice</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>]] {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">choice</span>(fac<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">C</span>], fbc<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">Either</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>], <span style="color: #6b8e23;">C</span>]
 }
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 
@@ -162,9 +164,11 @@ Take Http4s for example:
 http4s defined routes using <code>Kleisli</code>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">HttpRoutes</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]]
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">HttpRoutes</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]]
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">routes</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">HttpRoutes</span>[<span style="color: #6b8e23;">F</span>] <span style="color: #00008b;">=</span> ???
-</code></pre>
+</pre>
+</div>
 
 <p>
 But before going through <code>routes</code>, most request must pass middleware to
@@ -194,10 +198,12 @@ So the return type of <code>middleware</code> will be like
 if we define middleware like
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Middleware</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Either</span>[<span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>]]]
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Middleware</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Either</span>[<span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>]]]
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">passThrough</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>.ask[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]]
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">middleware</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">Middleware</span>[<span style="color: #6b8e23;">F</span>] <span style="color: #00008b;">=</span> ???
-</code></pre>
+</pre>
+</div>
 
 
 <figure>
@@ -210,8 +216,10 @@ Compose middleware and routes together is now easy thanks to <code>Kleisli</code
 has instance of <code>Choice</code>
 </p>
 
-<pre class="code"><code>middleware andThen passThrough.choice(routes)
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-scala">middleware andThen passThrough.choice(routes)
+</pre>
+</div>
 </div>
 </div>
 </div>

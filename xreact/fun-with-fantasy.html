@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-08 Sun 02:17 -->
+<!-- 2020-03-20 Fri 01:47 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>xReact Fantasy</title>
@@ -116,14 +116,16 @@ xReact 从 2.3 版本之后多了一种模式, 纯函数式的 FantasyX. 大概�
 要知道计数器的核心逻辑其实非常简单:
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">import</span> {lift, xinput} from <span style="color: #8b0000;">'xreact'</span>
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #00008b;">import</span> {lift, xinput} from <span style="color: #8b0000;">'xreact'</span>
 <span style="color: #00008b;">export</span> <span style="color: #00008b;">function</span> inc(<span style="color: #b8860b;">state</span>) {
   <span style="color: #00008b;">return</span> {count: state.count + 1}
 }
 <span style="color: #00008b;">export</span> <span style="color: #00008b;">function</span> dec(<span style="color: #b8860b;">state</span>) {
   <span style="color: #00008b;">return</span> {count: state.count -1 }
 }
-</code></pre>
+</pre>
+</div>
 
 <p>
 要么加1, 要么减1, 这个不那么简单计数器还多一个功能,可以改数字, 来来, 免费试玩一下:
@@ -134,9 +136,11 @@ xReact 从 2.3 版本之后多了一种模式, 纯函数式的 FantasyX. 大概�
 <p>
 先让我们看看如何把加减法lift起来
 </p>
-<pre class="code"><code><span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">XInc</span> = lift(inc)(xinput(<span style="color: #8b0000;">'inc'</span>))
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">XInc</span> = lift(inc)(xinput(<span style="color: #8b0000;">'inc'</span>))
 <span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">XDec</span> = lift(dec)(xinput(<span style="color: #8b0000;">'dec'</span>))
-</code></pre>
+</pre>
+</div>
 
 <p>
 注意, <code>lift(inc)</code> 免费得到了个从 FantasyX 到 FantasyX 的函数, 再接收一个 FantasyX 类型的 <code>xinput('inc')</code>, 得到我们需要的带有加一逻辑的FantasyX实例.
@@ -166,8 +170,10 @@ xReact 从 2.3 版本之后多了一种模式, 纯函数式的 FantasyX. 大概�
 <p>
 对了我们还忘了可以改的计数器输入框
 </p>
-<pre class="code"><code><span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">XCount</span> = xinput(<span style="color: #8b0000;">'count'</span>).map(state =&gt; ({count: ~~state.count}))
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">XCount</span> = xinput(<span style="color: #8b0000;">'count'</span>).map(state =&gt; ({count: ~~state.count}))
+</pre>
+</div>
 
 <p>
 就像我说过的 <code>xinput('count')</code> 会免费得到一个 FantasyX, 一旦有了这个类型, 我们是可以map的.
@@ -185,7 +191,8 @@ xReact 从 2.3 版本之后多了一种模式, 纯函数式的 FantasyX. 大概�
 <p>
 View 层是一个简单的 React stateless component
 </p>
-<pre class="code"><code><span style="color: #00008b;">import</span> * as React from <span style="color: #8b0000;">'react'</span>
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #00008b;">import</span> * as React from <span style="color: #8b0000;">'react'</span>
 <span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">View</span> = props =&gt; (
  &lt;div&gt;
     &lt;input type=<span style="color: #8b0000;">"button"</span> name=<span style="color: #8b0000;">"dec"</span> onClick={(e)=&gt;props.actions.fromEvent(e)} value=<span style="color: #8b0000;">"-"</span> /&gt;
@@ -194,7 +201,8 @@ View 层是一个简单的 React stateless component
  &lt;/div&gt;
 )
 View.defaultProps = {count: 0}
-</code></pre>
+</pre>
+</div>
 
 <p>
 只需要把事件都 hook 到 <code>props.actions</code> 上
@@ -213,13 +221,15 @@ View.defaultProps = {count: 0}
 现在我们有了几个 FantasyX 类型, <code>XInc</code>, <code>XDec</code> 和 <code>XCounter</code>, 然后根据业务逻辑的需要, 将这三个功能拼起来, 再应用到我们写好的 View 上.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">import</span> {xinput,pure} from <span style="color: #8b0000;">'xreact'</span>
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #00008b;">import</span> {xinput,pure} from <span style="color: #8b0000;">'xreact'</span>
 <span style="color: #00008b;">import</span> {XInc, XDec, XCount} from <span style="color: #8b0000;">'../transforms/counter'</span>
 <span style="color: #00008b;">import</span> {View} from <span style="color: #8b0000;">'../views/counter'</span>
 
 <span style="color: #00008b;">const</span> <span style="color: #b8860b;">XCounter</span> = XInc.concat(XDec).concat(XCount)
 <span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">Counter</span> = XCounter.apply(View)
-</code></pre>
+</pre>
+</div>
 
 <p>
 <code>concat</code> 是 Monoid 的操作, 类似于两个数组的 <code>concat</code>, 两个数组的内容会合到一起. 在 FantasyX 的概念里, concat 也是将内容合到一起, 而 FantasyX 的内容就是 reactive 的 state. 
@@ -234,14 +244,16 @@ concat 到一起的 <code>XCounter</code> 依然是 FantasyX 类型, 我们可�
 <div id="outline-container-org24f2fe1" class="outline-3">
 <h3 id="org24f2fe1">render</h3>
 <div class="outline-text-3" id="text-org24f2fe1">
-<pre class="code"><code><span style="color: #00008b;">import</span> * as React from <span style="color: #8b0000;">'react'</span>
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #00008b;">import</span> * as React from <span style="color: #8b0000;">'react'</span>
 <span style="color: #00008b;">import</span> { render } from <span style="color: #8b0000;">'react-dom'</span>;
 <span style="color: #00008b;">import</span> {Counter} from <span style="color: #8b0000;">'./components/counter'</span>
 <span style="color: #00008b;">import</span> {X} from <span style="color: #8b0000;">'xreact'</span>
 <span style="color: #00008b;">import</span> * as RX from <span style="color: #8b0000;">'xreact/lib/xs/rx'</span>
 <span style="color: #00008b;">const</span> <span style="color: #b8860b;">xmount</span> = (component, dom) =&gt; render(React.createFactory(X)({ x: RX }, component), dom)
 xmount(&lt;Counter /&gt;, document.getElementById(<span style="color: #8b0000;">'counter-app'</span>))
-</code></pre>
+</pre>
+</div>
 
 <p>
 最后, 当然是将这个 Counter component render 到 dom 上, 为了获得 Observable 引擎的选择, rxjs 或 mostjs, 需要给 xReact 的稍加配置.
@@ -261,7 +273,8 @@ xmount(&lt;Counter /&gt;, document.getElementById(<span style="color: #8b0000;">
 <p>
 比如我们的 View 是这样的
 </p>
-<pre class="code"><code><span style="color: #00008b;">import</span> * as React from <span style="color: #8b0000;">'react'</span>
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #00008b;">import</span> * as React from <span style="color: #8b0000;">'react'</span>
 <span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">View</span> = props =&gt; (
 &lt;div&gt;
   &lt;label&gt;Height: {props.height} cm
@@ -275,10 +288,12 @@ xmount(&lt;Counter /&gt;, document.getElementById(<span style="color: #8b0000;">
 &lt;/div&gt;
 )
 View.defaultProps = {health: <span style="color: #8b0000;">''</span>, bmi: 0, height: 175, weight: 70}
-</code></pre>
+</pre>
+</div>
 
 
-<pre class="code"><code><span style="color: #00008b;">import</span> {lift2, xinput} from <span style="color: #8b0000;">'xreact'</span>
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #00008b;">import</span> {lift2, xinput} from <span style="color: #8b0000;">'xreact'</span>
 <span style="color: #00008b;">function</span> <span style="color: #6a5acd;">bmiCalc</span>({weight}, {height}) {
   <span style="color: #00008b;">let</span> <span style="color: #b8860b;">health</span> = <span style="color: #8b0000;">'N/A'</span>
   <span style="color: #00008b;">let</span> <span style="color: #b8860b;">bmi</span> = weight * 10000 / (height * height) 
@@ -297,7 +312,8 @@ View.defaultProps = {health: <span style="color: #8b0000;">''</span>, bmi: 0, he
 <span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">XWeight</span> = xinput(<span style="color: #8b0000;">'weight'</span>).map(strToInt(<span style="color: #8b0000;">'weight'</span>))
 <span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">XHeight</span> = xinput(<span style="color: #8b0000;">'height'</span>).map(strToInt(<span style="color: #8b0000;">'height'</span>))
 <span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">XBMI</span> = lift2(bmiCalc)(XWeight, XHeight)
-</code></pre>
+</pre>
+</div>
 <p>
 主要的逻辑也没什么不同, 把输入框 height 和 weight 都变成 FantasyX, lift bmiCalc, 然后应用到 height 和 weight 上.
 </p>
@@ -319,10 +335,12 @@ render 到页面上, 大概就能工作了
 如果想拖动第一个滑块时 height 数字会跟着变, 我们只需要将 height 拖动的动作 concat 到一起就好了.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">import</span> {XBMI, XWeight, XHeight} from <span style="color: #8b0000;">'./transforms/bmi.js'</span>
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #00008b;">import</span> {XBMI, XWeight, XHeight} from <span style="color: #8b0000;">'./transforms/bmi.js'</span>
 <span style="color: #00008b;">const</span> <span style="color: #b8860b;">BMI2</span> = XBMI.concat(XWeight).concat(XHeight).apply(BV)
 xmount(&lt;BMI2 /&gt;, document.getElementById(<span style="color: #8b0000;">'bmi-app-2'</span>))
-</code></pre>
+</pre>
+</div>
 
 <p><div id="bmi-app-2"></div></p>
 </div>
@@ -346,7 +364,8 @@ xmount(&lt;BMI2 /&gt;, document.getElementById(<span style="color: #8b0000;">'bm
 假设还是这个例子, 但是 bmi 的计算逻辑发生在后端. 这时, 异步需求就来了.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">import</span> {lift2, xinput} from <span style="color: #8b0000;">'xreact'</span>
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #00008b;">import</span> {lift2, xinput} from <span style="color: #8b0000;">'xreact'</span>
 <span style="color: #00008b;">import</span> {XWeight, XHeight} from <span style="color: #8b0000;">'./bmi'</span>
 <span style="color: #00008b;">function</span> <span style="color: #6a5acd;">bmiCalc</span>({weight}, {height}) {
     <span style="color: #00008b;">return</span> {
@@ -356,7 +375,8 @@ xmount(&lt;BMI2 /&gt;, document.getElementById(<span style="color: #8b0000;">'bm
     }
 }
 <span style="color: #00008b;">export</span> <span style="color: #00008b;">const</span> <span style="color: #b8860b;">XBMI</span> = lift2(bmiCalc)(XWeight, XHeight)
-</code></pre>
+</pre>
+</div>
 
 <p>
 跟一般的函数一样,我们返回一个 state 的 patch, 不同的是, state 的 value 是个 promise.
@@ -366,10 +386,12 @@ xmount(&lt;BMI2 /&gt;, document.getElementById(<span style="color: #8b0000;">'bm
 一点也不用担心这个 promise, 它只是一个 lazy 的值, 在最后会 eval, 其结果 patch 到 state 上.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">import</span> {XBMI as XASYNCBMI} from <span style="color: #8b0000;">'./transforms/async-bmi.js'</span>
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #00008b;">import</span> {XBMI as XASYNCBMI} from <span style="color: #8b0000;">'./transforms/async-bmi.js'</span>
 <span style="color: #00008b;">const</span> <span style="color: #b8860b;">BMI3</span> = XASYNCBMI.concat(XWeight).concat(XHeight).apply(BV)
 xmount(&lt;BMI3 /&gt;, document.getElementById(<span style="color: #8b0000;">'bmi-app-3'</span>))
-</code></pre>
+</pre>
+</div>
 
 <p>
 我们render 到页面上就是这个效果了. 点击后本地不会发生计算, 注意看network 会发送请求到 github.com.ru 然后结果返回后页面会update.

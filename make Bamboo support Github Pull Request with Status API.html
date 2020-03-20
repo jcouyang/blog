@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-08 Sun 02:17 -->
+<!-- 2020-03-20 Fri 01:48 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>&lrm;</title>
@@ -146,8 +146,10 @@ you can simply trigger a custom build via <i>GUI</i>
 <p>
 or <i>API</i>
 </p>
-<pre class="code"><code>curl -XPOST -u name:password http://your.bamboo.domain/rest/api/latest/queue/:build-key?bamboo.variable.blah=blahblah
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST -u name:password http://your.bamboo.domain/rest/api/latest/queue/:build-key?bamboo.variable.blah=blahblah
+</pre>
+</div>
 
 <p>
 then the custom varibale is available via <code>$bamboo_blah</code>
@@ -202,7 +204,8 @@ checkout completed source code here <a href="https://gist.github.com/jcouyang/02
 </span> to achieve that.
 </p>
 
-<pre class="code"><code>robot.router.post <span style="color: #8b0000;">"/hubot/trigger-bamboo"</span>, (req, res) -&gt;
+<div class="org-src-container">
+<pre class="src src-javascript">robot.router.post <span style="color: #8b0000;">"/hubot/trigger-bamboo"</span>, (req, res) -&gt;
     query = querystring.parse(url.parse(req.url).query)
     bamboo_url = query.bamboo
     build_key = query.buildKey
@@ -216,23 +219,28 @@ checkout completed source code here <a href="https://gist.github.com/jcouyang/02
       <span style="color: #00008b;">if</span> eventType <span style="color: #00008b;">in</span> eventTypes
 <span id="coderef-post-bamboo-api" class="coderef-off">        robot.http(<span style="color: #8b0000;">"#{bamboo_url}/rest/api/latest/queue/#{build_key}?bamboo.variable.pull_sha=#{data.pull_request.head.sha}&amp;bamboo.variable.pull_num=#{data.number}"</span>) (post-bamboo-api)</span>
           .post()
-</code></pre>
+</pre>
+</div>
 
 <p>
 you can easily install the script for you hubot
 </p>
 
-<pre class="code"><code>npm install hubot-bamboo-pr --save
-</code></pre>
+<div class="org-src-container">
+<pre class="src src-sh">npm install hubot-bamboo-pr --save
+</pre>
+</div>
 
 <p>
 andd add it to <code>external-scripts.json</code> file
 </p>
-<pre class="code"><code>[
+<div class="org-src-container">
+<pre class="src src-diff">[
   "hubot-something-else",
   + "hubot-bamboo-pr"
 ]
-</code></pre>
+</pre>
+</div>
 
 <p>
 then point your github hook to hubot.
@@ -318,7 +326,8 @@ you need <i>bamboo password</i> for stoping build, just create a share user with
 <div id="outline-container-org8ecc0e7" class="outline-3">
 <h3 id="org8ecc0e7">checkout PR code</h3>
 <div class="outline-text-3" id="text-org8ecc0e7">
-<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">#</span><span style="color: #8c8c8c; font-style: italic;">!/bin/</span><span style="color: #00008b;">bash</span>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #8c8c8c; font-style: italic;">#</span><span style="color: #8c8c8c; font-style: italic;">!/bin/</span><span style="color: #00008b;">bash</span>
 <span style="color: #b8860b;">GITHUB_API</span>=https://api.github.com
 <span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">if github enterprise https://your.github.domain/api/v3</span>
 <span style="color: #00008b;">if</span> [[ -n ${<span style="color: #b8860b;">bamboo_pull_num</span>} ]]; <span style="color: #00008b;">then</span>
@@ -328,14 +337,16 @@ you need <i>bamboo password</i> for stoping build, just create a share user with
   git fetch ${<span style="color: #b8860b;">bamboo</span>.repository.git.repositoryUrl} +refs/pull/$<span style="color: #b8860b;">bamboo_pull_num</span>/merge:
   git checkout FETCH_HEAD
 <span style="color: #00008b;">fi</span>
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 
 <div id="outline-container-orgcccc835" class="outline-3">
 <h3 id="orgcccc835">notify github status</h3>
 <div class="outline-text-3" id="text-orgcccc835">
-<pre class="code"><code><span class="linenr"> 1: </span><span style="color: #8c8c8c; font-style: italic;">#</span><span style="color: #8c8c8c; font-style: italic;">!/bin/</span><span style="color: #00008b;">bash</span>
+<div class="org-src-container">
+<pre class="src src-sh"><span class="linenr"> 1: </span><span style="color: #8c8c8c; font-style: italic;">#</span><span style="color: #8c8c8c; font-style: italic;">!/bin/</span><span style="color: #00008b;">bash</span>
 <span class="linenr"> 2: </span><span style="color: #b8860b;">STATUS</span>=$<span style="color: #b8860b;">?</span>
 <span class="linenr"> 3: </span><span style="color: #00008b;">if</span> [[ -n ${<span style="color: #b8860b;">bamboo_pull_sha</span>} ]]; <span style="color: #00008b;">then</span>
 <span class="linenr"> 4: </span>  <span style="color: #00008b;">if</span> [ $<span style="color: #b8860b;">STATUS</span> != 0 ]; <span style="color: #00008b;">then</span>
@@ -346,7 +357,8 @@ you need <i>bamboo password</i> for stoping build, just create a share user with
 <span id="coderef-githubapi2" class="coderef-off"><span class="linenr"> 9: </span>    curl -k -H <span style="color: #8b0000;">"Authorization: token $bamboo_GITHUB_STATUS_API_password"</span> --request POST --data <span style="color: #8b0000;">"{\"state\": \"success\", \"description\": \"Success:)\", \"target_url\": \"${bamboo.buildResultsUrl}\"}"</span> $<span style="color: #b8860b;">GITHUB_API</span>/repos/:user/:repo/statuses/$<span style="color: #b8860b;">bamboo_pull_sha</span> &gt; /dev/null</span>
 <span class="linenr">10: </span>  <span style="color: #00008b;">fi</span>
 <span class="linenr">11: </span><span style="color: #00008b;">fi</span>
-</code></pre>
+</pre>
+</div>
 
 <p>
 place <code>checkout PR</code> and <code>notify github status</code> script in this order
@@ -366,12 +378,14 @@ place <code>checkout PR</code> and <code>notify github status</code> script in t
 <p>
 create new <i>stage</i> for <span class="underline">stop build</span> task
 </p>
-<pre class="code"><code><span class="linenr">1: </span><span style="color: #8c8c8c; font-style: italic;">#</span><span style="color: #8c8c8c; font-style: italic;">!/bin/</span><span style="color: #00008b;">bash</span><span style="color: #8c8c8c; font-style: italic;"> </span>
+<div class="org-src-container">
+<pre class="src src-sh"><span class="linenr">1: </span><span style="color: #8c8c8c; font-style: italic;">#</span><span style="color: #8c8c8c; font-style: italic;">!/bin/</span><span style="color: #00008b;">bash</span><span style="color: #8c8c8c; font-style: italic;"> </span>
 <span class="linenr">2: </span><span style="color: #00008b;">if</span> [[ -n ${<span style="color: #b8860b;">bamboo_pull_num</span>} ]]; <span style="color: #00008b;">then</span>
 <span class="linenr">3: </span>  <span style="color: #228b22;">echo</span> <span style="color: #8b0000;">'stoping bamboo'</span>
 <span class="linenr">4: </span>  curl <span style="color: #8b0000;">"http://${bamboo_BAMBOO_USER}:${bamboo_BAMBOO_password}@your.bamboo.domain/build/admin/stopPlan.action?${bamboo.planResultKey}-${bamboo.buildNumber}"</span>
 <span class="linenr">5: </span><span style="color: #00008b;">fi</span>
-</code></pre>
+</pre>
+</div>
 </div>
 </div>
 </div>
