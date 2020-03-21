@@ -655,6 +655,92 @@ f 在 =f True= 是确定 a 是 Boolean，在rank1多态是时就确定了 =a->a=
 
 所以到 =f 'a'= 类型就挂了。
 
+** Kan extensions 看展
+说到米田引理, 不得不提到一切概念的根源 {{{ruby(看展,kan extensions)}}}
+
+#+begin_quote
+All Concepts Are Kan Extensions
+The notion of Kan extensions subsumes all the other fundamental concepts of category theory.
+-- [[https://en.wikipedia.org/wiki/Categories_for_the_Working_Mathematician][Categories for the Working Mathematician]] by Saunders Mac Lane
+#+end_quote
+看展有一对(duel), {{{ruby(左看, Lan)}}},和 {{{ruby(右看, Ran)}}}, 不如从 右看 开始, 趁着米田共还没凉.
+
+右看的大概意思是这样的, 说有:
+
+- 三个范畴, A, B, C
+- 范畴之间有两个函子, AC 范畴的 =X= 和 AB 范畴的 =F=
+
+那么就一定一个 BC 的函子 Ran_{F}X 和 从 Ran_{F}X compose F 到 X 的 自然变换 \mu
+
+文字确实很绕, 让我们看看线图, 就很清楚.
+
+*** TODO insert diagram
+
+还是线图神奇吧, 很明显如果有 X 和 F 和 三个范畴, 那肯定可以找到 Ran_FX 和 自然变换把图补成这个样子:
+
+*** TODO insert diagram
+
+那么问题来了, 这货到底是
+
+右看还有一个重要的属性是:
+
+对于任意 BC 的函子 Z 如果能找到从 Z . F ~> X 的自然变换, 那就存在一个唯一的从 Z ~> Ran_{F}X 的自然变换
+
+那么表示成代码应该长什么样呢? 既然 Z ~> Ran_{F}X 只存在一个自然变换,那么我们找到 Z 不就找到了 Ran_{F}X?
+
+- Z . F ~> X : =forall b. z (f b) -> x b=
+- Z ~> Ran_{F}X : =forall a. z a -> Ran f x a=
+
+#+BEGIN_SRC haskell
+  ran :: forall z. Functor z => (forall b. z (f b) -> x b) -> (forall a. z a -> Ran f x a)
+#+END_SRC
+
+如果把 =Ran f x a= 拿到左边来定义成 data type 那么就有:
+
+#+BEGIN_SRC haskell
+  data Ran f x a = forall z. Functor z => Ran (forall b. z (f b) -> x b) (z a)
+#+END_SRC
+
+读出来很清楚吧, 随便给个函子 z, Ran f x a 就可以从 z . f 到 x 的自然变换 和 z 找到.
+
+这个定义有 rank 3, 分别是 a, b 和 z.
+但是真正的 Edward Kmett 的 [[http://hackage.haskell.org/package/kan-extensions-5.2][看展实现]] 是简化为 rank 2 type 版本的, 只有 a, b 两 rank, 让我们看下他的定义:
+
+#+BEGIN_SRC haskell
+newtype Ran f x a = Ran { runRan :: forall b. (a -> f b) -> x b }
+#+END_SRC 
+
+先来看看 \mu
+#+BEGIN_SRC haskell
+toRan :: Functor z => (forall b. z (f b) -> x b) -> (z a -> Ran f x a)
+toRan s t = Ran (s . flip fmap t)
+#+END_SRC
+
+这是point free 我们从右边开始走, Ran 里面是个函数 =forall b. (a -> f b) -> x b= 所以 =(s . flip fmap t)= 就是这个函数类型
+
+让我们试试类型对不对, 如果给这个函数入参 =(a -> f b)=, t 是 =z a=, 所以 ==flip fmap= 完了得到的类型是 =z (f b)=.
+代入 =s:: z (f b) -> x b= 刚好得到 =x b=, 类型正确.
+
+翻译成人话就是对于 Edward 的 Ran 来说他知道如何从 =a -> f b= , 如果你提供 =z a= 因为 z 是函子只要map一下就会得到 =z (f b)=
+因为存在 z . f 到 x 的自然变换最终刚好会得出 x b 来, 所以 Edward 定义 Ran 其实就是输入和输出.
+
+反过来, 如果我有个 Ran f x 如何求出这俩自然变换呢?
+
+#+BEGIN_SRC haskell
+fromRan :: (forall a. z a -> Ran f x a) -> (z (f b) -> x b)
+fromRan s = flip runRan id . s
+#+END_SRC
+
+依次展开下类型:
+1. =ranRa :: forall b. Ran f x a -> (a -> f b) -> x b=
+2. =flip ranRan :: forall b. (a -> f b) -> Ran f x a -> x b=
+3. =flip ranRan id :: forall b. Ran f x (f b) -> x b=
+4. =s :: z (f b) -> Ran f x (f b)=
+5. =flip ranRan id . s :: z (f b) -> x b=
+
+所以这个 rank 2 的 Ran 其实算出来是 a = f b 也就少了一 rank.
+
+
 ** /Kleisli Catergory/
 #+INDEX: Kleisi Catergory
 
