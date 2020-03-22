@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2020-03-22 Sun 01:47 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>如何部署 Scala 代码</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="欧阳继超">
+<meta name="description" content="到底应该打成肥 jar 包还是 docker? 打包工具为何如此难用?Scala部署到底怎么最简单高效?"
+>
+<meta name="keywords" content="Scala,Coursier,Assembly,Jar,Docker,Kubernetes,K8s">
+<link rel="icon" href="/favicon.ico">
+<meta name="theme-color" content="#ffffff">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
+<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
+<meta property="og:title" content="如何部署 Scala 代码" />
+<meta property="og:description" content="Cats need Caffeine!" />
+<meta property="og:type" content="article" />
+<meta content="https://upload.wikimedia.org/wikipedia/commons/7/7e/Imperial_Encyclopaedia_-_Animal_Kingdom_-_pic009_-_%E9%9B%8E%E9%B3%A9%E5%9C%96.svg" property="og:image">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="preamble" class="status">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJRFJGX"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header>
+    <a accesskey="h" href="/index.html"> HOME </a> |
+    <a href="#" id="edit-in-github">EDIT</a> |
+    <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
+    <a href="https://blog.oyanglul.us/theindex">INDEX</a> |
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
+</header>
+</div>
+<div id="content">
+<header>
+<h1 class="title">如何部署 Scala 代码</h1>
+</header><nav id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgd6411d8">两年多前</a></li>
+<li><a href="#orgc09933f">一年前</a></li>
+<li><a href="#orgd4622c1">现在</a></li>
+</ul>
+</div>
+</nav>
+<p>
+我们产品Scala用过很多种方式部署.
+</p>
+
+<div id="outline-container-orgd6411d8" class="outline-2">
+<h2 id="orgd6411d8">两年多前</h2>
+<div class="outline-text-2" id="text-orgd6411d8">
+<p>
+的代码库, 都是
+</p>
+
+<ol class="org-ol">
+<li><a href="https://github.com/sbt/sbt-assembly">sbt-assembly</a> 打成 uber jar(肥包, 也就是包含所有依赖), 大概 50-100M</li>
+<li>把 jar 包 压到带 jvm 的 docker 里, push 到 register</li>
+<li>K8s 从 register 拉 docker</li>
+</ol>
+
+<p>
+用过的同学都知道, 这个打肥包的过程非常非常的慢, 而且还需要一个诡异的配置告诉assembly如何merge<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+这对于新人来说是何等的 <del>卧槽</del> 黑人问号???
+</span>
+</p>
+<div class="org-src-container">
+<pre class="src src-scala">assemblyMergeStrategy in assembly := {
+  <span style="color: #00008b;">case</span> <span style="color: #36648b;">PathList</span>(<span style="color: #8b0000;">"META-INF"</span>, <span style="color: #b8860b;">xs</span> <span style="color: #00008b;">@</span> <span style="color: #00008b;">_</span><span style="color: #36648b;">*</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">MergeStrategy</span>.discard
+  <span style="color: #00008b;">case</span> <span style="color: #b8860b;">x</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">MergeStrategy</span>.first
+}
+</pre>
+</div>
+
+<p>
+所以, 一点也不好用, 没用过的也不要用它了
+</p>
+<ul class="org-ul">
+<li>打包慢</li>
+<li>包大</li>
+<li>uber jar包不能放registry, 只能给部署用, 所以别的服务怎么依赖这个jar</li>
+<li>merge策略可能会导致诡异的运行时问题</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgc09933f" class="outline-2">
+<h2 id="orgc09933f">一年前</h2>
+<div class="outline-text-2" id="text-orgc09933f">
+<p>
+的代码用的是 <a href="https://github.com/sbt/sbt-native-packager">sbt-native-packager</a>
+</p>
+
+<p>
+这个工具很强大, 能打成 N 种 安装包
+</p>
+<ul class="org-ul">
+<li>tar</li>
+<li>deb</li>
+<li>dmg</li>
+<li>msi</li>
+<li>docker</li>
+<li>graalvm</li>
+</ul>
+
+<p>
+这也太强了, 马上就觉得 assembly什么破烂玩意, 这个才是真正的打包工具.
+</p>
+
+<p>
+用法非常简单, 对于我们来说只要docker, 安装插件然后
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">sbt docker:publishLocal
+</pre>
+</div>
+
+<p>
+就完事了, push 到 register 就用了.
+</p>
+
+<p>
+真是省事!
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd4622c1" class="outline-2">
+<h2 id="orgd4622c1">现在</h2>
+<div class="outline-text-2" id="text-orgd4622c1">
+<p>
+用的是 <a href="https://get-coursier.io/">Coursier</a>
+</p>
+
+<p>
+都说了 sbt-native-packager 那么好用了, 为啥还要换?
+</p>
+
+<p>
+Coursier 相对 native packager 有更多的好处
+</p>
+<ul class="org-ul">
+<li>快: 有缓存, 而且sbt用的也是coursier, 共享缓存, 一起快</li>
+<li>快: 只打包应用, 不是 uber jar, 小了非常多, 打包速度也快, 上传也快</li>
+<li>还是快: CI 在部署前都不需要打包成docker, 这样前面的测试会很快,他们只用拉应用jar包,非常小,所有依赖又有缓存</li>
+</ul>
+
+<p>
+然我们来看看怎么用 coursier 打包.
+</p>
+
+<p>
+你不需要任何插件来发布 jar 包
+</p>
+
+<p>
+直接:
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">sbt publish
+</pre>
+</div>
+
+<p>
+假设你发布的包叫 `com.abc:heheda<sub>2.12</sub>:1.0`
+</p>
+
+<p>
+如果跑测试要运行这个jar包只需要
+</p>
+
+<pre class="example">
+coursier launch com.abc:heheda_2.12:1.0
+</pre>
+
+<p>
+所以大量的时间就省下来了<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
+真正部署前根本不需要docker image, 而大部分时间 CI 只跑 Pull Request 的测试而不会部署
+</span>.
+</p>
+
+<p>
+而在真正 master 部署时, 我们可以用 coursier 在 docker 里把依赖先安装好.
+</p>
+
+<p>
+首先需要一个 coursier 的 docker image<label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
+这完全可以扔 docker hub 上, 但是我懒
+</span>
+</p>
+
+<pre class="example">
+FROM openjdk:8u222-slim
+
+ARG VERSION
+
+RUN apt update &amp;&amp; apt install -y curl
+
+WORKDIR /usr/local/bin
+
+RUN curl -Lo coursier https://git.io/coursier-cli &amp;&amp; chmod +x coursier
+
+# Add and use user coursieruser
+RUN groupadd --gid 1001 coursieruser &amp;&amp; useradd --gid 1001 --uid 1001 coursieruser --shell /bin/bash
+RUN chown -R coursieruser:coursieruser /opt
+RUN mkdir /home/coursieruser &amp;&amp; chown -R coursieruser:coursieruser /home/coursieruser
+RUN mkdir /logs &amp;&amp; chown -R coursieruser:coursieruser /logs
+USER coursieruser
+
+WORKDIR /home/coursieruser
+
+RUN coursier --help
+</pre>
+
+<p>
+在给应打包docker时
+</p>
+
+<pre class="example">
+FROM mycoursier
+ARG version
+
+RUN coursier bootstrap com.abc:heheda_2.12:$version -o heheda
+
+CMD ./heheda
+</pre>
+
+<p>
+如果你的包在私有registry
+</p>
+
+<pre class="example">
+FROM mycoursier
+ARG version
+ARG csuser
+ARG cstoken
+
+RUN env COURSIER_REPOSITORIES="central|sonatype:releases|https://$csuser:$cstoken@my.jarregistry.com" \
+    coursier bootstrap com.abc:heheda_2.12:$version -o heheda
+
+CMD ./heheda
+</pre>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+这对于新人来说是何等的 <del>卧槽</del> 黑人问号???
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+真正部署前根本不需要docker image, 而大部分时间 CI 只跑 Pull Request 的测试而不会部署
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+这完全可以扔 docker hub 上, 但是我懒
+</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<footer>
+  <p>Author: 欧阳继超
+    <a class="github-button" href="https://github.com/sponsors/jcouyang" data-icon="octicon-heart" aria-label="Sponsor @jcouyang on GitHub">Sponsor</a>
+    <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
+  </p>
+  <p>Created: 2017-02-10 Fri 00:00</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
+  <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
+</footer>
+</div>
+</body>
+</html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-03-20 Fri 03:04 -->
+<!-- 2020-03-22 Sun 01:47 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>范畴论完全装逼手册 / Grokking Monad</title>
@@ -107,6 +107,12 @@ for the JavaScript code in this tag.
 <li><a href="#org1a754d9">Yoneda lemma / <del>米田共</del> 米田引理</a>
 <ul>
 <li><a href="#orgade6eef">Rank N Type</a></li>
+</ul>
+</li>
+<li><a href="#org0fb6f6c">Kan extensions 看展</a>
+<ul>
+<li><a href="#org5ed44f9"><span class="todo TODO">TODO</span> insert diagram</a></li>
+<li><a href="#org162fe39"><span class="todo TODO">TODO</span> insert diagram</a></li>
 </ul>
 </li>
 <li><a href="#org733f8e7"><i>Kleisli Catergory</i></a></li>
@@ -1008,6 +1014,156 @@ f 在 <code>f True</code> 是确定 a 是 Boolean，在rank1多态是时就确�
 </div>
 </div>
 </div>
+
+<div id="outline-container-org0fb6f6c" class="outline-3">
+<h3 id="org0fb6f6c">Kan extensions 看展</h3>
+<div class="outline-text-3" id="text-org0fb6f6c">
+<p>
+说到米田引理, 不得不提到一切概念的根源 <ruby>看展<rt>kan extensions</rt></ruby>
+</p>
+
+<div class="epigraph"><blockquote>
+<p>
+All Concepts Are Kan Extensions
+The notion of Kan extensions subsumes all the other fundamental concepts of category theory.
+&#x2013; <a href="https://en.wikipedia.org/wiki/Categories_for_the_Working_Mathematician">Categories for the Working Mathematician</a> by Saunders Mac Lane
+</p>
+
+</blockquote></div>
+<p>
+看展有一对(duel), <ruby>左看<rt> Lan</rt></ruby>,和 <ruby>右看<rt> Ran</rt></ruby>, 不如从 右看 开始, 趁着米田共还没凉.
+</p>
+
+<p>
+右看的大概意思是这样的, 说有:
+</p>
+
+<ul class="org-ul">
+<li>三个范畴, A, B, C</li>
+<li>范畴之间有两个函子, AC 范畴的 <code>X</code> 和 AB 范畴的 <code>F</code></li>
+</ul>
+
+<p>
+那么就一定一个 BC 的函子 Ran<sub>F</sub>X 和 从 Ran<sub>F</sub>X compose F 到 X 的 自然变换 &mu;
+</p>
+
+<p>
+文字确实很绕, 让我们看看线图, 就很清楚.
+</p>
+</div>
+
+<div id="outline-container-org5ed44f9" class="outline-4">
+<h4 id="org5ed44f9"><span class="todo TODO">TODO</span> insert diagram</h4>
+<div class="outline-text-4" id="text-org5ed44f9">
+<p>
+还是线图神奇吧, 很明显如果有 X 和 F 和 三个范畴, 那肯定可以找到 Ran<sub>FX</sub> 和 自然变换把图补成这个样子:
+</p>
+</div>
+</div>
+
+<div id="outline-container-org162fe39" class="outline-4">
+<h4 id="org162fe39"><span class="todo TODO">TODO</span> insert diagram</h4>
+<div class="outline-text-4" id="text-org162fe39">
+<p>
+那么问题来了, 这货到底是
+</p>
+
+<p>
+右看还有一个重要的属性是:
+</p>
+
+<p>
+对于任意 BC 的函子 Z 如果能找到从 Z . F ~&gt; X 的自然变换, 那就存在一个唯一的从 Z ~&gt; Ran<sub>F</sub>X 的自然变换
+</p>
+
+<p>
+那么表示成代码应该长什么样呢? 既然 Z ~&gt; Ran<sub>F</sub>X 只存在一个自然变换,那么我们找到 Z 不就找到了 Ran<sub>F</sub>X?
+</p>
+
+<ul class="org-ul">
+<li>Z . F ~&gt; X : <code>forall b. z (f b) -&gt; x b</code></li>
+<li>Z ~&gt; Ran<sub>F</sub>X : <code>forall a. z a -&gt; Ran f x a</code></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">ran</span> <span style="color: #b8860b;">::</span> <span style="color: #00008b;">forall</span> z<span style="color: #b8860b;">.</span> <span style="color: #36648b;">Functor</span> z <span style="color: #b8860b;">=&gt;</span> (<span style="color: #00008b;">forall</span> b<span style="color: #b8860b;">.</span> z (f b) <span style="color: #b8860b;">-&gt;</span> x b) <span style="color: #b8860b;">-&gt;</span> (<span style="color: #00008b;">forall</span> a<span style="color: #b8860b;">.</span> z a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Ran</span> f x a)
+</pre>
+</div>
+
+<p>
+如果把 <code>Ran f x a</code> 拿到左边来定义成 data type 那么就有:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">data</span> <span style="color: #36648b;">Ran</span> f x a <span style="color: #b8860b;">=</span> forall z<span style="color: #b8860b;">.</span> <span style="color: #36648b;">Functor</span> z <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Ran</span> (forall b<span style="color: #b8860b;">.</span> z (f b) <span style="color: #b8860b;">-&gt;</span> x b) (z a)
+</pre>
+</div>
+
+<p>
+读出来很清楚吧, 随便给个函子 z, Ran f x a 就可以从 z . f 到 x 的自然变换 和 z 找到.
+</p>
+
+<p>
+这个定义有 rank 3, 分别是 a, b 和 z.
+但是真正的 Edward Kmett 的 <a href="http://hackage.haskell.org/package/kan-extensions-5.2">看展实现</a> 是简化为 rank 2 type 版本的, 只有 a, b 两 rank, 让我们看下他的定义:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Ran</span> f x a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Ran</span> { runRan <span style="color: #b8860b;">::</span> <span style="color: #00008b;">forall</span> b<span style="color: #b8860b;">.</span> (a <span style="color: #b8860b;">-&gt;</span> f b) <span style="color: #b8860b;">-&gt;</span> x b }
+</pre>
+</div>
+
+<p>
+先来看看 &mu;
+</p>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">toRan</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Functor</span> z <span style="color: #b8860b;">=&gt;</span> (<span style="color: #00008b;">forall</span> b<span style="color: #b8860b;">.</span> z (f b) <span style="color: #b8860b;">-&gt;</span> x b) <span style="color: #b8860b;">-&gt;</span> (z a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Ran</span> f x a)
+<span style="color: #6a5acd;">toRan</span> s t <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Ran</span> (s <span style="color: #b8860b;">.</span> flip fmap t)
+</pre>
+</div>
+
+<p>
+这是point free 我们从右边开始走, Ran 里面是个函数 <code>forall b. (a -&gt; f b) -&gt; x b</code> 所以 <code>(s . flip fmap t)</code> 就是这个函数类型
+</p>
+
+<p>
+让我们试试类型对不对, 如果给这个函数入参 <code>(a -&gt; f b)</code>, t 是 <code>z a</code>, 所以 <code>=flip fmap</code> 完了得到的类型是 <code>z (f b)</code>.
+代入 <code>s:: z (f b) -&gt; x b</code> 刚好得到 <code>x b</code>, 类型正确.
+</p>
+
+<p>
+翻译成人话就是对于 Edward 的 Ran 来说他知道如何从 <code>a -&gt; f b</code> , 如果你提供 <code>z a</code> 因为 z 是函子只要map一下就会得到 <code>z (f b)</code>
+因为存在 z . f 到 x 的自然变换最终刚好会得出 x b 来, 所以 Edward 定义 Ran 其实就是输入和输出.
+</p>
+
+<p>
+反过来, 如果我有个 Ran f x 如何求出这俩自然变换呢?
+</p>
+
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">fromRan</span> <span style="color: #b8860b;">::</span> (<span style="color: #00008b;">forall</span> a<span style="color: #b8860b;">.</span> z a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Ran</span> f x a) <span style="color: #b8860b;">-&gt;</span> (z (f b) <span style="color: #b8860b;">-&gt;</span> x b)
+<span style="color: #6a5acd;">fromRan</span> s <span style="color: #b8860b;">=</span> flip runRan id <span style="color: #b8860b;">.</span> s
+</pre>
+</div>
+
+<p>
+依次展开下类型:
+</p>
+<ol class="org-ol">
+<li><code>ranRa :: forall b. Ran f x a -&gt; (a -&gt; f b) -&gt; x b</code></li>
+<li><code>flip ranRan :: forall b. (a -&gt; f b) -&gt; Ran f x a -&gt; x b</code></li>
+<li><code>flip ranRan id :: forall b. Ran f x (f b) -&gt; x b</code></li>
+<li><code>s :: z (f b) -&gt; Ran f x (f b)</code></li>
+<li><code>flip ranRan id . s :: z (f b) -&gt; x b</code></li>
+</ol>
+
+<p>
+所以这个 rank 2 的 Ran 其实算出来是 a = f b 也就少了一 rank.
+</p>
+</div>
+</div>
+</div>
+
 
 <div id="outline-container-org733f8e7" class="outline-3">
 <h3 id="org733f8e7"><i>Kleisli Catergory</i></h3>
