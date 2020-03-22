@@ -1,0 +1,150 @@
+#+TITLE: 如何部署 Scala 代码
+#+Date: <2017-02-10 Fri>
+#+AUTHOR: 欧阳继超
+#+OPTIONS: ^:t
+#+MACRO: ruby @@html:<ruby>$1<rt>$2</rt></ruby>@@
+#+PROPERTY: header-args :eval never-export
+#+KEYWORDS: Scala,Coursier,Assembly,Jar,Docker,Kubernetes,K8s
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="如何部署 Scala 代码" />
+#+HTML_HEAD_EXTRA: <meta property="og:description" content="Cats need Caffeine!" />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+#+HTML_HEAD_EXTRA: <meta content="https://upload.wikimedia.org/wikipedia/commons/7/7e/Imperial_Encyclopaedia_-_Animal_Kingdom_-_pic009_-_%E9%9B%8E%E9%B3%A9%E5%9C%96.svg" property="og:image">
+#+description: 到底应该打成肥 jar 包还是 docker? 打包工具为何如此难用?Scala部署到底怎么最简单高效?
+#+index: Scala!如何部署 Scala 代码
+#+index: DevOps!如何部署 Scala 代码
+
+我们产品Scala用过很多种方式部署.
+
+** 两年多前
+的代码库, 都是
+
+1. [[https://github.com/sbt/sbt-assembly][sbt-assembly]] 打成 uber jar(肥包, 也就是包含所有依赖), 大概 50-100M
+2. 把 jar 包 压到带 jvm 的 docker 里, push 到 register
+3. K8s 从 register 拉 docker
+
+用过的同学都知道, 这个打肥包的过程非常非常的慢, 而且还需要一个诡异的配置告诉assembly如何merge[fn:1]
+#+BEGIN_SRC scala
+    assemblyMergeStrategy in assembly := {
+      case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+      case x => MergeStrategy.first
+    }
+#+END_SRC
+
+所以, 一点也不好用, 没用过的也不要用它了
+- 打包慢
+- 包大
+- uber jar包不能放registry, 只能给部署用, 所以别的服务怎么依赖这个jar
+- merge策略可能会导致诡异的运行时问题
+** 一年前
+的代码用的是 [[https://github.com/sbt/sbt-native-packager][sbt-native-packager]]
+
+这个工具很强大, 能打成 N 种 安装包
+- tar
+- deb
+- dmg
+- msi
+- docker
+- graalvm
+
+这也太强了, 马上就觉得 assembly什么破烂玩意, 这个才是真正的打包工具.
+
+用法非常简单, 对于我们来说只要docker, 安装插件然后
+#+BEGIN_SRC bash
+sbt docker:publishLocal
+#+END_SRC
+
+就完事了, push 到 register 就用了.
+
+真是省事!
+
+** 现在
+用的是 [[https://get-coursier.io/][Coursier]]
+
+都说了 sbt-native-packager 那么好用了, 为啥还要换?
+
+Coursier 相对 native packager 有更多的好处
+- 快: 有缓存, 而且sbt用的也是coursier, 共享缓存, 一起快
+- 快: 只打包应用, 不是 uber jar, 小了非常多, 打包速度也快, 上传也快
+- 还是快: CI 在部署前都不需要打包成docker, 这样前面的测试会很快,他们只用拉应用jar包,非常小,所有依赖又有缓存
+
+然我们来看看怎么用 coursier 打包.
+
+你不需要任何插件来发布 jar 包
+
+直接:
+#+BEGIN_SRC bash
+sbt publish
+#+END_SRC
+
+假设你发布的包叫 `com.abc:heheda_2.12:1.0`
+
+如果跑测试要运行这个jar包只需要
+
+#+begin_example
+coursier launch com.abc:heheda_2.12:1.0
+#+end_example
+
+所以大量的时间就省下来了[fn:2].
+
+而在真正 master 部署时, 我们可以用 coursier 在 docker 里把依赖先安装好.
+
+首先需要一个 coursier 的 docker image[fn:3]
+
+#+begin_example
+FROM openjdk:8u222-slim
+
+ARG VERSION
+
+RUN apt update && apt install -y curl
+
+WORKDIR /usr/local/bin
+
+RUN curl -Lo coursier https://git.io/coursier-cli && chmod +x coursier
+
+# Add and use user coursieruser
+RUN groupadd --gid 1001 coursieruser && useradd --gid 1001 --uid 1001 coursieruser --shell /bin/bash
+RUN chown -R coursieruser:coursieruser /opt
+RUN mkdir /home/coursieruser && chown -R coursieruser:coursieruser /home/coursieruser
+RUN mkdir /logs && chown -R coursieruser:coursieruser /logs
+USER coursieruser
+
+WORKDIR /home/coursieruser
+
+RUN coursier --help
+#+end_example
+
+在给应打包docker时
+
+#+begin_example
+FROM mycoursier
+ARG version
+
+RUN coursier bootstrap com.abc:heheda_2.12:$version -o heheda
+
+CMD ./heheda
+#+end_example
+
+如果你的包在私有registry
+
+#+begin_example
+FROM mycoursier
+ARG version
+ARG csuser
+ARG cstoken
+
+RUN env COURSIER_REPOSITORIES="central|sonatype:releases|https://$csuser:$cstoken@my.jarregistry.com" \
+    coursier bootstrap com.abc:heheda_2.12:$version -o heheda
+
+CMD ./heheda
+#+end_example
+
+
+* Footnotes
+
+[fn:3] 这完全可以扔 docker hub 上, 但是我懒
+
+[fn:2] 真正部署前根本不需要docker image, 而大部分时间 CI 只跑 Pull Request 的测试而不会部署
+
+[fn:1] 这对于新人来说是何等的 +卧槽+ 黑人问号???
+
+
