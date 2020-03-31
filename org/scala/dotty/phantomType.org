@@ -1,0 +1,61 @@
+#+TITLE: Scala 3 Phantom Types
+#+Date: <2020-03-31 Tue>
+#+AUTHOR: 欧阳继超
+#+OPTIONS: ^:t
+#+PROPERTY: header-args :eval never-export
+#+KEYWORDS: Scala,Dotty,Haskell,Scala 3,Phantom Types
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="Scala 3 Phantom Types" />
+#+HTML_HEAD_EXTRA: <meta property="og:description" content="你可能不再需要 Cats" />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+#+HTML_HEAD_EXTRA: <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
+#+description: 你可能不再需要 Cats
+#+index: Scala!Scala 3 Phantom Types
+#+index: Dotty!Scala 3 Phantom Types
+#+index: Phantom Types!Scala 3 Phantom Types
+#+index: FP!Scala 3 Phantom Types
+#+index: Catergory Theory!Scala 3 Phantom Types
+#+INCLUDE: !toc.org
+
+Phantom Types 指并不是数据类型必要的类型. 其实在 [[./GADT.org][GADT]] 的例子中已经见过了.
+
+比如 =List[Int]= 说明构造 =List= 只需要知道 =Int=.
+
+但如果把类型定义成 =List[Int, B]=, 那么 =B= 就是 phantom type, 因为你在构造 =List(1)= 其实并不需要 =B= 类型的值.
+
+但是这个可以随意加的额外的类型格外有用, 比如我们可以用 phantom types 来定义类型安全的 =Vector=:
+
+#+BEGIN_SRC scala
+    enum Nat {
+      case Zero
+      case Succ[A]() extends Nat
+    }
+    import Nat._
+    type Nat2 = Succ[Succ[Zero.type]]
+    type Nat3 = Succ[Succ[Succ[Zero.type]]]
+
+    enum Vector[+N <: Nat, +A] {
+      case Cons(head: A, tail: Vector[N, A]) extends Vector[Succ[N], A]
+      case Nil extends Vector[Zero.type, Nothing]
+    }
+    import Vector._
+    val vector2: Vector[Nat2, Int] = Cons(1, Cons(2, Nil))
+    val vector3: Vector[Nat3, Int] = Cons(1, Cons(2, Cons(3, Nil)))
+#+END_SRC
+
+长度本身是运行时的值,但是通过phantom types我们把长度弄到了类型上, 这样编译器就能帮忙检查比如, head是不是安全:
+
+#+BEGIN_SRC scala
+def typeSafeHead[A](vec: Vector[Succ[Nat], A]):A = vec match
+    case Cons(head, _) => head
+#+END_SRC
+
+所以如果你想要拿 Nil 的 head, 编译时就会挂:
+#+BEGIN_SRC scala
+typeSafeHead(Nil)
+#+END_SRC
+#+begin_example
+ Found:    (Main.Vector.Nil : Main.Vector[(Main.Nat.Zero : Main.Nat), Nothing])
+ Required: Main.Vector[Main.Nat.Succ[Main.Nat], Any]
+#+end_example
+
+不信? 可以自己在 scastie 上试试: https://scastie.scala-lang.org/jcouyang/JTX3OFXrTCOuq6LNfgRj8Q/8
