@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2020-03-31 Tue 07:40 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scala 3 Phantom Types</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="欧阳继超">
+<meta name="description" content="你可能不再需要 Cats"
+>
+<meta name="keywords" content="Scala,Dotty,Haskell,Scala 3,Phantom Types">
+<link rel="icon" href="/favicon.ico">
+<meta name="theme-color" content="#ffffff">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
+<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
+<meta property="og:title" content="Scala 3 Phantom Types" />
+<meta property="og:description" content="你可能不再需要 Cats" />
+<meta property="og:type" content="article" />
+<meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="preamble" class="status">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJRFJGX"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header>
+    <a accesskey="h" href="/index.html"> HOME </a> |
+    <a href="#" id="edit-in-github">EDIT</a> |
+    <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
+    <a href="https://blog.oyanglul.us/theindex">INDEX</a> |
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
+</header>
+</div>
+<div id="content">
+<header>
+<h1 class="title">Scala 3 Phantom Types</h1>
+</header><hr>
+
+<ul class="org-ul">
+<li><a href="https://blog.oyanglul.us/scala/dotty/rank-n-type">Rank N Types</a></li>
+<li><a href="./functionK.html">FunctionK</a></li>
+<li><a href="./GADT.html">GADT</a></li>
+<li><a href="./phantomType.html">Phantom Types</a>  👈 更新到这里了</li>
+</ul>
+
+<p>
+可以跑的源码在这里 👉 <a href="https://github.com/jcouyang/meow">https://github.com/jcouyang/meow</a>
+</p>
+
+<hr>
+
+<p>
+Phantom Types 指并不是数据类型必要的类型. 其实在 <a href="./GADT.html">GADT</a> 的例子中已经见过了.
+</p>
+
+<p>
+比如 <code>List[Int]</code> 说明构造 <code>List</code> 只需要知道 <code>Int</code>.
+</p>
+
+<p>
+但如果把类型定义成 <code>List[Int, B]</code>, 那么 <code>B</code> 就是 phantom type, 因为你在构造 <code>List(1)</code> 其实并不需要 <code>B</code> 类型的值.
+</p>
+
+<p>
+但是这个可以随意加的额外的类型格外有用, 比如我们可以用 phantom types 来定义类型安全的 <code>Vector</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala">enum <span style="color: #6b8e23;">Nat</span> {
+  <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">Zero</span>
+  <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">Succ</span>[<span style="color: #6b8e23;">A</span>]() <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Nat</span>
+}
+<span style="color: #00008b;">import</span> <span style="color: #6b8e23;">Nat</span>.<span style="color: #00008b;">_</span>
+<span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Nat2</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Succ</span>[<span style="color: #6b8e23;">Succ</span>[<span style="color: #6b8e23;">Zero</span>.<span style="color: #00008b;">type</span>]]
+<span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Nat3</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Succ</span>[<span style="color: #6b8e23;">Succ</span>[<span style="color: #6b8e23;">Succ</span>[<span style="color: #6b8e23;">Zero</span>.<span style="color: #00008b;">type</span>]]]
+
+enum <span style="color: #6b8e23;">Vector</span>[+<span style="color: #6b8e23;">N</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">Nat</span>, +<span style="color: #6b8e23;">A</span>] {
+  <span style="color: #00008b;">case</span> <span style="color: #36648b;">Cons</span>(<span style="color: #b8860b;">head</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>, <span style="color: #b8860b;">tail</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">N</span>, <span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">Succ</span>[<span style="color: #6b8e23;">N</span>], <span style="color: #6b8e23;">A</span>]
+  <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">Nil</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">Zero</span>.<span style="color: #00008b;">type</span>, <span style="color: #6b8e23;">Nothing</span>]
+}
+<span style="color: #00008b;">import</span> <span style="color: #6b8e23;">Vector</span>.<span style="color: #00008b;">_</span>
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">vector2</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">Nat2</span>, <span style="color: #6b8e23;">Int</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Cons</span>(<span style="color: #6b8e23;">1</span>, <span style="color: #6b8e23;">Cons</span>(<span style="color: #6b8e23;">2</span>, <span style="color: #6b8e23;">Nil</span>))
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">vector3</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">Nat3</span>, <span style="color: #6b8e23;">Int</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Cons</span>(<span style="color: #6b8e23;">1</span>, <span style="color: #6b8e23;">Cons</span>(<span style="color: #6b8e23;">2</span>, <span style="color: #6b8e23;">Cons</span>(<span style="color: #6b8e23;">3</span>, <span style="color: #6b8e23;">Nil</span>)))
+</pre>
+</div>
+
+<p>
+长度本身是运行时的值,但是通过phantom types我们把长度弄到了类型上, 这样编译器就能帮忙检查比如, head是不是安全:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">typeSafeHead</span>[<span style="color: #6b8e23;">A</span>](vec<span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">Succ</span>[<span style="color: #6b8e23;">Nat</span>], <span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span><span style="color: #36648b;">A</span> <span style="color: #00008b;">=</span> vec <span style="color: #00008b;">match</span>
+    <span style="color: #00008b;">case</span> <span style="color: #36648b;">Cons</span>(<span style="color: #b8860b;">head</span>, <span style="color: #00008b;">_</span>) <span style="color: #00008b;">=&gt;</span> head
+</pre>
+</div>
+
+<p>
+所以如果你想要拿 Nil 的 head, 编译时就会挂:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala">typeSafeHead(<span style="color: #6b8e23;">Nil</span>)
+</pre>
+</div>
+<pre class="example">
+Found:    (Main.Vector.Nil : Main.Vector[(Main.Nat.Zero : Main.Nat), Nothing])
+Required: Main.Vector[Main.Nat.Succ[Main.Nat], Any]
+</pre>
+
+<p>
+不信? 可以自己在 scastie 上试试: <a href="https://scastie.scala-lang.org/jcouyang/JTX3OFXrTCOuq6LNfgRj8Q/8">https://scastie.scala-lang.org/jcouyang/JTX3OFXrTCOuq6LNfgRj8Q/8</a>
+</p>
+</div>
+<div id="postamble" class="status">
+<footer>
+  <p>Author: 欧阳继超
+    <a class="github-button" href="https://github.com/sponsors/jcouyang" data-icon="octicon-heart" aria-label="Sponsor @jcouyang on GitHub">Sponsor</a>
+    <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
+  </p>
+  <p>Created: 2020-03-31 Tue 00:00</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
+  <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
+</footer>
+</div>
+</body>
+</html>
