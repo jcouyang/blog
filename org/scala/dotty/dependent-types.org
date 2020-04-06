@@ -1,0 +1,90 @@
+#+TITLE: Scala 3 Dependent Types
+#+Date: <2020-04-05 Sun>
+#+AUTHOR: 欧阳继超
+#+OPTIONS: ^:t
+#+MACRO: ruby @@html:<ruby>$1<rt>$2</rt></ruby>@@
+#+PROPERTY: header-args :eval never-export
+#+KEYWORDS: Scala,Dotty,Scala 3,Dependent Tyeps,Shapeless,Aux Pattern,Context Functions
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="Scala 3 Dependent Types" />
+#+HTML_HEAD_EXTRA: <meta property="og:description" content="你可能不再需要 Cats" />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+#+HTML_HEAD_EXTRA: <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
+#+description: 你可能不再需要 Cats
+#+index: Scala!Scala 3 Dependent Types
+#+index: Shapeless!Scala 3 Dependent Types
+#+index: Dotty!Scala 3 Dependent Types
+#+index: Dependent Types!Scala 3 Dependent Types
+#+index: FunctionK!Scala 3 Dependent Types
+#+index: FP!Scala 3 Dependent Types
+#+INCLUDE: !toc.org
+
+* Scala 2
+如果经常使用 [[https://github.com/milessabin/shapeless/][Shapeless]], 你可能会熟悉一种叫 Aux 的 Pattern
+
+比如:
+
+#+BEGIN_SRC scala
+trait Second[L <: HList] {
+  type Out
+  def apply(value: L): Out
+}
+
+object Second {
+  type Aux[L <: HList, O] = Second[L] { type Out = O }
+
+  def apply[L <: HList](implicit inst: Second[L]): Aux[L, inst.Out] =
+    inst
+}
+
+Second(1 :: "2" :: HNil)
+#+END_SRC
+输出：
+#+begin_example
+"2"
+#+end_example
+
+可以看见这个 Second 是 dependent types, 也就是说他的类型取决于输入的类型， 比如现在换一个 HList，他的
+输出就不是 String 了：
+#+BEGIN_SRC scala
+Second("1" :: 2 :: HNil)
+// => 2
+#+END_SRC
+输入变成 Int 了。
+
+* Scala 3
+
+在 Scala 3 我们不仅可以用dependent methods，还可以申明 dependent function。
+也就是上面那个例子，可以进一步的简化：
+#+BEGIN_SRC scala
+trait Second[L <: HList] {
+  type Out
+  def apply(value: L): Out
+}
+
+object Second {
+  def apply[L <: HList](value: L) = (inst: Second[L]) ?=> inst(value)
+}
+#+END_SRC
+
+其中 ~?=>~ 先当与是简写的 ~(using inst: Second[L]) => inst(value)~
+
+注意看前后的区别:
+#+BEGIN_SRC diff
+- def apply[L <: HList](implicit inst: Second[L]): Aux[L, inst.Out] =
+    inst
++ def apply[L <: HList](value: L) = (inst: Second[L]) ?=> inst(value)
+#+END_SRC
+
+以前需要标明method类型为dependent types =Aux[L, inst.Out]=
+
+现在你看，我们可以吧 Aux 和 Out 消除掉，因为你可以直接返回一个 dependent function
+
+如果你给这个 dependent function 标类型的话：
+#+BEGIN_SRC scala
+def apply[L <: HList](value: L): (inst: Second[L]) ?=> inst.Out =
+ (inst: Second[L]) ?=> inst(value)
+#+END_SRC
+
+它就跟Scala 2 dependent method的时候很像了，但是我们还是不用 Aux 类型的帮助。
+
+如果懒得拉[[https://github.com/jcouyang/meow][源代码]]下来玩，可以在 scastie 上试试 https://scastie.scala-lang.org/fyxXSR3ASj6rSkkERnUK7g
