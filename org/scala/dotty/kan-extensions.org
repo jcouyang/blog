@@ -36,4 +36,86 @@ The notion of Kan extensions subsumes all the other fundamental concepts of cate
 
 * 左看
 
+Haskell 的定义用了 GADT
+#+BEGIN_SRC haskell
+data Lan g h a where
+  Lan :: (g b -> a) -> h b -> Lan g h a
+#+END_SRC
+
+对阿，我们才学过 [[./gadt.org][GADT]], 用 enum 就好了：
+#+BEGIN_SRC scala
+enum Lan[G[?], H[?], A] {
+ case LeftKan[G[?], H[?], A, B](f: (G[B] => A), v: H[B]) extends Lan[G, H, A]
+}
+#+END_SRC
+
+看起来不是很复杂，重要的是 Lan 可以得到一个 {{{ruby(免费函子,Free Functor)}}}:
+#+BEGIN_SRC scala
+given [G[?],H[?]] as Functor[Lan[G, H, *]] {
+  def [A, B](r: Lan[G, H, A]).map(f: A => B):Lan[G,H,B] = r match {
+    case Lan.LeftKan(g, v) => Lan.LeftKan(f compose g, v)
+  }
+}
+#+END_SRC
+
+这怎么这么眼熟，难道这不就是用来实现 Free Monad 的 [[file:~/Documents/blog/org/grokking-monad/part3.org::*Coyoneda][Coyoneda]]? 果然可以引出所有概念。
+
+#+BEGIN_SRC scala
+type CoYoneda[F[?], A] = Lan[Id, F, A]
+#+END_SRC
+
+而且注意到其中 Scala 3 的新写法：
+- =*= 是 [[https://github.com/typelevel/kind-projector][kind projector]] 表示 kind， Scala 3 不再需要编译器插件，只需要打开toggle =-Ykind-projector= 即可。[fn:1]
+- =given= 是新的表示 typeclass instance 的 implicit。[fn:3]
+
 * 右看
+
+#+BEGIN_SRC haskell
+newtype Ran g h a = Ran { runRan :: forall b. (a -> g b) -> h b }
+#+END_SRC
+
+从 Haskell 翻译过来也容易，我们不是才学的 [[./rank-N-type.org][Rank N Types]] 么？ =forall b. (a -> gb)= 很好表示：
+#+BEGIN_SRC scala
+case class Ran[G[?], H[?], A](run: [B] => (A => G[B]) => H[B])
+#+END_SRC
+
+这也有个 {{{ruby(免费函子,Free Functor)}}}:
+
+#+BEGIN_SRC scala
+given [G[?],H[?]] as Functor[Ran[G, H, *]] {
+  def [A, B](r: Ran[G, H, A]).map(f: A => B):Ran[G,H,B] =
+    Ran([C] => (k:B=>G[C]) => r.run(k.compose(f)))
+}
+#+END_SRC
+
+不用想也知道那么这个应该可以推出 Yoneda 吧：
+#+BEGIN_SRC scala
+type Yoneda[F[?], A] = Ran[Id, F, A]
+#+END_SRC
+
+不仅有免费的函子，更有免费的单子，当 H 也是 G 的时候:
+#+BEGIN_SRC scala
+given [G[?]](using Functor[Ran[G, G, *]]) as Monad[Ran[G, G, *]] {
+  def pure[A](a: A): Ran[G, G, A] = Ran([C]=>(k:A=>G[C]) => k(a))
+  def [A, B](r: Ran[G, G, A]).map(f: A => B):Ran[G,G,B] = r.map(f)
+  def [A, B](ran: Ran[G, G, A]) >>= (f: A => Ran[G,G,B]):Ran[G,G,B] =
+    Ran([C] => (k: B => G[C]) => ran.run((a)=> f(a).run(k)))
+}
+#+END_SRC
+
+其中：
+- =using= 是新的 implicit 参数写法, 而且还可以匿名。[fn:4]
+
+当然看展不仅仅引出这么些概念，还可以推出 ConT, Limits, CoLimits...[fn:2]
+更重要的是，实现它几乎把所有我们学过GADT，Rank-N Types, Phantom Types, Typeclasses(given, using) 这些 Scala 3 新特性都用了个遍，真是两仪生四象，四象生八卦，八卦生万物。
+
+有兴趣的同学可以下[[https://github.com/jcouyang/meow/blob/master/src/test/scala/KanExtensions.scala][源码]]看下测试，这看展的 property based testing 写得真是太费劲了。
+* Footnotes
+
+[fn:4] https://dotty.epfl.ch/docs/reference/contextual/using-clauses.html
+
+[fn:3] https://dotty.epfl.ch/docs/reference/contextual/givens.html
+
+[fn:2] http://comonad.com/reader/2008/kan-extensions/
+
+[fn:1] https://dotty.epfl.ch/docs/reference/changed-features/wildcards.html
