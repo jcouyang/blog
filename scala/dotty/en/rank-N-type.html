@@ -4,10 +4,10 @@
 <!-- 2020-05-06 Wed 13:31 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Scala 3 原生 Rank N Types</title>
+<title>Rank N Types in Scala 3</title>
 <meta name="generator" content="Org mode">
-<meta name="author" content="欧阳继超">
-<meta name="description" content="你可能不再需要 Cats"
+<meta name="author" content="Jichao Ouyang">
+<meta name="description" content="You probably don't need Cats"
 >
 <meta name="keywords" content="Scala,Dotty,Haskell,Scala 3,FunctionK,Rank N Types,Rank 2 Types,Polymorphic function types">
 <link rel="icon" href="/favicon.ico">
@@ -17,8 +17,8 @@
 <link rel="stylesheet" href="/style/toc.css"/>
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<meta property="og:title" content="Scala 原生 Rank N Type" />
-<meta property="og:description" content="你可能不再需要 Cats" />
+<meta property="og:title" content="Rank N Types in Scala 3" />
+<meta property="og:description" content="You probably don't need Cats" />
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
 <script type="text/javascript">
@@ -85,49 +85,41 @@ for the JavaScript code in this tag.
 </div>
 <div id="content">
 <header>
-<h1 class="title">Scala 3 原生 Rank N Types</h1>
+<h1 class="title">Rank N Types in Scala 3</h1>
 </header><nav id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org216c8c5">Scala 2</a></li>
-<li><a href="#org9ad013c">Scala 3</a></li>
+<li><a href="#org2500d06">Scala 2</a></li>
+<li><a href="#orgc70f012">Scala 3</a></li>
 </ul>
 </div>
 </nav>
 <div class="org-center">
 <p>
-<a href="./rank-n-type.html">中文</a> | <a href="./en/rank-n-type.html">English</a>
+<a href="../rank-n-type.html">中文</a> | <a href="./rank-n-type.html">English</a>
 </p>
 </div>
 
 <hr>
 
-<ul class="org-ul">
-<li><a href="https://blog.oyanglul.us/scala/dotty/rank-n-type">Rank N Types</a></li>
-<li><a href="./functionK.html">FunctionK</a></li>
-<li><a href="./GADT.html">GADT</a></li>
-<li><a href="./phantomType.html">Phantom Types</a></li>
-<li><a href="./dependent-types.html">Dependent Types</a></li>
-<li><a href="./kan-extensions.html">Kan Extensions</a>  😸 更新到这里了</li>
-</ul>
-
 <p>
-可以跑的源码在这里 👉 <a href="https://github.com/jcouyang/meow">https://github.com/jcouyang/meow</a>
+I'm recently migrating some libs and projects to Scala 3, I guess it would be very helpful
+to me or anyone interested to learn some new functional programming features that Scala 3 is bringing to us.
 </p>
 
 <hr>
-<div id="outline-container-org216c8c5" class="outline-2">
-<h2 id="org216c8c5">Scala 2</h2>
-<div class="outline-text-2" id="text-org216c8c5">
+
+<div id="outline-container-org2500d06" class="outline-2">
+<h2 id="org2500d06">Scala 2</h2>
+<div class="outline-text-2" id="text-org2500d06">
 <p>
-没有 <a href="https://wiki.haskell.org/Rank-N_types">Rank N Types</a>, 所以我们需要使用 Cats 的 <a href="https://typelevel.org/cats/datatypes/functionk.html">FunctionK</a> 来做一些事情.
+There is no <a href="https://wiki.haskell.org/Rank-N_types">Rank N Types</a> in Scala 2, but you can use <a href="https://typelevel.org/cats/datatypes/functionk.html">FunctionK</a> from Cats to mimic Rank N Types.
 </p>
 
 <p>
-比如:
+This is a Rank 1:
 </p>
-
 <div class="org-src-container">
 <pre class="src src-scala"><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">forall a b c. (b, c) -&gt; (a -&gt; a) -&gt; (b, c)</span>
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">rank</span>[<span style="color: #6b8e23;">A</span>,<span style="color: #6b8e23;">B</span>,<span style="color: #6b8e23;">C</span>](a<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>), doSomething<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">A</span>)<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>) <span style="color: #00008b;">=</span> (doSomething(a._1), doSomething(a._2))
@@ -135,16 +127,17 @@ for the JavaScript code in this tag.
 </div>
 
 <p>
-是编译不了的, 因为这只有 rank 1, 数 rank 几 很容易, 有几个forall, 这里只有一个, 也就是, A, B, C 是一个 rank.
+It won't compile because `doSomething` is rank 1 in rank 2 place.
 </p>
 
 <p>
-同一个 rank 的毛病是, 编译器在看到 <code>doSomething(a._1)</code> 时, 由于 <code>=a._1: B</code> 时就决定了这时 <code>doSomething: B =&gt; B</code> 就
-决定了 A = B, 再看后面的 <code>doSomething(a._2)</code> 编译就挂了, 因为我决定好了是 B 了你给我个 C 当然不行.
+When compiler tried to figure our what type <code>doSomething(a._1)</code> really is, since <code>=a._1: B</code> fix the type <code>doSomething: B =&gt; B</code>
+ so compiler knows that  <code>A = B</code>, but latter on there is a <code>doSomething(a._2)</code> now compiler confused, A cannot be both B and C while there
+are no proof of <code>B = C</code>.
 </p>
 
 <p>
-Scala 2 解决的办法可以通过 Cats 的 FunctionK:
+Simplest way to make Scala 2 is to use Cats FunctionK:
 </p>
 
 <div class="org-src-container">
@@ -153,39 +146,39 @@ Scala 2 解决的办法可以通过 Cats 的 FunctionK:
 </div>
 
 <p>
-可以看见 FunctionK 的小诡计把 A 从 <code>rank[A, B, C</code> 的类型参数上拿掉了, 也就是编译器完全不需要在编译这个函数的时候确定下来 <code>doSomething</code> 的
-A 类型是啥.
+Note that the trick of FunctionK, which basically remove A from type parameter <code>rank[A, B, C]</code>, which means compiler then has nothing
+to confuse about.
 </p>
 
 <p>
-使用 cats 也不是完全免费, 你在定义 <code>doSomething</code> 的时候要多些一堆代码
+While it is not totally free to use cats, there are some boilerplate you have to do when defining <code>doSomething</code>:
 </p>
 <div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">rankNId</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Id</span> ~&gt; <span style="color: #6b8e23;">Id</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> (<span style="color: #6b8e23;">Id</span> ~&gt; <span style="color: #6b8e23;">Id</span>) {
+<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">doSomething</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Id</span> ~&gt; <span style="color: #6b8e23;">Id</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> (<span style="color: #6b8e23;">Id</span> ~&gt; <span style="color: #6b8e23;">Id</span>) {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Id</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Id</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> a
 }
 </pre>
 </div>
 
 <p>
-定义个 id 这么累, 你可以通过这个过程看到, 哦, 原来 A 类型被藏到这里了.
+Type <code>A</code> is hidden in the <code>apply</code> method.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org9ad013c" class="outline-2">
-<h2 id="org9ad013c">Scala 3</h2>
-<div class="outline-text-2" id="text-org9ad013c">
+<div id="outline-container-orgc70f012" class="outline-2">
+<h2 id="orgc70f012">Scala 3</h2>
+<div class="outline-text-2" id="text-orgc70f012">
 <p>
-但是现在 Dotty 中, 已经实现了 Rank N Types, 叫 <a href="https://dotty.epfl.ch/blog/2019/06/11/16th-dotty-milestone-release.html#polymorphic-function-types">Polymorphic function types</a>
+Now in Scala 3, you can simply do the same thing natively with <a href="https://dotty.epfl.ch/blog/2019/06/11/16th-dotty-milestone-release.html#polymorphic-function-types">Polymorphic function types</a>.
 </p>
 
 <div class="org-src-container">
 <pre class="src src-scala"><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">rank 2 type (forall a. a -&gt; a)</span>
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">id</span> <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=&gt;</span> (t<span style="color: #00008b;">:</span> <span style="color: #36648b;">T</span>) <span style="color: #00008b;">=&gt;</span> t
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">id</span> <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> (a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">=&gt;</span> a
 
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">forall b c. (b, c) -&gt; (forall a. a -&gt; a) -&gt; (b, c)</span>
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">rank2</span>[<span style="color: #6b8e23;">B</span>,<span style="color: #6b8e23;">C</span>](a<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>), doSomething<span style="color: #00008b;">:</span> [<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">T</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">T</span>)<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>) <span style="color: #00008b;">=</span> (doSomething(a._1), doSomething(a._2))
+<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">rank2</span>[<span style="color: #6b8e23;">B</span>,<span style="color: #6b8e23;">C</span>](a<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>), doSomething<span style="color: #00008b;">:</span> [<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">A</span>)<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>) <span style="color: #00008b;">=</span> (doSomething(a._1), doSomething(a._2))
 
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">main</span>(args<span style="color: #00008b;">:</span> <span style="color: #36648b;">Array</span>[<span style="color: #6b8e23;">String</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Unit</span> <span style="color: #00008b;">=</span> {
   println(
@@ -196,18 +189,31 @@ A 类型是啥.
 </div>
 
 <p>
-是可以完美编译运行的.
+The trick is now <code>A</code> is defined <code>[A] =&gt; A =&gt; A</code>, no in method type parameters.
+It is quite similar to how we define rank n types in Haskell
+</p>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">forall</span> b c<span style="color: #b8860b;">.</span> (b, c) <span style="color: #b8860b;">-&gt;</span> (forall a<span style="color: #b8860b;">.</span> a <span style="color: #b8860b;">-&gt;</span> a) <span style="color: #b8860b;">-&gt;</span> (b, c)
+</pre>
+</div>
+
+<p>
+So basically <code>[A] =&gt;</code> is the same thing as <code>forall a.~</code>
 </p>
 
 <p>
-不信? 可以自己在 scastie 上试试: <a href="https://scastie.scala-lang.org/jcouyang/3hNle3faQ7SpS4mCcoMSGA/29">https://scastie.scala-lang.org/jcouyang/3hNle3faQ7SpS4mCcoMSGA/29</a>
+Play around with the above examples in scatie: <a href="https://scastie.scala-lang.org/jcouyang/3hNle3faQ7SpS4mCcoMSGA/29">https://scastie.scala-lang.org/jcouyang/3hNle3faQ7SpS4mCcoMSGA/29</a>
+</p>
+
+<p>
+Or clone the repo and play locally: <a href="https://github.com/jcouyang/meow">https://github.com/jcouyang/meow</a>
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <footer>
-  <p>Author: 欧阳继超
+  <p>Author: Jichao Ouyang
     <a class="github-button" href="https://github.com/sponsors/jcouyang" data-icon="octicon-heart" aria-label="Sponsor @jcouyang on GitHub">Sponsor</a>
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
   </p>
