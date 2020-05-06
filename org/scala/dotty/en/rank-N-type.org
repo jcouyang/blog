@@ -1,0 +1,87 @@
+#+TITLE: Rank N Types in Scala 3
+#+Date: <2020-03-22 Sun>
+#+AUTHOR: Jichao Ouyang
+#+OPTIONS: ^:t
+#+MACRO: ruby @@html:<ruby>$1<rt>$2</rt></ruby>@@
+#+PROPERTY: header-args :eval never-export
+#+KEYWORDS: Scala,Dotty,Haskell,Scala 3,FunctionK,Rank N Types,Rank 2 Types,Polymorphic function types
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="Rank N Types in Scala 3" />
+#+HTML_HEAD_EXTRA: <meta property="og:description" content="You probably don't need Cats" />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+#+HTML_HEAD_EXTRA: <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
+#+description: You probably don't need Cats
+#+index: Scala!Rank N Types in Scala 3
+#+index: Dotty!Rank N Types in Scala 3
+#+index: Rank N Types!Rank N Types in Scala 3
+#+index: FunctionK!Rank N Types in Scala 3
+#+index: FP!Rank N Types in Scala 3
+#+index: Catergory Theory!Rank N Types in Scala 3
+
+#+begin_center
+[[../rank-n-type.org][中文]] | [[./rank-n-type.org][English]]
+#+end_center
+
+#+INCLUDE: !toc.org
+
+* Scala 2
+There is no [[https://wiki.haskell.org/Rank-N_types][Rank N Types]] in Scala 2, but you can use [[https://typelevel.org/cats/datatypes/functionk.html][FunctionK]] from Cats to mimic Rank N Types.
+
+This is a Rank 1:
+#+BEGIN_SRC scala
+  // forall a b c. (b, c) -> (a -> a) -> (b, c)
+  def rank[A,B,C](a: (B, C), doSomething: A => A): (B, C) = (doSomething(a._1), doSomething(a._2))
+#+END_SRC
+
+It won't compile because `doSomething` is rank 1 in rank 2 place.
+
+When compiler tried to figure our what type =doSomething(a._1)= really is, since ==a._1: B= fix the type ~doSomething: B => B~
+ so compiler knows that  ~A = B~, but latter on there is a =doSomething(a._2)= now compiler confused, A cannot be both B and C while there
+are no proof of ~B = C~.
+
+Simplest way to make Scala 2 is to use Cats FunctionK:
+
+#+BEGIN_SRC scala
+def rank[B,C](a: (B, C), doSomething: Id ~> Id): (B, C) = (doSomething(a._1), doSomething(a._2))
+#+END_SRC
+
+Note that the trick of FunctionK, which basically remove A from type parameter =rank[A, B, C]=, which means compiler then has nothing
+to confuse about.
+
+While it is not totally free to use cats, there are some boilerplate you have to do when defining =doSomething=:
+#+BEGIN_SRC scala
+def doSomething: Id ~> Id = new (Id ~> Id) {
+  def apply[A](a: Id[A]): Id[A] = a
+}
+#+END_SRC
+
+Type =A= is hidden in the =apply= method.
+
+* Scala 3
+
+Now in Scala 3, you can simply do the same thing natively with [[https://dotty.epfl.ch/blog/2019/06/11/16th-dotty-milestone-release.html#polymorphic-function-types][Polymorphic function types]].
+
+#+BEGIN_SRC scala
+  // rank 2 type (forall a. a -> a)
+  val id = [A] => (a: A) => a
+  
+  // forall b c. (b, c) -> (forall a. a -> a) -> (b, c)
+  def rank2[B,C](a: (B, C), doSomething: [A] => A => A): (B, C) = (doSomething(a._1), doSomething(a._2))
+  
+  def main(args: Array[String]): Unit = {
+    println(
+      rank2((1, "2"), id)
+    )
+  }
+#+END_SRC
+
+The trick is now =A= is defined ~[A] => A => A~, no in method type parameters.
+It is quite similar to how we define rank n types in Haskell
+#+BEGIN_SRC haskell
+forall b c. (b, c) -> (forall a. a -> a) -> (b, c)
+#+END_SRC
+
+So basically ~[A] =>~ is the same thing as ~forall a.~~
+
+Play around with the above examples in scatie: https://scastie.scala-lang.org/jcouyang/3hNle3faQ7SpS4mCcoMSGA/29
+
+Or clone the repo and play locally: https://github.com/jcouyang/meow
