@@ -1,0 +1,83 @@
+#+TITLE: FunctionK in Scala 3
+#+Date: <2020-05-08 Fri>
+#+AUTHOR: Jichao Ouyang
+#+OPTIONS: ^:t
+#+MACRO: ruby @@html:<ruby>$1<rt>$2</rt></ruby>@@
+#+PROPERTY: header-args :eval never-export
+#+KEYWORDS: Scala,Dotty,Haskell,Scala 3,FunctionK,Rank N Types,Rank 2 Types,Polymorphic function types
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="FunctionK in Scala 3" />
+#+HTML_HEAD_EXTRA: <meta property="og:description" content="You probably don't need Cats" />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+#+HTML_HEAD_EXTRA: <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
+#+description: You probably don't need Cats
+#+index: Scala!FunctionK in Scala 3
+#+index: Dotty!FunctionK in Scala 3
+#+index: Rank N Types!FunctionK in Scala 3
+#+index: FunctionK!FunctionK in Scala 3
+#+index: FP!FunctionK in Scala 3
+#+index: Catergory Theory!FunctionK in Scala 3
+#+INCLUDE: !toc.org
+
+* Scala 2
+
+Last section we've seen the usable of [[https://typelevel.org/cats/datatypes/functionk.html][FunctionK]] and [[https://typelevel.org/cats/datatypes/id.html][Id]] in Cats when we were trying to implement [[./rank-n-type.org][rank N types in Scala 2]].
+
+But the actual usable of FunctionK is like:
+
+#+BEGIN_SRC scala
+  import cats.~>
+  def tupledOptionToList[B,C](a: (Option[B], Option[C]), fnk: Option ~> List): (List[B], List[C]) =
+    (fnk(a._1), fnk(a._2))
+#+END_SRC
+
+Same reason as rank n types, normal function ~Option[A] => List[A]~ won't work since ~A~ should not be in the same rank with ~B~ and ~C~.
+
+So =Option ~> List~= [fn:1] hide the =A= type, means the function only map Kind to other Kind, and leave what ever type =A= not changed,
+which is also why is called FunctionK(K for Kind).
+
+* Scala 3
+
+While in Scala 3, since we have Rank N Types, a.k.a [[https://dotty.epfl.ch/blog/2019/06/11/16th-dotty-milestone-release.html#polymorphic-function-types][Polymorphic function types]], it is very easy to implement =~>=.
+
+Basically you don't even need to implement, just a type alias will do:
+#+BEGIN_SRC scala
+// kind: * -> *
+// FunctionK: (* -> *) -> (* -> *)
+type ~>[F[?],G[?]] = [A] => F[A] => G[A]
+#+END_SRC
+
+Use the =~>= in infix position, you will get exactly same thing Cats FunctionK does:
+
+#+BEGIN_SRC scala
+object Main {
+  // rank 2 type (forall a. Option a -> List a)
+  val optionToList: Option ~> List = [A] => (a: Option[A]) => a.toList
+  
+  // forall b c. (Option b, Option c) -> (forall a. Option a -> List a) -> (List b, List c)
+  def tupledOptionToList[B,C](a: (Option[B], Option[C]), fnk: Option ~> List): (List[B], List[C]) =
+      (fnk(a._1), fnk(a._2))
+  
+  def main(args: Array[String]): Unit = {
+    println(
+      tupledOptionToList((Some(1), Some("2")), optionToList)
+    )
+  }
+}
+#+END_SRC
+
+No Cats needed, even better, it's much easier to define a functionK too:
+#+BEGIN_SRC scala
+  // Cats
+  val optionToList: Option ~> List = new (Option ~> List) {
+    def apply(a: Option[A]): List[A] = a.toList
+  }
+  // Scala 3
+  val optionToList: Option ~> List = [A] => (a: Option[A]) => a.toList
+#+END_SRC
+
+Try the above examples online: https://scastie.scala-lang.org/jcouyang/W5jIXajVTU64g8KZe8V7Kw/9
+Or clone and run it locally: https://github.com/jcouyang/meow
+
+* Footnotes
+
+[fn:1] When =F= and =G= are =Functor=, =FunctionK[F, G]= is the natural transformation from =F= to =G=, noted =F ~> G=.
