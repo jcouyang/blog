@@ -4,10 +4,10 @@
 <!-- 2020-05-08 Fri 12:05 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Scala 3 原生 FunctionK</title>
+<title>FunctionK in Scala 3</title>
 <meta name="generator" content="Org mode">
-<meta name="author" content="欧阳继超">
-<meta name="description" content="你可能不再需要 Cats"
+<meta name="author" content="Jichao Ouyang">
+<meta name="description" content="You probably don't need Cats"
 >
 <meta name="keywords" content="Scala,Dotty,Haskell,Scala 3,FunctionK,Rank N Types,Rank 2 Types,Polymorphic function types">
 <link rel="icon" href="/favicon.ico">
@@ -17,8 +17,8 @@
 <link rel="stylesheet" href="/style/toc.css"/>
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<meta property="og:title" content="Scala 原生 FunctionK" />
-<meta property="og:description" content="你可能不再需要 Cats" />
+<meta property="og:title" content="FunctionK in Scala 3" />
+<meta property="og:description" content="You probably don't need Cats" />
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
 <script type="text/javascript">
@@ -85,72 +85,79 @@ for the JavaScript code in this tag.
 </div>
 <div id="content">
 <header>
-<h1 class="title">Scala 3 原生 FunctionK</h1>
+<h1 class="title">FunctionK in Scala 3</h1>
 </header><nav id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org3df80e1">Scala 2</a></li>
-<li><a href="#org8fb046b">Scala 3</a></li>
+<li><a href="#orgd9747ef">Scala 2</a></li>
+<li><a href="#org94c748c">Scala 3</a></li>
 </ul>
 </div>
 </nav>
 <hr>
 
-<ul class="org-ul">
-<li><a href="https://blog.oyanglul.us/scala/dotty/rank-n-type">Rank N Types</a></li>
-<li><a href="./functionK.html">FunctionK</a></li>
-<li><a href="./GADT.html">GADT</a></li>
-<li><a href="./phantomType.html">Phantom Types</a></li>
-<li><a href="./dependent-types.html">Dependent Types</a></li>
-<li><a href="./kan-extensions.html">Kan Extensions</a>  😸 更新到这里了</li>
-</ul>
-
 <p>
-可以跑的源码在这里 👉 <a href="https://github.com/jcouyang/meow">https://github.com/jcouyang/meow</a>
+I'm recently migrating some libs and projects to Scala 3, I guess it would be very helpful
+to me or anyone interested to learn some new functional programming features that Scala 3 is bringing to us.
 </p>
 
 <hr>
 
-<div id="outline-container-org3df80e1" class="outline-2">
-<h2 id="org3df80e1">Scala 2</h2>
-<div class="outline-text-2" id="text-org3df80e1">
+<div id="outline-container-orgd9747ef" class="outline-2">
+<h2 id="orgd9747ef">Scala 2</h2>
+<div class="outline-text-2" id="text-orgd9747ef">
 <p>
-没有 FunctionK 所以我们需要使用 Cats 的 <a href="https://typelevel.org/cats/datatypes/functionk.html">FunctionK</a> 来做一些事情.<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
-当 FunctionK[F, G] 的 F 和 G 都是 Functor 时, FunctionK 是 F ~&gt; G 的自然变换.
-</span>
+Last section we've seen the usable of <a href="https://typelevel.org/cats/datatypes/functionk.html">FunctionK</a> and <a href="https://typelevel.org/cats/datatypes/id.html">Id</a> in Cats when we were trying to implement <a href="./rank-n-type.html">rank N types in Scala 2</a>.
 </p>
 
 <p>
-比如:
+But the actual usable of FunctionK is like:
 </p>
 
 <div class="org-src-container">
 <pre class="src src-scala"><span style="color: #00008b;">import</span> cats.~&gt;
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">tupledOptionToList</span>[<span style="color: #6b8e23;">B</span>,<span style="color: #6b8e23;">C</span>](a<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">B</span>], <span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">C</span>]), fnk<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span> ~&gt; <span style="color: #6b8e23;">List</span>)<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">List</span>[<span style="color: #6b8e23;">B</span>], <span style="color: #6b8e23;">List</span>[<span style="color: #6b8e23;">C</span>])  
+<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">tupledOptionToList</span>[<span style="color: #6b8e23;">B</span>,<span style="color: #6b8e23;">C</span>](a<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">B</span>], <span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">C</span>]), fnk<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span> ~&gt; <span style="color: #6b8e23;">List</span>)<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">List</span>[<span style="color: #6b8e23;">B</span>], <span style="color: #6b8e23;">List</span>[<span style="color: #6b8e23;">C</span>]) <span style="color: #00008b;">=</span>
+  (fnk(a._1), fnk(a._2))
 </pre>
 </div>
 
 <p>
-至于为什么不能直接用普通类型为 <code>Option[A] =&gt; List[A]</code> 的函数而要用 FunctionK 呢? 请看 <a href="./rank-N-type.html">Rank-N types</a>.
+Same reason as rank n types, normal function <code>Option[A] =&gt; List[A]</code> won't work since <code>A</code> should not be in the same rank with <code>B</code> and <code>C</code>.
+</p>
+
+<p>
+So <code>Option ~&gt; List~</code> <label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+When <code>F</code> and <code>G</code> are <code>Functor</code>, <code>FunctionK[F, G]</code> is the natural transformation from <code>F</code> to <code>G</code>, noted <code>F ~&gt; G</code>.
+</span> hide the <code>A</code> type, means the function only map Kind to other Kind, and leave what ever type <code>A</code> not changed,
+which is also why is called FunctionK(K for Kind).
 </p>
 </div>
 </div>
 
-<div id="outline-container-org8fb046b" class="outline-2">
-<h2 id="org8fb046b">Scala 3</h2>
-<div class="outline-text-2" id="text-org8fb046b">
+<div id="outline-container-org94c748c" class="outline-2">
+<h2 id="org94c748c">Scala 3</h2>
+<div class="outline-text-2" id="text-org94c748c">
 <p>
-在 Dotty 中, 已经实现了 Rank N Types, 叫 <a href="https://dotty.epfl.ch/blog/2019/06/11/16th-dotty-milestone-release.html#polymorphic-function-types">Polymorphic function types</a>, 就可以很轻松的定义出 <code>~&gt;</code>:
+While in Scala 3, since we have Rank N Types, a.k.a <a href="https://dotty.epfl.ch/blog/2019/06/11/16th-dotty-milestone-release.html#polymorphic-function-types">Polymorphic function types</a>, it is very easy to implement <code>~&gt;</code>.
+</p>
+
+<p>
+Basically you don't even need to implement, just a type alias will do:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">kind: * -&gt; *</span>
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">FunctionK: (* -&gt; *) -&gt; (* -&gt; *)</span>
+<span style="color: #00008b;">type</span> ~&gt;[<span style="color: #6b8e23;">F</span>[?],<span style="color: #6b8e23;">G</span>[?]] <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">G</span>[<span style="color: #6b8e23;">A</span>]
+</pre>
+</div>
+
+<p>
+Use the <code>~&gt;</code> in infix position, you will get exactly same thing Cats FunctionK does:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scala"><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">kind * -&gt; *</span>
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">FunctionK (* -&gt; *) -&gt; (* -&gt; *)</span>
-
-<span style="color: #00008b;">type</span> ~&gt;[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>],<span style="color: #6b8e23;">G</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">G</span>[<span style="color: #6b8e23;">A</span>]
-
-<span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Main</span> {
+<pre class="src src-scala"><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Main</span> {
   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">rank 2 type (forall a. Option a -&gt; List a)</span>
   <span style="color: #00008b;">val</span> <span style="color: #b8860b;">optionToList</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span> ~&gt; <span style="color: #6b8e23;">List</span> <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> (a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=&gt;</span> a.toList
 
@@ -168,11 +175,21 @@ for the JavaScript code in this tag.
 </div>
 
 <p>
-不需任何cats, 是可以完美编译运行的.
+No Cats needed, even better, it's much easier to define a functionK too:
 </p>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">Cats</span>
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">optionToList</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span> ~&gt; <span style="color: #6b8e23;">List</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> (<span style="color: #6b8e23;">Option</span> ~&gt; <span style="color: #6b8e23;">List</span>) {
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>(a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">List</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> a.toList
+}
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">Scala 3</span>
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">optionToList</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span> ~&gt; <span style="color: #6b8e23;">List</span> <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> (a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=&gt;</span> a.toList
+</pre>
+</div>
 
 <p>
-不信? 可以自己在 scastie 上试试: <a href="https://scastie.scala-lang.org/jcouyang/W5jIXajVTU64g8KZe8V7Kw/9">https://scastie.scala-lang.org/jcouyang/W5jIXajVTU64g8KZe8V7Kw/9</a>
+Try the above examples online: <a href="https://scastie.scala-lang.org/jcouyang/W5jIXajVTU64g8KZe8V7Kw/9">https://scastie.scala-lang.org/jcouyang/W5jIXajVTU64g8KZe8V7Kw/9</a>
+Or clone and run it locally: <a href="https://github.com/jcouyang/meow">https://github.com/jcouyang/meow</a>
 </p>
 </div>
 </div>
@@ -181,7 +198,7 @@ for the JavaScript code in this tag.
 <div id="text-footnotes">
 
 <div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
-当 FunctionK[F, G] 的 F 和 G 都是 Functor 时, FunctionK 是 F ~&gt; G 的自然变换.
+When <code>F</code> and <code>G</code> are <code>Functor</code>, <code>FunctionK[F, G]</code> is the natural transformation from <code>F</code> to <code>G</code>, noted <code>F ~&gt; G</code>.
 </p></div></div>
 
 
@@ -189,11 +206,11 @@ for the JavaScript code in this tag.
 </div></div>
 <div id="postamble" class="status">
 <footer>
-  <p>Author: 欧阳继超
+  <p>Author: Jichao Ouyang
     <a class="github-button" href="https://github.com/sponsors/jcouyang" data-icon="octicon-heart" aria-label="Sponsor @jcouyang on GitHub">Sponsor</a>
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
   </p>
-  <p>Created: 2020-03-22 Sun 00:00</p>
+  <p>Created: 2020-05-08 Fri 00:00</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
