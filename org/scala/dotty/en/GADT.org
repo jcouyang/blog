@@ -1,0 +1,86 @@
+#+TITLE: Generalized Algebraic Datatypes in Scala 3
+#+Date: <2020-05-18 Mon>
+#+AUTHOR: Jichao Ouyang
+#+OPTIONS: ^:t
+#+MACRO: ruby @@html:<ruby>$1<rt>$2</rt></ruby>@@
+#+PROPERTY: header-args :eval never-export
+#+KEYWORDS: Scala,Dotty,Haskell,Scala 3,Phantom Types,GADT
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="Generalized Algebraic Datatypes in Scala 3" />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+#+HTML_HEAD_EXTRA: <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
+#+index: Scala!Generalized Algebraic Datatypes in Scala 3
+#+index: Dotty!Generalized Algebraic Datatypes in Scala 3
+#+index: Phantom Types!Generalized Algebraic Datatypes in Scala 3
+#+index: FP!Generalized Algebraic Datatypes in Scala 3
+#+index: Catergory Theory!Generalized Algebraic Datatypes in Scala 3
+
+[[../GADT.org][中文]] | [[./GADT.org][English]]
+
+#+INCLUDE: !toc.org
+
+{{{ruby(ADT,Algebraic Datatypes)}}} has multiple constructor returns one type:
+
+#+BEGIN_SRC scala
+  enum List[+A]{
+    case Nil
+    case Cons(head: A, tail: List[A])
+  }
+#+END_SRC
+
+Here both =Nil= and =Cons= can create a value of type =List[A]=.
+
+This is great improvement from Scala 2, since defining a ADT is much easier than before:
+
+#+BEGIN_SRC scala
+  sealed trait List[+A]
+  case object Nil extends List[Nothing]
+  case class Cons[A](head: A, tail: List[A]) extends List[A]
+#+END_SRC
+
+But actually the way Scala 2 using is GADT.[fn:1]
+
+We can also do GADT using =enum=, for instance to define a =SafeList=:[fn:2]
+#+BEGIN_SRC scala -n -r
+  enum Size {
+    case Empty
+    case NonEmpty
+  }
+
+  enum SafeList[+A, +S <: Size] {
+    case Nil extends SafeList[Nothing, Size.Empty.type] // <- (ref:nil)
+    case Cons(head: A, tail: SafeList[A, Size]) extends SafeList[A, Size.NonEmpty.type]
+  }
+#+END_SRC
+
+What GATD provides is a much fine control of type, i.e. line [[(nil)][(nil)]] no longer returns =List[Nothing]=,
+we can let it return something else =SafeList[Nothing, Size.Empty.type]=
+
+Same way we can make =Cons= return =SafeList[A, Size.NonEmpty.type]=, which tag it as =NonEmpty= at type level.
+
+So we can simply write a method =safeHead= just handle =NonEmpty= List, and it is safe at compile time.
+#+BEGIN_SRC scala
+  import SafeList._
+
+  def safeHead[A](list: SafeList[A, Size.NonEmpty.type]): A = list match
+    case SafeList.Cons(head, tail) => head
+#+END_SRC
+
+When a Nil is passed to =safeHead=, compiler will point it out:
+
+#+BEGIN_SRC scala
+safeHead(Nil)
+#+END_SRC
+
+#+begin_example
+Found:    (Main.SafeList.Nil : Main.SafeList[Nothing, (Main.Size.Empty : Main.Size)])
+Required: Main.SafeList[Any, (Main.Size.NonEmpty : Main.Size)]
+#+end_example
+
+Try it online at Scastie: https://scastie.scala-lang.org/jcouyang/yGQTSUJ6SN2P2oUsfWu9zw/1
+Or clone the repo and =sbt test=: https://github.com/jcouyang/meow
+
+* Footnotes
+
+[fn:2] https://wiki.haskell.org/Generalised_algebraic_datatype#Example_with_lists
+
+[fn:1] https://dotty.epfl.ch/docs/reference/enums/adts.html
