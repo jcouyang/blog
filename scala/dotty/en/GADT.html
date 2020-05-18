@@ -4,12 +4,10 @@
 <!-- 2020-05-18 Mon 13:07 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Scala 3 Generalized Algebraic Datatypes (GADT)</title>
+<title>Generalized Algebraic Datatypes in Scala 3</title>
 <meta name="generator" content="Org mode">
-<meta name="author" content="欧阳继超">
-<meta name="description" content="你可能不再需要 Cats"
->
-<meta name="keywords" content="Scala,Dotty,Haskell,Scala 3,Phantom Types">
+<meta name="author" content="Jichao Ouyang">
+<meta name="keywords" content="Scala,Dotty,Haskell,Scala 3,Phantom Types,GADT">
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -17,8 +15,7 @@
 <link rel="stylesheet" href="/style/toc.css"/>
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<meta property="og:title" content="Scala 3 Generalized Algebraic Datatypes" />
-<meta property="og:description" content="你可能不再需要 Cats" />
+<meta property="og:title" content="Generalized Algebraic Datatypes in Scala 3" />
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
 <script type="text/javascript">
@@ -85,30 +82,28 @@ for the JavaScript code in this tag.
 </div>
 <div id="content">
 <header>
-<h1 class="title">Scala 3 Generalized Algebraic Datatypes (GADT)</h1>
+<h1 class="title">Generalized Algebraic Datatypes in Scala 3</h1>
 </header><p>
-<a href="./GADT.html">中文</a> | <a href="./en/GADT.html">English</a>
+<a href="../GADT.html">中文</a> | <a href="./GADT.html">English</a>
 </p>
 
 <hr>
+
+<p>
+I'm recently migrating some libs and projects to Scala 3, I guess it would be very helpful
+to me or anyone interested to learn some new functional programming features that Scala 3 is bringing to us.
+</p>
 
 <ul class="org-ul">
-<li><a href="https://blog.oyanglul.us/scala/dotty/rank-n-type">Rank N Types</a></li>
+<li><a href="./rank-n-type.html">Rank N Types</a></li>
 <li><a href="./functionK.html">FunctionK</a></li>
 <li><a href="./GADT.html">GADT</a></li>
-<li><a href="./phantomType.html">Phantom Types</a></li>
-<li><a href="./dependent-types.html">Dependent Types</a></li>
-<li><a href="./kan-extensions.html">Kan Extensions</a>  😸 更新到这里了</li>
 </ul>
-
-<p>
-可以跑的源码在这里 👉 <a href="https://github.com/jcouyang/meow">https://github.com/jcouyang/meow</a>
-</p>
 
 <hr>
 
 <p>
-我们都知道 <ruby>ADT<rt>Algebraic Datatypes</rt></ruby> 指的是 Coproduct 类型, 也就是由多个构造函数返回一种类型, 比如:
+<ruby>ADT<rt>Algebraic Datatypes</rt></ruby> has multiple constructor returns one type:
 </p>
 
 <div class="org-src-container">
@@ -120,17 +115,30 @@ for the JavaScript code in this tag.
 </div>
 
 <p>
-这是普通的 ADT, 也就是 <code>Nil</code> 和 <code>Cons</code> 构造出来的类型是固定的.
+Here both <code>Nil</code> and <code>Cons</code> can create a value of type <code>List[A]</code>.
 </p>
 
 <p>
-但是如果对类型有一些特别的需求, 这种 ADT 就难以满足, 幸运的是 Scala 3 的 enum 本身就是 GADT.<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+This is great improvement from Scala 2, since defining a ADT is much easier than before:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #228b22;">sealed</span> <span style="color: #00008b;">trait</span> <span style="color: #36648b;">List</span>[+<span style="color: #6b8e23;">A</span>]
+<span style="color: #00008b;">case</span> <span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Nil</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">List</span>[<span style="color: #6b8e23;">Nothing</span>]
+<span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Cons</span>[<span style="color: #6b8e23;">A</span>](head<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>, tail<span style="color: #00008b;">:</span> <span style="color: #36648b;">List</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">List</span>[<span style="color: #6b8e23;">A</span>]
+</pre>
+</div>
+
+<p>
+But actually the way Scala 2 using is GADT.<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
 <a href="https://dotty.epfl.ch/docs/reference/enums/adts.html">https://dotty.epfl.ch/docs/reference/enums/adts.html</a>
 </span>
 </p>
 
 <p>
-然我们来定义一个类型更安全的 List, 叫 <code>SafeList</code>
+We can also do GADT using <code>enum</code>, for instance to define a <code>SafeList</code>:<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
+<a href="https://wiki.haskell.org/Generalised_algebraic_datatype#Example_with_lists">https://wiki.haskell.org/Generalised_algebraic_datatype#Example_with_lists</a>
+</span>
 </p>
 <div class="org-src-container">
 <pre class="src src-scala"><span class="linenr">1: </span>enum <span style="color: #6b8e23;">Size</span> {
@@ -146,14 +154,17 @@ for the JavaScript code in this tag.
 </div>
 
 <p>
-你看 <a href="#coderef-nil" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-nil');" onmouseout="CodeHighlightOff(this, 'coderef-nil');">这行</a> 就不是默认的返回类型 <code>List[Nothing]</code> , 我们可以定制这个类型为 <code>SafeList[Nothing, Size.Empty,type]</code>, 来在类型上表示
-该 list 为空.
+What GATD provides is a much fine control of type, i.e. line <a href="#coderef-nil" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-nil');" onmouseout="CodeHighlightOff(this, 'coderef-nil');">7</a> no longer returns <code>List[Nothing]</code>,
+we can let it return something else <code>SafeList[Nothing, Size.Empty.type]</code>
 </p>
 
 <p>
-同样的我们把 Cons 的返回类型写死成 <code>SafeList[A, Size.NonEmpty.type]</code> 表示它不空.
+Same way we can make <code>Cons</code> return <code>SafeList[A, Size.NonEmpty.type]</code>, which tag it as <code>NonEmpty</code> at type level.
 </p>
 
+<p>
+So we can simply write a method <code>safeHead</code> just handle <code>NonEmpty</code> List, and it is safe at compile time.
+</p>
 <div class="org-src-container">
 <pre class="src src-scala"><span style="color: #00008b;">import</span> <span style="color: #6b8e23;">SafeList</span>.<span style="color: #00008b;">_</span>
 
@@ -163,11 +174,7 @@ for the JavaScript code in this tag.
 </div>
 
 <p>
-从类型上看 <code>SafeList[A, Size.NonEmpty.type]</code> 只接受 <code>Size.NonEmpty</code> 的 list.
-</p>
-
-<p>
-所以如果你传个 Nil 进去, 编译器就不乐意了.
+When a Nil is passed to <code>safeHead</code>, compiler will point it out:
 </p>
 
 <div class="org-src-container">
@@ -181,7 +188,8 @@ Required: Main.SafeList[Any, (Main.Size.NonEmpty : Main.Size)]
 </pre>
 
 <p>
-不信? 自己试试吧 <a href="https://scastie.scala-lang.org/jcouyang/yGQTSUJ6SN2P2oUsfWu9zw/1">https://scastie.scala-lang.org/jcouyang/yGQTSUJ6SN2P2oUsfWu9zw/1</a>
+Try it online at Scastie: <a href="https://scastie.scala-lang.org/jcouyang/yGQTSUJ6SN2P2oUsfWu9zw/1">https://scastie.scala-lang.org/jcouyang/yGQTSUJ6SN2P2oUsfWu9zw/1</a>
+Or clone the repo and <code>sbt test</code>: <a href="https://github.com/jcouyang/meow">https://github.com/jcouyang/meow</a>
 </p>
 <div id="footnotes">
 <h2 class="footnotes">Footnotes: </h2>
@@ -191,16 +199,20 @@ Required: Main.SafeList[Any, (Main.Size.NonEmpty : Main.Size)]
 <a href="https://dotty.epfl.ch/docs/reference/enums/adts.html">https://dotty.epfl.ch/docs/reference/enums/adts.html</a>
 </p></div></div>
 
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://wiki.haskell.org/Generalised_algebraic_datatype#Example_with_lists">https://wiki.haskell.org/Generalised_algebraic_datatype#Example_with_lists</a>
+</p></div></div>
+
 
 </div>
 </div></div>
 <div id="postamble" class="status">
 <footer>
-  <p>Author: 欧阳继超
+  <p>Author: Jichao Ouyang
     <a class="github-button" href="https://github.com/sponsors/jcouyang" data-icon="octicon-heart" aria-label="Sponsor @jcouyang on GitHub">Sponsor</a>
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
   </p>
-  <p>Created: 2020-03-30 Mon 00:00</p>
+  <p>Created: 2020-05-18 Mon 00:00</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
