@@ -18,7 +18,7 @@
 
 #+INCLUDE: !toc.org
 
-{{{ruby(ADT,Algebraic Datatypes)}}} has multiple constructor returns one type:
+{{{ruby(ADT,Algebraic Datatypes)}}} is something that has multiple constructors return single type:
 
 #+BEGIN_SRC scala
   enum List[+A]{
@@ -29,7 +29,7 @@
 
 Here both =Nil= and =Cons= can create a value of type =List[A]=.
 
-This is great improvement from Scala 2, since defining a ADT is much easier than before:
+This is great improvement from Scala 2, since defining an ADT is much easier than before:
 
 #+BEGIN_SRC scala
   sealed trait List[+A]
@@ -37,9 +37,10 @@ This is great improvement from Scala 2, since defining a ADT is much easier than
   case class Cons[A](head: A, tail: List[A]) extends List[A]
 #+END_SRC
 
-But actually the way Scala 2 using is GADT.[fn:1]
+But actually the way Scala 2 using is {{{ruby(GADT,Generalized Algebraic Datatypes)}}}.
 
-We can also do GADT using =enum=, for instance to define a =SafeList=:[fn:2]
+We can also do GADT using =enum=[fn:1], for instance to define a =SafeList=:[fn:2]
+
 #+BEGIN_SRC scala -n -r
   enum Size {
     case Empty
@@ -52,7 +53,7 @@ We can also do GADT using =enum=, for instance to define a =SafeList=:[fn:2]
   }
 #+END_SRC
 
-What GATD provides is a much fine control of type, i.e. line [[(nil)][(nil)]] no longer returns =List[Nothing]=,
+What GATD provides fine control of type, i.e. line [[(nil)][(nil)]] no longer returns =List[Nothing]=,
 we can let it return something else =SafeList[Nothing, Size.Empty.type]=
 
 Same way we can make =Cons= return =SafeList[A, Size.NonEmpty.type]=, which tag it as =NonEmpty= at type level.
