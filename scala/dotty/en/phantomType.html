@@ -4,12 +4,12 @@
 <!-- 2020-05-19 Tue 06:16 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Scala 3 幻影类型</title>
+<title>Phantom Types in Scala 3</title>
 <meta name="generator" content="Org mode">
-<meta name="author" content="欧阳继超">
-<meta name="description" content="你可能不再需要 Cats"
+<meta name="author" content="Jichao Ouyang">
+<meta name="description" content="You probably don't need Cats"
 >
-<meta name="keywords" content="Scala,Dotty,Haskell,Scala 3,Phantom Types">
+<meta name="keywords" content="Scala,Dotty,Haskell,Scala 3,Phantom Types,GADTs">
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -17,8 +17,8 @@
 <link rel="stylesheet" href="/style/toc.css"/>
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<meta property="og:title" content="Scala 3 幻影类型" />
-<meta property="og:description" content="你可能不再需要 Cats" />
+<meta property="og:title" content="Phantom Types in Scala 3" />
+<meta property="og:description" content="You probably don't need Cats" />
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
 <script type="text/javascript">
@@ -85,42 +85,39 @@ for the JavaScript code in this tag.
 </div>
 <div id="content">
 <header>
-<h1 class="title">Scala 3 幻影类型</h1>
+<h1 class="title">Phantom Types in Scala 3</h1>
 </header><p>
-<a href="./phantomeType.html">中文</a> | <a href="./en/phantomType.html">English</a>
+<a href="../phantomType.html">中文</a> | <a href="./phantomType.html">English</a>
 </p>
 
 <hr>
 
+<p>
+I'm recently migrating some libs and projects to Scala 3, I guess it would be very helpful
+to me or anyone interested to learn some new functional programming features that Scala 3 is bringing to us.
+</p>
+
 <ul class="org-ul">
-<li><a href="https://blog.oyanglul.us/scala/dotty/rank-n-type">Rank N Types</a></li>
+<li><a href="./rank-n-type.html">Rank N Types</a></li>
 <li><a href="./functionK.html">FunctionK</a></li>
 <li><a href="./GADT.html">GADT</a></li>
 <li><a href="./phantomType.html">Phantom Types</a></li>
-<li><a href="./dependent-types.html">Dependent Types</a></li>
-<li><a href="./kan-extensions.html">Kan Extensions</a>  😸 更新到这里了</li>
 </ul>
-
-<p>
-可以跑的源码在这里 👉 <a href="https://github.com/jcouyang/meow">https://github.com/jcouyang/meow</a>
-</p>
 
 <hr>
 
 <p>
-Phantom Types 指并不是数据类型必要的类型. 其实在 <a href="./GADT.html">GADT</a> 的例子中已经见过了.
+<i>Phantom Types</i> means types that are one the left-hand side, not the right-hand side,
+which means the types that you don't actually need, when constructing a value.
 </p>
 
 <p>
-比如 <code>List[Int]</code> 说明构造 <code>List</code> 只需要知道 <code>Int</code>.
+We actually met phantom type already in the <code>SafeList</code> example in <a href="./GADT.html">GADT</a>.
 </p>
 
 <p>
-但如果把类型定义成 <code>List[Int, B]</code>, 那么 <code>B</code> 就是 phantom type, 因为你在构造 <code>List(1)</code> 其实并不需要 <code>B</code> 类型的值.
-</p>
-
-<p>
-但是这个可以随意加的额外的类型格外有用, 比如我们可以用 phantom types 来定义类型安全的 <code>Vector</code>:
+Here is a better one, we can put more info other than just <code>Empty</code>, <code>NonEmpty</code> in the type.
+We can have <b>length</b> info in type as well, then we got a type safe <code>Vector</code>:
 </p>
 
 <div class="org-src-container">
@@ -143,7 +140,18 @@ enum <span style="color: #6b8e23;">Vector</span>[+<span style="color: #6b8e23;">
 </div>
 
 <p>
-长度本身是运行时的值,但是通过phantom types我们把长度弄到了类型上, 这样编译器就能帮忙检查比如, head是不是安全:
+See the type <code>Nat2</code> does only appear on the <b>left hand side</b>. <code>Cons</code> don't need anything
+about <code>Nat</code> to create a <code>Vector</code>.
+</p>
+
+<p>
+We know that for Scala <code>List</code>, if we call <code>head</code>, it could cause run time error when
+the list is empty.
+</p>
+
+<p>
+When we have the length info tagged into the <code>Vector[N, A]</code>, we can actually create
+a type level safe <code>head</code>, let us call it <code>typeSafeHead</code>:
 </p>
 
 <div class="org-src-container">
@@ -153,7 +161,7 @@ enum <span style="color: #6b8e23;">Vector</span>[+<span style="color: #6b8e23;">
 </div>
 
 <p>
-所以如果你想要拿 Nil 的 head, 编译时就会挂:
+When you have some code that trying to get <code>head</code> from <code>Nil</code>, the compiler will tell you:
 </p>
 <div class="org-src-container">
 <pre class="src src-scala">typeSafeHead(<span style="color: #6b8e23;">Nil</span>)
@@ -165,16 +173,21 @@ Required: Main.Vector[Main.Nat.Succ[Main.Nat], Any]
 </pre>
 
 <p>
-不信? 可以自己在 scastie 上试试: <a href="https://scastie.scala-lang.org/jcouyang/JTX3OFXrTCOuq6LNfgRj8Q/8">https://scastie.scala-lang.org/jcouyang/JTX3OFXrTCOuq6LNfgRj8Q/8</a>
+Similarly, you can easily create safe <code>second</code> as well, by counting how many <code>Succ</code> there are in <code>Nat</code> at type level.
+</p>
+
+<p>
+Try it online at Scastie: <a href="https://scastie.scala-lang.org/jcouyang/JTX3OFXrTCOuq6LNfgRj8Q/8">https://scastie.scala-lang.org/jcouyang/JTX3OFXrTCOuq6LNfgRj8Q/8</a>
+Or clone the repo and <code>sbt test</code>: <a href="https://github.com/jcouyang/meow">https://github.com/jcouyang/meow</a>
 </p>
 </div>
 <div id="postamble" class="status">
 <footer>
-  <p>Author: 欧阳继超
+  <p>Author: Jichao Ouyang
     <a class="github-button" href="https://github.com/sponsors/jcouyang" data-icon="octicon-heart" aria-label="Sponsor @jcouyang on GitHub">Sponsor</a>
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
   </p>
-  <p>Created: 2020-03-31 Tue 00:00</p>
+  <p>Created: 2020-05-19 Tue 00:00</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
