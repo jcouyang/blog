@@ -1,0 +1,74 @@
+#+TITLE: Phantom Types in Scala 3
+#+Date: <2020-05-19 Tue>
+#+AUTHOR: Jichao Ouyang
+#+OPTIONS: ^:t
+#+PROPERTY: header-args :eval never-export
+#+KEYWORDS: Scala,Dotty,Haskell,Scala 3,Phantom Types,GADTs
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="Phantom Types in Scala 3" />
+#+HTML_HEAD_EXTRA: <meta property="og:description" content="You probably don't need Cats" />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+#+HTML_HEAD_EXTRA: <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
+#+description: You probably don't need Cats
+#+index: Scala!Phantom Types in Scala 3
+#+index: Dotty!Phantom Types in Scala 3
+#+index: Phantom Types!Phantom Types in Scala 3
+#+index: FP!Phantom Types in Scala 3
+#+index: Catergory Theory!Phantom Types in Scala 3
+
+[[../phantomType.org][中文]] | [[./phantomType.org][English]]
+
+#+INCLUDE: !toc.org
+
+/Phantom Types/ means types that are one the left-hand side, not the right-hand side,
+which means the types that you don't actually need, when constructing a value.
+
+We actually met phantom type already in the =SafeList= example in [[./GADT.org][GADT]].
+
+Here is a better one, we can put more info other than just =Empty=, =NonEmpty= in the type.
+We can have *length* info in type as well, then we got a type safe =Vector=:
+
+#+BEGIN_SRC scala
+    enum Nat {
+      case Zero
+      case Succ[A]() extends Nat
+    }
+    import Nat._
+    type Nat2 = Succ[Succ[Zero.type]]
+    type Nat3 = Succ[Succ[Succ[Zero.type]]]
+
+    enum Vector[+N <: Nat, +A] {
+      case Cons(head: A, tail: Vector[N, A]) extends Vector[Succ[N], A]
+      case Nil extends Vector[Zero.type, Nothing]
+    }
+    import Vector._
+    val vector2: Vector[Nat2, Int] = Cons(1, Cons(2, Nil))
+    val vector3: Vector[Nat3, Int] = Cons(1, Cons(2, Cons(3, Nil)))
+#+END_SRC
+
+See the type =Nat2= does only appear on the *left hand side*. =Cons= don't need anything
+about =Nat= to create a =Vector=.
+
+We know that for Scala =List=, if we call =head=, it could cause run time error when
+the list is empty.
+
+When we have the length info tagged into the =Vector[N, A]=, we can actually create
+a type level safe =head=, let us call it =typeSafeHead=:
+
+#+BEGIN_SRC scala
+def typeSafeHead[A](vec: Vector[Succ[Nat], A]):A = vec match
+    case Cons(head, _) => head
+#+END_SRC
+
+When you have some code that trying to get =head= from =Nil=, the compiler will tell you:
+#+BEGIN_SRC scala
+typeSafeHead(Nil)
+#+END_SRC
+#+begin_example
+ Found:    (Main.Vector.Nil : Main.Vector[(Main.Nat.Zero : Main.Nat), Nothing])
+ Required: Main.Vector[Main.Nat.Succ[Main.Nat], Any]
+#+end_example
+
+Similarly, you can easily create safe =second= as well, by counting how many =Succ= there are in =Nat= at type level.
+
+Try it online at Scastie: https://scastie.scala-lang.org/jcouyang/JTX3OFXrTCOuq6LNfgRj8Q/8
+Or clone the repo and =sbt test=: https://github.com/jcouyang/meow
