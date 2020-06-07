@@ -1,0 +1,130 @@
+#+TITLE: Dependent Types in Scala 3
+#+Date: <2020-04-05 Sun>
+#+AUTHOR: Jichao Ouyang
+#+OPTIONS: ^:t
+#+MACRO: ruby @@html:<ruby>$1<rt>$2</rt></ruby>@@
+#+PROPERTY: header-args :eval never-export
+#+KEYWORDS: Scala,Dotty,Scala 3,Dependent Tyeps,Shapeless,Aux Pattern,Context Functions
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="Dependent Types in Scala 3" />
+#+HTML_HEAD_EXTRA: <meta property="og:description" content="You may no longer need Aux pattern" />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+#+HTML_HEAD_EXTRA: <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
+#+description: You may no longer need Aux pattern
+#+index: Scala!Dependent Types in Scala 3
+#+index: Shapeless!Dependent Types in Scala 3
+#+index: Dotty!Dependent Types in Scala 3
+#+index: Dependent Types!Dependent Types in Scala 3
+#+index: FunctionK!Dependent Types in Scala 3
+#+index: FP!Dependent Types in Scala 3
+
+[[../dependent-types.org][中文]] | [[./denpendent-types.org][English]]
+
+#+INCLUDE: !toc.org
+
+* Scala 2
+
+There is a very common pattern in [[https://github.com/milessabin/shapeless/][Shapeless]], Aux pattern[fn:3]:
+
+#+BEGIN_SRC scala
+trait Second[L <: HList] {
+  type Out
+  def apply(value: L): Out
+}
+
+object Second {
+  type Aux[L <: HList, O] = Second[L] { type Out = O }
+
+  def apply[L <: HList, R](l: L)(implicit inst: Aux[L, R]): R =
+    inst(l)
+}
+
+Second(1 :: "2" :: HNil)
+#+END_SRC
+
+will output：
+#+begin_example
+"2"
+#+end_example
+
+You can basically tell the output type from =Aux[L, R]= is =R=, if input is =L=.
+
+e.g. when the input is another HList:
+#+BEGIN_SRC scala
+Second("1" :: 2 :: HNil)
+// => 2
+#+END_SRC
+Output type will become =Int=.
+
+Actually with /dependent method/, this could be simplify:
+
+#+BEGIN_SRC scala
+object Second {
+  def apply[L <: HList, R](l: L)(implicit inst: Second[L]): inst.Out =
+    inst(l)
+}
+#+END_SRC
+
+* Scala 3
+
+In Scala 3 it is even better, not only dependent method, we can define /dependent function/[fn:2] now.
+
+With dependent function, it looks like：
+
+#+BEGIN_SRC scala -n -r
+object Second {
+  def apply[L <: HList](value: L) = (inst: Second[L]) ?=> inst(value) // <-- (ref:implicit-lambda)
+}
+#+END_SRC
+
+ [[(implicit-lambda)][~?=>~ in line (implicit-lambda)]] [fn:1] is not a typo, it is simplified verion of ~(using inst: Second[L]) => inst(value)~
+
+If we add the type for the function it will be like:
+#+BEGIN_SRC scala
+def apply[L <: HList](value: L): (inst: Second[L]) ?=> inst.Out =
+ (inst: Second[L]) ?=> inst(value)
+#+END_SRC
+
+** Aux is somehow still very useful
+Ok, there is another problem though, so why do we need Aux pattern anymore if dependent method can solve the problem already?
+
+If we need to implement a 2 demensional =Second=, which means it will take the second element's second element.
+
+#+BEGIN_SRC scala
+object Second2D {
+  import Second.Aux
+  def apply[L <: HList, R <: HList, R2](l: L)(implicit inst1D: Aux[L, R], inst2D: Aux[R, R2]): R2 =
+    inst2D(inst1D(l))
+}
+#+END_SRC
+
+
+The =inst1D= depdends on the input type =L=, =inst2D= now depends on the inst1D return type =R=, so the whole method return type =R2= depends on =R=.
+
+See what happen if we try to transform this to dependent method:
+#+BEGIN_SRC scala
+object Second2D {
+  def apply[L <: HList](l: L)(implicit inst1D: Second[L], inst2D: Second[inst1D.Out]): inst2D.Out =
+    inst2D(inst1D(l))
+}
+#+END_SRC
+
+You got a compile error:
+#+begin_example
+Type argument inst1D.Out does not conform to upper bound shapeless.HList 
+#+end_example
+
+Since it is a dependent type, we don't have any chance to tell compiler that =inst1D.Out= must be a =HList=.
+
+-----
+
+Try it online at Scastie: https://scastie.scala-lang.org/fyxXSR3ASj6rSkkERnUK7g
+
+Or clone the repo and =sbt test=: https://github.com/jcouyang/meow
+
+* Footnotes
+
+[fn:3] basically a pattern to derive output type
+
+[fn:2] https://dotty.epfl.ch/docs/reference/new-types/dependent-function-types.html
+
+[fn:1] https://dotty.epfl.ch/docs/reference/contextual/context-bounds.html
