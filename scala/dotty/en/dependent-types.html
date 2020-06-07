@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2020-06-07 Sun 05:45 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dependent Types in Scala 3</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Jichao Ouyang">
+<meta name="description" content="You may no longer need Aux pattern"
+>
+<meta name="keywords" content="Scala,Dotty,Scala 3,Dependent Tyeps,Shapeless,Aux Pattern,Context Functions">
+<link rel="icon" href="/favicon.ico">
+<meta name="theme-color" content="#ffffff">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
+<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
+<meta property="og:title" content="Dependent Types in Scala 3" />
+<meta property="og:description" content="You may no longer need Aux pattern" />
+<meta property="og:type" content="article" />
+<meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="preamble" class="status">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJRFJGX"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header>
+    <a accesskey="h" href="/index.html"> HOME </a> |
+    <a href="#" id="edit-in-github">EDIT</a> |
+    <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
+    <a href="https://blog.oyanglul.us/theindex">INDEX</a> |
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
+</header>
+</div>
+<div id="content">
+<header>
+<h1 class="title">Dependent Types in Scala 3</h1>
+</header><nav id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org3447e4f">Scala 2</a></li>
+<li><a href="#orge976b67">Scala 3</a>
+<ul>
+<li><a href="#orgd447989">Aux is somehow still very useful</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav>
+<p>
+<a href="../dependent-types.html">中文</a> | <a href="./denpendent-types.html">English</a>
+</p>
+
+<hr>
+
+<p>
+I'm recently migrating some libs and projects to Scala 3, I guess it would be very helpful
+to me or anyone interested to learn some new functional programming features that Scala 3 is bringing to us.
+</p>
+
+<ul class="org-ul">
+<li><a href="./rank-n-type.html">Rank N Types</a></li>
+<li><a href="./functionK.html">FunctionK</a></li>
+<li><a href="./GADT.html">GADT</a></li>
+<li><a href="./phantomType.html">Phantom Types</a></li>
+<li><a href="./dependent-types.html">Dependent Types</a></li>
+</ul>
+
+<p>
+Source code 👉 <a href="https://github.com/jcouyang/meow">https://github.com/jcouyang/meow</a>
+</p>
+
+<hr>
+
+<div id="outline-container-org3447e4f" class="outline-2">
+<h2 id="org3447e4f">Scala 2</h2>
+<div class="outline-text-2" id="text-org3447e4f">
+<p>
+There is a very common pattern in <a href="https://github.com/milessabin/shapeless/">Shapeless</a>, Aux pattern<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+basically a pattern to derive output type
+</span>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>] {
+  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Out</span>
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>(value<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Out</span>
+}
+
+<span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second</span> {
+  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Aux</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>, <span style="color: #6b8e23;">O</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Second</span>[<span style="color: #6b8e23;">L</span>] { <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Out</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">O</span> }
+
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>, <span style="color: #6b8e23;">R</span>](l<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)(<span style="color: #228b22;">implicit</span> inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Aux</span>[<span style="color: #6b8e23;">L</span>, <span style="color: #6b8e23;">R</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">R</span> <span style="color: #00008b;">=</span>
+    inst(l)
+}
+
+<span style="color: #6b8e23;">Second</span>(<span style="color: #6b8e23;">1</span> :: <span style="color: #8b0000;">"2"</span> :: <span style="color: #6b8e23;">HNil</span>)
+</pre>
+</div>
+
+<p>
+will output：
+</p>
+<pre class="example">
+"2"
+</pre>
+
+<p>
+You can basically tell the output type from <code>Aux[L, R]</code> is <code>R</code>, if input is <code>L</code>.
+</p>
+
+<p>
+e.g. when the input is another HList:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #6b8e23;">Second</span>(<span style="color: #8b0000;">"1"</span> :: <span style="color: #6b8e23;">2</span> :: <span style="color: #6b8e23;">HNil</span>)
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; 2</span>
+</pre>
+</div>
+<p>
+Output type will become <code>Int</code>.
+</p>
+
+<p>
+Actually with <i>dependent method</i>, this could be simplify:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second</span> {
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>, <span style="color: #6b8e23;">R</span>](l<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)(<span style="color: #228b22;">implicit</span> inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">inst</span>.<span style="color: #6b8e23;">Out</span> <span style="color: #00008b;">=</span>
+    inst(l)
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge976b67" class="outline-2">
+<h2 id="orge976b67">Scala 3</h2>
+<div class="outline-text-2" id="text-orge976b67">
+<p>
+In Scala 3 it is even better, not only dependent method, we can define <i>dependent function</i><label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
+<a href="https://dotty.epfl.ch/docs/reference/new-types/dependent-function-types.html">https://dotty.epfl.ch/docs/reference/new-types/dependent-function-types.html</a>
+</span> now.
+</p>
+
+<p>
+With dependent function, it looks like：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala"><span class="linenr">1: </span><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second</span> {
+<span id="coderef-implicit-lambda" class="coderef-off"><span class="linenr">2: </span>  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>](value<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>) <span style="color: #00008b;">=</span> (inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>]) ?=&gt; inst(value) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;--</span></span>
+<span class="linenr">3: </span>}
+</pre>
+</div>
+
+<p>
+<a href="#coderef-implicit-lambda" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-implicit-lambda');" onmouseout="CodeHighlightOff(this, 'coderef-implicit-lambda');"><code>?=&gt;</code> in line 2</a> <label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
+<a href="https://dotty.epfl.ch/docs/reference/contextual/context-bounds.html">https://dotty.epfl.ch/docs/reference/contextual/context-bounds.html</a>
+</span> is not a typo, it is simplified verion of <code>(using inst: Second[L]) =&gt; inst(value)</code>
+</p>
+
+<p>
+If we add the type for the function it will be like:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>](value<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)<span style="color: #00008b;">:</span> (inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>]) ?=&gt; inst.<span style="color: #6b8e23;">Out</span> <span style="color: #00008b;">=</span>
+ (inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>]) ?=&gt; inst(value)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgd447989" class="outline-3">
+<h3 id="orgd447989">Aux is somehow still very useful</h3>
+<div class="outline-text-3" id="text-orgd447989">
+<p>
+Ok, there is another problem though, so why do we need Aux pattern anymore if dependent method can solve the problem already?
+</p>
+
+<p>
+If we need to implement a 2 demensional <code>Second</code>, which means it will take the second element's second element.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second2D</span> {
+  <span style="color: #00008b;">import</span> <span style="color: #6b8e23;">Second</span>.<span style="color: #6b8e23;">Aux</span>
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>, <span style="color: #6b8e23;">R</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>, <span style="color: #6b8e23;">R2</span>](l<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)(<span style="color: #228b22;">implicit</span> inst1D<span style="color: #00008b;">:</span> <span style="color: #36648b;">Aux</span>[<span style="color: #6b8e23;">L</span>, <span style="color: #6b8e23;">R</span>], inst2D<span style="color: #00008b;">:</span> <span style="color: #36648b;">Aux</span>[<span style="color: #6b8e23;">R</span>, <span style="color: #6b8e23;">R2</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">R2</span> <span style="color: #00008b;">=</span>
+    inst2D(inst1D(l))
+}
+</pre>
+</div>
+
+
+<p>
+The <code>inst1D</code> depdends on the input type <code>L</code>, <code>inst2D</code> now depends on the inst1D return type <code>R</code>, so the whole method return type <code>R2</code> depends on <code>R</code>.
+</p>
+
+<p>
+See what happen if we try to transform this to dependent method:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second2D</span> {
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>](l<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)(<span style="color: #228b22;">implicit</span> inst1D<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>], inst2D<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[inst1D.<span style="color: #6b8e23;">Out</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">inst2D</span>.<span style="color: #6b8e23;">Out</span> <span style="color: #00008b;">=</span>
+    inst2D(inst1D(l))
+}
+</pre>
+</div>
+
+<p>
+You got a compile error:
+</p>
+<pre class="example">
+Type argument inst1D.Out does not conform to upper bound shapeless.HList 
+</pre>
+
+<p>
+Since it is a dependent type, we don't have any chance to tell compiler that <code>inst1D.Out</code> must be a <code>HList</code>.
+</p>
+
+<hr>
+
+<p>
+Try it online at Scastie: <a href="https://scastie.scala-lang.org/fyxXSR3ASj6rSkkERnUK7g">https://scastie.scala-lang.org/fyxXSR3ASj6rSkkERnUK7g</a>
+</p>
+
+<p>
+Or clone the repo and <code>sbt test</code>: <a href="https://github.com/jcouyang/meow">https://github.com/jcouyang/meow</a>
+</p>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+basically a pattern to derive output type
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://dotty.epfl.ch/docs/reference/new-types/dependent-function-types.html">https://dotty.epfl.ch/docs/reference/new-types/dependent-function-types.html</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://dotty.epfl.ch/docs/reference/contextual/context-bounds.html">https://dotty.epfl.ch/docs/reference/contextual/context-bounds.html</a>
+</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<footer>
+  <p>Author: Jichao Ouyang
+    <a class="github-button" href="https://github.com/sponsors/jcouyang" data-icon="octicon-heart" aria-label="Sponsor @jcouyang on GitHub">Sponsor</a>
+    <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
+  </p>
+  <p>Created: 2020-04-05 Sun 00:00</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
+  <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
+</footer>
+</div>
+</body>
+</html>
