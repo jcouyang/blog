@@ -41,7 +41,7 @@ object Second {
 Second(1 :: "2" :: HNil)
 #+END_SRC
 
-will output：
+will output:
 #+begin_example
 "2"
 #+end_example
@@ -55,7 +55,7 @@ Second("1" :: 2 :: HNil)
 #+END_SRC
 Output type will become =Int=.
 
-Actually with /dependent method/, this could be simplify:
+Actually with /dependent method/, this could be simplified as:
 
 #+BEGIN_SRC scala
 object Second {
@@ -68,7 +68,7 @@ object Second {
 
 In Scala 3 it is even better, not only dependent method, we can define /dependent function/[fn:2] now.
 
-With dependent function, it looks like：
+With dependent function, it looks like:
 
 #+BEGIN_SRC scala -n -r
 object Second {
@@ -76,7 +76,7 @@ object Second {
 }
 #+END_SRC
 
- [[(implicit-lambda)][~?=>~ in line (implicit-lambda)]] [fn:1] is not a typo, it is simplified verion of ~(using inst: Second[L]) => inst(value)~
+ [[(implicit-lambda)][~?=>~ in line (implicit-lambda)]] [fn:1] is not a typo, it is simplified version of ~(using inst: Second[L]) => inst(value)~
 
 If we add the type for the function it will be like:
 #+BEGIN_SRC scala
@@ -87,7 +87,7 @@ def apply[L <: HList](value: L): (inst: Second[L]) ?=> inst.Out =
 ** Aux is somehow still very useful
 Ok, there is another problem though, so why do we need Aux pattern anymore if dependent method can solve the problem already?
 
-If we need to implement a 2 demensional =Second=, which means it will take the second element's second element.
+If we need to implement a 2 dimensional =Second=, which means it will take the second element's second element.
 
 #+BEGIN_SRC scala
 object Second2D {
@@ -98,7 +98,7 @@ object Second2D {
 #+END_SRC
 
 
-The =inst1D= depdends on the input type =L=, =inst2D= now depends on the inst1D return type =R=, so the whole method return type =R2= depends on =R=.
+The =inst1D= depends on the input type =L=, =inst2D= now depends on the inst1D return type =R=, so the whole method return type =R2= depends on =R=.
 
 See what happen if we try to transform this to dependent method:
 #+BEGIN_SRC scala
