@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2020-07-13 Mon 13:23 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dummy Guide to sbt</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Jichao Ouyang">
+<meta name="description" content="It is actually a Simple Build Tool if you use it correctly"
+>
+<meta name="keywords" content="Scala,sbt,Simple Build Tool,Rake,Make">
+<link rel="icon" href="/favicon.ico">
+<meta name="theme-color" content="#ffffff">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
+<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
+<meta property="og:title" content="Dummy Guide to sbt" />
+<meta property="og:description" content="It is actually a Simple Build Tool if you use it correctly" />
+<meta property="og:type" content="article" />
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="preamble" class="status">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJRFJGX"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header>
+    <a accesskey="h" href="/index.html"> HOME </a> |
+    <a href="#" id="edit-in-github">EDIT</a> |
+    <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
+    <a href="https://blog.oyanglul.us/theindex">INDEX</a> |
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
+</header>
+</div>
+<div id="content">
+<header>
+<h1 class="title">Dummy Guide to sbt</h1>
+</header><nav id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org1534c4c">Why sbt</a></li>
+<li><a href="#org020389a">What is the pain actually?</a>
+<ul>
+<li><a href="#org3c096c4">npm</a></li>
+<li><a href="#orgd9b4055">Rakefile</a></li>
+</ul>
+</li>
+<li><a href="#org26d5170">Then follow the Stereo type</a>
+<ul>
+<li><a href="#orgbd140ce">Package management</a>
+<ul>
+<li><a href="#orgf3022d2"><code>%%</code></a></li>
+<li><a href="#orgeb7e14b">Version handling</a></li>
+</ul>
+</li>
+<li><a href="#org092c089">Task</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav>
+
+
+<div id="outline-container-org1534c4c" class="outline-2">
+<h2 id="org1534c4c">Why sbt</h2>
+<div class="outline-text-2" id="text-org1534c4c">
+<p>
+In <a href="https://scalacenter.github.io/scala-developer-survey-2019/">Scala Survey 2019</a> there was a question:
+</p>
+
+<p>
+<b>What are the *other</b> pain points in your daily workflow?
+</p>
+
+
+<figure>
+<img src="https://www.evernote.com/l/ABfkUXRmO9xM36PSw2wUvg9GNHeaqsgbEB8B/image.png" alt="image.png">
+
+</figure>
+
+<p>
+And sbt is the "winner".
+</p>
+
+<p>
+But in another question:
+</p>
+
+<p>
+Which build tools do you use?
+</p>
+
+
+<figure>
+<img src="https://www.evernote.com/l/ABectL9KKVlPhpjxmYX2PwExprn8N779IbYB/image.png" alt="image.png">
+
+</figure>
+
+<p>
+So, I can simply can interpret this as:
+Most people choose sbt, they feel it is pain using it, and they don't like to move to
+variety of other good options- i.e. mill, fury.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org020389a" class="outline-2">
+<h2 id="org020389a">What is the pain actually?</h2>
+<div class="outline-text-2" id="text-org020389a">
+<p>
+So, it is a build tool, I guess most of users are coming from <i>Makefile</i>, <i>Rakefile</i> or <i>npm</i> already
+have a stereo type of what a build tool should be like - very low effort to learn.
+</p>
+</div>
+
+<div id="outline-container-org3c096c4" class="outline-3">
+<h3 id="org3c096c4">npm</h3>
+<div class="outline-text-3" id="text-org3c096c4">
+<p>
+npm has almost 0 learning curve, since it is plain json file, `npm init` will get basically everything
+setup, `npm install &#x2013;save blah` will get your dependency configed. For for advance usage all
+you need to do is to look up the document and copy paste key value into your json file.
+</p>
+
+<p>
+It is actually more of dependencies manage tool rather than build tool, the build feature is very
+limited so you probably still need Makefile.
+</p>
+<div class="org-src-container">
+<pre class="src src-json">{ "scripts" :
+  { "preinstall" : "./configure"
+  , "install" : "make &amp;&amp; make install"
+  , "test" : "make test"
+  }
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgd9b4055" class="outline-3">
+<h3 id="orgd9b4055">Rakefile</h3>
+<div class="outline-text-3" id="text-orgd9b4055">
+<p>
+Rake has basically the same concept of Makefile, except you can do ruby script in it while Makefile
+you do bash.
+</p>
+
+<p>
+Rakefile:
+</p>
+<div class="org-src-container">
+<pre class="src src-ruby">task <span style="color: #6b8e23;">name:</span> [<span style="color: #6b8e23;">:prereq1</span>, <span style="color: #6b8e23;">:prereq2</span>] <span style="color: #00008b;">do</span> |t|
+  <span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">ruby script goes here</span>
+<span style="color: #00008b;">end</span>
+</pre>
+</div>
+
+<p>
+Makefile:
+</p>
+<div class="org-src-container">
+<pre class="src src-make">name: prereq1 prereq2
+  # bash script goes here
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org26d5170" class="outline-2">
+<h2 id="org26d5170">Then follow the Stereo type</h2>
+<div class="outline-text-2" id="text-org26d5170">
+<p>
+So the common here they are both very simple to use, without understanding how it works even what it means,
+just follow the same pattern you could get the build working.
+</p>
+
+<p>
+Same way if any user come from those build tool, they may assume the Scala build tool should
+share the same trait as well - a build tool should have low learning effort, just copy paste should be enough
+get it work.
+</p>
+
+<p>
+With that kind of expectation, sbt will let you down. Since it has very good and detail documents,
+but no one is going to spends days to read the hundreds page of documents just to get a project
+compile and ship. Most people just what things like npm or makefile that you can just simply copy
+paste and everything just works.
+</p>
+
+<p>
+sbt is actually both a build tool, can be use like <code>make</code> and <code>rake</code>, at the same time also a simple to use manage dependencies, just like
+<code>npm</code> or <code>bundler</code>.
+</p>
+
+<p>
+So let us start with package management.
+</p>
+</div>
+
+<div id="outline-container-orgbd140ce" class="outline-3">
+<h3 id="orgbd140ce">Package management</h3>
+<div class="outline-text-3" id="text-orgbd140ce">
+<p>
+in bundler dependencies can be defined as:
+</p>
+<div class="org-src-container">
+<pre class="src src-ruby">gem <span style="color: #8b0000;">'httparty'</span>, <span style="color: #8b0000;">'0.17.3'</span>
+</pre>
+</div>
+
+<p>
+Let us define `finagle` as sbt project dependencies, you can find how to add it from the right hand side of:
+ <a href="https://index.scala-lang.org/twitter/finagle/finagle-core/20.5.0?target=_2.13">https://index.scala-lang.org/twitter/finagle/finagle-core/20.5.0?target=_2.13</a>
+</p>
+<div class="org-src-container">
+<pre class="src src-scala">libraryDependencies += <span style="color: #8b0000;">"com.twitter"</span> %% <span style="color: #8b0000;">"finagle-core"</span> % <span style="color: #8b0000;">"20.5.0"</span>
+</pre>
+</div>
+
+<p>
+where
+</p>
+<ul class="org-ul">
+<li><code>com.twitter</code> is group id</li>
+<li><code>finagle-core</code> is package name</li>
+<li><code>20.5.0</code> is the version of course</li>
+</ul>
+
+<p>
+Comparing to bundler, there a lot other thing you may need to pay attention to.
+</p>
+
+<p>
+What is <code>%%</code> and <code>%</code>, what is <code>+=</code> ?
+</p>
+
+<p>
+It is totally fine to not knowing those symbols, the build still works, but they
+are noises and if you put the wrong thing it won't compile.
+</p>
+</div>
+
+<div id="outline-container-orgf3022d2" class="outline-4">
+<h4 id="orgf3022d2"><code>%%</code></h4>
+<div class="outline-text-4" id="text-orgf3022d2">
+<p>
+Here is a quick guide how to use <code>%</code>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-nillangnilswitchesnilflags">nilbody
+</pre>
+</div>
+
+<p>
+That is all you need to know to get a basic dependencies working.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgeb7e14b" class="outline-4">
+<h4 id="orgeb7e14b">Version handling</h4>
+<div class="outline-text-4" id="text-orgeb7e14b">
+<p>
+don't care the patch version, pick the bigest patch
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala">libraryDependencies += <span style="color: #8b0000;">"com.twitter"</span> %% <span style="color: #8b0000;">"finagle-core"</span> % <span style="color: #8b0000;">"20.5.+"</span>
+</pre>
+</div>
+
+<p>
+don't care the minor version, pick the bigest patch
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala">libraryDependencies += <span style="color: #8b0000;">"com.twitter"</span> %% <span style="color: #8b0000;">"finagle-core"</span> % <span style="color: #8b0000;">"20.+"</span>
+</pre>
+</div>
+
+<p>
+rang of version
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala">libraryDependencies += <span style="color: #8b0000;">"com.twitter"</span> %% <span style="color: #8b0000;">"finagle-core"</span> % <span style="color: #8b0000;">"[19.4.0, 20.5.0)"</span>
+</pre>
+</div>
+
+<p>
+Package management actually isn't the most painful setting in sbt, since all library
+will give you the config of how to install already in README already.
+</p>
+
+<p>
+Simply copy paste generally works.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org092c089" class="outline-3">
+<h3 id="org092c089">Task</h3>
+<div class="outline-text-3" id="text-org092c089">
+<p>
+In Rakefile, we can have very simply task flow, i.e.
+</p>
+<ol class="org-ol">
+<li>start database</li>
+<li>run test</li>
+<li>stop database</li>
+</ol>
+
+<div class="org-src-container">
+<pre class="src src-ruby">task <span style="color: #6b8e23;">:db_up</span> <span style="color: #00008b;">do</span>
+  sh <span style="color: #8b0000;">"docker-compose up -d db"</span>
+<span style="color: #00008b;">end</span>
+
+task <span style="color: #6b8e23;">test:</span> [<span style="color: #6b8e23;">:db_up</span>] <span style="color: #00008b;">do</span>
+  task(<span style="color: #6b8e23;">:spec</span>).invoke
+<span style="color: #00008b;">end</span>
+
+task <span style="color: #6b8e23;">:db_down</span> <span style="color: #00008b;">do</span>
+  <span style="color: #8b0000;">`docker-compose stop db`</span>
+<span style="color: #00008b;">end</span>
+
+desc <span style="color: #8b0000;">'run db up test and db down'</span>
+task <span style="color: #6b8e23;">default:</span> [<span style="color: #6b8e23;">:spec</span>] <span style="color: #00008b;">do</span>
+  task(<span style="color: #6b8e23;">:db_down</span>).invoke
+<span style="color: #00008b;">end</span>
+</pre>
+</div>
+
+<p>
+Let us define the same tasks in sbt<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+<a href="https://www.scala-sbt.org/1.x/docs/Tasks.html">https://www.scala-sbt.org/1.x/docs/Tasks.html</a>
+</span>:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">for the `!` syntax to exec external command</span>
+<span style="color: #00008b;">import</span> scala.sys.process.<span style="color: #00008b;">_</span>
+
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">dbUp</span> <span style="color: #00008b;">=</span> taskKey[<span style="color: #6b8e23;">Unit</span>](<span style="color: #8b0000;">"start database"</span>)
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">dbDown</span> <span style="color: #00008b;">=</span> taskKey[<span style="color: #6b8e23;">Unit</span>](<span style="color: #8b0000;">"stop database"</span>)
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">runTest</span> <span style="color: #00008b;">=</span> taskKey[<span style="color: #6b8e23;">Unit</span>](<span style="color: #8b0000;">"run test"</span>)
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">default</span> <span style="color: #00008b;">=</span> taskKey[<span style="color: #6b8e23;">Unit</span>](<span style="color: #8b0000;">"default task"</span>)
+
+dbUp := {
+  <span style="color: #8b0000;">"docker-compose up -d db"</span> !
+}
+
+dbDown := {
+  <span style="color: #8b0000;">"docker-compose stop db"</span> !
+}
+
+runTest := { dbUp.value;
+  <span style="color: #6b8e23;">Command</span>.process(<span style="color: #8b0000;">"test"</span>, state.value)
+}
+
+default := <span style="color: #6b8e23;">Def</span>.sequential(
+  runTest,
+  dbDown
+).value
+</pre>
+</div>
+
+<p>
+It is bit more verbose than Rake because of the Type things, but generally
+it is as simply as rake when defining external process<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
+<a href="https://www.scala-sbt.org/1.x/docs/Process.html">https://www.scala-sbt.org/1.x/docs/Process.html</a>
+</span> and task dependency.
+</p>
+
+<p>
+There are lot of ways you can define <code>default</code> in sbt, as a new command:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala">commands += <span style="color: #6b8e23;">Command</span>.command(<span style="color: #8b0000;">"defaultCommand"</span>) { state <span style="color: #00008b;">=&gt;</span>
+  <span style="color: #8b0000;">"runTest"</span> :: <span style="color: #8b0000;">"dbDown"</span> ::
+  state
+}
+</pre>
+</div>
+
+<p>
+or as command alias:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala">addCommandAlias(<span style="color: #8b0000;">"defaultCommand"</span>, <span style="color: #8b0000;">"runTest;dbDown"</span>)
+</pre>
+</div>
+
+<p>
+Another example is you can operate on files as well from sbt.
+</p>
+
+<p>
+For instance there is built-in task in sbt called <code>makePom</code>, but it will generate
+<code>pom.xml</code> to <code>target</code> folder, we preferred to generate the file into <code>.github/pom.xml</code>
+so Github can pick it up and analyst what jar file is in CVE list.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">genPom</span> <span style="color: #00008b;">=</span> taskKey[<span style="color: #6b8e23;">Unit</span>](<span style="color: #8b0000;">"generate pom for github to do security monitoring"</span>)
+genPom := {
+  <span style="color: #00008b;">val</span> <span style="color: #b8860b;">pomFile</span> <span style="color: #00008b;">=</span> makePom.value
+  io.<span style="color: #6b8e23;">IO</span>.copyFile(pomFile, file(<span style="color: #8b0000;">"."</span>) / <span style="color: #8b0000;">".github"</span> / <span style="color: #8b0000;">"pom.xml"</span>)
+}
+</pre>
+</div>
+
+<p>
+Very simply and declarative task, right.
+</p>
+
+<ul class="org-ul">
+<li><code>makePom: TaskKey[File]</code> is a task that return the pom file,  <code>makePom.value</code> will call the task and generate the file, and return the file as <code>pomFile</code></li>
+<li><code>io.IO.copyFile</code> will copy the file to expected path</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://www.scala-sbt.org/1.x/docs/Tasks.html">https://www.scala-sbt.org/1.x/docs/Tasks.html</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://www.scala-sbt.org/1.x/docs/Process.html">https://www.scala-sbt.org/1.x/docs/Process.html</a>
+</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<footer>
+  <p>Author: Jichao Ouyang
+    <a class="github-button" href="https://github.com/sponsors/jcouyang" data-icon="octicon-heart" aria-label="Sponsor @jcouyang on GitHub">Sponsor</a>
+    <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
+    <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
+  </p>
+  <p>Created: 2020-06-07 Sun 00:00</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
+  <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
+</footer>
+</div>
+</body>
+</html>

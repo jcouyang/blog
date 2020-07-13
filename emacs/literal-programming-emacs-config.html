@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-06-08 Mon 12:42 -->
+<!-- 2020-07-13 Mon 13:23 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Literal Programming Emacs Configure Literal Programming Emacs Configure</title>
@@ -109,12 +109,13 @@ for the JavaScript code in this tag.
 <li><a href="#org296f121">multi cursor</a></li>
 <li><a href="#org74664b7">expand region</a></li>
 <li><a href="#org50a9826">pallet</a></li>
+<li><a href="#orgd675e29">PureScript</a></li>
 <li><a href="#orgfe62dd8">smartparens</a></li>
 <li><a href="#org978d772">Scala Metals</a></li>
 <li><a href="#org0ff80ab">Flyspell</a></li>
 <li><a href="#org92bbc02">Langtool</a></li>
 <li><a href="#orgfc69c8d">prompt</a></li>
-<li><a href="#orgd675e29">PureScript</a></li>
+<li><a href="#org06a9750">PureScript</a></li>
 <li><a href="#orgc15caed">yasnippet</a></li>
 </ul>
 </li>
@@ -193,7 +194,8 @@ download <a href="https://larsenwork.com/monoid/">monoid</a> font
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">    (<span style="color: #00008b;">if</span> (eq system-type 'gnu/linux)
+<pre class="src src-emacs-lisp">(setenv <span style="color: #8b0000;">"PATH"</span> <span style="color: #8b0000;">"/usr/local/bin:/usr/bin:/bin"</span>)
+    (<span style="color: #00008b;">if</span> (eq system-type 'gnu/linux)
 (<span style="color: #00008b;">let</span> ((path-from-shell (shell-command-to-string <span style="color: #8b0000;">"/usr/bin/fish -c \"echo -n \\$PATH[1]; for val in \\$PATH[2..-1];echo -n \\\":\\$val\\\";end\""</span>)))
   (setenv <span style="color: #8b0000;">"PATH"</span> path-from-shell)
   (<span style="color: #00008b;">setq</span> exec-path (split-string path-from-shell <span style="color: #8b0000;">":"</span>)))
@@ -323,6 +325,7 @@ text completion framework
  (<span style="color: #8b0000;">"M--"</span> . text-scale-decrease)
  (<span style="color: #8b0000;">"M-="</span> . text-scale-increase)
  (<span style="color: #8b0000;">"M-}"</span> . textmate-shift-right)
+ (<span style="color: #8b0000;">"M-c M-t"</span> . textmate-clear-cache)
  (<span style="color: #8b0000;">"M-&lt;backspace&gt;"</span> . kill-whole-line)
  (<span style="color: #8b0000;">"M-c"</span> . kill-ring-save)
  (<span style="color: #8b0000;">"M-{"</span> . textmate-shift-left)
@@ -435,6 +438,44 @@ text completion framework
 (<span style="color: #00008b;">setq</span> js-indent-level 2)
 </pre>
 </div>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00008b;">setq</span> org-agenda-files (<span style="color: #00008b;">quote</span> (<span style="color: #8b0000;">"~/Dropbox/org"</span>)))
+(<span style="color: #00008b;">setq</span> org-refile-targets (<span style="color: #00008b;">quote</span> ((nil <span style="color: #228b22;">:maxlevel</span> . 9)
+                                 (org-agenda-files <span style="color: #228b22;">:maxlevel</span> . 9))))
+    (<span style="color: #00008b;">setq</span> org-directory <span style="color: #8b0000;">"~/Dropbox/org"</span>)
+    (<span style="color: #00008b;">setq</span> org-default-notes-file <span style="color: #8b0000;">"~/Dropbox/org/refile.org"</span>)
+
+    <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">I use C-c c to start capture mode</span>
+    (global-set-key (kbd <span style="color: #8b0000;">"C-c c"</span>) 'org-capture)
+    (global-set-key (kbd <span style="color: #8b0000;">"C-c a"</span>) 'org-agenda)
+
+    <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Capture templates for: TODO tasks, Notes, appointments, phone calls, meetings, and org-protocol</span>
+    (<span style="color: #00008b;">setq</span> org-capture-templates
+          (<span style="color: #00008b;">quote</span> ((<span style="color: #8b0000;">"t"</span> <span style="color: #8b0000;">"Todo"</span> entry (file+headline <span style="color: #8b0000;">"~/Dropbox/org/refile.org"</span> <span style="color: #8b0000;">"Todos"</span>)
+                   <span style="color: #8b0000;">"* TODO %?\n%U\n%a\n"</span> <span style="color: #228b22;">:clock-in</span> t <span style="color: #228b22;">:clock-resume</span> t)
+                  (<span style="color: #8b0000;">"n"</span> <span style="color: #8b0000;">"Note"</span> entry (file+headline <span style="color: #8b0000;">"~/Dropbox/org/note.org"</span> <span style="color: #8b0000;">"Notes"</span>)
+                   <span style="color: #8b0000;">"* %?\n%U\n%a\n"</span> <span style="color: #228b22;">:clock-in</span> t <span style="color: #228b22;">:clock-resume</span> t)
+                  (<span style="color: #8b0000;">"w"</span> <span style="color: #8b0000;">"Work"</span> entry (file+headline <span style="color: #8b0000;">"~/Dropbox/org/myob.org"</span> <span style="color: #8b0000;">"Work Notes"</span>)
+                   <span style="color: #8b0000;">"* %?\n%U\n"</span> <span style="color: #228b22;">:clock-in</span> t <span style="color: #228b22;">:clock-resume</span> t)
+                  )))
+  (<span style="color: #00008b;">setq</span> org-refile-use-outline-path t)
+
+  <span style="color: #8c8c8c; font-style: italic;">; </span><span style="color: #8c8c8c; font-style: italic;">Targets complete directly with IDO</span>
+  (<span style="color: #00008b;">setq</span> org-outline-path-complete-in-steps nil)
+  <span style="color: #8c8c8c; font-style: italic;">; </span><span style="color: #8c8c8c; font-style: italic;">Use IDO for both buffer and file completion and ido-everywhere to t</span>
+  (<span style="color: #00008b;">setq</span> org-completion-use-ido t)
+  (<span style="color: #00008b;">setq</span> ido-everywhere t)
+  (<span style="color: #00008b;">setq</span> ido-max-directory-size 100000)
+  (ido-mode (<span style="color: #00008b;">quote</span> both))
+  <span style="color: #8c8c8c; font-style: italic;">; </span><span style="color: #8c8c8c; font-style: italic;">Use the current window when visiting files and buffers with ido</span>
+  (<span style="color: #00008b;">setq</span> ido-default-file-method 'selected-window)
+  (<span style="color: #00008b;">setq</span> ido-default-buffer-method 'selected-window)
+  <span style="color: #8c8c8c; font-style: italic;">; </span><span style="color: #8c8c8c; font-style: italic;">Use the current window for indirect buffer display</span>
+  (<span style="color: #00008b;">setq</span> org-indirect-buffer-display 'current-window)
+
+</pre>
+</div>
 </div>
 </div>
 
@@ -502,6 +543,24 @@ text completion framework
 </div>
 </div>
 
+<div id="outline-container-orgd675e29" class="outline-3">
+<h3 id="orgd675e29">PureScript</h3>
+<div class="outline-text-3" id="text-orgd675e29">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(use-package psc-ide
+<span style="color: #228b22;">:config</span>
+(add-hook 'purescript-mode-hook
+  (<span style="color: #00008b;">lambda</span> ()
+    (psc-ide-mode)
+    (company-mode)
+    (flycheck-mode)
+    (turn-on-purescript-indentation)))
+(<span style="color: #00008b;">setq</span> psc-ide-use-npm-bin t)
+)
+</pre>
+</div>
+</div>
+</div>
 <div id="outline-container-orgfe62dd8" class="outline-3">
 <h3 id="orgfe62dd8">smartparens</h3>
 <div class="outline-text-3" id="text-orgfe62dd8">
@@ -620,9 +679,9 @@ extract them into <code>/usr/local/share/LanguageTool</code>
 </div>
 </div>
 
-<div id="outline-container-orgd675e29" class="outline-3">
-<h3 id="orgd675e29">PureScript</h3>
-<div class="outline-text-3" id="text-orgd675e29">
+<div id="outline-container-org06a9750" class="outline-3">
+<h3 id="org06a9750">PureScript</h3>
+<div class="outline-text-3" id="text-org06a9750">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(use-package psc-ide
 <span style="color: #228b22;">:config</span>
