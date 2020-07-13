@@ -1,0 +1,247 @@
+#+TITLE: Dummy Guide to sbt
+#+Date: <2020-06-07 Sun>
+#+AUTHOR: Jichao Ouyang
+#+OPTIONS: ^:t
+#+MACRO: ruby @@html:<ruby>$1<rt>$2</rt></ruby>@@
+#+PROPERTY: header-args :eval never-export
+#+KEYWORDS: Scala,sbt,Simple Build Tool,Rake,Make
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="Dummy Guide to sbt" />
+#+HTML_HEAD_EXTRA: <meta property="og:description" content="It is actually a Simple Build Tool if you use it correctly" />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+#+description: It is actually a Simple Build Tool if you use it correctly
+#+index: Scala!Dummy Guide to sbt
+
+
+* Why sbt
+In [[https://scalacenter.github.io/scala-developer-survey-2019/][Scala Survey 2019]] there was a question:
+
+*What are the *other* pain points in your daily workflow?
+
+https://www.evernote.com/l/ABfkUXRmO9xM36PSw2wUvg9GNHeaqsgbEB8B/image.png
+
+And sbt is the "winner".
+
+But in another question:
+
+Which build tools do you use?
+
+https://www.evernote.com/l/ABectL9KKVlPhpjxmYX2PwExprn8N779IbYB/image.png
+
+So, I can simply can interpret this as:
+Most people choose sbt, they feel it is pain using it, and they don't like to move to
+variety of other good options- i.e. mill, fury.
+
+* What is the pain actually?
+
+So, it is a build tool, I guess most of users are coming from /Makefile/, /Rakefile/ or /npm/ already
+have a stereo type of what a build tool should be like - very low effort to learn.
+
+** npm
+npm has almost 0 learning curve, since it is plain json file, `npm init` will get basically everything
+setup, `npm install --save blah` will get your dependency configed. For for advance usage all
+you need to do is to look up the document and copy paste key value into your json file.
+
+It is actually more of dependencies manage tool rather than build tool, the build feature is very
+limited so you probably still need Makefile.
+#+BEGIN_SRC json
+{ "scripts" :
+  { "preinstall" : "./configure"
+  , "install" : "make && make install"
+  , "test" : "make test"
+  }
+}
+#+END_SRC
+** Rakefile
+Rake has basically the same concept of Makefile, except you can do ruby script in it while Makefile
+you do bash.
+
+Rakefile:
+#+BEGIN_SRC ruby
+task name: [:prereq1, :prereq2] do |t|
+  # ruby script goes here
+end
+#+END_SRC
+
+Makefile:
+#+BEGIN_SRC make
+name: prereq1 prereq2
+  # bash script goes here
+#+END_SRC
+* Then follow the Stereo type
+So the common here they are both very simple to use, without understanding how it works even what it means,
+just follow the same pattern you could get the build working.
+
+Same way if any user come from those build tool, they may assume the Scala build tool should
+share the same trait as well - a build tool should have low learning effort, just copy paste should be enough
+get it work.
+
+With that kind of expectation, sbt will let you down. Since it has very good and detail documents,
+but no one is going to spends days to read the hundreds page of documents just to get a project
+compile and ship. Most people just what things like npm or makefile that you can just simply copy
+paste and everything just works.
+
+sbt is actually both a build tool, can be use like =make= and =rake=, at the same time also a simple to use manage dependencies, just like
+=npm= or =bundler=.
+
+So let us start with package management.
+
+** Package management
+
+in bundler dependencies can be defined as:
+#+BEGIN_SRC ruby
+gem 'httparty', '0.17.3'
+#+END_SRC
+
+Let us define `finagle` as sbt project dependencies, you can find how to add it from the right hand side of:
+ https://index.scala-lang.org/twitter/finagle/finagle-core/20.5.0?target=_2.13
+#+BEGIN_SRC scala
+libraryDependencies += "com.twitter" %% "finagle-core" % "20.5.0"
+#+END_SRC
+
+where
+- =com.twitter= is group id
+- =finagle-core= is package name
+- =20.5.0= is the version of course
+
+Comparing to bundler, there a lot other thing you may need to pay attention to.
+
+What is =%%= and =%=, what is ~+=~ ?
+
+It is totally fine to not knowing those symbols, the build still works, but they
+are noises and if you put the wrong thing it won't compile.
+
+*** =%%=
+Here is a quick guide how to use =%=
+
+#+BEGIN_SRC scala %
+// Java library
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
+// Scala library %%
+libraryDependencies += "com.twitter" %% "finagle-core" % "20.5.0"
+// Scala lib % with hard coded Scala version
+libraryDependencies += "com.twitter" % "finagle-core_2.13" % "20.5.0"
+// Test only library
+libraryDependencies += "org.scalameta" %% "munit-scalacheck" % "0.7.7" % Test
+#+END_SRC
+
+That is all you need to know to get a basic dependencies working.
+
+*** Version handling
+
+don't care the patch version, pick the bigest patch
+
+#+BEGIN_SRC scala
+libraryDependencies += "com.twitter" %% "finagle-core" % "20.5.+"
+#+END_SRC
+
+don't care the minor version, pick the bigest patch
+
+#+BEGIN_SRC scala
+libraryDependencies += "com.twitter" %% "finagle-core" % "20.+"
+#+END_SRC
+
+rang of version
+
+#+BEGIN_SRC scala
+libraryDependencies += "com.twitter" %% "finagle-core" % "[19.4.0, 20.5.0)"
+#+END_SRC
+
+Package management actually isn't the most painful setting in sbt, since all library
+will give you the config of how to install already in README already.
+
+Simply copy paste generally works.
+
+** Task
+
+In Rakefile, we can have very simply task flow, i.e.
+1. start database
+2. run test
+3. stop database
+
+#+BEGIN_SRC ruby
+task :db_up do
+  sh "docker-compose up -d db"
+end
+
+task test: [:db_up] do
+  task(:spec).invoke
+end
+
+task :db_down do
+  `docker-compose stop db`
+end
+
+desc 'run db up test and db down'
+task default: [:spec] do
+  task(:db_down).invoke
+end
+#+END_SRC
+
+Let us define the same tasks in sbt[fn:2]:
+#+BEGIN_SRC scala
+  // for the `!` syntax to exec external command
+  import scala.sys.process._
+
+  val dbUp = taskKey[Unit]("start database")
+  val dbDown = taskKey[Unit]("stop database")
+  val runTest = taskKey[Unit]("run test")
+  val default = taskKey[Unit]("default task")
+
+  dbUp := {
+    "docker-compose up -d db" !
+  }
+
+  dbDown := {
+    "docker-compose stop db" !
+  }
+
+  runTest := { dbUp.value;
+    Command.process("test", state.value)
+  }
+
+  default := Def.sequential(
+    runTest,
+    dbDown
+  ).value
+#+END_SRC
+
+It is bit more verbose than Rake because of the Type things, but generally
+it is as simply as rake when defining external process[fn:1] and task dependency.
+
+There are lot of ways you can define =default= in sbt, as a new command:
+#+BEGIN_SRC scala
+  commands += Command.command("defaultCommand") { state =>
+    "runTest" :: "dbDown" ::
+    state
+  }
+#+END_SRC
+
+or as command alias:
+#+BEGIN_SRC scala
+  addCommandAlias("defaultCommand", "runTest;dbDown")
+#+END_SRC
+
+Another example is you can operate on files as well from sbt.
+
+For instance there is built-in task in sbt called =makePom=, but it will generate
+=pom.xml= to =target= folder, we preferred to generate the file into =.github/pom.xml=
+so Github can pick it up and analyst what jar file is in CVE list.
+
+#+BEGIN_SRC scala
+val genPom = taskKey[Unit]("generate pom for github to do security monitoring")
+genPom := {
+  val pomFile = makePom.value
+  io.IO.copyFile(pomFile, file(".") / ".github" / "pom.xml")
+}
+#+END_SRC
+
+Very simply and declarative task, right.
+
+- =makePom: TaskKey[File]= is a task that return the pom file,  =makePom.value= will call the task and generate the file, and return the file as =pomFile=
+- =io.IO.copyFile= will copy the file to expected path
+
+* Footnotes
+
+[fn:2] https://www.scala-sbt.org/1.x/docs/Tasks.html
+
+[fn:1] https://www.scala-sbt.org/1.x/docs/Process.html
