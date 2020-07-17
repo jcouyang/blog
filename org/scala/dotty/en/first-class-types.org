@@ -25,9 +25,9 @@
 In Idris, types are first class, meaning that they can be *computed* and manipulated (and passed to functions) just like any other language construct. [fn:1]
 #+end_quote
 
-In Scala 3, types can be *computed* at certain level, but can not passed to or returned by function. It is close but not first class yet.
+In Scala 3, types can be *computed* at certain level, but can not be passed to or returned by function. It is pretty close but not first class yet.
 
-Let us compare side by side with Idris' example
+Let us compare side by side with Idris' examples.
 
 ** Type level function
 In Idris, types can be input and output of a normal function:
@@ -85,7 +85,7 @@ By using /Matching Types/ =IsSingleton=, we can compute the types of =x=, but we
 or say that types here are first class since =IsSingleton= is not a function. Matching types can
 do some sort of computation but not as power as function.
 
-Apart from typelevel function, there are few places are little bit verbose in Scala 3.
+Apart from type level function, there are few places are kind of verbose in Scala 3.
 
 *** [[(verbose1)][Verbose 1]]:
 have to manually give compiler a hint that =x= has type =IsSingleton[true]=, otherwise compile error:
@@ -97,7 +97,7 @@ clearly Scala compiler is not as good at proving as Idris that =x= is =IsSinglet
 *** [[(verbose2)][Verbose 2]]:
 have to manually give compiler a hint that =x= has type =Int= and =xs= has type =IsSingletype[false]=
 
-Although a little bit clumsy, it still works, everything computed at type level correctly.
+Although a bit clumsy, it still works, everything computed at type level correctly.
 
 ** Typelevel Ops
 I really hope you still remember =Vector=:
@@ -121,7 +121,7 @@ We don't really need to define =Nat= in Scala 3, there is singleton Int type we 
 use.
 And we can also use =S= combinator for =Int= just like =S= in Idris.
 
-The real challenge here is to compute the length at typelevel, which is very easy to
+The real challenge here is to compute the length at type level, which is very easy to
 achieve in Idris since types can be passed into function.
 
 Since length is =Nat=, we can simply define =+= function for =Nat=:
@@ -131,7 +131,7 @@ Since length is =Nat=, we can simply define =+= function for =Nat=:
 (+) (S k) y = S (+ k y)
 #+END_SRC
 
-Next to combine two =Vect= and compute length at typelevel is just:
+Next to combine two =Vect= and compute length at type level is just:
 #+BEGIN_SRC haskell
 (++) : Vect n a -> Vect m a -> Vect (n + m) a
 (++) Nil       ys = ys
@@ -140,7 +140,7 @@ Next to combine two =Vect= and compute length at typelevel is just:
 
 We just did it again, calling a function =(n + m)= in type signature.
 
-Ideally we should able to translate in Scala 3:
+Ideally we should be able to translate in Scala 3:
 #+BEGIN_SRC scala
   import scala.compiletime.ops.int.{+}
   def combine[N <:Int, M<:Int,A](a: Vector[N, A], b: Vector[M, A]): Vector[N + M, A] =
@@ -149,7 +149,7 @@ Ideally we should able to translate in Scala 3:
       case Cons(head, tail) => Cons(head, combine(tail, b))
 #+END_SRC
 
-Typelevel operator =+= here is from =compiletime.ops=, it calculates singleton Int types at compile time.[fn:3]
+Type level operator =+= here is from =compiletime.ops=, it calculates singleton Int types at compile time.[fn:3]
 For instance:
 #+BEGIN_SRC scala
   val x: 1 + 2 * 3 = 7
@@ -169,9 +169,9 @@ But it is a crude real world...
 
 Scala cannot infer return type should be =Vector[0+M, A]= since =Nil= has type =Vector[0, A]=.
 
-also cannot prove =N - 1 + M + 1= is  =N + M=.
+Also compiler cannot prove =N - 1 + M + 1= is  =N + M=.
 
-I wouldn't suggest to do this on production but we need to help Scala prove that the type is correct.
+I wouldn't suggest doing this on production, but we need to help Scala prove that the type is correct.
 #+BEGIN_SRC scala
   def combine[N <:Int, M<:Int,A](a: Vector[N, A], b: Vector[M, A]): Vector[N + M, A] =
     (a, b) match
