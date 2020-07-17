@@ -1,0 +1,193 @@
+#+TITLE: "First Class" Types in Scala 3
+#+Date: <2020-07-17 Fri>
+#+AUTHOR: Jichao Ouyang
+#+OPTIONS: ^:t
+#+MACRO: ruby @@html:<ruby>$1<rt>$2</rt></ruby>@@
+#+PROPERTY: header-args :eval never-export
+#+KEYWORDS: Scala,Dotty,Scala 3,Dependent Tyeps,Shapeless
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="\"First Class\" Types in Scala 3" />
+#+HTML_HEAD_EXTRA: <meta property="og:description" content="You may no longer need Shapeless" />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+#+HTML_HEAD_EXTRA: <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
+#+description: You may no longer need Shapeless
+#+index: Scala!"First Class" Types in Scala 3
+#+index: Shapeless!"First Class" Types in Scala 3
+#+index: Dotty!"First Class" Types in Scala 3
+#+index: Dependent Types!"First Class" Types in Scala 3
+#+index: FunctionK!"First Class" Types in Scala 3
+#+index: FP!"First Class" Types in Scala 3
+
+#+INCLUDE: !toc.org
+
+* First Class Types
+
+#+begin_quote
+In Idris, types are first class, meaning that they can be *computed* and manipulated (and passed to functions) just like any other language construct. [fn:1]
+#+end_quote
+
+In Scala 3, types can be *computed* at certain level, but can not passed to or returned by function. It is close but not first class yet.
+
+Let us compare side by side with Idris' example
+
+** Type level function
+In Idris, types can be input and output of a normal function:
+#+BEGIN_SRC haskell
+isSingleton : Bool -> Type
+isSingleton True = Nat
+isSingleton False = List Nat
+#+END_SRC
+
+=True=, =False=, =Nat=, =List Nat= here are all types,
+but they are all in the position of values can be in a normal function =isSingleton=.
+
+In Scala, types cannot be passed into function, but in Scala 3, there is a new feature called /Match Types/[fn:2].
+
+#+BEGIN_SRC scala
+  type IsSingleton[X <: Boolean] = X match {
+    case true => Int
+    case false => List[Int]
+  }
+#+END_SRC
+
+Clearly =IsSingleton= is not a function in Scala, but it is kind of doing the similar thing that =isSingleton= does in
+Idris.
+
+Notice that =true= and =false= here are not value, they are singleton types.
+
+#+BEGIN_SRC scala
+val singletonBool: true = true
+val singletonInt: 1 = 1
+#+END_SRC
+
+Next let us translate another Idris example into Scala 3:
+#+BEGIN_SRC haskell
+sum : (single : Bool) -> isSingleton single -> Nat
+sum True x = x
+sum False [] = 0
+sum False (x :: xs) = x + sum False xs
+#+END_SRC
+
+In the type signature, it is super cool that we can call a function =isSingleton= directly. This is
+the exactly place where you can feel that types are first class and just like values in Idris.
+
+It is a bit verbose in Scala 3:
+#+BEGIN_SRC scala -n
+  def sum(single: Boolean, x: IsSingleton[single.type]): Int = (single, x) match {
+    case (true, x: IsSingleton[true]) =>  x                // <- (ref:verbose1)
+    case (false, Nil) => 0
+    case (false, ((x:Int)::(xs: IsSingleton[false]))) => { // <- (ref:verbose2)
+      sum(false, xs) + x
+    } 
+  }
+#+END_SRC
+
+By using /Matching Types/ =IsSingleton=, we can compute the types of =x=, but we cannot feel
+or say that types here are first class since =IsSingleton= is not a function. Matching types can
+do some sort of computation but not as power as function.
+
+Apart from typelevel function, there are few places are little bit verbose in Scala 3.
+
+*** [[(verbose1)][Verbose 1]]:
+have to manually give compiler a hint that =x= has type =IsSingleton[true]=, otherwise compile error:
+#+begin_example
+[E]      Found:    (x : DependentTypes2.this.IsSingleton[(single : Boolean)])
+[E]      Required: Int
+#+end_example
+clearly Scala compiler is not as good at proving as Idris that =x= is =IsSingleton[true]= since =single= is =true=.
+*** [[(verbose2)][Verbose 2]]:
+have to manually give compiler a hint that =x= has type =Int= and =xs= has type =IsSingletype[false]=
+
+Although a little bit clumsy, it still works, everything computed at type level correctly.
+
+** Typelevel Ops
+I really hope you still remember =Vector=:
+#+BEGIN_SRC haskell
+data Nat    = Z   | S Nat 
+data Vect : Nat -> Type -> Type where
+   Nil  : Vect Z a
+   (::) : a -> Vect k a -> Vect (S k) a
+#+END_SRC
+
+Simply translate it to Scala 3:
+
+#+BEGIN_SRC scala
+  import scala.compiletime.{S}
+  enum Vector[Nat, +A] {
+    case Nil extends Vector[0, Nothing]
+    case Cons[N <: Int, AA](head: AA, tail: Vector[N, AA]) extends Vector[S[N], AA]
+  }
+#+END_SRC
+We don't really need to define =Nat= in Scala 3, there is singleton Int type we can
+use.
+And we can also use =S= combinator for =Int= just like =S= in Idris.
+
+The real challenge here is to compute the length at typelevel, which is very easy to
+achieve in Idris since types can be passed into function.
+
+Since length is =Nat=, we can simply define =+= function for =Nat=:
+#+BEGIN_SRC haskell
+(+) : Nat -> Nat -> Nat
+(+) Z     y = y
+(+) (S k) y = S (+ k y)
+#+END_SRC
+
+Next to combine two =Vect= and compute length at typelevel is just:
+#+BEGIN_SRC haskell
+(++) : Vect n a -> Vect m a -> Vect (n + m) a
+(++) Nil       ys = ys
+(++) (x :: xs) ys = x :: xs ++ ys
+#+END_SRC
+
+We just did it again, calling a function =(n + m)= in type signature.
+
+Ideally we should able to translate in Scala 3:
+#+BEGIN_SRC scala
+  import scala.compiletime.ops.int.{+}
+  def combine[N <:Int, M<:Int,A](a: Vector[N, A], b: Vector[M, A]): Vector[N + M, A] =
+    (a, b) match
+      case (Nil, b) => b
+      case Cons(head, tail) => Cons(head, combine(tail, b))
+#+END_SRC
+
+Typelevel operator =+= here is from =compiletime.ops=, it calculates singleton Int types at compile time.[fn:3]
+For instance:
+#+BEGIN_SRC scala
+  val x: 1 + 2 * 3 = 7
+#+END_SRC
+
+But it is a crude real world...
+#+begin_example
+[E]      Found:    (b : DependentTypes2.this.Vector[M, A])
+[E]      Required: DependentTypes2.this.Vector[N + M, A]
+[E]      L61:     case (Nil, b) => b
+#+end_example
+#+begin_example
+[E]      Found:    DependentTypes2.this.Vector[scala.compiletime.S[Int + M], Any]
+[E]      Required: DependentTypes2.this.Vector[N + M, A]
+[E]      L62:     case Cons(head, tail) => Cons(head, combine(tail, b))
+#+end_example
+
+Scala cannot infer return type should be =Vector[0+M, A]= since =Nil= has type =Vector[0, A]=.
+
+also cannot prove =N - 1 + M + 1= is  =N + M=.
+
+I wouldn't suggest to do this on production but we need to help Scala prove that the type is correct.
+#+BEGIN_SRC scala
+  def combine[N <:Int, M<:Int,A](a: Vector[N, A], b: Vector[M, A]): Vector[N + M, A] =
+    (a, b) match
+      case (Nil, b) => b.asInstanceOf[Vector[N+M, A]]
+      case (Cons(head: A, tail: Vector[N-1, A]), b) =>
+        (Cons[N -1 + M, A](head,  combine(tail, b))).asInstanceOf[Vector[N+M, A]]
+#+END_SRC
+
+Overall I think it is great that Scala 3 provides *Match Types* and =compiletime.ops=,
+which make it possible to compute types just like values without using any shapeless, although types are yet first class.
+
+* Footnotes
+
+[fn:3] https://dotty.epfl.ch/docs/reference/metaprogramming/inline.html#the-scalacompiletimeops-package
+
+[fn:2] https://dotty.epfl.ch/docs/reference/new-types/match-types.html
+
+[fn:1] https://idris2.readthedocs.io/en/latest/tutorial/typesfuns.html#first-class-types
+ 
