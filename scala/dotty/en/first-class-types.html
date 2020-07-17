@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-07-17 Fri 14:25 -->
+<!-- 2020-07-17 Fri 14:37 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>"First Class" Types in Scala 3</title>
@@ -139,11 +139,11 @@ In Idris, types are first class, meaning that they can be <b>computed</b> and ma
 </blockquote></div>
 
 <p>
-In Scala 3, types can be <b>computed</b> at certain level, but can not passed to or returned by function. It is close but not first class yet.
+In Scala 3, types can be <b>computed</b> at certain level, but can not be passed to or returned by function. It is pretty close but not first class yet.
 </p>
 
 <p>
-Let us compare side by side with Idris' example
+Let us compare side by side with Idris' examples.
 </p>
 </div>
 
@@ -231,7 +231,7 @@ do some sort of computation but not as power as function.
 </p>
 
 <p>
-Apart from typelevel function, there are few places are little bit verbose in Scala 3.
+Apart from type level function, there are few places are kind of verbose in Scala 3.
 </p>
 </div>
 
@@ -258,7 +258,7 @@ have to manually give compiler a hint that <code>x</code> has type <code>Int</co
 </p>
 
 <p>
-Although a little bit clumsy, it still works, everything computed at type level correctly.
+Although a bit clumsy, it still works, everything computed at type level correctly.
 </p>
 </div>
 </div>
@@ -297,7 +297,7 @@ And we can also use <code>S</code> combinator for <code>Int</code> just like <co
 </p>
 
 <p>
-The real challenge here is to compute the length at typelevel, which is very easy to
+The real challenge here is to compute the length at type level, which is very easy to
 achieve in Idris since types can be passed into function.
 </p>
 
@@ -312,7 +312,7 @@ Since length is <code>Nat</code>, we can simply define <code>+</code> function f
 </div>
 
 <p>
-Next to combine two <code>Vect</code> and compute length at typelevel is just:
+Next to combine two <code>Vect</code> and compute length at type level is just:
 </p>
 <div class="org-src-container">
 <pre class="src src-haskell">(<span style="color: #6a5acd;">++</span>) <span style="color: #36648b;">:</span> <span style="color: #36648b;">Vect</span> n a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Vect</span> m a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Vect</span> (n <span style="color: #b8860b;">+</span> m) a
@@ -326,7 +326,7 @@ We just did it again, calling a function <code>(n + m)</code> in type signature.
 </p>
 
 <p>
-Ideally we should able to translate in Scala 3:
+Ideally we should be able to translate in Scala 3:
 </p>
 <div class="org-src-container">
 <pre class="src src-scala"><span style="color: #00008b;">import</span> scala.compiletime.ops.int.{+}
@@ -338,7 +338,7 @@ Ideally we should able to translate in Scala 3:
 </div>
 
 <p>
-Typelevel operator <code>+</code> here is from <code>compiletime.ops</code>, it calculates singleton Int types at compile time.<label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
+Type level operator <code>+</code> here is from <code>compiletime.ops</code>, it calculates singleton Int types at compile time.<label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
 <a href="https://dotty.epfl.ch/docs/reference/metaprogramming/inline.html#the-scalacompiletimeops-package">https://dotty.epfl.ch/docs/reference/metaprogramming/inline.html#the-scalacompiletimeops-package</a>
 </span>
 For instance:
@@ -367,11 +367,11 @@ Scala cannot infer return type should be <code>Vector[0+M, A]</code> since <code
 </p>
 
 <p>
-also cannot prove <code>N - 1 + M + 1</code> is  <code>N + M</code>.
+Also compiler cannot prove <code>N - 1 + M + 1</code> is  <code>N + M</code>.
 </p>
 
 <p>
-I wouldn't suggest to do this on production but we need to help Scala prove that the type is correct.
+I wouldn't suggest doing this on production, but we need to help Scala prove that the type is correct.
 </p>
 <div class="org-src-container">
 <pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">combine</span>[<span style="color: #6b8e23;">N</span> <span style="color: #00008b;">&lt;:</span><span style="color: #6b8e23;">Int</span>, <span style="color: #6b8e23;">M</span><span style="color: #00008b;">&lt;:</span><span style="color: #6b8e23;">Int</span>,<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">N</span>, <span style="color: #6b8e23;">A</span>], b<span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">M</span>, <span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">N</span> + <span style="color: #6b8e23;">M</span>, <span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span>
