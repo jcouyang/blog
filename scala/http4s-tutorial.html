@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2020-09-20 Sun 01:50 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Http4s x Finagle Tutorial</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Jichao Ouyang">
+<link rel="icon" href="/favicon.ico">
+<meta name="theme-color" content="#ffffff">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
+<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="preamble" class="status">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJRFJGX"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header>
+    <a accesskey="h" href="/index.html"> HOME </a> |
+    <a href="#" id="edit-in-github">EDIT</a> |
+    <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
+    <a href="https://blog.oyanglul.us/theindex">INDEX</a> |
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
+</header>
+</div>
+<div id="content">
+<header>
+<h1 class="title">Http4s x Finagle Tutorial</h1>
+</header><nav id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org24d6ba6">Get Started with Http4s</a>
+<ul>
+<li><a href="#orge2aa66a">Prerequisites</a></li>
+<li><a href="#org7aef404">Verify your environment</a></li>
+<li><a href="#orgbf7517e">Creating a new Joke Application</a>
+<ul>
+<li><a href="#org1b6ae95">file structure</a></li>
+<li><a href="#org3c08723">source structure</a></li>
+</ul>
+</li>
+<li><a href="#org67608bb">Data migration</a></li>
+<li><a href="#orgf4c40ae">Save a joke <code>POST /joke</code></a></li>
+<li><a href="#org8203beb">Stream some jokes <code>GET /joke</code></a></li>
+<li><a href="#org9a66fe4">Feature Toggle <code>GET /joke/:id</code></a></li>
+<li><a href="#org3bc4583">Random dad joke <code>GET /random-joke</code></a></li>
+<li><a href="#orgeaa213b">Tracing Metrics and Logging</a>
+<ul>
+<li><a href="#orgd20c5cb">Logging</a></li>
+<li><a href="#org77d0ca2">Zipkin Tracing</a></li>
+<li><a href="#orgbba24a6"><span class="todo TODO">TODO</span> Prometheus Metrics</a></li>
+</ul>
+</li>
+<li><a href="#orgce0d5dd"><span class="todo TODO">TODO</span> Why Resource of resource</a></li>
+<li><a href="#org3a012c5"><span class="todo TODO">TODO</span> Test</a></li>
+<li><a href="#orge94b3ee"><span class="todo TODO">TODO</span> Package and deploy</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav>
+<div id="outline-container-org24d6ba6" class="outline-2">
+<h2 id="org24d6ba6">Get Started with Http4s<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+follow the structure of <a href="https://guides.rubyonrails.org/getting_started.html">Getting Started with Rails</a>
+</span></h2>
+<div class="outline-text-2" id="text-org24d6ba6">
+<p>
+This guide covers getting up and running a production ready http4s example.
+</p>
+
+<p>
+After reader this guide, you will know:
+</p>
+<ul class="org-ul">
+<li>How to install Http4s, create a new Http4s application, and connect your application to a database.</li>
+<li>The general layout of a Http4s application.</li>
+<li>The basic principles of FP design.</li>
+<li>How to quickly generate the starting pieces of a Http4s application.</li>
+<li>How to package and deploy a Http4s application</li>
+<li>How to monitor a Http4s application</li>
+</ul>
+</div>
+
+<div id="outline-container-orge2aa66a" class="outline-3">
+<h3 id="orge2aa66a">Prerequisites</h3>
+<div class="outline-text-3" id="text-orge2aa66a">
+<ul class="org-ul">
+<li>Nix <code>sh &lt;(curl -L https://nixos.org/nix/install)</code> <label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
+If you're using macOS Catalina follow <a href="https://nixos.org/manual/nix/stable/#sect-macos-installation">https://nixos.org/manual/nix/stable/#sect-macos-installation</a> 
+</span></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org7aef404" class="outline-3">
+<h3 id="org7aef404">Verify your environment</h3>
+<div class="outline-text-3" id="text-org7aef404">
+<p>
+Start server
+</p>
+<pre class="example">
+$ nix-shell
+&gt; sbt ~reStart
+</pre>
+
+<div class="epigraph"><blockquote>
+<p>
+Let us assume all future prefix of <code>&gt;</code> represent for command in <code>nix-shell</code>, and <code>$</code> for <code>bash</code>.
+</p>
+
+</blockquote></div>
+
+<p>
+You should able to see a empty list <code>[]</code> since there is nothing in database yet.
+</p>
+<pre class="example">
+$ curl localhost:8080/joke
+</pre>
+
+<p>
+To run test simply
+</p>
+<pre class="example">
+&gt; sbt test
+</pre>
+
+<p>
+Now you have a proven working environment for the service to test and run, let us see how we build it.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbf7517e" class="outline-3">
+<h3 id="orgbf7517e">Creating a new Joke Application</h3>
+<div class="outline-text-3" id="text-orgbf7517e">
+<pre class="example">
+$ sbt new jcouyang/http4s.g8
+</pre>
+
+<p>
+You can either answer all those question that it prompt or press <code>Enter</code> all the way to the end.
+</p>
+</div>
+
+<div id="outline-container-org1b6ae95" class="outline-4">
+<h4 id="org1b6ae95">file structure</h4>
+<div class="outline-text-4" id="text-org1b6ae95">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">File/Folder</th>
+<th scope="col" class="org-left">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">.github</td>
+<td class="org-left">folder of github workflow etc.</td>
+</tr>
+
+<tr>
+<td class="org-left">.scalafmt.conf</td>
+<td class="org-left">Specification of how to format Scala source code</td>
+</tr>
+
+<tr>
+<td class="org-left">build.sbt</td>
+<td class="org-left">Specify build tasks and Scala library dependencies</td>
+</tr>
+
+<tr>
+<td class="org-left">db</td>
+<td class="org-left">Database migrations</td>
+</tr>
+
+<tr>
+<td class="org-left">docker-compose.yml</td>
+<td class="org-left">Definition of how to boot local services like zipkin, postgres</td>
+</tr>
+
+<tr>
+<td class="org-left">project</td>
+<td class="org-left">sbt plugins</td>
+</tr>
+
+<tr>
+<td class="org-left">shell.nix</td>
+<td class="org-left">Nix shell configuration</td>
+</tr>
+
+<tr>
+<td class="org-left">src</td>
+<td class="org-left">Scala source</td>
+</tr>
+
+<tr>
+<td class="org-left">target</td>
+<td class="org-left">Compiled target</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-org3c08723" class="outline-4">
+<h4 id="org3c08723">source structure</h4>
+<div class="outline-text-4" id="text-org3c08723">
+<pre class="example">
+$ tree src
+src
+├── main
+│   ├── resources
+│   │   ├── com
+│   │   │   └── twitter
+│   │   │       └── toggles
+│   │   │           └── configs
+│   │   │               └── com.your.domain.http4sexample.json
+│   │   └── logback.xml
+│   └── scala
+│       └── com
+│           └── your
+│               └── domain
+│                   └── http4sexample
+│                       ├── Config.scala
+│                       ├── Main.scala
+│                       ├── NatureTransfomation.scala
+│                       ├── package.scala
+│                       ├── resource
+│                       │   ├── database.scala
+│                       │   ├── http.scala
+│                       │   ├── logger.scala
+│                       │   ├── package.scala
+│                       │   ├── toggle.scala
+│                       │   └── trace.scala
+│                       └── route
+│                           ├── config.scala
+│                           ├── joke.scala
+│                           └── package.scala
+└── test
+    └── scala
+        └── com
+            └── your
+                └── domain
+                    └── http4sexample
+                        ├── SpecHelper.scala
+                        └── route
+                            └── JokeSpec.scala
+</pre>
+
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">File/Folder</th>
+<th scope="col" class="org-left">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">com.your.domain.http4sexample.json</td>
+<td class="org-left">feature toggles</td>
+</tr>
+
+<tr>
+<td class="org-left">logback.xml</td>
+<td class="org-left">log config</td>
+</tr>
+
+<tr>
+<td class="org-left">Config.scala</td>
+<td class="org-left">Application Config as code</td>
+</tr>
+
+<tr>
+<td class="org-left">Main.scala</td>
+<td class="org-left">The entry point of the program</td>
+</tr>
+
+<tr>
+<td class="org-left">NatureTransfomation.scala</td>
+<td class="org-left">A helper for kind to kind transformation</td>
+</tr>
+
+<tr>
+<td class="org-left">package.scala</td>
+<td class="org-left">index of common types and function across whole application</td>
+</tr>
+
+<tr>
+<td class="org-left">resource/database.scala</td>
+<td class="org-left">Database resource, transactor, helper methods etc</td>
+</tr>
+
+<tr>
+<td class="org-left">resource/http.scala</td>
+<td class="org-left">Http Client resource</td>
+</tr>
+
+<tr>
+<td class="org-left">resource/package.scala</td>
+<td class="org-left">index of all resources</td>
+</tr>
+
+<tr>
+<td class="org-left">resource/toggle.scala</td>
+<td class="org-left">Resource of feature toggles</td>
+</tr>
+
+<tr>
+<td class="org-left">resource/trace.scala</td>
+<td class="org-left">Resource of zipkin tracing</td>
+</tr>
+
+<tr>
+<td class="org-left">route/config.scala</td>
+<td class="org-left">API route of <code>/config</code> endpoint</td>
+</tr>
+
+<tr>
+<td class="org-left">route/joke.scala</td>
+<td class="org-left">API route of <code>/joke</code> endpoint</td>
+</tr>
+
+<tr>
+<td class="org-left">route/package.scala</td>
+<td class="org-left">Index of all APIs</td>
+</tr>
+
+<tr>
+<td class="org-left">SpecHelper.scala</td>
+<td class="org-left">Common helper methods for test like database connection</td>
+</tr>
+
+<tr>
+<td class="org-left">route/JokeSpec.scala</td>
+<td class="org-left">Test Specification of route <code>/joke</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org67608bb" class="outline-3">
+<h3 id="org67608bb">Data migration</h3>
+<div class="outline-text-3" id="text-org67608bb">
+<p>
+Before we start to build the joke service, what we need is a database table,
+to store the detail of jokes.
+</p>
+
+<p>
+You might ask, where is our local DB?
+</p>
+
+<p>
+The Postgres DB is defined in <code>docker-compose.yml</code> for local development
+</p>
+<div class="org-src-container">
+<pre class="src src-yaml">db:
+  image: postgres:10
+  environment:
+    - POSTGRES_DB=joke
+    - POSTGRES_HOST_AUTH_METHOD=trust
+  ports:
+    - 5432:5432
+</pre>
+</div>
+<p>
+Where <code>POSTGRES_DB=joke</code> will help creating the database and name it <code>joke</code>.
+</p>
+
+<p>
+You don't need to run DB migration manually most of the time, since nix-shell hook will run it for you.
+</p>
+
+<p>
+Every time you enter <code>nix-shell</code>, you will see the migration log:
+</p>
+<pre class="example">
+nix-shell
+Creating network "http4s-example_default" with the default driver
+Creating http4s-example_zipkin_1 ... done
+Creating http4s-example_db_1     ... done
+[info] welcome to sbt 1.3.13 (Azul Systems, Inc. Java 1.8.0_202)
+[info] loading settings for project http4s-example-build from plugins.sbt,metals.sbt ...
+[info] loading project definition from /Users/jichao.ouyang/Develop/http4s-example/project
+[info] loading settings for project root from build.sbt ...
+[info] set current project to http4s-example (in build file:/Users/jichao.ouyang/Develop/http4s-example/)
+[info] running Main migrate
+Sep 14, 2020 12:14:15 PM org.flywaydb.core.internal.license.VersionPrinter printVersionOnly
+INFO: Flyway Community Edition 6.5.5 by Redgate
+Sep 14, 2020 12:14:15 PM org.flywaydb.core.internal.database.DatabaseFactory createDatabase
+INFO: Database: jdbc:postgresql://localhost:5432/joke (PostgreSQL 10.14)
+Sep 14, 2020 12:14:15 PM org.flywaydb.core.internal.command.DbValidate validate
+INFO: Successfully validated 1 migration (execution time 00:00.015s)
+Sep 14, 2020 12:14:15 PM org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory create
+INFO: Creating Schema History table "public"."flyway_schema_history" ...
+Sep 14, 2020 12:14:15 PM org.flywaydb.core.internal.command.DbMigrate migrateGroup
+INFO: Current version of schema "public": &lt;&lt; Empty Schema &gt;&gt;
+Sep 14, 2020 12:14:15 PM org.flywaydb.core.internal.command.DbMigrate doMigrateGroup
+INFO: Migrating schema "public" to version 1.0 - CreateJokeTable
+</pre>
+
+<p>
+To migrate when schema changed:
+</p>
+<pre class="example">
+&gt; sbt "db/run migration"
+</pre>
+
+<p>
+Migration file located in <code>db/src/main/scala/db/migration</code>
+</p>
+<pre class="example">
+$ tree db/src
+db/src
+└── main
+    └── scala
+        ├── DoobieMigration.scala
+        ├── Main.scala
+        └── db
+            └── migration
+                └── V1_0__CreateJokeTable.scala
+</pre>
+
+<p>
+A migration file is actually a Scala <a href="https://tpolecat.github.io/doobie/">doobie</a> source code.
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">class</span> <span style="color: #36648b;">V1_0_</span>_CreateJokeTable <span style="color: #00008b;">extends</span> <span style="color: #36648b;">DoobieMigration</span> {
+  <span style="color: #228b22;">override</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">migrate</span> <span style="color: #00008b;">=</span>
+    sql<span style="color: #8b0000;">"""create table joke (</span>
+<span style="color: #8b0000;">                id serial not null</span>
+<span style="color: #8b0000;">                        constraint joke_pk</span>
+<span style="color: #8b0000;">                        primary key,</span>
+<span style="color: #8b0000;">                text text not null,</span>
+<span style="color: #8b0000;">                created timestamptz default now() not null</span>
+<span style="color: #8b0000;">          )"""</span>.update.run
+}
+</pre>
+</div>
+
+<p>
+The prefix <code>V1_0__</code> in class name means version 1.0, detail of naming convention please refer to <a href="https://flywaydb.org/documentation/migrations#java-based-migrations">Flyway</a>
+</p>
+
+<p>
+Now we have database scheme set, next we need a API to save data into the new table.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf4c40ae" class="outline-3">
+<h3 id="orgf4c40ae">Save a joke <code>POST /joke</code></h3>
+<div class="outline-text-3" id="text-orgf4c40ae">
+<p>
+To be to able to save data, a database library such as <a href="https://tpolecat.github.io/doobie/">Doobie</a> or <a href="https://getquill.io/">Quill</a> is required.
+</p>
+
+<p>
+The following example uses Quill:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span id="coderef-route" class="coderef-off"><span class="linenr"> 1: </span><span style="color: #00008b;">val</span> <span style="color: #b8860b;">CRUD</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">AppRoute</span> {                               <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (route)</span>
+<span class="linenr"> 2: </span>    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">req</span> <span style="color: #00008b;">@</span> <span style="color: #6b8e23;">POST</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"joke"</span> <span style="color: #00008b;">=&gt;</span>
+<span class="linenr"> 3: </span>      <span style="color: #00008b;">for</span> {
+<span id="coderef-kleisli" class="coderef-off"><span class="linenr"> 4: </span>        has <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>.ask[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">HasDatabase</span>]         <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (kleisli)</span>
+<span id="coderef-reqbody" class="coderef-off"><span class="linenr"> 5: </span>        joke <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>.liftF(req.as[<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">Create</span>])  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (reqbody)</span>
+<span id="coderef-quill" class="coderef-off"><span class="linenr"> 6: </span>        id <span style="color: #00008b;">&lt;-</span> has.transact(run(quote {              <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (quill)</span>
+<span class="linenr"> 7: </span>          query[<span style="color: #6b8e23;">Dao</span>.<span style="color: #6b8e23;">Joke</span>]
+<span class="linenr"> 8: </span>            .insert(<span style="color: #00008b;">_</span>.text -&gt; lift(joke.text))
+<span class="linenr"> 9: </span>            .returningGenerated(<span style="color: #00008b;">_</span>.id)
+<span class="linenr">10: </span>        }))
+<span class="linenr">11: </span>        <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> log.infoF(s<span style="color: #8b0000;">"created joke with id </span><span style="color: #b8860b;">$id</span><span style="color: #8b0000;">"</span>)
+<span class="linenr">12: </span>        resp <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Created</span>(json<span style="color: #8b0000;">"""{"id": </span><span style="color: #b8860b;">$id</span><span style="color: #8b0000;">}"""</span>)
+<span class="linenr">13: </span>      } <span style="color: #00008b;">yield</span> resp
+<span class="linenr">14: </span>}
+</pre>
+</div>
+<ol class="org-ol">
+<li><a href="#coderef-route" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-route');" onmouseout="CodeHighlightOff(this, 'coderef-route');"><code>AppRoute</code></a> is simply a wrapper of Http4s' <code>HttpRoutes.of[IO]</code> but dependencies injectable.</li>
+<li><a href="#coderef-kleisli" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-kleisli');" onmouseout="CodeHighlightOff(this, 'coderef-kleisli');"><code>Kleisli.ask</code></a> is something like <code>@Inject</code> in Java world except everything is lazy, when you <code>ask[IO, HasDatabase]</code>, it will <code>&lt;-</code> a instance <code>has</code> of <code>HasDatabase</code> type <label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
+Kleisli is also known as ReaderT <a href="https://blog.oyanglul.us/scala/into-the-readert-verse">https://blog.oyanglul.us/scala/into-the-readert-verse</a> 
+</span></li>
+<li>We also need to read the body from the req using Http4s DSL <a href="#coderef-reqbody" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-reqbody');" onmouseout="CodeHighlightOff(this, 'coderef-reqbody');"><code>req.as[Repr.Create]</code></a> will parse the body and return a <code>IO[Repr.Create]</code>.
+We need to <code>liftF</code> because the for comprehension is type <code>Kleisli[IO, HasXYZ, Response[IO]]</code>.</li>
+<li><code>has</code> has type <code>HasDatabase</code>, which means it has database <code>transact</code> method, when <code>run</code> convert Quill's <code>quote</code> into <code>ConnectionIO[A]</code>, <code>transact</code>
+can execute it in one transaction.</li>
+</ol>
+
+<div class="epigraph"><blockquote>
+<p>
+It is pretty cool that Quill will translate the DSL directly into SQL at compile time:
+</p>
+
+
+<figure>
+<img src="https://www.evernote.com/l/ABeuNCR1bIpMa4xqHKyccGy5mbbxVrzlj2AB/image.png" alt="image.png">
+
+</figure>
+
+</blockquote></div>
+
+<p>
+If you're not fan of Macro it is very easy to switch back to doobie DSL:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span class="linenr"> 1: </span><span style="color: #00008b;">val</span> <span style="color: #b8860b;">CRUD</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">AppRoute</span> {
+<span class="linenr"> 2: </span>    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">req</span> <span style="color: #00008b;">@</span> <span style="color: #6b8e23;">POST</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"joke"</span> <span style="color: #00008b;">=&gt;</span>
+<span class="linenr"> 3: </span>      <span style="color: #00008b;">for</span> {
+<span class="linenr"> 4: </span>        has <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>.ask[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">HasDatabase</span>]
+<span class="linenr"> 5: </span>        joke <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>.liftF(req.as[<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">Create</span>])
+<span class="linenr"> 6: </span>        id <span style="color: #00008b;">&lt;-</span> has.transact(
+<span id="coderef-doobie" class="coderef-off"><span class="linenr"> 7: </span>          sql<span style="color: #8b0000;">"insert into joke (text) values </span><span style="color: #b8860b;">${joke.text}</span><span style="color: #8b0000;">"</span>.update.withUniqueGeneratedKeys(<span style="color: #8b0000;">"id"</span>)) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (doobie)</span>
+<span class="linenr"> 8: </span>        <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> log.infoF(s<span style="color: #8b0000;">"created joke with id </span><span style="color: #b8860b;">$id</span><span style="color: #8b0000;">"</span>)
+<span class="linenr"> 9: </span>        resp <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Created</span>(json<span style="color: #8b0000;">"""{"id": </span><span style="color: #b8860b;">$id</span><span style="color: #8b0000;">}"""</span>)
+<span class="linenr">10: </span>      } <span style="color: #00008b;">yield</span> resp
+<span class="linenr">11: </span>}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8203beb" class="outline-3">
+<h3 id="org8203beb">Stream some jokes <code>GET /joke</code></h3>
+<div class="outline-text-3" id="text-org8203beb">
+<p>
+Similarly you will probably figure out how to implement a <code>GET /joke</code> endpoint already.
+</p>
+
+<p>
+But we has some killer feature in Http4s, we can stream the list of jokes direct from DB to response body.
+Which means you don't actually need to read all jokes into memory, and then return it back at one go, the data of jokes
+can actually flow through your Http4s server without accumulating in the memory.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala"><span class="linenr"> 1: </span><span style="color: #00008b;">case</span> <span style="color: #6b8e23;">GET</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"joke"</span> <span style="color: #00008b;">=&gt;</span>
+<span class="linenr"> 2: </span>  <span style="color: #6b8e23;">Kleisli</span>
+<span class="linenr"> 3: </span>    .ask[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">HasDatabase</span>]
+<span class="linenr"> 4: </span>    .flatMap(
+<span class="linenr"> 5: </span>      db <span style="color: #00008b;">=&gt;</span>
+<span class="linenr"> 6: </span>        <span style="color: #6b8e23;">Ok</span>(
+<span id="coderef-stream" class="coderef-off"><span class="linenr"> 7: </span>          db.transact(stream(quote {   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (stream)</span>
+<span class="linenr"> 8: </span>            query[<span style="color: #6b8e23;">Dao</span>.<span style="color: #6b8e23;">Joke</span>]
+<span class="linenr"> 9: </span>          }))
+<span class="linenr">10: </span>            .map(<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">View</span>.from)
+<span class="linenr">11: </span>        )
+<span class="linenr">12: </span>    )
+</pre>
+</div>
+
+<p>
+<a href="#coderef-stream" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-stream');" onmouseout="CodeHighlightOff(this, 'coderef-stream');"><code>stream</code></a> is provide by doobie, which returns <code>Stream[ConnectionIO, A]</code>, when <code>transact</code> it we will get a <code>Stream[IO, A]</code>,
+luckly Http4s response accept a <code>Stream[IO, A]</code> as long as we have a <code>EntityEncoder[IO, A]</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org9a66fe4" class="outline-3">
+<h3 id="org9a66fe4">Feature Toggle <code>GET /joke/:id</code></h3>
+<div class="outline-text-3" id="text-org9a66fe4">
+<p>
+It is too straightforward to implement a <code>GET /joke/:id</code>:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">case</span> <span style="color: #6b8e23;">GET</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"joke"</span> <span style="color: #6b8e23;">/</span> <span style="color: #36648b;">IntVar</span>(<span style="color: #b8860b;">id</span>) <span style="color: #00008b;">=&gt;</span>
+  <span style="color: #00008b;">for</span> {
+    has <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>.ask[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">HasDatabase</span>]
+    joke <span style="color: #00008b;">&lt;-</span> log.infoF(s<span style="color: #8b0000;">"getting joke </span><span style="color: #b8860b;">$id</span><span style="color: #8b0000;">"</span>) *&gt; <span style="color: #6b8e23;">Kleisli</span>.liftF(
+      <span style="color: #6b8e23;">IO</span>.shift(<span style="color: #6b8e23;">IO</span>.contextShift(<span style="color: #6b8e23;">ExecutionContext</span>.global))
+    ) *&gt; has.transact(run(quote {
+      query[<span style="color: #6b8e23;">Dao</span>.<span style="color: #6b8e23;">Joke</span>].filter(<span style="color: #00008b;">_</span>.id == lift(id)).take(<span style="color: #6b8e23;">1</span>)
+    }))
+    resp <span style="color: #00008b;">&lt;-</span> joke <span style="color: #00008b;">match</span> {
+      <span style="color: #00008b;">case</span> <span style="color: #b8860b;">a</span> <span style="color: #36648b;">::</span> <span style="color: #6b8e23;">Nil</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Ok</span>(a)
+      <span style="color: #00008b;">case</span> <span style="color: #00008b;">_</span>        <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">NotFound</span>(id)
+    }
+  } <span style="color: #00008b;">yield</span> resp
+</pre>
+</div>
+
+<p>
+Let's add some feature to it, for instance, if there is no joke in database, how about
+randomly generate some dad joke? And we like 50% of users can see random joke instead of hitting <code>NotFound</code>
+</p>
+
+<p>
+To prepare a feature toggle in Finagle, you have to put a file in directory
+<code>src/main/resources/com/twitter/toggles/configs/com.your.domain.http4sexample.json</code>.
+where <code>com.your.domain.http4sexample</code> is your application package.
+</p>
+
+<p>
+And then put in the toggle:
+</p>
+<div class="org-src-container">
+<pre class="src src-json">{
+  "toggles": [
+    {
+      "id": "com.your.domain.http4sexample.useDadJoke",
+      "description": "random generate dad joke",
+      "fraction": 0.5
+    }
+  ]
+}
+</pre>
+</div>
+
+<p>
+It is good practice to have <code>id</code> naming with proper namespace too.
+</p>
+
+<p>
+<code>0.5</code> fraction means there will be 50% chance for the toggle to be on status.
+</p>
+
+<p>
+How can we use this toggle in source code?<label for="4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="4" class="margin-toggle"/><span class="sidenote">
+<a href="https://github.com/jcouyang/http4s-example/blob/master/src/main/scala/com/your/domain/http4sexample/resource/toggle.scala#L9">https://github.com/jcouyang/http4s-example/blob/master/src/main/scala/com/your/domain/http4sexample/resource/toggle.scala#L9</a> 
+</span>
+</p>
+
+<p>
+Inject <code>HasToggle</code> effect
+</p>
+<div class="org-src-container">
+<pre class="src src-diff">- has &lt;- Kleisli.ask[IO, HasDatabase]
++ has &lt;- Kleisli.ask[IO, HasDatabase with HasToggle]
+</pre>
+</div>
+
+<p>
+Switch on the toggle
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span id="coderef-declare" class="coderef-off"><span class="linenr">1: </span>dadJoke <span style="color: #00008b;">=</span>                             <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (declare)</span>
+<span class="linenr">2: </span>  <span style="color: #00008b;">if</span> (has.toggleOn(<span style="color: #8b0000;">"com.your.domain.http4sexample.useDadJoke"</span>))
+<span class="linenr">3: </span>    log.infoF(s<span style="color: #8b0000;">"cannot find joke </span><span style="color: #b8860b;">$id</span><span style="color: #8b0000;">"</span>) *&gt; dadJokeApp.flatMap(<span style="color: #6b8e23;">NotFound</span>(<span style="color: #00008b;">_</span>))
+<span class="linenr">4: </span>  <span style="color: #00008b;">else</span>
+<span class="linenr">5: </span>    <span style="color: #6b8e23;">NotFound</span>(id)
+<span class="linenr">6: </span>resp <span style="color: #00008b;">&lt;-</span> joke <span style="color: #00008b;">match</span> {
+<span class="linenr">7: </span>  <span style="color: #00008b;">case</span> <span style="color: #b8860b;">a</span> <span style="color: #36648b;">::</span> <span style="color: #6b8e23;">Nil</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Ok</span>(a)
+<span id="coderef-usage" class="coderef-off"><span class="linenr">8: </span>  <span style="color: #00008b;">case</span> <span style="color: #00008b;">_</span>        <span style="color: #00008b;">=&gt;</span> dadJoke            <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (usage)</span>
+<span class="linenr">9: </span>}
+</pre>
+</div>
+<p>
+<code>dadJokeApp</code> is a HTTP effect which call another API, we will go through later.
+</p>
+
+<p>
+Here is another advantage of FP over Imperative Programming, <a href="#coderef-declare" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-declare');" onmouseout="CodeHighlightOff(this, 'coderef-declare');"><code>dadJoke</code></a> is lazy and referential transparent, which means
+I can place it anywhere, and whenever I reference it will always be the same thing. While in Imperative Programming
+this won't be always true, i.e. when you declare a <code>val printlog = println("log")</code> it will execute immediately
+where it declared. But later on when you refer to <code>printlog</code>, it is not the same thing it was defined. Since
+the log is already print, it won't print again.
+</p>
+
+<p>
+So, simply declare a <code>dadJoke</code> won't execute <code>dadJokeApp</code> to actually send out the request.
+We can safely put it for later usage in <a href="#coderef-usage" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-usage');" onmouseout="CodeHighlightOff(this, 'coderef-usage');"><code>pattern matching</code></a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3bc4583" class="outline-3">
+<h3 id="org3bc4583">Random dad joke <code>GET /random-joke</code></h3>
+<div class="outline-text-3" id="text-org3bc4583">
+<p>
+To get a random dad joke remotely, you will need a Http client that talk connected to the remote host.
+</p>
+
+<p>
+Finagle Client is actually a RPC client, which means a client will bind to particular service.
+</p>
+
+<p>
+Assuming we have already define a <code>jokeClient</code> in <code>HasClient</code>, a dad joke endpoint will be as simple as:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">dadJokeApp</span> <span style="color: #00008b;">=</span>
+  <span style="color: #6b8e23;">Kleisli</span>.ask[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">HasClient</span>].flatMapF(<span style="color: #00008b;">_</span>.jokeClient.expect[<span style="color: #6b8e23;">DadJoke</span>](<span style="color: #8b0000;">"/"</span>))
+</pre>
+</div>
+
+<p>
+The client can be make from <code>resource/package.scala</code> and then inject into <code>AppResource</code>
+</p>
+<div class="org-src-container">
+<pre class="src src-scala">js <span style="color: #00008b;">&lt;-</span> http.mk(cfg.jokeService)
+</pre>
+</div>
+
+<p>
+where <code>cfg.jokeService</code> is <code>uri"https://icanhazdadjoke.com"</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgeaa213b" class="outline-3">
+<h3 id="orgeaa213b">Tracing Metrics and Logging</h3>
+<div class="outline-text-3" id="text-orgeaa213b">
+<p>
+Finagle already provide sophisticated tracing and metrics, zipkin tracing is by default enable,
+but it is sample rate is 0.1%, to verify it work, we could start the server with parameter
+</p>
+
+<pre class="example">
+&gt; sbt '~reStart -zipkin.initialSampleRate=1'
+</pre>
+
+<p>
+Sample rate 1 means 100% of trace will report to zipkin.
+</p>
+
+<pre class="example">
+curl localhost:8080/random-joke
+</pre>
+</div>
+<div id="outline-container-orgd20c5cb" class="outline-4">
+<h4 id="orgd20c5cb">Logging</h4>
+<div class="outline-text-4" id="text-orgd20c5cb">
+<p>
+You can see the server console will print something like:
+</p>
+<pre class="example">
+root [7cb6f08c27a8b33c.7cb6f08c27a8b33c&lt;:7cb6f08c27a8b33c finagle/netty4-2-2] INFO  c.y.d.h.r.joke - generating random joke
+root [7cb6f08c27a8b33c.7cb6f08c27a8b33c&lt;:7cb6f08c27a8b33c finagle/netty4-2-2] INFO  c.y.d.h.r.joke - getting dad joke...
+</pre>
+
+<p>
+The format of trace id is:
+</p>
+<pre class="example">
+           TRACE ID         SPAN ID           PARENT ID
+SERVICE A  7cb6f08c27a8b33c.7cb6f08c27a8b33c&lt;:7cb6f08c27a8b33c
+</pre>
+<p>
+Logs belong to the same request will print the exactly same <code>TRACE ID</code>
+</p>
+
+<p>
+Logger format can be adjusted in <code>src/main/resources/logback.xml</code>
+</p>
+<div class="org-src-container">
+<pre class="src src-xml">&lt;<span style="color: #6a5acd;">encoder</span>&gt;
+  &lt;<span style="color: #6a5acd;">pattern</span>&gt;[%X{trace.id} %thread] %highlight(%-5level) %cyan(%logger{15}) - %msg %n&lt;/<span style="color: #6a5acd;">pattern</span>&gt;
+&lt;/<span style="color: #6a5acd;">encoder</span>&gt;
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org77d0ca2" class="outline-4">
+<h4 id="org77d0ca2">Zipkin Tracing</h4>
+<div class="outline-text-4" id="text-org77d0ca2">
+<p>
+if you grab <code>7cb6f08c27a8b33c</code> and search as trace id in <code>localhost:9411</code>
+</p>
+
+
+<figure>
+<img src="https://www.evernote.com/l/ABdFXDYBcnBAFYGQ-8X_us6xcsq42kL2Vn0B/image.png" alt="image.png">
+
+</figure>
+
+<p>
+It will show the trace of the request, from the trace you can simply tell that
+our server took 3.321s to response, where 2.955s was spend in requesting <code>icanhazdadjoke.com</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbba24a6" class="outline-4">
+<h4 id="orgbba24a6"><span class="todo TODO">TODO</span> Prometheus Metrics</h4>
+</div>
+</div>
+
+
+
+<div id="outline-container-orgce0d5dd" class="outline-3">
+<h3 id="orgce0d5dd"><span class="todo TODO">TODO</span> Why Resource of resource</h3>
+</div>
+
+<div id="outline-container-org3a012c5" class="outline-3">
+<h3 id="org3a012c5"><span class="todo TODO">TODO</span> Test</h3>
+</div>
+<div id="outline-container-orge94b3ee" class="outline-3">
+<h3 id="orge94b3ee"><span class="todo TODO">TODO</span> Package and deploy</h3>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+follow the structure of <a href="https://guides.rubyonrails.org/getting_started.html">Getting Started with Rails</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+If you're using macOS Catalina follow <a href="https://nixos.org/manual/nix/stable/#sect-macos-installation">https://nixos.org/manual/nix/stable/#sect-macos-installation</a> 
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+Kleisli is also known as ReaderT <a href="https://blog.oyanglul.us/scala/into-the-readert-verse">https://blog.oyanglul.us/scala/into-the-readert-verse</a> 
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://github.com/jcouyang/http4s-example/blob/master/src/main/scala/com/your/domain/http4sexample/resource/toggle.scala#L9">https://github.com/jcouyang/http4s-example/blob/master/src/main/scala/com/your/domain/http4sexample/resource/toggle.scala#L9</a> 
+</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<footer>
+  <p>Author: Jichao Ouyang
+    <a class="github-button" href="https://github.com/sponsors/jcouyang" data-icon="octicon-heart" aria-label="Sponsor @jcouyang on GitHub">Sponsor</a>
+    <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
+    <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
+  </p>
+  <p>Created: 2020-09-20 Sun 00:00</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
+  <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
+</footer>
+</div>
+</body>
+</html>
