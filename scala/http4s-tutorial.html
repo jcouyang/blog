@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-09-20 Sun 01:50 -->
+<!-- 2020-11-07 Sat 01:43 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Http4s x Finagle Tutorial</title>
@@ -102,12 +102,12 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#orgd20c5cb">Logging</a></li>
 <li><a href="#org77d0ca2">Zipkin Tracing</a></li>
-<li><a href="#orgbba24a6"><span class="todo TODO">TODO</span> Prometheus Metrics</a></li>
+<li><a href="#orgbba24a6">Prometheus Metrics</a></li>
 </ul>
 </li>
-<li><a href="#orgce0d5dd"><span class="todo TODO">TODO</span> Why Resource of resource</a></li>
-<li><a href="#org3a012c5"><span class="todo TODO">TODO</span> Test</a></li>
-<li><a href="#orge94b3ee"><span class="todo TODO">TODO</span> Package and deploy</a></li>
+<li><a href="#orgce0d5dd">Why Resource of resource</a></li>
+<li><a href="#org3a012c5">Test</a></li>
+<li><a href="#orge94b3ee">Package and deploy</a></li>
 </ul>
 </li>
 </ul>
@@ -793,17 +793,10 @@ curl localhost:8080/random-joke
 You can see the server console will print something like:
 </p>
 <pre class="example">
-root [7cb6f08c27a8b33c.7cb6f08c27a8b33c&lt;:7cb6f08c27a8b33c finagle/netty4-2-2] INFO  c.y.d.h.r.joke - generating random joke
-root [7cb6f08c27a8b33c.7cb6f08c27a8b33c&lt;:7cb6f08c27a8b33c finagle/netty4-2-2] INFO  c.y.d.h.r.joke - getting dad joke...
+root [7cb6f08c27a8b33c finagle/netty4-2-2] INFO  c.y.d.h.r.joke - generating random joke
+root [7cb6f08c27a8b33c finagle/netty4-2-2] INFO  c.y.d.h.r.joke - getting dad joke...
 </pre>
 
-<p>
-The format of trace id is:
-</p>
-<pre class="example">
-           TRACE ID         SPAN ID           PARENT ID
-SERVICE A  7cb6f08c27a8b33c.7cb6f08c27a8b33c&lt;:7cb6f08c27a8b33c
-</pre>
 <p>
 Logs belong to the same request will print the exactly same <code>TRACE ID</code>
 </p>
@@ -840,21 +833,146 @@ our server took 3.321s to response, where 2.955s was spend in requesting <code>i
 </div>
 
 <div id="outline-container-orgbba24a6" class="outline-4">
-<h4 id="orgbba24a6"><span class="todo TODO">TODO</span> Prometheus Metrics</h4>
+<h4 id="orgbba24a6">Prometheus Metrics</h4>
+<div class="outline-text-4" id="text-orgbba24a6">
+<p>
+If you have <a href="https://prometheus.io">Prometheus</a> setup, scrap <code>localhost:9990/metrics</code> to get server and client metrics.
+</p>
 </div>
 </div>
-
+</div>
 
 
 <div id="outline-container-orgce0d5dd" class="outline-3">
-<h3 id="orgce0d5dd"><span class="todo TODO">TODO</span> Why Resource of resource</h3>
+<h3 id="orgce0d5dd">Why Resource of resource</h3>
+<div class="outline-text-3" id="text-orgce0d5dd">
+<p>
+The resource maker's type is slightly tricky because it is <code>Resource[IO, Resource[IO, AppResource]]</code>:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">mk</span>(<span style="color: #228b22;">implicit</span> ctx<span style="color: #00008b;">:</span> <span style="color: #36648b;">ContextShift</span>[<span style="color: #6b8e23;">IO</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Resource</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Resource</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">AppResource</span>]] <span style="color: #00008b;">=</span>
+  <span style="color: #00008b;">for</span> {
+    cfg <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Resource</span>.liftF(<span style="color: #6b8e23;">Config</span>.all.load[<span style="color: #6b8e23;">IO</span>])
+    js <span style="color: #00008b;">&lt;-</span> http.mk(cfg.jokeService)
+    db <span style="color: #00008b;">&lt;-</span> database.transactor
+  } <span style="color: #00008b;">yield</span> <span style="color: #6b8e23;">Resource</span>.make(<span style="color: #6b8e23;">IO</span> {
+    <span style="color: #00008b;">new</span> <span style="color: #36648b;">AppResource</span> {
+      <span style="color: #00008b;">val</span> <span style="color: #b8860b;">config</span> <span style="color: #00008b;">=</span> cfg
+      <span style="color: #00008b;">val</span> <span style="color: #b8860b;">jokeClient</span> <span style="color: #00008b;">=</span> js
+      <span style="color: #00008b;">val</span> <span style="color: #b8860b;">database</span> <span style="color: #00008b;">=</span> db
+    }
+  }) { res <span style="color: #00008b;">=&gt;</span>
+    res.logEval
+  }
+</pre>
+</div>
+
+<p>
+Why should we have nested Resource here?
+</p>
+
+<p>
+These are actually two different kinds of resource, the first level is whole server scope, all requests through this server share the
+same resource.
+</p>
+<ul class="org-ul">
+<li>config</li>
+<li>database</li>
+<li>HTTP client</li>
+</ul>
+
+<p>
+In another word, these resources are acquired when server start, closed when server close.
+And there are few resources not share across server, they are acquired when request arrived, closed when response sent:
+</p>
+<ul class="org-ul">
+<li>trace</li>
+<li>toggle</li>
+<li>logger</li>
+</ul>
+</div>
 </div>
 
 <div id="outline-container-org3a012c5" class="outline-3">
-<h3 id="org3a012c5"><span class="todo TODO">TODO</span> Test</h3>
+<h3 id="org3a012c5">Test</h3>
+<div class="outline-text-3" id="text-org3a012c5">
+<p>
+Once we implemented all CRUD endpoints for <code>/joke</code>, testing these endpoints actually are very easy via <a href="https://github.com/typelevel/scalacheck">ScalaCheck</a>
+property based testing:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span class="linenr"> 1: </span>property(<span style="color: #8b0000;">"CRUD"</span>) {
+<span id="coderef-testResource" class="coderef-off"><span class="linenr"> 2: </span>  <span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">appRes</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">TestAppResource</span>              <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (testResource)</span>
+<span class="linenr"> 3: </span>  forAll { (requestBody<span style="color: #00008b;">:</span> <span style="color: #36648b;">joke</span>.<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">Create</span>, updateBody<span style="color: #00008b;">:</span> <span style="color: #36648b;">joke</span>.<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">Create</span>) <span style="color: #00008b;">=&gt;</span>
+<span id="coderef-toggleOff" class="coderef-off"><span class="linenr"> 4: </span>    when(appRes.toggleMap.apply(useDadJokeToggleName))   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (toggleOff)</span>
+<span class="linenr"> 5: </span>      .thenReturn(<span style="color: #6b8e23;">Toggle</span>.off(useDadJokeToggleName))
+<span id="coderef-createDelete" class="coderef-off"><span class="linenr"> 6: </span>    createAndDelete(requestBody)                         <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (createDelete)</span>
+<span class="linenr"> 7: </span>      .use { id <span style="color: #00008b;">=&gt;</span>
+<span class="linenr"> 8: </span>        assertEquals(query(id).flatMap(<span style="color: #00008b;">_</span>.as[joke.<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">View</span>]).unsafeRunSync().text, requestBody.text)
+<span id="coderef-update" class="coderef-off"><span class="linenr"> 9: </span>        update(id, updateBody)                           <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (update)</span>
+<span class="linenr">10: </span>          .map(<span style="color: #00008b;">_</span> <span style="color: #00008b;">=&gt;</span> assertEquals(query(id).flatMap(<span style="color: #00008b;">_</span>.as[joke.<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">View</span>]).unsafeRunSync().text, updateBody.text))
+<span class="linenr">11: </span>      }
+<span id="coderef-execute" class="coderef-off"><span class="linenr">12: </span>      .unsafeRunSync()                                   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (execute)</span>
+<span class="linenr">13: </span>  }
+<span class="linenr">14: </span>}
+</pre>
 </div>
+
+<p>
+To test all CRUD we just need scalacheck to randomly generate arbitrary create request body and update request body.
+</p>
+
+<ol class="org-ol">
+<li>New a fake resource <a href="#coderef-testResource" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-testResource');" onmouseout="CodeHighlightOff(this, 'coderef-testResource');">TestAppResource</a>, defined in <code>SpecHelper.scala</code></li>
+<li>Don't forget to <a href="#coderef-toggleOff" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-toggleOff');" onmouseout="CodeHighlightOff(this, 'coderef-toggleOff');">toggle off</a> our fancy dad joke toggle</li>
+<li>Make <a href="#coderef-createDelete" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-createDelete');" onmouseout="CodeHighlightOff(this, 'coderef-createDelete');">create and delete</a> a resource so our test data will always clean after assertion</li>
+</ol>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">createAndDelete</span>(req<span style="color: #00008b;">:</span> <span style="color: #36648b;">joke</span>.<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">Create</span>)(<span style="color: #228b22;">implicit</span> router<span style="color: #00008b;">:</span> <span style="color: #36648b;">HttpApp</span>[<span style="color: #6b8e23;">IO</span>]) <span style="color: #00008b;">=</span>
+    <span style="color: #6b8e23;">Resource</span>.make[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">String</span>](create(req))(delete)
+</pre>
+</div>
+<ol class="org-ol">
+<li>Assert there will be a joke created</li>
+<li><a href="#coderef-update" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-update');" onmouseout="CodeHighlightOff(this, 'coderef-update');">Update the joke</a> and then query again to verify the data is updated</li>
+<li>Don't hesitate to <a href="#coderef-execute" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-execute');" onmouseout="CodeHighlightOff(this, 'coderef-execute');">unsafeRunSync</a> the Resource, it is OK to fail fast at runtime in test.</li>
+</ol>
+</div>
+</div>
+
 <div id="outline-container-orge94b3ee" class="outline-3">
-<h3 id="orge94b3ee"><span class="todo TODO">TODO</span> Package and deploy</h3>
+<h3 id="orge94b3ee">Package and deploy</h3>
+<div class="outline-text-3" id="text-orge94b3ee">
+<p>
+To package the server into a runable binary, simply:
+</p>
+<pre class="example">
+&gt; sbt bootstrap
+</pre>
+
+<p>
+To run:
+</p>
+<pre class="example">
+&gt; ./http4s-example
+</pre>
+
+<p>
+Package it to docker to ship to heroku or k8s
+</p>
+<pre class="example">
+&gt; docker build . -t http4s-example
+</pre>
+
+<p>
+The same way we can package and deploy migration scripts as well
+</p>
+
+<pre class="example">
+&gt; sbt db/bootstrap
+&gt; ./http4s-example-db-migration migrate
+</pre>
+</div>
 </div>
 </div>
 <div id="footnotes">
@@ -887,7 +1005,7 @@ Kleisli is also known as ReaderT <a href="https://blog.oyanglul.us/scala/into-th
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
-  <p>Created: 2020-09-20 Sun 00:00</p>
+  <p>Created: 2020-11-07 Sat 00:00</p>
   <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>

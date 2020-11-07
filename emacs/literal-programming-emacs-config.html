@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-09-20 Sun 01:49 -->
+<!-- 2020-11-07 Sat 01:43 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Literal Programming Emacs Configure Literal Programming Emacs Configure</title>
@@ -96,26 +96,35 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#org02d4946">ace jump mode</a></li>
 <li><a href="#org4b8b2b3">company</a></li>
+<li><a href="#orgc9ef2de">Dhall</a></li>
+<li><a href="#org74664b7">expand region</a></li>
+<li><a href="#org0ff80ab">Flyspell</a></li>
 <li><a href="#orgdf243df">forge</a></li>
 <li><a href="#orgeaa6d1c">helm</a></li>
-<li><a href="#org6272ceb">textmate</a></li>
 <li><a href="#orge225d43">ido</a></li>
-<li><a href="#orgdeeb58c">typescript</a></li>
+<li><a href="#orgda9622b">indent guide</a></li>
 <li><a href="#orgc755913">js2 mode</a></li>
-<li><a href="#orgbb6b389">on screen</a></li>
-<li><a href="#orgc50d928">org mode</a></li>
 <li><a href="#orgd6632e7">key chord</a></li>
+<li><a href="#org92bbc02">Langtool</a></li>
+<li><a href="#org24c81d4">ligature</a></li>
 <li><a href="#orgf22d552">magit</a></li>
 <li><a href="#org296f121">multi cursor</a></li>
-<li><a href="#org74664b7">expand region</a></li>
+<li><a href="#org0609d1b">Nya mode</a></li>
+<li><a href="#orgbb6b389">on screen</a></li>
+<li><a href="#orgc50d928">org mode</a></li>
 <li><a href="#org50a9826">pallet</a></li>
-<li><a href="#org2519d20">PureScript</a></li>
-<li><a href="#orgfe62dd8">smartparens</a></li>
-<li><a href="#org978d772">Scala Metals</a></li>
-<li><a href="#org0ff80ab">Flyspell</a></li>
-<li><a href="#org92bbc02">Langtool</a></li>
 <li><a href="#orgfc69c8d">prompt</a></li>
 <li><a href="#org0104261">PureScript</a></li>
+<li><a href="#org1b45ce1">PureScript</a></li>
+<li><a href="#org74520ee">rainbow delimiter</a></li>
+<li><a href="#org15235be">Restclient</a></li>
+<li><a href="#org978d772">Scala Metals</a></li>
+<li><a href="#org5fdfeb2">shell-mode</a></li>
+<li><a href="#orgfe62dd8">smartparens</a></li>
+<li><a href="#org6272ceb">textmate</a></li>
+<li><a href="#org6a9ef08">undo tree</a></li>
+<li><a href="#orgb92ede1">unicode</a></li>
+<li><a href="#org1fd315b">which key</a></li>
 <li><a href="#orgc15caed">yasnippet</a></li>
 </ul>
 </li>
@@ -142,16 +151,15 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-
 <div id="outline-container-org2fbb33e" class="outline-3">
 <h3 id="org2fbb33e">Fonts</h3>
 <div class="outline-text-3" id="text-org2fbb33e">
 <p>
-download <a href="https://larsenwork.com/monoid/">monoid</a> font
+Download <a href="https://www.jetbrains.com/lp/mono/">JetBrain Mono</a> font.
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00008b;">if</span> (member <span style="color: #8b0000;">"Monoid"</span> (font-family-list))
-    (set-default-font <span style="color: #8b0000;">"Monoid-14:width=condensed:weight=light"</span>))
+<pre class="src src-emacs-lisp">(<span style="color: #00008b;">if</span> (member <span style="color: #8b0000;">"JetBrains Mono"</span> (font-family-list))
+    (set-frame-font <span style="color: #8b0000;">"JetBrains Mono Light 14"</span>))
 
 (<span style="color: #00008b;">when</span> (eq system-type 'gnu/linux)
   (<span style="color: #00008b;">dolist</span> (charset '(kana han symbol cjk-misc bopomofo))
@@ -178,14 +186,12 @@ download <a href="https://larsenwork.com/monoid/">monoid</a> font
 (menu-bar-mode -1)
 (delete-selection-mode 1)
 (global-auto-revert-mode 1)
-(nyan-mode t)
 (electric-indent-mode t)
 (<span style="color: #00008b;">setq-default</span>
  make-backup-files nil
  indent-tabs-mode nil)
 <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">make unix lineendings default</span>
-(unicode-fonts-setup)
-(<span style="color: #00008b;">setq</span> default-buffer-file-coding-system 'utf-8-unix)
+ (<span style="color: #00008b;">setq</span> default-buffer-file-coding-system 'utf-8-unix)
 (<span style="color: #00008b;">when</span> (eq system-type 'darwin)
   (<span style="color: #00008b;">setq</span> mac-option-modifier 'alt)
   (<span style="color: #00008b;">setq</span> mac-option-modifier 'super) <span style="color: #8c8c8c; font-style: italic;">; </span><span style="color: #8c8c8c; font-style: italic;">make opt key do Super</span>
@@ -223,6 +229,7 @@ You can move your cursor to ANY position ( across window and frame ) in emacs by
 
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(use-package ace-jump-mode
+<span style="color: #228b22;">:ensure</span> t
 <span style="color: #228b22;">:bind</span>
 (<span style="color: #8b0000;">"C-c SPC"</span> . ace-jump-mode)
 (<span style="color: #8b0000;">"C-c u SPC"</span> . ace-jump-mode-pop-mark)
@@ -244,7 +251,71 @@ text completion framework
   <span style="color: #228b22;">:config</span>
    (add-hook 'after-init-hook 'global-company-mode)
    )
+</pre>
+</div>
+</div>
+</div>
 
+<div id="outline-container-orgc9ef2de" class="outline-3">
+<h3 id="orgc9ef2de">Dhall</h3>
+<div class="outline-text-3" id="text-orgc9ef2de">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(use-package dhall-mode
+  <span style="color: #228b22;">:ensure</span> t
+  <span style="color: #228b22;">:config</span>
+  (<span style="color: #00008b;">setq</span>
+    <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">uncomment the next line to disable automatic format</span>
+    <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">dhall-format-at-save nil</span>
+
+    <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">comment the next line to use unicode syntax</span>
+    <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">dhall-format-arguments (\` ("--ascii"))</span>
+
+    <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">header-line is obsoleted by lsp-mode</span>
+    dhall-use-header-line nil))
+
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org74664b7" class="outline-3">
+<h3 id="org74664b7">expand region</h3>
+<div class="outline-text-3" id="text-org74664b7">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(use-package expand-region
+<span style="color: #228b22;">:bind</span>
+(<span style="color: #8b0000;">"C-8"</span> . er/expand-region)
+(<span style="color: #8b0000;">"C--"</span> . er/contract-region))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0ff80ab" class="outline-3">
+<h3 id="org0ff80ab">Flyspell</h3>
+<div class="outline-text-3" id="text-org0ff80ab">
+<p>
+wsdf sjd js is
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (use-package flycheck
+<span style="color: #228b22;">:ensure</span> t
+    <span style="color: #228b22;">:init</span>
+    (global-flycheck-mode)
+<span style="color: #228b22;">:config</span>
+    (<span style="color: #00008b;">dolist</span> (hook '(text-mode-hook))
+      (add-hook hook (<span style="color: #00008b;">lambda</span> () 
+(flyspell-mode 1)
+(add-to-list 'company-backends 'company-ispell)
+(message <span style="color: #8b0000;">"company-ispell enable"</span>)
+)
+))
+    (<span style="color: #00008b;">dolist</span> (hook '(prog-mode-hook))
+      (add-hook hook (<span style="color: #00008b;">lambda</span> () 
+(flyspell-prog-mode)
+(<span style="color: #00008b;">setq</span> company-backends (delete 'company-ispell company-backends))
+(message <span style="color: #8b0000;">"company-ispell disable"</span>)
+)))
+)
 </pre>
 </div>
 </div>
@@ -254,8 +325,8 @@ text completion framework
 <h3 id="orgdf243df">forge</h3>
 <div class="outline-text-3" id="text-orgdf243df">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(use-package forge
-<span style="color: #228b22;">:after</span> magit)
+<pre class="src src-emacs-lisp"><span style="color: #8c8c8c; font-style: italic;">;;</span><span style="color: #8c8c8c; font-style: italic;">(use-package forge</span>
+<span style="color: #8c8c8c; font-style: italic;">;;</span><span style="color: #8c8c8c; font-style: italic;">:after magit)</span>
 </pre>
 </div>
 </div>
@@ -305,33 +376,10 @@ text completion framework
   projectile-completion-system 'helm))
 
   (use-package helm-projectile
+<span style="color: #228b22;">:ensure</span> t
     <span style="color: #228b22;">:config</span>
     (helm-projectile-on)
     )
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org6272ceb" class="outline-3">
-<h3 id="org6272ceb">textmate</h3>
-<div class="outline-text-3" id="text-org6272ceb">
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(use-package textmate
-<span style="color: #228b22;">:config</span>
-(textmate-mode)
-(bind-keys
- <span style="color: #228b22;">:map</span> *textmate-mode-map*
- (<span style="color: #8b0000;">"M--"</span> . text-scale-decrease)
- (<span style="color: #8b0000;">"M-="</span> . text-scale-increase)
- (<span style="color: #8b0000;">"M-}"</span> . textmate-shift-right)
- (<span style="color: #8b0000;">"M-c M-t"</span> . textmate-clear-cache)
- (<span style="color: #8b0000;">"M-&lt;backspace&gt;"</span> . kill-whole-line)
- (<span style="color: #8b0000;">"M-c"</span> . kill-ring-save)
- (<span style="color: #8b0000;">"M-{"</span> . textmate-shift-left)
- (<span style="color: #8b0000;">"M-/"</span> . comment-line)
- (<span style="color: #8b0000;">"M-l"</span> . textmate-select-line)
- ))
 </pre>
 </div>
 </div>
@@ -352,36 +400,12 @@ text completion framework
 </div>
 </div>
 
-<div id="outline-container-orgdeeb58c" class="outline-3">
-<h3 id="orgdeeb58c">typescript</h3>
-<div class="outline-text-3" id="text-orgdeeb58c">
+<div id="outline-container-orgda9622b" class="outline-3">
+<h3 id="orgda9622b">indent guide</h3>
+<div class="outline-text-3" id="text-orgda9622b">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00008b;">defun</span> <span style="color: #6a5acd;">setup-tide-mode</span> ()
-   (<span style="color: #00008b;">interactive</span>)
-   (tide-setup)
-   (flycheck-mode +1)
-   (<span style="color: #00008b;">setq</span> flycheck-check-syntax-automatically '(save mode-enabled))
-   (eldoc-mode +1)
-   (tide-hl-identifier-mode +1)
-   <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">company is an optional dependency. You have to</span>
-   <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">install it separately via package-install</span>
-   <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">`M-x package-install [ret] company`</span>
-   (company-mode +1))
-
- <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">aligns annotation to the right hand side</span>
- (<span style="color: #00008b;">setq</span> company-tooltip-align-annotations t)
-
- <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">formats the buffer before saving</span>
-
-
- (add-hook 'typescript-mode-hook #'setup-tide-mode)
- (<span style="color: #00008b;">require</span> '<span style="color: #6b8e23;">web-mode</span>)
-(add-to-list 'auto-mode-alist '(<span style="color: #8b0000;">"\\.tsx\\'"</span> . web-mode))
-(add-hook 'web-mode-hook
-         (<span style="color: #00008b;">lambda</span> ()
-           (<span style="color: #00008b;">when</span> (<span style="color: #00008b;">and</span> (buffer-file-name)
-(string-equal <span style="color: #8b0000;">"tsx"</span> (file-name-extension buffer-file-name)))
-             (setup-tide-mode))))
+<pre class="src src-emacs-lisp">(use-package indent-guide
+<span style="color: #228b22;">:hook</span> (prog-mode . indent-guide-mode))
 </pre>
 </div>
 </div>
@@ -415,12 +439,127 @@ text completion framework
 </div>
 </div>
 
+<div id="outline-container-orgd6632e7" class="outline-3">
+<h3 id="orgd6632e7">key chord</h3>
+<div class="outline-text-3" id="text-orgd6632e7">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (use-package key-chord
+    <span style="color: #228b22;">:config</span>
+    (key-chord-mode 1)
+    (<span style="color: #00008b;">setq</span> key-chord-two-keys-delay 0.03)
+    (key-chord-define-global <span style="color: #8b0000;">"vr"</span>     'vr/replace)
+    (key-chord-define-global <span style="color: #8b0000;">"ln"</span>     'display-line-numbers-mode)
+    (key-chord-define-global <span style="color: #8b0000;">",."</span>     <span style="color: #8b0000;">"&lt;&gt;\C-b"</span>)
+)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org92bbc02" class="outline-3">
+<h3 id="org92bbc02">Langtool</h3>
+<div class="outline-text-3" id="text-org92bbc02">
+<p>
+Install LanguageTool version 3.0 or later (and java) <a href="https://languagetool.org/">https://languagetool.org/</a>
+</p>
+
+<p>
+extract them into <code>/usr/local/share/LanguageTool</code>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(use-package langtool
+<span style="color: #228b22;">:config</span>
+(<span style="color: #00008b;">setq</span> langtool-language-tool-jar <span style="color: #8b0000;">"/usr/local/share/LanguageTool/languagetool-commandline.jar"</span>
+      langtool-disabled-rules '(<span style="color: #8b0000;">"WHITESPACE_RULE"</span>
+                                <span style="color: #8b0000;">"EN_UNPAIRED_BRACKETS"</span>
+                                <span style="color: #8b0000;">"COMMA_PARENTHESIS_WHITESPACE"</span>
+                                <span style="color: #8b0000;">"EN_QUOTES"</span>)
+      langtool-default-language <span style="color: #8b0000;">"en-US"</span>)
+)
+
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org24c81d4" class="outline-3">
+<h3 id="org24c81d4">ligature</h3>
+<div class="outline-text-3" id="text-org24c81d4">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00008b;">when</span> (cl-search <span style="color: #8b0000;">"27."</span> (emacs-version))
+  (use-package ligature
+    <span style="color: #228b22;">:ensure</span> t
+    <span style="color: #228b22;">:init</span>
+    (ligature-set-ligatures 'prog-mode '(<span style="color: #8b0000;">"|||&gt;"</span> <span style="color: #8b0000;">"&lt;|||"</span> <span style="color: #8b0000;">"&lt;==&gt;"</span> <span style="color: #8b0000;">"&lt;!--"</span> <span style="color: #8b0000;">"####"</span> <span style="color: #8b0000;">"~~&gt;"</span> <span style="color: #8b0000;">"***"</span> <span style="color: #8b0000;">"||="</span> <span style="color: #8b0000;">"||&gt;"</span>
+                                         <span style="color: #8b0000;">":::"</span> <span style="color: #8b0000;">"::="</span> <span style="color: #8b0000;">"=:="</span> <span style="color: #8b0000;">"==="</span> <span style="color: #8b0000;">"==&gt;"</span> <span style="color: #8b0000;">"=!="</span> <span style="color: #8b0000;">"=&gt;&gt;"</span> <span style="color: #8b0000;">"=&lt;&lt;"</span> <span style="color: #8b0000;">"=/="</span> <span style="color: #8b0000;">"!=="</span>
+                                         <span style="color: #8b0000;">"!!."</span> <span style="color: #8b0000;">"&gt;=&gt;"</span> <span style="color: #8b0000;">"&gt;&gt;="</span> <span style="color: #8b0000;">"&gt;&gt;&gt;"</span> <span style="color: #8b0000;">"&gt;&gt;-"</span> <span style="color: #8b0000;">"&gt;-&gt;"</span> <span style="color: #8b0000;">"-&gt;&gt;"</span> <span style="color: #8b0000;">"--&gt;"</span> <span style="color: #8b0000;">"---"</span> <span style="color: #8b0000;">"-&lt;&lt;"</span>
+                                         <span style="color: #8b0000;">"&lt;~~"</span> <span style="color: #8b0000;">"&lt;~&gt;"</span> <span style="color: #8b0000;">"&lt;*&gt;"</span> <span style="color: #8b0000;">"&lt;||"</span> <span style="color: #8b0000;">"&lt;|&gt;"</span> <span style="color: #8b0000;">"&lt;$&gt;"</span> <span style="color: #8b0000;">"&lt;=="</span> <span style="color: #8b0000;">"&lt;=&gt;"</span> <span style="color: #8b0000;">"&lt;=&lt;"</span> <span style="color: #8b0000;">"&lt;-&gt;"</span>
+                                         <span style="color: #8b0000;">"&lt;--"</span> <span style="color: #8b0000;">"&lt;-&lt;"</span> <span style="color: #8b0000;">"&lt;&lt;="</span> <span style="color: #8b0000;">"&lt;&lt;-"</span> <span style="color: #8b0000;">"&lt;&lt;&lt;"</span> <span style="color: #8b0000;">"&lt;+&gt;"</span> <span style="color: #8b0000;">"&lt;/&gt;"</span> <span style="color: #8b0000;">"###"</span> <span style="color: #8b0000;">"#_("</span> <span style="color: #8b0000;">"..&lt;"</span>
+                                         <span style="color: #8b0000;">"..."</span> <span style="color: #8b0000;">"+++"</span> <span style="color: #8b0000;">"/=="</span> <span style="color: #8b0000;">"///"</span> <span style="color: #8b0000;">"_|_"</span> <span style="color: #8b0000;">"www"</span> <span style="color: #8b0000;">"&amp;&amp;"</span> <span style="color: #8b0000;">"^="</span> <span style="color: #8b0000;">"~~"</span> <span style="color: #8b0000;">"~@"</span> <span style="color: #8b0000;">"~="</span>
+                                         <span style="color: #8b0000;">"~&gt;"</span> <span style="color: #8b0000;">"~-"</span> <span style="color: #8b0000;">"**"</span> <span style="color: #8b0000;">"*&gt;"</span> <span style="color: #8b0000;">"*/"</span> <span style="color: #8b0000;">"||"</span> <span style="color: #8b0000;">"|}"</span> <span style="color: #8b0000;">"|]"</span> <span style="color: #8b0000;">"|="</span> <span style="color: #8b0000;">"|&gt;"</span> <span style="color: #8b0000;">"|-"</span> <span style="color: #8b0000;">"{|"</span>
+                                         <span style="color: #8b0000;">"[|"</span> <span style="color: #8b0000;">"]#"</span> <span style="color: #8b0000;">"::"</span> <span style="color: #8b0000;">":="</span> <span style="color: #8b0000;">":&gt;"</span> <span style="color: #8b0000;">":&lt;"</span> <span style="color: #8b0000;">"$&gt;"</span> <span style="color: #8b0000;">"=="</span> <span style="color: #8b0000;">"=&gt;"</span> <span style="color: #8b0000;">"!="</span> <span style="color: #8b0000;">"!!"</span> <span style="color: #8b0000;">"&gt;:"</span>
+                                         <span style="color: #8b0000;">"&gt;="</span> <span style="color: #8b0000;">"&gt;&gt;"</span> <span style="color: #8b0000;">"&gt;-"</span> <span style="color: #8b0000;">"-~"</span> <span style="color: #8b0000;">"-|"</span> <span style="color: #8b0000;">"-&gt;"</span> <span style="color: #8b0000;">"--"</span> <span style="color: #8b0000;">"-&lt;"</span> <span style="color: #8b0000;">"&lt;~"</span> <span style="color: #8b0000;">"&lt;*"</span> <span style="color: #8b0000;">"&lt;|"</span> <span style="color: #8b0000;">"&lt;:"</span>
+                                         <span style="color: #8b0000;">"&lt;$"</span> <span style="color: #8b0000;">"&lt;="</span> <span style="color: #8b0000;">"&lt;&gt;"</span> <span style="color: #8b0000;">"&lt;-"</span> <span style="color: #8b0000;">"&lt;&lt;"</span> <span style="color: #8b0000;">"&lt;+"</span> <span style="color: #8b0000;">"&lt;/"</span> <span style="color: #8b0000;">"#{"</span> <span style="color: #8b0000;">"#["</span> <span style="color: #8b0000;">"#:"</span> <span style="color: #8b0000;">"#="</span> <span style="color: #8b0000;">"#!"</span>
+                                         <span style="color: #8b0000;">"##"</span> <span style="color: #8b0000;">"#("</span> <span style="color: #8b0000;">"#?"</span> <span style="color: #8b0000;">"#_"</span> <span style="color: #8b0000;">"%%"</span> <span style="color: #8b0000;">".="</span> <span style="color: #8b0000;">".-"</span> <span style="color: #8b0000;">".."</span> <span style="color: #8b0000;">".?"</span> <span style="color: #8b0000;">"+&gt;"</span> <span style="color: #8b0000;">"++"</span> <span style="color: #8b0000;">"?:"</span>
+                                         <span style="color: #8b0000;">"?="</span> <span style="color: #8b0000;">"?."</span> <span style="color: #8b0000;">"??"</span> <span style="color: #8b0000;">";;"</span> <span style="color: #8b0000;">"/*"</span> <span style="color: #8b0000;">"/="</span> <span style="color: #8b0000;">"/&gt;"</span> <span style="color: #8b0000;">"//"</span> <span style="color: #8b0000;">"__"</span> <span style="color: #8b0000;">"~~"</span> <span style="color: #8b0000;">"(*"</span> <span style="color: #8b0000;">"*)"</span>
+                                         <span style="color: #8b0000;">"\\"</span> <span style="color: #8b0000;">"://"</span>))
+    (global-ligature-mode t))
+  )
+
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf22d552" class="outline-3">
+<h3 id="orgf22d552">magit</h3>
+<div class="outline-text-3" id="text-orgf22d552">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(use-package magit
+<span style="color: #228b22;">:bind</span>
+(<span style="color: #8b0000;">"C-x g"</span> . magit-status))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org296f121" class="outline-3">
+<h3 id="org296f121">multi cursor</h3>
+<div class="outline-text-3" id="text-org296f121">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(use-package multiple-cursors
+<span style="color: #228b22;">:bind</span>
+(<span style="color: #8b0000;">"C-&lt;"</span> . mc/mark-previous-like-this)
+ (<span style="color: #8b0000;">"C-&gt;"</span> . mc/mark-next-like-this)
+ (<span style="color: #8b0000;">"C-*"</span> . mc/mark-all-like-this))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0609d1b" class="outline-3">
+<h3 id="org0609d1b">Nya mode</h3>
+<div class="outline-text-3" id="text-org0609d1b">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(use-package nyan-mode
+<span style="color: #228b22;">:ensure</span> t
+<span style="color: #228b22;">:config</span> (nyan-mode t))
+</pre>
+</div>
+</div>
+</div>
+
 <div id="outline-container-orgbb6b389" class="outline-3">
 <h3 id="orgbb6b389">on screen</h3>
 <div class="outline-text-3" id="text-orgbb6b389">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(on-screen-global-mode 1)
-(<span style="color: #00008b;">setq</span> on-screen-highlight-method 'narrow-line)
+<pre class="src src-emacs-lisp">(use-package on-screen
+<span style="color: #228b22;">:ensure</span> t
+<span style="color: #228b22;">:config</span>
+(on-screen-global-mode 1)
+(<span style="color: #00008b;">setq</span> on-screen-highlight-method 'narrow-line))
+
 </pre>
 </div>
 </div>
@@ -430,12 +569,24 @@ text completion framework
 <h3 id="orgc50d928">org mode</h3>
 <div class="outline-text-3" id="text-orgc50d928">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00008b;">setq</span> org-startup-folded 'nofold)
-(<span style="color: #00008b;">setq</span> org-startup-indented t)
+<pre class="src src-emacs-lisp">(<span style="color: #00008b;">when</span> (cl-search <span style="color: #8b0000;">"27."</span> (emacs-version))
+  (<span style="color: #00008b;">require</span> '<span style="color: #6b8e23;">org-tempo</span>))
+(<span style="color: #00008b;">setq</span> org-startup-folded 'content)
+(<span style="color: #00008b;">setq</span> org-startup-indented nil)
 (<span style="color: #00008b;">setq</span> org-startup-with-inline-images t)
 (<span style="color: #00008b;">setq</span> org-startup-truncated t)
 (<span style="color: #00008b;">setq</span> org-src-tab-acts-natively t)
+
 (<span style="color: #00008b;">setq</span> js-indent-level 2)
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(use-package org-crypt
+<span style="color: #228b22;">:config</span> 
+(org-crypt-use-before-save-magic)
+(<span style="color: #00008b;">setq</span> org-crypt-key <span style="color: #8b0000;">"A506C38D5CC847D0DF01134ADA8B833B52604E63"</span>)
+(<span style="color: #00008b;">setq</span> org-tags-exclude-from-inheritance '(<span style="color: #8b0000;">"crypt"</span>))
+)
 </pre>
 </div>
 
@@ -479,58 +630,6 @@ text completion framework
 </div>
 </div>
 
-<div id="outline-container-orgd6632e7" class="outline-3">
-<h3 id="orgd6632e7">key chord</h3>
-<div class="outline-text-3" id="text-orgd6632e7">
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(use-package key-chord
-  <span style="color: #228b22;">:config</span>
-  (key-chord-mode 1)
-  (<span style="color: #00008b;">setq</span> key-chord-two-keys-delay 0.03))
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-orgf22d552" class="outline-3">
-<h3 id="orgf22d552">magit</h3>
-<div class="outline-text-3" id="text-orgf22d552">
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(use-package magit
-<span style="color: #228b22;">:bind</span>
-(<span style="color: #8b0000;">"C-x g"</span> . magit-status))
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org296f121" class="outline-3">
-<h3 id="org296f121">multi cursor</h3>
-<div class="outline-text-3" id="text-org296f121">
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(use-package multiple-cursors
-<span style="color: #228b22;">:bind</span>
-(<span style="color: #8b0000;">"C-&lt;"</span> . mc/mark-previous-like-this)
- (<span style="color: #8b0000;">"C-&gt;"</span> . mc/mark-next-like-this)
- (<span style="color: #8b0000;">"C-*"</span> . mc/mark-all-like-this))
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org74664b7" class="outline-3">
-<h3 id="org74664b7">expand region</h3>
-<div class="outline-text-3" id="text-org74664b7">
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(use-package expand-region
-<span style="color: #228b22;">:bind</span>
-(<span style="color: #8b0000;">"C-8"</span> . er/expand-region)
-(<span style="color: #8b0000;">"C--"</span> . er/contract-region))
-</pre>
-</div>
-</div>
-</div>
-
 <div id="outline-container-org50a9826" class="outline-3">
 <h3 id="org50a9826">pallet</h3>
 <div class="outline-text-3" id="text-org50a9826">
@@ -538,129 +637,6 @@ text completion framework
 <pre class="src src-emacs-lisp">(use-package pallet
 <span style="color: #228b22;">:config</span>
 (pallet-mode t))
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org2519d20" class="outline-3">
-<h3 id="org2519d20">PureScript</h3>
-<div class="outline-text-3" id="text-org2519d20">
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(use-package psc-ide
-<span style="color: #228b22;">:config</span>
-(add-hook 'purescript-mode-hook
-  (<span style="color: #00008b;">lambda</span> ()
-    (psc-ide-mode)
-    (company-mode)
-    (flycheck-mode)
-    (turn-on-purescript-indentation)))
-(<span style="color: #00008b;">setq</span> psc-ide-use-npm-bin t)
-)
-</pre>
-</div>
-</div>
-</div>
-<div id="outline-container-orgfe62dd8" class="outline-3">
-<h3 id="orgfe62dd8">smartparens</h3>
-<div class="outline-text-3" id="text-orgfe62dd8">
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(use-package smartparens-config
-  <span style="color: #228b22;">:config</span>
-   (smartparens-global-mode t)
-  (show-smartparens-global-mode t))
-
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org978d772" class="outline-3">
-<h3 id="org978d772">Scala Metals</h3>
-<div class="outline-text-3" id="text-org978d772">
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(use-package scala-mode
-  <span style="color: #228b22;">:mode</span> <span style="color: #8b0000;">"\\.s</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">(</span><span style="color: #8b0000;">cala</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">|</span><span style="color: #8b0000;">bt</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">)</span><span style="color: #8b0000;">$"</span>)
-
-(use-package sbt-mode
-  <span style="color: #228b22;">:commands</span> sbt-start sbt-command
-  <span style="color: #228b22;">:config</span>
-  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31</span>
-  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">allows using SPACE when in the minibuffer</span>
-  (substitute-key-definition
-   'minibuffer-complete-word
-   'self-insert-command
-   minibuffer-local-completion-map))
-
-<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable nice rendering of diagnostics like compile errors.</span>
-(use-package flycheck
-  <span style="color: #228b22;">:init</span> (global-flycheck-mode))
-
-(use-package lsp-mode
-  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Optional - enable lsp-mode automatically in scala files</span>
-  <span style="color: #228b22;">:hook</span> (scala-mode . lsp)
-  <span style="color: #228b22;">:config</span> (<span style="color: #00008b;">setq</span> lsp-prefer-flymake nil))
-
-(use-package lsp-ui)
-
-<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Add company-lsp backend for metals</span>
-(use-package company-lsp)
-</pre>
-</div>
-</div>
-</div>
-<div id="outline-container-org0ff80ab" class="outline-3">
-<h3 id="org0ff80ab">Flyspell</h3>
-<div class="outline-text-3" id="text-org0ff80ab">
-<p>
-wsdf sjd js is
-</p>
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">  (use-package flycheck
-    <span style="color: #228b22;">:init</span>
-    (global-flycheck-mode)
-<span style="color: #228b22;">:config</span>
-    (<span style="color: #00008b;">dolist</span> (hook '(text-mode-hook))
-      (add-hook hook (<span style="color: #00008b;">lambda</span> () 
-(flyspell-mode 1)
-(add-to-list 'company-backends 'company-ispell)
-(message <span style="color: #8b0000;">"company-ispell enable"</span>)
-)
-))
-    (<span style="color: #00008b;">dolist</span> (hook '(prog-mode-hook))
-      (add-hook hook (<span style="color: #00008b;">lambda</span> () 
-(flyspell-prog-mode)
-(<span style="color: #00008b;">setq</span> company-backends (delete 'company-ispell company-backends))
-(message <span style="color: #8b0000;">"company-ispell disable"</span>)
-)))
-)
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org92bbc02" class="outline-3">
-<h3 id="org92bbc02">Langtool</h3>
-<div class="outline-text-3" id="text-org92bbc02">
-<p>
-Install LanguageTool version 3.0 or later (and java) <a href="https://languagetool.org/">https://languagetool.org/</a>
-</p>
-
-<p>
-extract them into <code>/usr/local/share/LanguageTool</code>
-</p>
-
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(use-package langtool
-<span style="color: #228b22;">:config</span>
-(<span style="color: #00008b;">setq</span> langtool-language-tool-jar <span style="color: #8b0000;">"/usr/local/share/LanguageTool/languagetool-commandline.jar"</span>
-      langtool-disabled-rules '(<span style="color: #8b0000;">"WHITESPACE_RULE"</span>
-                                <span style="color: #8b0000;">"EN_UNPAIRED_BRACKETS"</span>
-                                <span style="color: #8b0000;">"COMMA_PARENTHESIS_WHITESPACE"</span>
-                                <span style="color: #8b0000;">"EN_QUOTES"</span>)
-      langtool-default-language <span style="color: #8b0000;">"en-US"</span>)
-)
-
 </pre>
 </div>
 </div>
@@ -691,11 +667,209 @@ extract them into <code>/usr/local/share/LanguageTool</code>
     (company-mode)
     (flycheck-mode)
     (turn-on-purescript-indentation)))
+(<span style="color: #00008b;">setq</span> psc-ide-use-npm-bin t)
 )
 </pre>
 </div>
 </div>
 </div>
+
+<div id="outline-container-org1b45ce1" class="outline-3">
+<h3 id="org1b45ce1">PureScript</h3>
+<div class="outline-text-3" id="text-org1b45ce1">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(use-package psc-ide
+<span style="color: #228b22;">:config</span>
+(add-hook 'purescript-mode-hook
+  (<span style="color: #00008b;">lambda</span> ()
+    (psc-ide-mode)
+    (company-mode)
+    (flycheck-mode)
+    (turn-on-purescript-indentation)))
+)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org74520ee" class="outline-3">
+<h3 id="org74520ee">rainbow delimiter</h3>
+<div class="outline-text-3" id="text-org74520ee">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(use-package rainbow-delimiters
+<span style="color: #228b22;">:hook</span> (prog-mode . rainbow-delimiters-mode))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org15235be" class="outline-3">
+<h3 id="org15235be">Restclient</h3>
+<div class="outline-text-3" id="text-org15235be">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (use-package restclient
+<span style="color: #228b22;">:config</span>
+(add-to-list 'company-backends 'company-restclient))
+  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">:config</span>
+  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">;</span>
+                                          <span style="color: #8c8c8c; font-style: italic;">; </span>
+  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">:hook (company-mode))</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org978d772" class="outline-3">
+<h3 id="org978d772">Scala Metals</h3>
+<div class="outline-text-3" id="text-org978d772">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable defer and ensure by default for use-package</span>
+<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Keep auto-save/backup files separate from source code:  https://github.com/scalameta/metals/issues/1027</span>
+(<span style="color: #00008b;">setq</span> use-package-always-defer t
+      use-package-always-ensure t
+      backup-directory-alist `((<span style="color: #8b0000;">".*"</span> . ,temporary-file-directory))
+      auto-save-file-name-transforms `((<span style="color: #8b0000;">".*"</span> ,temporary-file-directory t)))
+
+<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable scala-mode for highlighting, indentation and motion commands</span>
+(use-package scala-mode
+  <span style="color: #228b22;">:mode</span> <span style="color: #8b0000;">"\\.s</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">(</span><span style="color: #8b0000;">cala</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">|</span><span style="color: #8b0000;">bt</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">)</span><span style="color: #8b0000;">$"</span>)
+
+<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable sbt mode for executing sbt commands</span>
+(use-package sbt-mode
+  <span style="color: #228b22;">:commands</span> sbt-start sbt-command
+  <span style="color: #228b22;">:config</span>
+  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31</span>
+  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">allows using SPACE when in the minibuffer</span>
+  (substitute-key-definition
+   'minibuffer-complete-word
+   'self-insert-command
+   minibuffer-local-completion-map)
+   <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152</span>
+   (<span style="color: #00008b;">setq</span> sbt:program-options '(<span style="color: #8b0000;">"-Dsbt.supershell=false"</span>))
+)
+
+<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable nice rendering of diagnostics like compile errors.</span>
+(use-package flycheck
+  <span style="color: #228b22;">:init</span> (global-flycheck-mode))
+
+(use-package lsp-mode
+  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Optional - enable lsp-mode automatically in scala files</span>
+  <span style="color: #228b22;">:hook</span>  (scala-mode . lsp)
+         (lsp-mode . lsp-lens-mode)
+         (dhall-mode . lsp)
+  <span style="color: #228b22;">:config</span> (<span style="color: #00008b;">setq</span> lsp-prefer-flymake nil))
+
+<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Add metals backend for lsp-mode</span>
+(use-package lsp-metals)
+
+<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable nice rendering of documentation on hover</span>
+(use-package lsp-ui)
+
+<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">lsp-mode supports snippets, but in order for them to work you need to use yasnippet</span>
+<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">If you don't want to use snippets set lsp-enable-snippet to nil in your lsp-mode settings</span>
+<span style="color: #8c8c8c; font-style: italic;">;;   </span><span style="color: #8c8c8c; font-style: italic;">to avoid odd behavior with snippets and indentation</span>
+(use-package yasnippet)
+
+<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Add company-lsp backend for metals</span>
+(use-package company-lsp)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5fdfeb2" class="outline-3">
+<h3 id="org5fdfeb2">shell-mode</h3>
+<div class="outline-text-3" id="text-org5fdfeb2">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+
+(use-package shell-mode
+<span style="color: #228b22;">:hook</span> (shell-mode-hook . ansi-color-for-comint-mode-on)
+<span style="color: #228b22;">:config</span>
+(add-to-list 'comint-output-filter-functions 'ansi-color-process-output)
+)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgfe62dd8" class="outline-3">
+<h3 id="orgfe62dd8">smartparens</h3>
+<div class="outline-text-3" id="text-orgfe62dd8">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (use-package smartparens
+<span style="color: #228b22;">:ensure</span> t
+    <span style="color: #228b22;">:config</span>
+     (smartparens-global-mode t)
+    (show-smartparens-global-mode t))
+
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6272ceb" class="outline-3">
+<h3 id="org6272ceb">textmate</h3>
+<div class="outline-text-3" id="text-org6272ceb">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(use-package textmate
+<span style="color: #228b22;">:ensure</span> t
+<span style="color: #228b22;">:config</span>
+(textmate-mode)
+(bind-keys
+ <span style="color: #228b22;">:map</span> *textmate-mode-map*
+ (<span style="color: #8b0000;">"M--"</span> . text-scale-decrease)
+ (<span style="color: #8b0000;">"M-="</span> . text-scale-increase)
+ (<span style="color: #8b0000;">"M-}"</span> . textmate-shift-right)
+ (<span style="color: #8b0000;">"M-c M-t"</span> . textmate-clear-cache)
+ (<span style="color: #8b0000;">"M-&lt;backspace&gt;"</span> . kill-whole-line)
+ (<span style="color: #8b0000;">"M-c"</span> . kill-ring-save)
+ (<span style="color: #8b0000;">"M-{"</span> . textmate-shift-left)
+ (<span style="color: #8b0000;">"M-/"</span> . comment-line)
+ (<span style="color: #8b0000;">"M-l"</span> . textmate-select-line)
+ ))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6a9ef08" class="outline-3">
+<h3 id="org6a9ef08">undo tree</h3>
+<div class="outline-text-3" id="text-org6a9ef08">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(use-package undo-tree
+  <span style="color: #228b22;">:init</span> (global-undo-tree-mode))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgb92ede1" class="outline-3">
+<h3 id="orgb92ede1">unicode</h3>
+<div class="outline-text-3" id="text-orgb92ede1">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(use-package unicode-fonts
+   <span style="color: #228b22;">:ensure</span> t
+   <span style="color: #228b22;">:config</span>
+    (unicode-fonts-setup))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1fd315b" class="outline-3">
+<h3 id="org1fd315b">which key</h3>
+<div class="outline-text-3" id="text-org1fd315b">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">     (use-package which-key
+       <span style="color: #228b22;">:config</span>
+       (<span style="color: #00008b;">setq</span> which-key-use-C-h-commands t)
+       (<span style="color: #00008b;">setq</span> which-key-paging-key <span style="color: #8b0000;">"&lt;f5&gt;"</span>)
+)
+</pre>
+</div>
+</div>
+</div>
+
 <div id="outline-container-orgc15caed" class="outline-3">
 <h3 id="orgc15caed">yasnippet</h3>
 <div class="outline-text-3" id="text-orgc15caed">
