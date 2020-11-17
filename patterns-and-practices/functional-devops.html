@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2020-11-17 Tue 11:08 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Functional DevOps</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Jichao Ouyang">
+<meta name="keywords" content="Functional Programming,DevOps,Dhall,Nix,FP">
+<link rel="icon" href="/favicon.ico">
+<meta name="theme-color" content="#ffffff">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
+<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
+<meta property="og:title" content="Functional DevOps" />
+<meta property="og:type" content="article" />
+<meta content="https://blog.oyanglul.us/images/0day-accident.gif" property="og:image">
+<script type="text/javascript" src="https://blog.oyanglul.us/js/org-info.js">
+/**
+ *
+ * @source: https://blog.oyanglul.us/js/org-info.js
+ *
+ * @licstart  The following is the entire license notice for the
+ *  JavaScript code in https://blog.oyanglul.us/js/org-info.js.
+ *
+ * Copyright (C) 2012-2020 Free Software Foundation, Inc.
+ *
+ *
+ * The JavaScript code in this tag is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU
+ * General Public License (GNU GPL) as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option)
+ * any later version.  The code is distributed WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+ *
+ * As additional permission under GNU GPL version 3 section 7, you
+ * may distribute non-source (e.g., minimized or compacted) forms of
+ * that code without the copy of the GNU GPL normally required by
+ * section 4, provided you include this license notice and a URL
+ * through which recipients can access the Corresponding Source.
+ *
+ * @licend  The above is the entire license notice
+ * for the JavaScript code in https://blog.oyanglul.us/js/org-info.js.
+ *
+ */
+</script>
+
+<script type="text/javascript">
+
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+
+<!--/*--><![CDATA[/*><!--*/
+org_html_manager.set("TOC_DEPTH", "4");
+org_html_manager.set("LINK_HOME", "");
+org_html_manager.set("LINK_UP", "");
+org_html_manager.set("LOCAL_TOC", "1");
+org_html_manager.set("VIEW_BUTTONS", "0");
+org_html_manager.set("MOUSE_HINT", "underline");
+org_html_manager.set("FIXED_TOC", "0");
+org_html_manager.set("TOC", "1");
+org_html_manager.set("VIEW", "info");
+org_html_manager.setup();  // activate after the parameters are set
+/*]]>*///-->
+</script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="preamble" class="status">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJRFJGX"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header>
+    <a accesskey="h" href="/index.html"> HOME </a> |
+    <a href="#" id="edit-in-github">EDIT</a> |
+    <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
+    <a href="https://blog.oyanglul.us/theindex">INDEX</a> |
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
+</header>
+</div>
+<div id="content">
+<header>
+<h1 class="title">Functional DevOps</h1>
+</header><nav id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#functional-devops">Functional DevOps</a></li>
+<li><a href="#devops">Devops</a></li>
+<li><a href="#functional-programming">Functional Programming</a>
+<ul>
+<li><a href="#fp-vs-oo">FP vs OO</a></li>
+<li><a href="#is-this-oo">Is this OO?</a></li>
+</ul>
+</li>
+<li><a href="#infrastructure-as-code">Infrastructure as Code</a>
+<ul>
+<li><a href="#org09c3cd0">Code can be locked by commit</a></li>
+<li><a href="#so-the-more-things-you-can-factor-out-and-lock-the-more-predictable-result-you-will-get.">Lock everything where possible</a></li>
+</ul>
+</li>
+<li><a href="#fp-takes-no-assumptions">FP takes No assumptions</a></li>
+<li><a href="#nix">Nix</a>
+<ul>
+<li><a href="#immutable-vs-mutable">Immutable vs Mutable</a></li>
+<li><a href="#nixs-only-assumption">Nix's only assumption</a></li>
+<li><a href="#nix-shell">nix-shell</a></li>
+</ul>
+</li>
+<li><a href="#dhall">Dhall</a>
+<ul>
+<li><a href="#immutable">Immutable</a></li>
+<li><a href="#type-system">Type System</a></li>
+</ul>
+</li>
+<li><a href="#wrap-up">Wrap up</a></li>
+</ul>
+</div>
+</nav>
+
+<div id="outline-container-orgca08b83" class="outline-2">
+<h2 id="functional-devops">Functional DevOps</h2>
+<div class="outline-text-2" id="text-functional-devops">
+</div>
+</div>
+
+<div id="outline-container-orgc12ffff" class="outline-2">
+<h2 id="devops">Devops</h2>
+<div class="outline-text-2" id="text-devops">
+<div class="epigraph"><blockquote>
+<p>
+<b>DevOps</b> is a set of practices that combines <a href="https://en.wikipedia.org/wiki/Software_development">software development</a> (Dev) and
+<a href="https://en.wikipedia.org/wiki/IT_operations">IT operations</a> (Ops).
+It aims to shorten the
+<a href="https://en.wikipedia.org/wiki/Systems_development_life_cycle">systems
+development life cycle</a> and provide
+<a href="https://en.wikipedia.org/wiki/Continuous_delivery">continuous
+delivery</a> with high
+<a href="https://en.wikipedia.org/wiki/Software_quality">software quality</a>.
+&#x2014; <a href="https://en.wikipedia.org/wiki/DevOps">https://en.wikipedia.org/wiki/DevOps</a>
+</p>
+
+</blockquote></div>
+
+<p>
+So it is a set of practices. In another word, those yaml files in your
+repository will be Devops, and whoever create and make them run, is
+DevOps Engineer.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1c6b17d" class="outline-2">
+<h2 id="functional-programming">Functional Programming</h2>
+<div class="outline-text-2" id="text-functional-programming">
+<ul class="org-ul">
+<li>Referential Transparency</li>
+<li>Immutable</li>
+<li>Pure</li>
+<li>Function and Data segregation</li>
+</ul>
+</div>
+
+<div id="outline-container-orgbf0953f" class="outline-3">
+<h3 id="fp-vs-oo">FP vs OO</h3>
+<div class="outline-text-3" id="text-fp-vs-oo">
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">len</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Int</span>
+<span style="color: #6a5acd;">httpServer</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Request</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Response</span>
+</pre>
+</div>
+
+<p>
+Object contains internal state in memory and react differently base on
+the same input.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge4ea981" class="outline-3">
+<h3 id="is-this-oo">Is this OO?</h3>
+<div class="outline-text-3" id="text-is-this-oo">
+<pre class="example">
+httpServer :: Request -&gt; DBState -&gt; Response
+</pre>
+
+<div class="epigraph"><blockquote>
+<p>
+but the other function which retrieve the DBState will be stateful
+</p>
+
+</blockquote></div>
+
+<p>
+as long as you can factor out every thing that may be changed, you
+will get a pure function.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4bb0d10" class="outline-2">
+<h2 id="infrastructure-as-code"><a href="https://www.thoughtworks.com/radar#adolescence-of-infrastructure-as-code">Infrastructure as Code</a></h2>
+<div class="outline-text-2" id="text-infrastructure-as-code">
+
+<figure>
+<img src="https://paper-attachments.dropbox.com/s_57AB1806083E548AE8AB3A31935FB481380E6A828F40D016642DF3922BC7E794_1604039641363_image.png" alt="s_57AB1806083E548AE8AB3A31935FB481380E6A828F40D016642DF3922BC7E794_1604039641363_image.png">
+
+</figure>
+
+<p>
+So what are the variables we can factor out here?
+</p>
+
+<p>
+Ideally should be just one:
+</p>
+
+<ul class="org-ul">
+<li>Git commit</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #6a5acd;">genPipeline</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Commit</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Pipeline</span>
+</pre>
+</div>
+
+<p>
+🌏 the real world is not, unless buildkite agent and all scripts on it are versioned
+</p>
+</div>
+
+<div id="outline-container-org09c3cd0" class="outline-3">
+<h3 id="org09c3cd0">Code can be locked by commit</h3>
+<div class="outline-text-3" id="text-org09c3cd0">
+<p>
+So does infrastructure.
+One commit implicitly locks all other factors as well
+</p>
+
+<ul class="org-ul">
+<li>pipeline.dhall</li>
+<li>source code</li>
+<li>build.sbt</li>
+<li>Dockerfile</li>
+<li>&#x2026;</li>
+</ul>
+
+<p>
+And eventually each of them lock a bunch of factors behind as well
+</p>
+
+<p>
+For instance <code>build.sbt</code> will lock:
+</p>
+
+<ul class="org-ul">
+<li>sbt version</li>
+<li>jar dependency versions</li>
+<li>Scala version</li>
+<li>project configuration</li>
+</ul>
+
+<p>
+While <code>pipeline.dhall</code> will lock:
+</p>
+
+<ul class="org-ul">
+<li>steps of pipeline</li>
+<li>build agent for each steps</li>
+<li>environments</li>
+</ul>
+
+<p>
+Things out of control of pipeline.dhall will be like tools version on
+build agent, they are not locked unless the agent queue is also
+versioned.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgea93b2d" class="outline-3">
+<h3 id="so-the-more-things-you-can-factor-out-and-lock-the-more-predictable-result-you-will-get.">Lock everything where possible</h3>
+<div class="outline-text-3" id="text-so-the-more-things-you-can-factor-out-and-lock-the-more-predictable-result-you-will-get.">
+<p>
+So the more things you can factor out and lock, the more predictable
+result you will get.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8c16e6b" class="outline-2">
+<h2 id="fp-takes-no-assumptions">FP takes No assumptions</h2>
+<div class="outline-text-2" id="text-fp-takes-no-assumptions">
+<p>
+🌏 Let us see how to apply FP with some practical tools in real world.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1c5298f" class="outline-2">
+<h2 id="nix">Nix</h2>
+<div class="outline-text-2" id="text-nix">
+<div class="epigraph"><blockquote>
+<p>
+Nix is a purely functional package manager. This means that it treats
+packages like values in purely functional programming languages such
+as Haskell &#x2014; they are built by functions that don't have
+side-effects, and they never change after they have been built.
+</p>
+
+</blockquote></div>
+</div>
+
+<div id="outline-container-org7ff5882" class="outline-3">
+<h3 id="immutable-vs-mutable">Immutable vs Mutable</h3>
+<div class="outline-text-3" id="text-immutable-vs-mutable">
+<p>
+It is assuming your environment are all the same, consider the following
+factors when you do <code>brew install sbt</code>
+</p>
+
+<ul class="org-ul">
+<li>sbt version</li>
+<li>JRE version</li>
+<li>macOS version</li>
+<li><b><b>timing</b></b>, even your OS is exactly the same, when you run this command
+will result different</li>
+<li>What about your linux friend?</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org86bb07d" class="outline-3">
+<h3 id="nixs-only-assumption">Nix's only assumption</h3>
+<div class="outline-text-3" id="text-nixs-only-assumption">
+<pre class="example">
+# for mac
+nix-channel --add https://nixos.org/channels/nixpkgs-20.09-darwin nixpkgs
+# for linux
+nix-channel --add https://nixos.org/channels/nixos-20.09 nixpkgs
+nix-channel --update
+</pre>
+
+<p>
+Once everyone subscribes to the same channel, the version and binary of
+anything you installed should be exactly the same as everyone
+</p>
+
+<pre class="example">
+&gt; nix-env -i awscli
+&gt; nix-env --installed --query --out-path awscli
+awscli-1.18.80  /nix/store/2b2c56c44xi3gj4hvzcxcn1dp1lb579k-awscli-1.18.80
+</pre>
+
+<p>
+Give it a try, your awscli will be exactly the same as mine, even the
+path of the file is exactly the same noted that
+<code>2b2c56c44xi3gj4hvzcxcn1dp1lb579k</code> is the 160-bit MD5 checksum of the
+package dependencies which guarantee we all get the exactly same awscli.
+</p>
+
+<p>
+which means we are not even assuming python version, everything awscli
+dependencies will be exactly the same.
+</p>
+
+<pre class="example">
+&gt; nix-store -q --references /nix/store/2b2c56c44xi3gj4hvzcxcn1dp1lb579k-awscli-1.18.80
+/nix/store/my66alsy3dhj9iz9s3sq7c9sni1b1a2d-bash-4.4-p23
+/nix/store/vlmz2mfdagyr67l4jxyyaqb0h4p5amkw-python3-3.8.3
+/nix/store/15a0yz4aq63qrad41zzkmg3nwcpyqfq0-python3.8-pyasn1-0.4.8
+/nix/store/1rkxc2kilndrwz78m7z4v7q7h879aki1-python3.8-rsa-3.4.2
+/nix/store/2lwr1pggba24r6xv9hbsm98lbnjwikpq-python3.8-pyparsing-2.4.6
+/nix/store/5j2g0pj41vvqgpdpgv274wg36lhmk6fr-python3.8-simplejson-3.17.0
+/nix/store/7pr17zaxr133d6x1xhdbiw0f5c2qmdxr-python3.8-colorama-0.4.3
+/nix/store/ahfw2fzzjd23vfph4axnzxyzfy5myraw-python3.8-six-1.15.0
+/nix/store/8l35mr17gyh3qfyzxfiy0vqrz1nf9n6h-python3.8-packaging-20.4
+/nix/store/9r6cipwqmclb9b1dihzc8ggb02aq23rm-python3.8-idna-2.9
+/nix/store/cmjvb2hc62mcrliqwbyhrg2ksfxrwdhc-groff-1.22.4
+/nix/store/w6cql1fp236laf6ra11wr89mfk2nhl3v-python3.8-certifi-2020.4.5.1
+/nix/store/x0qrskv33x5l3a7j2r2p4mq83zpdyc58-python3.8-pysocks-1.7.1
+/nix/store/kdrmgvwbg2hcr4knd7iczfmr3in6023z-python3.8-urllib3-1.25.9
+/nix/store/vcc86ig5zwz72plx4pmmy8j1bng7ci79-python3.8-ply-3.11
+/nix/store/l9fn7w5a204wff11n2ss3881pikbsbnr-python3.8-jmespath-0.10.0
+/nix/store/mhg8p60av9yvsmlai9svcsm56a5dvgrc-python3.8-ordereddict-1.1
+/nix/store/q2znq8a16yrg0pxpxdyn1p3svf80b0v9-python3.8-docutils-0.16
+/nix/store/zvi4mf9pwcdjx2ypmafghbadwxjkqlsw-python3.8-setuptools_scm-4.1.2
+/nix/store/v9ny5zsw7a9zb2ldb3kp9mif3xikq121-python3.8-python-dateutil-2.8.1
+/nix/store/dk8iaj1dlhzp9x9pi2yp4b11jwmbz7pi-python3.8-botocore-1.17.3
+/nix/store/gb0gsnzwhj1l83654dkyp7vl061b0nn5-python3.8-PyYAML-5.3.1
+/nix/store/n2mn1a0pfn1adl1gcyjbc93s1fp74n9c-python3.8-pyOpenSSL-19.1.0
+/nix/store/nzl2dxim5l46rwnsqz624yzinjh39sm1-python3.8-bcdoc-0.16.0
+/nix/store/rwskkf31whpm0vj6z048s9aavlsdwn18-python3.8-cryptography-2.9.2
+/nix/store/vz7v3c2x9ps2k48h9dd4d8zqm5jpy9rg-less-551
+/nix/store/wbi1wqpr3kr7x0ds3gpc7v5m5blbswv7-python3.8-pycparser-2.20
+/nix/store/xzrndp7yz2b947vkx7b74vmavwqgqw2c-python3.8-s3transfer-0.3.3
+/nix/store/ylpx0r4zl51zs7kz3x2c9ak5b9w23z8y-python3.8-cffi-1.14.0
+/nix/store/2b2c56c44xi3gj4hvzcxcn1dp1lb579k-awscli-1.18.80
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org9a0ec01" class="outline-3">
+<h3 id="nix-shell">nix-shell</h3>
+<div class="outline-text-3" id="text-nix-shell">
+<p>
+If everyone is using brew, when you tell your friend to run
+</p>
+
+<pre class="example">
+sbt test
+</pre>
+
+<p>
+You have no idea your friend will have
+</p>
+
+<ul class="org-ul">
+<li>what version of sbt?</li>
+<li>what JRE version sbt is running on?</li>
+<li>what environment variables are in the context?</li>
+<li>are required dependencies spin up yet i.e. database?</li>
+</ul>
+
+<p>
+shell.nix
+</p>
+
+<pre class="example">
+with import &lt;nixpkgs&gt; {};
+mkShell {
+  shellHook = ''
+            source .buildkite/hooks/post-checkout
+            source .buildkite/hooks/pre-command
+            set +e
+            set -a
+            source app.env
+            set +a
+            source ./ops/bin/deps-up
+            '';
+  buildInputs = [
+    jq
+    kubectl
+    sbt
+    awscli
+    kustomize
+    gitAndTools.hub
+    dhall
+    dhall-json
+    dhall-bash
+  ];
+}
+</pre>
+
+<p>
+But if you <code>nix-shell</code> <code>--``run</code> <code>'``sbt test``'</code> You have no assumption
+on user's system other than <code>nix</code> Everyone with this command is
+guarantee to have exactly the same
+</p>
+
+<ul class="org-ul">
+<li>sbt</li>
+<li>JRE and everything which back sbt</li>
+<li>tools like Dhall aws hub etc.</li>
+<li>all source the required scripts and environment in <code>post-checkout</code></li>
+<li>has the same <code>app.env</code> sourced</li>
+<li>all deps services are up</li>
+</ul>
+
+<p>
+Wrap up as previous FP concept, nix-shell is something like a pure
+function
+</p>
+
+<pre class="example">
+nix-shell :: shell.nix -&gt; ConfigedRuntime
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9e18c48" class="outline-2">
+<h2 id="dhall">Dhall</h2>
+<div class="outline-text-2" id="text-dhall">
+<p>
+Nix makes sure your system is immutable and reproducible, there is
+another tool to make your Configuration immutable and reproducible as
+well.
+</p>
+
+<pre class="example">
+dhall :: xyz.dhall -&gt; configuration
+</pre>
+
+<div class="epigraph"><blockquote>
+<p>
+Dhall is a
+<a href="https://docs.dhall-lang.org/discussions/Programmable-configuration-files.html#">programmable
+configuration language</a> that you can think of as: JSON + functions +
+types + imports
+</p>
+
+<p>
+Dhall is a
+<a href="https://en.wikipedia.org/wiki/Total_functional_programming">"total"</a>
+functional programming language, which means that: - You can always
+type-check an expression in a finite amount of time - If an expression
+type-checks then evaluating that expression always succeeds in a
+finite amount of time
+</p>
+
+</blockquote></div>
+</div>
+
+<div id="outline-container-orge559734" class="outline-3">
+<h3 id="immutable">Immutable</h3>
+<div class="outline-text-3" id="text-immutable">
+<p>
+Similar concept of nix, Dhall locks configuration and its dependencies
+with crypto hash It is not simply take sha256 of config file, it takes
+sha256 of normalized config
+</p>
+
+<pre class="example">
+let bk =
+      https://raw.githubusercontent.com/jcouyang/buildkite.dhall/0.1.0/package.dhall sha256:3c5e9eb0182755e85c65d0b16a79b2b0f9614dcffde05151835e3b1daf587e20
+
+let scalaAgent = Some { queue = "ody-lab-scala" }
+
+let main = "master"
+
+in  [ bk.Steps.Command
+        bk.Command::{
+        , label = Some "lint"
+        , commands = [ "shellcheck -x ops/bin/*" ]
+        , agents = scalaAgent
+        }
+    , bk.Steps.Command
+        bk.Command::{
+        , label = Some "test dhall"
+        , commands = [ "echo '(./app.dhall).version' | dhall-to-bash" ]
+        , agents = scalaAgent
+        }
+    , bk.Steps.Wait bk.Wait.default
+    , bk.Steps.Command
+        bk.Command::{
+        , label = Some ":shipit:"
+        , commands = [ "./ops/bin/git-tag.sh", "./ops/bin/tag-release.sh" ]
+        , agents = scalaAgent
+        }
+    ]
+</pre>
+
+<p>
+The above Dhall file has hash
+<code>sha256:8ce5c8a0c0144bc5ff48b89087e5ef11c3523b4d28db1614ef7715cda1485154</code>
+</p>
+
+<p>
+Not matter how you refactor it, the hash won't change if the normalized
+value isn't change.
+</p>
+
+<pre class="example">
+let bk =
+      https://raw.githubusercontent.com/jcouyang/buildkite.dhall/0.1.0/package.dhall sha256:3c5e9eb0182755e85c65d0b16a79b2b0f9614dcffde05151835e3b1daf587e20
+
+let scalaAgent = Some { queue = "ody-lab-scala" }
+
+let main = "master"
+
+let lint =
+      bk.Command::{
+      , label = Some "lint"
+      , commands = [ "shellcheck -x ops/bin/*" ]
+      , agents = scalaAgent
+      }
+
+let test =
+      bk.Command::{
+      , label = Some "test dhall"
+      , commands = [ "echo '(./app.dhall).version' | dhall-to-bash" ]
+      , agents = scalaAgent
+      }
+
+let ship =
+      bk.Command::{
+      , label = Some ":shipit:"
+      , commands = [ "./ops/bin/git-tag.sh", "./ops/bin/tag-release.sh" ]
+      , agents = scalaAgent
+      }
+
+let wait = bk.Steps.Wait bk.Wait.default
+
+in  [ bk.Steps.Command lint
+    , bk.Steps.Command test
+    , wait
+    , bk.Steps.Command ship
+    ]
+</pre>
+
+<p>
+The refactor will result in exactly config as previous one, I'm 100%
+certain since the sha is exactly the same
+</p>
+
+<pre class="example">
+&gt; dhall hash &lt; .buildkite/pipeline.dhall
+sha256:8ce5c8a0c0144bc5ff48b89087e5ef11c3523b4d28db1614ef7715cda1485154
+</pre>
+
+<p>
+if any of the value actually changed, for instance I have a typo
+</p>
+
+<pre class="example">
+-       , commands = [ "shellcheck -x ops/bin/*" ]
++       , commands = [ "shellcheckasdf -x ops/bin/*" ]
+
+
+dhall hash &lt; .buildkite/pipeline.dhall
+sha256:a8182dd677567eb613dd953397ae23590ba8695f3307a71bcc5d928346314b7d
+</pre>
+
+<p>
+You can even tell what is going wrong by compare with the remote config
+at master branch
+</p>
+
+<pre class="example">
+dhall diff "./.buildkite/pipeline.dhall" "https://raw.githubusercontent.com/MYOB-Technology/odyssey/master/.buildkite/pipeline.dhall"
+[   &lt; …
+    &gt;
+  . …
+  { commands = [ "shellcheckasdf -x ops/bin/*"
+               ]
+
+  , …
+  }
+, …
+]
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org33e86b6" class="outline-3">
+<h3 id="type-system">Type System</h3>
+<div class="outline-text-3" id="text-type-system">
+<p>
+Dhall has the most powerful type system, which is at type level more
+powerful than even Scala
+</p>
+
+<pre class="example">
+Bool : Type  -- The expression `Bool` has type `Type`
+
+Type : Kind  -- The expression `Type` has type `Kind`
+
+Kind : Sort  -- The expression `Kind` has type `Sort
+</pre>
+
+<p>
+where Scala somewhere just near Kind level.
+</p>
+
+<p>
+Powerful type system means you can do more calculation at
+typelevel(compile time), this is exactly what a config need, we don't
+need any cool runtime for config file, we just need the type system to
+help us check correctness of config.
+</p>
+
+<p>
+⚠️ the following example just for showcase the power of type system, it
+is possible in language good at proof like Idris but not likely in Scala
+</p>
+
+<p>
+Type is first class citizen, normal function can consume Type and return
+Type
+</p>
+
+<pre class="example">
+let DependentType = ∀(a : Type) → Optional a → Type
+</pre>
+
+<p>
+the above function defines Type of Type, now lets define Type
+</p>
+
+<pre class="example">
+let SomeTextOrNatural
+    : DependentType
+    = λ(x : Type) →
+      λ(y : Optional x) →
+        merge { Some = λ(z : x) → Text, None = Natural } y
+</pre>
+
+<p>
+<code>SomeTextOrNatural</code> is a Type, depends on the value of <code>y</code>, the return
+type is either <code>Text</code> or <code>Natural</code>
+</p>
+
+<p>
+It is mix both Type and Value together which might be little confuse but
+if you figure this out everything makes sense
+</p>
+
+<pre class="example">
+True : Bool : Type : Kind : Sort
+</pre>
+
+<ul class="org-ul">
+<li><code>y</code> is value because right hand side of <code>:</code> is <code>Optional x</code></li>
+<li><code>x</code> is a type because RHS is <code>Type</code></li>
+<li><code>z</code> is value because RHS is <code>x</code> which is type</li>
+<li><code>merge { Some = λ(z : x) → Text, None = Natural } y</code> returns <code>Type</code>
+because <code>Text</code> and <code>Natural</code> has type <code>Type</code></li>
+</ul>
+
+<p>
+define some values, yay
+</p>
+
+<pre class="example">
+let value = "asdf"
+
+let someValue = Some value
+</pre>
+
+<p>
+now a value which has dependent type:
+</p>
+
+<pre class="example">
+let someTextOrNatural
+    : SomeTextOrNatural Text someValue
+    = value
+</pre>
+
+<p>
+⚠️ <code>someValue</code> is a value, but at type position,
+<code>SomeTextOrNaural Text someValue</code> will return a <code>Type</code> which could be
+<code>Natural</code> or <code>Text</code> totally depends on the value of <code>someValue</code>
+</p>
+
+<p>
+when we change value of <code>someValue</code>
+</p>
+
+<pre class="example">
+let someValue = None Text
+
+let someTextOrNatural
+    : SomeTextOrNatural Text someValue
+    = value
+</pre>
+
+<p>
+a compile error will print because base on the value, type of
+<code>someTextOrNatural</code> is now <code>Natural</code>
+</p>
+
+<pre class="example">
+Error: Expression doesn't match annotation
+
+- Natural
++ Text
+
+15│       value
+16│
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6eccf5e" class="outline-2">
+<h2 id="wrap-up">Wrap up</h2>
+<div class="outline-text-2" id="text-wrap-up">
+<p>
+basically with these two tools, we now can eliminate most of our
+assumptions.
+</p>
+
+<p>
+We have all infrastructure as code, system runtime is configed as code
+and immutable once checkin your codebase, which guarantee everyone will
+have the same runtime on the same commit of code.
+</p>
+
+<p>
+Configuration itself is immutable, once it is checkin we all confident
+the pipeline will always be the same for the same commit of code.
+</p>
+
+<p>
+Being immutable doesn't mean you can't change the file at all, they are
+like expressions As long as the expression result in the same value, you
+can refactor as whatever you want. change the variable name, extract
+functions, split into multiple files and import back in. These are all
+safe as long as the hash result in the same thing
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<footer>
+  <p>Author: Jichao Ouyang
+    <a class="github-button" href="https://github.com/sponsors/jcouyang" data-icon="octicon-heart" aria-label="Sponsor @jcouyang on GitHub">Sponsor</a>
+    <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
+    <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
+  </p>
+  <p>Created: 2020-11-17 Tue 00:00</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
+  <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
+</footer>
+</div>
+</body>
+</html>

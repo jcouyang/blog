@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-11-07 Sat 01:43 -->
+<!-- 2020-11-17 Tue 11:08 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Literal Programming Emacs Configure Literal Programming Emacs Configure</title>
@@ -99,6 +99,7 @@ for the JavaScript code in this tag.
 <li><a href="#orgc9ef2de">Dhall</a></li>
 <li><a href="#org74664b7">expand region</a></li>
 <li><a href="#org0ff80ab">Flyspell</a></li>
+<li><a href="#org52ce1d7">fish</a></li>
 <li><a href="#orgdf243df">forge</a></li>
 <li><a href="#orgeaa6d1c">helm</a></li>
 <li><a href="#orge225d43">ido</a></li>
@@ -114,16 +115,16 @@ for the JavaScript code in this tag.
 <li><a href="#orgc50d928">org mode</a></li>
 <li><a href="#org50a9826">pallet</a></li>
 <li><a href="#orgfc69c8d">prompt</a></li>
-<li><a href="#org0104261">PureScript</a></li>
 <li><a href="#org1b45ce1">PureScript</a></li>
 <li><a href="#org74520ee">rainbow delimiter</a></li>
 <li><a href="#org15235be">Restclient</a></li>
 <li><a href="#org978d772">Scala Metals</a></li>
-<li><a href="#org5fdfeb2">shell-mode</a></li>
+<li><a href="#org4e41248">shell-mode</a></li>
 <li><a href="#orgfe62dd8">smartparens</a></li>
 <li><a href="#org6272ceb">textmate</a></li>
 <li><a href="#org6a9ef08">undo tree</a></li>
 <li><a href="#orgb92ede1">unicode</a></li>
+<li><a href="#org89c50d9">web-mode</a></li>
 <li><a href="#org1fd315b">which key</a></li>
 <li><a href="#orgc15caed">yasnippet</a></li>
 </ul>
@@ -159,7 +160,7 @@ Download <a href="https://www.jetbrains.com/lp/mono/">JetBrain Mono</a> font.
 </p>
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #00008b;">if</span> (member <span style="color: #8b0000;">"JetBrains Mono"</span> (font-family-list))
-    (set-frame-font <span style="color: #8b0000;">"JetBrains Mono Light 14"</span>))
+    (set-frame-font <span style="color: #8b0000;">"JetBrains Mono Light 15"</span>))
 
 (<span style="color: #00008b;">when</span> (eq system-type 'gnu/linux)
   (<span style="color: #00008b;">dolist</span> (charset '(kana han symbol cjk-misc bopomofo))
@@ -187,6 +188,7 @@ Download <a href="https://www.jetbrains.com/lp/mono/">JetBrain Mono</a> font.
 (delete-selection-mode 1)
 (global-auto-revert-mode 1)
 (electric-indent-mode t)
+
 (<span style="color: #00008b;">setq-default</span>
  make-backup-files nil
  indent-tabs-mode nil)
@@ -293,28 +295,38 @@ text completion framework
 <div id="outline-container-org0ff80ab" class="outline-3">
 <h3 id="org0ff80ab">Flyspell</h3>
 <div class="outline-text-3" id="text-org0ff80ab">
-<p>
-wsdf sjd js is
-</p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">  (use-package flycheck
-<span style="color: #228b22;">:ensure</span> t
-    <span style="color: #228b22;">:init</span>
-    (global-flycheck-mode)
-<span style="color: #228b22;">:config</span>
-    (<span style="color: #00008b;">dolist</span> (hook '(text-mode-hook))
-      (add-hook hook (<span style="color: #00008b;">lambda</span> () 
-(flyspell-mode 1)
-(add-to-list 'company-backends 'company-ispell)
-(message <span style="color: #8b0000;">"company-ispell enable"</span>)
-)
-))
-    (<span style="color: #00008b;">dolist</span> (hook '(prog-mode-hook))
-      (add-hook hook (<span style="color: #00008b;">lambda</span> () 
-(flyspell-prog-mode)
-(<span style="color: #00008b;">setq</span> company-backends (delete 'company-ispell company-backends))
-(message <span style="color: #8b0000;">"company-ispell disable"</span>)
-)))
+<pre class="src src-emacs-lisp">(use-package flycheck
+  <span style="color: #228b22;">:ensure</span> t
+  <span style="color: #228b22;">:init</span>
+  (global-flycheck-mode)
+  <span style="color: #228b22;">:config</span>
+  (<span style="color: #00008b;">dolist</span> (hook '(text-mode-hook))
+    (add-hook hook (<span style="color: #00008b;">lambda</span> ()
+                     (flyspell-mode 1)
+                     (add-to-list 'company-backends 'company-ispell)
+                     (message <span style="color: #8b0000;">"company-ispell enable"</span>)
+                     )
+              ))
+  (<span style="color: #00008b;">dolist</span> (hook '(prog-mode-hook))
+    (add-hook hook (<span style="color: #00008b;">lambda</span> ()
+                     (flyspell-prog-mode)
+                     (<span style="color: #00008b;">setq</span> company-backends (delete 'company-ispell company-backends))
+                     (message <span style="color: #8b0000;">"company-ispell disable"</span>)
+                     )))
+  )
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org52ce1d7" class="outline-3">
+<h3 id="org52ce1d7">fish</h3>
+<div class="outline-text-3" id="text-org52ce1d7">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(use-package company-fish
+<span style="color: #228b22;">:hook</span> (shell-mode-hook . company-mode)
+<span style="color: #228b22;">:init</span> (add-to-list 'company-backends 'company-fish)
 )
 </pre>
 </div>
@@ -574,7 +586,7 @@ extract them into <code>/usr/local/share/LanguageTool</code>
 (<span style="color: #00008b;">setq</span> org-startup-folded 'content)
 (<span style="color: #00008b;">setq</span> org-startup-indented nil)
 (<span style="color: #00008b;">setq</span> org-startup-with-inline-images t)
-(<span style="color: #00008b;">setq</span> org-startup-truncated t)
+(<span style="color: #00008b;">setq</span> org-startup-truncated nil)
 (<span style="color: #00008b;">setq</span> org-src-tab-acts-natively t)
 
 (<span style="color: #00008b;">setq</span> js-indent-level 2)
@@ -655,30 +667,13 @@ extract them into <code>/usr/local/share/LanguageTool</code>
 </div>
 </div>
 
-<div id="outline-container-org0104261" class="outline-3">
-<h3 id="org0104261">PureScript</h3>
-<div class="outline-text-3" id="text-org0104261">
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(use-package psc-ide
-<span style="color: #228b22;">:config</span>
-(add-hook 'purescript-mode-hook
-  (<span style="color: #00008b;">lambda</span> ()
-    (psc-ide-mode)
-    (company-mode)
-    (flycheck-mode)
-    (turn-on-purescript-indentation)))
-(<span style="color: #00008b;">setq</span> psc-ide-use-npm-bin t)
-)
-</pre>
-</div>
-</div>
-</div>
-
 <div id="outline-container-org1b45ce1" class="outline-3">
 <h3 id="org1b45ce1">PureScript</h3>
 <div class="outline-text-3" id="text-org1b45ce1">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(use-package psc-ide
+<span style="color: #228b22;">:init</span>
+(<span style="color: #00008b;">setq</span> psc-ide-use-npm-bin t)
 <span style="color: #228b22;">:config</span>
 (add-hook 'purescript-mode-hook
   (<span style="color: #00008b;">lambda</span> ()
@@ -686,6 +681,7 @@ extract them into <code>/usr/local/share/LanguageTool</code>
     (company-mode)
     (flycheck-mode)
     (turn-on-purescript-indentation)))
+
 )
 </pre>
 </div>
@@ -697,7 +693,7 @@ extract them into <code>/usr/local/share/LanguageTool</code>
 <div class="outline-text-3" id="text-org74520ee">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(use-package rainbow-delimiters
-<span style="color: #228b22;">:hook</span> (prog-mode . rainbow-delimiters-mode))
+  <span style="color: #228b22;">:hook</span> (prog-mode . rainbow-delimiters-mode))
 </pre>
 </div>
 </div>
@@ -707,13 +703,13 @@ extract them into <code>/usr/local/share/LanguageTool</code>
 <h3 id="org15235be">Restclient</h3>
 <div class="outline-text-3" id="text-org15235be">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">  (use-package restclient
-<span style="color: #228b22;">:config</span>
-(add-to-list 'company-backends 'company-restclient))
-  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">:config</span>
-  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">;</span>
-                                          <span style="color: #8c8c8c; font-style: italic;">; </span>
-  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">:hook (company-mode))</span>
+<pre class="src src-emacs-lisp">(use-package restclient
+  <span style="color: #228b22;">:config</span>
+  (add-to-list 'company-backends 'company-restclient))
+<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">:config</span>
+<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">;</span>
+                                        <span style="color: #8c8c8c; font-style: italic;">; </span>
+<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">:hook (company-mode))</span>
 </pre>
 </div>
 </div>
@@ -723,14 +719,7 @@ extract them into <code>/usr/local/share/LanguageTool</code>
 <h3 id="org978d772">Scala Metals</h3>
 <div class="outline-text-3" id="text-org978d772">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp"><span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable defer and ensure by default for use-package</span>
-<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Keep auto-save/backup files separate from source code:  https://github.com/scalameta/metals/issues/1027</span>
-(<span style="color: #00008b;">setq</span> use-package-always-defer t
-      use-package-always-ensure t
-      backup-directory-alist `((<span style="color: #8b0000;">".*"</span> . ,temporary-file-directory))
-      auto-save-file-name-transforms `((<span style="color: #8b0000;">".*"</span> ,temporary-file-directory t)))
-
-<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable scala-mode for highlighting, indentation and motion commands</span>
+<pre class="src src-emacs-lisp"><span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable scala-mode for highlighting, indentation and motion commands</span>
 (use-package scala-mode
   <span style="color: #228b22;">:mode</span> <span style="color: #8b0000;">"\\.s</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">(</span><span style="color: #8b0000;">cala</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">|</span><span style="color: #8b0000;">bt</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">)</span><span style="color: #8b0000;">$"</span>)
 
@@ -748,10 +737,6 @@ extract them into <code>/usr/local/share/LanguageTool</code>
    (<span style="color: #00008b;">setq</span> sbt:program-options '(<span style="color: #8b0000;">"-Dsbt.supershell=false"</span>))
 )
 
-<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable nice rendering of diagnostics like compile errors.</span>
-(use-package flycheck
-  <span style="color: #228b22;">:init</span> (global-flycheck-mode))
-
 (use-package lsp-mode
   <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Optional - enable lsp-mode automatically in scala files</span>
   <span style="color: #228b22;">:hook</span>  (scala-mode . lsp)
@@ -765,11 +750,6 @@ extract them into <code>/usr/local/share/LanguageTool</code>
 <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable nice rendering of documentation on hover</span>
 (use-package lsp-ui)
 
-<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">lsp-mode supports snippets, but in order for them to work you need to use yasnippet</span>
-<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">If you don't want to use snippets set lsp-enable-snippet to nil in your lsp-mode settings</span>
-<span style="color: #8c8c8c; font-style: italic;">;;   </span><span style="color: #8c8c8c; font-style: italic;">to avoid odd behavior with snippets and indentation</span>
-(use-package yasnippet)
-
 <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Add company-lsp backend for metals</span>
 (use-package company-lsp)
 </pre>
@@ -777,17 +757,22 @@ extract them into <code>/usr/local/share/LanguageTool</code>
 </div>
 </div>
 
-<div id="outline-container-org5fdfeb2" class="outline-3">
-<h3 id="org5fdfeb2">shell-mode</h3>
-<div class="outline-text-3" id="text-org5fdfeb2">
+<div id="outline-container-org4e41248" class="outline-3">
+<h3 id="org4e41248"><a href="https://github.com/atomontage/xterm-color">shell-mode</a></h3>
+<div class="outline-text-3" id="text-org4e41248">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+<pre class="src src-emacs-lisp">(<span style="color: #00008b;">setq</span> comint-output-filter-functions
+      (remove 'ansi-color-process-output comint-output-filter-functions))
 
-(use-package shell-mode
-<span style="color: #228b22;">:hook</span> (shell-mode-hook . ansi-color-for-comint-mode-on)
-<span style="color: #228b22;">:config</span>
-(add-to-list 'comint-output-filter-functions 'ansi-color-process-output)
-)
+(add-hook 'shell-mode-hook
+          (<span style="color: #00008b;">lambda</span> ()
+            <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Disable font-locking in this buffer to improve performance</span>
+            (font-lock-mode -1)
+            <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Prevent font-locking from being re-enabled in this buffer</span>
+            (make-local-variable 'font-lock-function)
+            (<span style="color: #00008b;">setq</span> font-lock-function (<span style="color: #00008b;">lambda</span> (_) nil))
+            (add-hook 'comint-preoutput-filter-functions 'xterm-color-filter nil t)))
+(setenv <span style="color: #8b0000;">"TERM"</span> <span style="color: #8b0000;">"xterm-256color"</span>)
 </pre>
 </div>
 </div>
@@ -797,11 +782,12 @@ extract them into <code>/usr/local/share/LanguageTool</code>
 <h3 id="orgfe62dd8">smartparens</h3>
 <div class="outline-text-3" id="text-orgfe62dd8">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">  (use-package smartparens
-<span style="color: #228b22;">:ensure</span> t
-    <span style="color: #228b22;">:config</span>
-     (smartparens-global-mode t)
-    (show-smartparens-global-mode t))
+<pre class="src src-emacs-lisp">(use-package smartparens
+  <span style="color: #228b22;">:init</span>
+  (<span style="color: #00008b;">require</span> '<span style="color: #6b8e23;">smartparens-config</span>)
+  <span style="color: #228b22;">:config</span>
+   (smartparens-global-mode t)
+   (show-smartparens-global-mode t))
 
 </pre>
 </div>
@@ -813,15 +799,13 @@ extract them into <code>/usr/local/share/LanguageTool</code>
 <div class="outline-text-3" id="text-org6272ceb">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(use-package textmate
-<span style="color: #228b22;">:ensure</span> t
-<span style="color: #228b22;">:config</span>
+<span style="color: #228b22;">:init</span>
 (textmate-mode)
 (bind-keys
  <span style="color: #228b22;">:map</span> *textmate-mode-map*
  (<span style="color: #8b0000;">"M--"</span> . text-scale-decrease)
  (<span style="color: #8b0000;">"M-="</span> . text-scale-increase)
  (<span style="color: #8b0000;">"M-}"</span> . textmate-shift-right)
- (<span style="color: #8b0000;">"M-c M-t"</span> . textmate-clear-cache)
  (<span style="color: #8b0000;">"M-&lt;backspace&gt;"</span> . kill-whole-line)
  (<span style="color: #8b0000;">"M-c"</span> . kill-ring-save)
  (<span style="color: #8b0000;">"M-{"</span> . textmate-shift-left)
@@ -856,12 +840,29 @@ extract them into <code>/usr/local/share/LanguageTool</code>
 </div>
 </div>
 
+<div id="outline-container-org89c50d9" class="outline-3">
+<h3 id="org89c50d9">web-mode</h3>
+<div class="outline-text-3" id="text-org89c50d9">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(use-package web-mode
+  <span style="color: #228b22;">:mode</span> <span style="color: #8b0000;">"\\.html$'"</span> <span style="color: #8b0000;">"\\.jsx$"</span> <span style="color: #8b0000;">"\\.tsx$"</span>
+  <span style="color: #228b22;">:init</span> 
+  (<span style="color: #00008b;">setq</span> web-mode-markup-indent-offset 2)
+  (<span style="color: #00008b;">setq</span> web-mode-css-indent-offset 2)
+  (<span style="color: #00008b;">setq</span> web-mode-code-indent-offset 2)
+  )
+</pre>
+</div>
+</div>
+</div>
+
 <div id="outline-container-org1fd315b" class="outline-3">
 <h3 id="org1fd315b">which key</h3>
 <div class="outline-text-3" id="text-org1fd315b">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">     (use-package which-key
        <span style="color: #228b22;">:config</span>
+       (which-key-mode)
        (<span style="color: #00008b;">setq</span> which-key-use-C-h-commands t)
        (<span style="color: #00008b;">setq</span> which-key-paging-key <span style="color: #8b0000;">"&lt;f5&gt;"</span>)
 )
