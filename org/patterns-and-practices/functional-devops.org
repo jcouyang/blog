@@ -1,0 +1,565 @@
+#+TITLE: Functional DevOps
+#+Date: <2020-11-17 Tue>
+#+AUTHOR: Jichao Ouyang
+#+INFOJS_OPT: path:https://blog.oyanglul.us/js/org-info.js
+#+INFOJS_OPT: view:info toc:t
+#+INFOJS_OPT: up:/patterns-and-practices/functional-devops.org
+#+INFOJS_OPT: home:/
+#+KEYWORDS: Functional Programming,DevOps,Dhall,Nix,FP
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="Functional DevOps" />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+#+HTML_HEAD_EXTRA: <meta content="https://blog.oyanglul.us/images/0day-accident.gif" property="og:image">
+#+index: FP!Functional DevOps
+#+index: DevOps!Functional DevOps
+#+index: Dhall!Functional DevOps
+#+index: Nix!Functional DevOps
+
+* Functional DevOps
+  :PROPERTIES:
+  :CUSTOM_ID: functional-devops
+  :END:
+
+* Devops
+  :PROPERTIES:
+  :CUSTOM_ID: devops
+  :END:
+
+#+BEGIN_QUOTE
+  *DevOps* is a set of practices that combines [[https://en.wikipedia.org/wiki/Software_development][software development]] (Dev) and
+  [[https://en.wikipedia.org/wiki/IT_operations][IT operations]] (Ops).
+  It aims to shorten the
+  [[https://en.wikipedia.org/wiki/Systems_development_life_cycle][systems
+  development life cycle]] and provide
+  [[https://en.wikipedia.org/wiki/Continuous_delivery][continuous
+  delivery]] with high
+  [[https://en.wikipedia.org/wiki/Software_quality][software quality]].
+  --- https://en.wikipedia.org/wiki/DevOps
+#+END_QUOTE
+
+So it is a set of practices. In another word, those yaml files in your
+repository will be Devops, and whoever create and make them run, is
+DevOps Engineer.
+
+* Functional Programming
+  :PROPERTIES:
+  :CUSTOM_ID: functional-programming
+  :END:
+
+- Referential Transparency
+- Immutable
+- Pure
+- Function and Data segregation
+
+** FP vs OO
+   :PROPERTIES:
+   :CUSTOM_ID: fp-vs-oo
+   :END:
+
+   #+begin_src haskell
+      len :: String -> Int
+      httpServer :: Request -> Response
+   #+end_src
+
+Object contains internal state in memory and react differently base on
+the same input.
+
+** Is this OO?
+   :PROPERTIES:
+   :CUSTOM_ID: is-this-oo
+   :END:
+
+#+BEGIN_EXAMPLE
+  httpServer :: Request -> DBState -> Response
+#+END_EXAMPLE
+
+#+begin_quote
+but the other function which retrieve the DBState will be stateful
+#+end_quote
+
+as long as you can factor out every thing that may be changed, you
+will get a pure function.
+
+* [[https://www.thoughtworks.com/radar#adolescence-of-infrastructure-as-code][Infrastructure as Code]]
+  :PROPERTIES:
+  :CUSTOM_ID: infrastructure-as-code
+  :END:
+
+[[https://paper-attachments.dropbox.com/s_57AB1806083E548AE8AB3A31935FB481380E6A828F40D016642DF3922BC7E794_1604039641363_image.png]]
+
+So what are the variables we can factor out here?
+
+Ideally should be just one:
+
+- Git commit
+#+begin_src haskell
+  genPipeline :: Commit -> Pipeline
+#+end_src
+
+🌏 the real world is not, unless buildkite agent and all scripts on it are versioned
+
+** Code can be locked by commit
+So does infrastructure.
+One commit implicitly locks all other factors as well
+
+- pipeline.dhall
+- source code
+- build.sbt
+- Dockerfile
+- ...
+
+And eventually each of them lock a bunch of factors behind as well
+
+For instance =build.sbt= will lock:
+
+- sbt version
+- jar dependency versions
+- Scala version
+- project configuration
+
+While =pipeline.dhall= will lock:
+
+- steps of pipeline
+- build agent for each steps
+- environments
+
+Things out of control of pipeline.dhall will be like tools version on
+build agent, they are not locked unless the agent queue is also
+versioned.
+
+** Lock everything where possible
+   :PROPERTIES:
+   :CUSTOM_ID: so-the-more-things-you-can-factor-out-and-lock-the-more-predictable-result-you-will-get.
+   :END:
+
+So the more things you can factor out and lock, the more predictable
+result you will get.
+
+* FP takes No assumptions
+  :PROPERTIES:
+  :CUSTOM_ID: fp-takes-no-assumptions
+  :END:
+🌏 Let us see how to apply FP with some practical tools in real world.
+
+* Nix
+  :PROPERTIES:
+  :CUSTOM_ID: nix
+  :END:
+
+#+BEGIN_QUOTE
+  Nix is a purely functional package manager. This means that it treats
+  packages like values in purely functional programming languages such
+  as Haskell --- they are built by functions that don't have
+  side-effects, and they never change after they have been built.
+#+END_QUOTE
+
+** Immutable vs Mutable
+   :PROPERTIES:
+   :CUSTOM_ID: immutable-vs-mutable
+   :END:
+
+It is assuming your environment are all the same, consider the following
+factors when you do =brew install sbt=
+
+- sbt version
+- JRE version
+- macOS version
+- **timing**, even your OS is exactly the same, when you run this command
+  will result different
+- What about your linux friend?
+
+** Nix's only assumption
+   :PROPERTIES:
+   :CUSTOM_ID: nixs-only-assumption
+   :END:
+
+#+BEGIN_EXAMPLE
+  # for mac
+  nix-channel --add https://nixos.org/channels/nixpkgs-20.09-darwin nixpkgs
+  # for linux
+  nix-channel --add https://nixos.org/channels/nixos-20.09 nixpkgs
+  nix-channel --update
+#+END_EXAMPLE
+
+Once everyone subscribes to the same channel, the version and binary of
+anything you installed should be exactly the same as everyone
+
+#+BEGIN_EXAMPLE
+  > nix-env -i awscli
+  > nix-env --installed --query --out-path awscli
+  awscli-1.18.80  /nix/store/2b2c56c44xi3gj4hvzcxcn1dp1lb579k-awscli-1.18.80
+#+END_EXAMPLE
+
+Give it a try, your awscli will be exactly the same as mine, even the
+path of the file is exactly the same noted that
+=2b2c56c44xi3gj4hvzcxcn1dp1lb579k= is the 160-bit MD5 checksum of the
+package dependencies which guarantee we all get the exactly same awscli.
+
+which means we are not even assuming python version, everything awscli
+dependencies will be exactly the same.
+
+#+BEGIN_EXAMPLE
+  > nix-store -q --references /nix/store/2b2c56c44xi3gj4hvzcxcn1dp1lb579k-awscli-1.18.80
+  /nix/store/my66alsy3dhj9iz9s3sq7c9sni1b1a2d-bash-4.4-p23
+  /nix/store/vlmz2mfdagyr67l4jxyyaqb0h4p5amkw-python3-3.8.3
+  /nix/store/15a0yz4aq63qrad41zzkmg3nwcpyqfq0-python3.8-pyasn1-0.4.8
+  /nix/store/1rkxc2kilndrwz78m7z4v7q7h879aki1-python3.8-rsa-3.4.2
+  /nix/store/2lwr1pggba24r6xv9hbsm98lbnjwikpq-python3.8-pyparsing-2.4.6
+  /nix/store/5j2g0pj41vvqgpdpgv274wg36lhmk6fr-python3.8-simplejson-3.17.0
+  /nix/store/7pr17zaxr133d6x1xhdbiw0f5c2qmdxr-python3.8-colorama-0.4.3
+  /nix/store/ahfw2fzzjd23vfph4axnzxyzfy5myraw-python3.8-six-1.15.0
+  /nix/store/8l35mr17gyh3qfyzxfiy0vqrz1nf9n6h-python3.8-packaging-20.4
+  /nix/store/9r6cipwqmclb9b1dihzc8ggb02aq23rm-python3.8-idna-2.9
+  /nix/store/cmjvb2hc62mcrliqwbyhrg2ksfxrwdhc-groff-1.22.4
+  /nix/store/w6cql1fp236laf6ra11wr89mfk2nhl3v-python3.8-certifi-2020.4.5.1
+  /nix/store/x0qrskv33x5l3a7j2r2p4mq83zpdyc58-python3.8-pysocks-1.7.1
+  /nix/store/kdrmgvwbg2hcr4knd7iczfmr3in6023z-python3.8-urllib3-1.25.9
+  /nix/store/vcc86ig5zwz72plx4pmmy8j1bng7ci79-python3.8-ply-3.11
+  /nix/store/l9fn7w5a204wff11n2ss3881pikbsbnr-python3.8-jmespath-0.10.0
+  /nix/store/mhg8p60av9yvsmlai9svcsm56a5dvgrc-python3.8-ordereddict-1.1
+  /nix/store/q2znq8a16yrg0pxpxdyn1p3svf80b0v9-python3.8-docutils-0.16
+  /nix/store/zvi4mf9pwcdjx2ypmafghbadwxjkqlsw-python3.8-setuptools_scm-4.1.2
+  /nix/store/v9ny5zsw7a9zb2ldb3kp9mif3xikq121-python3.8-python-dateutil-2.8.1
+  /nix/store/dk8iaj1dlhzp9x9pi2yp4b11jwmbz7pi-python3.8-botocore-1.17.3
+  /nix/store/gb0gsnzwhj1l83654dkyp7vl061b0nn5-python3.8-PyYAML-5.3.1
+  /nix/store/n2mn1a0pfn1adl1gcyjbc93s1fp74n9c-python3.8-pyOpenSSL-19.1.0
+  /nix/store/nzl2dxim5l46rwnsqz624yzinjh39sm1-python3.8-bcdoc-0.16.0
+  /nix/store/rwskkf31whpm0vj6z048s9aavlsdwn18-python3.8-cryptography-2.9.2
+  /nix/store/vz7v3c2x9ps2k48h9dd4d8zqm5jpy9rg-less-551
+  /nix/store/wbi1wqpr3kr7x0ds3gpc7v5m5blbswv7-python3.8-pycparser-2.20
+  /nix/store/xzrndp7yz2b947vkx7b74vmavwqgqw2c-python3.8-s3transfer-0.3.3
+  /nix/store/ylpx0r4zl51zs7kz3x2c9ak5b9w23z8y-python3.8-cffi-1.14.0
+  /nix/store/2b2c56c44xi3gj4hvzcxcn1dp1lb579k-awscli-1.18.80
+#+END_EXAMPLE
+
+** nix-shell
+   :PROPERTIES:
+   :CUSTOM_ID: nix-shell
+   :END:
+
+If everyone is using brew, when you tell your friend to run
+
+#+BEGIN_EXAMPLE
+  sbt test
+#+END_EXAMPLE
+
+You have no idea your friend will have
+
+- what version of sbt?
+- what JRE version sbt is running on?
+- what environment variables are in the context?
+- are required dependencies spin up yet i.e. database?
+
+shell.nix
+
+#+BEGIN_EXAMPLE
+  with import <nixpkgs> {};
+  mkShell {
+    shellHook = ''
+              source .buildkite/hooks/post-checkout
+              source .buildkite/hooks/pre-command
+              set +e
+              set -a
+              source app.env
+              set +a
+              source ./ops/bin/deps-up
+              '';
+    buildInputs = [
+      jq
+      kubectl
+      sbt
+      awscli
+      kustomize
+      gitAndTools.hub
+      dhall
+      dhall-json
+      dhall-bash
+    ];
+  }
+#+END_EXAMPLE
+
+But if you =nix-shell= =--``run= ='``sbt test``'= You have no assumption
+on user's system other than =nix= Everyone with this command is
+guarantee to have exactly the same
+
+- sbt
+- JRE and everything which back sbt
+- tools like Dhall aws hub etc.
+- all source the required scripts and environment in =post-checkout=
+- has the same =app.env= sourced
+- all deps services are up
+
+Wrap up as previous FP concept, nix-shell is something like a pure
+function
+
+#+BEGIN_EXAMPLE
+  nix-shell :: shell.nix -> ConfigedRuntime
+#+END_EXAMPLE
+
+* Dhall
+  :PROPERTIES:
+  :CUSTOM_ID: dhall
+  :END:
+
+Nix makes sure your system is immutable and reproducible, there is
+another tool to make your Configuration immutable and reproducible as
+well.
+
+#+BEGIN_EXAMPLE
+  dhall :: xyz.dhall -> configuration
+#+END_EXAMPLE
+
+#+BEGIN_QUOTE
+  Dhall is a
+  [[https://docs.dhall-lang.org/discussions/Programmable-configuration-files.html#][programmable
+  configuration language]] that you can think of as: JSON + functions +
+  types + imports
+
+  Dhall is a
+  [[https://en.wikipedia.org/wiki/Total_functional_programming]["total"]]
+  functional programming language, which means that: - You can always
+  type-check an expression in a finite amount of time - If an expression
+  type-checks then evaluating that expression always succeeds in a
+  finite amount of time
+#+END_QUOTE
+
+** Immutable
+   :PROPERTIES:
+   :CUSTOM_ID: immutable
+   :END:
+
+Similar concept of nix, Dhall locks configuration and its dependencies
+with crypto hash It is not simply take sha256 of config file, it takes
+sha256 of normalized config
+
+#+BEGIN_EXAMPLE
+  let bk =
+        https://raw.githubusercontent.com/jcouyang/buildkite.dhall/0.1.0/package.dhall sha256:3c5e9eb0182755e85c65d0b16a79b2b0f9614dcffde05151835e3b1daf587e20
+
+  let scalaAgent = Some { queue = "ody-lab-scala" }
+
+  let main = "master"
+
+  in  [ bk.Steps.Command
+          bk.Command::{
+          , label = Some "lint"
+          , commands = [ "shellcheck -x ops/bin/*" ]
+          , agents = scalaAgent
+          }
+      , bk.Steps.Command
+          bk.Command::{
+          , label = Some "test dhall"
+          , commands = [ "echo '(./app.dhall).version' | dhall-to-bash" ]
+          , agents = scalaAgent
+          }
+      , bk.Steps.Wait bk.Wait.default
+      , bk.Steps.Command
+          bk.Command::{
+          , label = Some ":shipit:"
+          , commands = [ "./ops/bin/git-tag.sh", "./ops/bin/tag-release.sh" ]
+          , agents = scalaAgent
+          }
+      ]
+#+END_EXAMPLE
+
+The above Dhall file has hash
+=sha256:8ce5c8a0c0144bc5ff48b89087e5ef11c3523b4d28db1614ef7715cda1485154=
+
+Not matter how you refactor it, the hash won't change if the normalized
+value isn't change.
+
+#+BEGIN_EXAMPLE
+  let bk =
+        https://raw.githubusercontent.com/jcouyang/buildkite.dhall/0.1.0/package.dhall sha256:3c5e9eb0182755e85c65d0b16a79b2b0f9614dcffde05151835e3b1daf587e20
+
+  let scalaAgent = Some { queue = "ody-lab-scala" }
+
+  let main = "master"
+
+  let lint =
+        bk.Command::{
+        , label = Some "lint"
+        , commands = [ "shellcheck -x ops/bin/*" ]
+        , agents = scalaAgent
+        }
+
+  let test =
+        bk.Command::{
+        , label = Some "test dhall"
+        , commands = [ "echo '(./app.dhall).version' | dhall-to-bash" ]
+        , agents = scalaAgent
+        }
+
+  let ship =
+        bk.Command::{
+        , label = Some ":shipit:"
+        , commands = [ "./ops/bin/git-tag.sh", "./ops/bin/tag-release.sh" ]
+        , agents = scalaAgent
+        }
+
+  let wait = bk.Steps.Wait bk.Wait.default
+
+  in  [ bk.Steps.Command lint
+      , bk.Steps.Command test
+      , wait
+      , bk.Steps.Command ship
+      ]
+#+END_EXAMPLE
+
+The refactor will result in exactly config as previous one, I'm 100%
+certain since the sha is exactly the same
+
+#+BEGIN_EXAMPLE
+  > dhall hash < .buildkite/pipeline.dhall
+  sha256:8ce5c8a0c0144bc5ff48b89087e5ef11c3523b4d28db1614ef7715cda1485154
+#+END_EXAMPLE
+
+if any of the value actually changed, for instance I have a typo
+
+#+BEGIN_EXAMPLE
+  -       , commands = [ "shellcheck -x ops/bin/*" ]
+  +       , commands = [ "shellcheckasdf -x ops/bin/*" ]
+
+
+  dhall hash < .buildkite/pipeline.dhall
+  sha256:a8182dd677567eb613dd953397ae23590ba8695f3307a71bcc5d928346314b7d
+#+END_EXAMPLE
+
+You can even tell what is going wrong by compare with the remote config
+at master branch
+
+#+BEGIN_EXAMPLE
+  dhall diff "./.buildkite/pipeline.dhall" "https://raw.githubusercontent.com/MYOB-Technology/odyssey/master/.buildkite/pipeline.dhall"
+  [   < …
+      >
+    . …
+    { commands = [ "shellcheckasdf -x ops/bin/*"
+                 ]
+
+    , …
+    }
+  , …
+  ]
+#+END_EXAMPLE
+
+** Type System
+   :PROPERTIES:
+   :CUSTOM_ID: type-system
+   :END:
+
+Dhall has the most powerful type system, which is at type level more
+powerful than even Scala
+
+#+BEGIN_EXAMPLE
+  Bool : Type  -- The expression `Bool` has type `Type`
+
+  Type : Kind  -- The expression `Type` has type `Kind`
+
+  Kind : Sort  -- The expression `Kind` has type `Sort
+#+END_EXAMPLE
+
+where Scala somewhere just near Kind level.
+
+Powerful type system means you can do more calculation at
+typelevel(compile time), this is exactly what a config need, we don't
+need any cool runtime for config file, we just need the type system to
+help us check correctness of config.
+
+⚠️ the following example just for showcase the power of type system, it
+is possible in language good at proof like Idris but not likely in Scala
+
+Type is first class citizen, normal function can consume Type and return
+Type
+
+#+BEGIN_EXAMPLE
+  let DependentType = ∀(a : Type) → Optional a → Type
+#+END_EXAMPLE
+
+the above function defines Type of Type, now lets define Type
+
+#+BEGIN_EXAMPLE
+  let SomeTextOrNatural
+      : DependentType
+      = λ(x : Type) →
+        λ(y : Optional x) →
+          merge { Some = λ(z : x) → Text, None = Natural } y
+#+END_EXAMPLE
+
+=SomeTextOrNatural= is a Type, depends on the value of =y=, the return
+type is either =Text= or =Natural=
+
+It is mix both Type and Value together which might be little confuse but
+if you figure this out everything makes sense
+
+#+BEGIN_EXAMPLE
+  True : Bool : Type : Kind : Sort
+#+END_EXAMPLE
+
+- =y= is value because right hand side of =:= is =Optional x=
+- =x= is a type because RHS is =Type=
+- =z= is value because RHS is =x= which is type
+- =merge { Some = λ(z : x) → Text, None = Natural } y= returns =Type=
+  because =Text= and =Natural= has type =Type=
+
+define some values, yay
+
+#+BEGIN_EXAMPLE
+  let value = "asdf"
+
+  let someValue = Some value
+#+END_EXAMPLE
+
+now a value which has dependent type:
+
+#+BEGIN_EXAMPLE
+  let someTextOrNatural
+      : SomeTextOrNatural Text someValue
+      = value
+#+END_EXAMPLE
+
+⚠️ =someValue= is a value, but at type position,
+=SomeTextOrNaural Text someValue= will return a =Type= which could be
+=Natural= or =Text= totally depends on the value of =someValue=
+
+when we change value of =someValue=
+
+#+BEGIN_EXAMPLE
+  let someValue = None Text
+
+  let someTextOrNatural
+      : SomeTextOrNatural Text someValue
+      = value
+#+END_EXAMPLE
+
+a compile error will print because base on the value, type of
+=someTextOrNatural= is now =Natural=
+
+#+BEGIN_EXAMPLE
+  Error: Expression doesn't match annotation
+
+  - Natural
+  + Text
+
+  15│       value
+  16│
+#+END_EXAMPLE
+
+* Wrap up
+  :PROPERTIES:
+  :CUSTOM_ID: wrap-up
+  :END:
+
+basically with these two tools, we now can eliminate most of our
+assumptions.
+
+We have all infrastructure as code, system runtime is configed as code
+and immutable once checkin your codebase, which guarantee everyone will
+have the same runtime on the same commit of code.
+
+Configuration itself is immutable, once it is checkin we all confident
+the pipeline will always be the same for the same commit of code.
+
+Being immutable doesn't mean you can't change the file at all, they are
+like expressions As long as the expression result in the same value, you
+can refactor as whatever you want. change the variable name, extract
+functions, split into multiple files and import back in. These are all
+safe as long as the hash result in the same thing
