@@ -76,7 +76,7 @@ the same input.
 but the other function which retrieve the DBState will be stateful
 #+end_quote
 
-as long as you can factor out every thing that may be changed, you
+As long as you can factor out every thing that may be changed, you
 will get a pure function.
 
 * [[https://www.thoughtworks.com/radar#adolescence-of-infrastructure-as-code][Infrastructure as Code]]
@@ -99,7 +99,7 @@ Ideally should be just one:
 
 ** Code can be locked by commit
 So does infrastructure.
-One commit implicitly locks all other factors as well
+One commit implicitly locks all other factors as well.
 
 - pipeline.dhall
 - source code
@@ -122,7 +122,7 @@ While =pipeline.dhall= will lock:
 - build agent for each steps
 - environments
 
-Things out of control of pipeline.dhall will be like tools version on
+Things out of control of =pipeline.dhall= will be like tools version on
 build agent, they are not locked unless the agent queue is also
 versioned.
 
@@ -194,7 +194,7 @@ path of the file is exactly the same noted that
 =2b2c56c44xi3gj4hvzcxcn1dp1lb579k= is the 160-bit MD5 checksum of the
 package dependencies which guarantee we all get the exactly same awscli.
 
-which means we are not even assuming python version, everything awscli
+Which means we are not even assuming python version, everything awscli
 dependencies will be exactly the same.
 
 #+BEGIN_EXAMPLE
@@ -277,9 +277,10 @@ shell.nix
   }
 #+END_EXAMPLE
 
-But if you =nix-shell= =--``run= ='``sbt test``'= You have no assumption
-on user's system other than =nix= Everyone with this command is
-guarantee to have exactly the same
+But if you ~nix-shell --run='sbt test'~ You have no assumption
+on user's system other than =nix=
+
+Everyone with this command is guarantee to have exactly the same
 
 - sbt
 - JRE and everything which back sbt
@@ -457,7 +458,7 @@ powerful than even Scala
   Kind : Sort  -- The expression `Kind` has type `Sort
 #+END_EXAMPLE
 
-where Scala somewhere just near Kind level.
+Where Scala somewhere just near Kind level.
 
 Powerful type system means you can do more calculation at
 typelevel(compile time), this is exactly what a config need, we don't
@@ -474,7 +475,7 @@ Type
   let DependentType = ∀(a : Type) → Optional a → Type
 #+END_EXAMPLE
 
-the above function defines Type of Type, now lets define Type
+the above function defines Type of Type, now let's define Type
 
 #+BEGIN_EXAMPLE
   let SomeTextOrNatural
@@ -487,7 +488,7 @@ the above function defines Type of Type, now lets define Type
 =SomeTextOrNatural= is a Type, depends on the value of =y=, the return
 type is either =Text= or =Natural=
 
-It is mix both Type and Value together which might be little confuse but
+It is mix both Type and Value together which might be little confused but
 if you figure this out everything makes sense
 
 #+BEGIN_EXAMPLE
@@ -500,7 +501,7 @@ if you figure this out everything makes sense
 - =merge { Some = λ(z : x) → Text, None = Natural } y= returns =Type=
   because =Text= and =Natural= has type =Type=
 
-define some values, yay
+Now we define some values, yay
 
 #+BEGIN_EXAMPLE
   let value = "asdf"
@@ -508,7 +509,7 @@ define some values, yay
   let someValue = Some value
 #+END_EXAMPLE
 
-now a value which has dependent type:
+And a value which has dependent type:
 
 #+BEGIN_EXAMPLE
   let someTextOrNatural
@@ -520,7 +521,7 @@ now a value which has dependent type:
 =SomeTextOrNaural Text someValue= will return a =Type= which could be
 =Natural= or =Text= totally depends on the value of =someValue=
 
-when we change value of =someValue=
+When we change value of =someValue=
 
 #+BEGIN_EXAMPLE
   let someValue = None Text
@@ -548,7 +549,7 @@ a compile error will print because base on the value, type of
   :CUSTOM_ID: wrap-up
   :END:
 
-basically with these two tools, we now can eliminate most of our
+Basically with these two tools, we now can eliminate most of our
 assumptions.
 
 We have all infrastructure as code, system runtime is configed as code
@@ -560,6 +561,6 @@ the pipeline will always be the same for the same commit of code.
 
 Being immutable doesn't mean you can't change the file at all, they are
 like expressions As long as the expression result in the same value, you
-can refactor as whatever you want. change the variable name, extract
+can refactor as whatever you want. Change the variable name, extract
 functions, split into multiple files and import back in. These are all
-safe as long as the hash result in the same thing
+safe as long as the hash result in the same thing.
