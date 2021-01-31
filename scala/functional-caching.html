@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-11-18 Wed 02:54 -->
+<!-- 2021-01-31 Sun 02:35 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Functional Scala Caching</title>
@@ -90,10 +90,11 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#making-caffeine-cats-friendly-badge">Making Caffeine https://typelevel.org/cats/img/cats-badge-tiny.png</a>
+<li><a href="#scala-3-example">Quick Started in Scala 3^{<code>new</code>}</a></li>
+<li><a href="#making-caffeine-cats-friendly-badge">https://typelevel.org/cats/img/cats-badge-tiny.png Caffeine</a>
 <ul>
-<li><a href="#and-cats-io">and Cats IO</a></li>
-<li><a href="#orgdc69100">and Caffeine builder</a></li>
+<li><a href="#and-cats-io">works with Cats IO</a></li>
+<li><a href="#org147e4c1">idiomatic syntax for Caffeine builder</a></li>
 <li><a href="#org40b2aac">Works with Tagless Final</a></li>
 <li><a href="#orgc161118">ReaderT Pattern</a></li>
 <li><a href="#org8c3b6de">Extensible</a></li>
@@ -121,7 +122,7 @@ Sorry, your browser does not support SVG.</object></a>
 
 <div class="epigraph"><blockquote>
 <p>
-关关雎鸠 在河之洲 <b>Do one thing and do it well</b> micro <a href="https://github.com/search?q=org:jcouyang+topic:birds&amp;type=Repositories">birds library</a> series
+<b>Do one thing and do it well</b> micro <a href="https://github.com/search?q=org:jcouyang+topic:birds&amp;type=Repositories">birds library</a> series
 </p>
 
 </blockquote></div>
@@ -133,21 +134,70 @@ Sorry, your browser does not support SVG.</object></a>
 libraryDependencies += "us.oyanglul" %% "jujiu" % version
 </pre>
 
-<div id="outline-container-org4646257" class="outline-2">
-<h2 id="making-caffeine-cats-friendly-badge">Making <a href="https://github.com/ben-manes/caffeine">Caffeine </a><img src="https://typelevel.org/cats/img/cats-badge-tiny.png" alt="cats-badge-tiny.png"></h2>
+<div id="outline-container-org132d402" class="outline-2">
+<h2 id="scala-3-example">Quick Started in Scala 3^{<code>new</code>}</h2>
+<div class="outline-text-2" id="text-scala-3-example">
+<p>
+There are only two simple steps to use cache:
+</p>
+<ol class="org-ol">
+<li>Initiate a protocol-agnostic Cache DSL, which means the DSL only aware of what to operate, not how to</li>
+<li>using the DSL syntax <code>fetchF</code>, <code>parFetchAllF</code> etc to describe how to use the Cache in the program</li>
+<li><p>
+<code>given</code> a instance of <code>Cache[Key, Val]</code>, in the example we created a Caffeine instance, which tells <b>how</b> exactly how to actually do the cache.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">class</span> <span style="color: #36648b;">JujiuScala3Spec</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Specification</span><span style="color: #00008b;">:</span>
+  given <span style="color: #6b8e23;">ContextShift</span>[<span style="color: #6b8e23;">IO</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">IO</span>.contextShift(<span style="color: #6b8e23;">ExecutionContext</span>.global)
+  <span style="color: #8b0000;">"works with IO"</span> &gt;&gt; {
+    <span style="color: #8b0000;">"normal cache"</span> &gt;&gt; {
+      <span style="color: #00008b;">val</span> <span style="color: #b8860b;">dsl</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Cache</span>[<span style="color: #6b8e23;">IO</span>, cache.<span style="color: #6b8e23;">Cache</span>, <span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">String</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">CaffeineCache</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">String</span>]{}
+
+      <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span>(using cache.<span style="color: #6b8e23;">Cache</span>[<span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">String</span>]) <span style="color: #00008b;">=</span>
+        <span style="color: #00008b;">for</span>
+          <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">IO</span>(println(<span style="color: #8b0000;">"something"</span>))
+          <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> dsl.putF(<span style="color: #8b0000;">"key1"</span>, <span style="color: #8b0000;">"value1"</span>)
+          r1 <span style="color: #00008b;">&lt;-</span> dsl.fetchF(<span style="color: #8b0000;">"key1"</span>)
+          r2 <span style="color: #00008b;">&lt;-</span> dsl.fetchF(<span style="color: #8b0000;">"key2"</span>, <span style="color: #00008b;">_</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(<span style="color: #8b0000;">"value2"</span>))
+          r3 <span style="color: #00008b;">&lt;-</span> dsl.fetchAllF(<span style="color: #6b8e23;">List</span>(<span style="color: #8b0000;">"key1"</span>, <span style="color: #8b0000;">"key2"</span>))
+          r4 <span style="color: #00008b;">&lt;-</span> dsl.parFetchAllF[<span style="color: #6b8e23;">List</span>, <span style="color: #6b8e23;">IO</span>.<span style="color: #6b8e23;">Par</span>](<span style="color: #6b8e23;">List</span>(<span style="color: #8b0000;">"key1"</span>, <span style="color: #8b0000;">"key2"</span>))
+          <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> dsl.clearF(<span style="color: #8b0000;">"key1"</span>)
+        <span style="color: #00008b;">yield</span> (r1, r2, r3, r4)
+
+      given cache.<span style="color: #6b8e23;">Cache</span>[<span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">String</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Caffeine</span>().sync[<span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">String</span>]
+      program.unsafeRunSync() must_== (
+        (
+          <span style="color: #6b8e23;">Some</span>(<span style="color: #8b0000;">"value1"</span>),
+          <span style="color: #8b0000;">"value2"</span>,
+          <span style="color: #6b8e23;">List</span>(<span style="color: #6b8e23;">Some</span>(<span style="color: #8b0000;">"value1"</span>), <span style="color: #6b8e23;">Some</span>(<span style="color: #8b0000;">"value2"</span>)),
+          <span style="color: #6b8e23;">List</span>(<span style="color: #6b8e23;">Some</span>(<span style="color: #8b0000;">"value1"</span>), <span style="color: #6b8e23;">Some</span>(<span style="color: #8b0000;">"value2"</span>))
+        )
+      )
+    }
+  }
+end <span style="color: #6b8e23;">JujiuScala3Spec</span>
+</pre>
+</div></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org3028382" class="outline-2">
+<h2 id="making-caffeine-cats-friendly-badge"><img src="https://typelevel.org/cats/img/cats-badge-tiny.png" alt="cats-badge-tiny.png"> <a href="https://github.com/ben-manes/caffeine">Caffeine</a></h2>
 <div class="outline-text-2" id="text-making-caffeine-cats-friendly-badge">
 <div class="org-src-container">
 <pre class="src src-scala"><span class="linenr"> 1: </span><span style="color: #8b0000;">"it should able to get and set cache"</span> &gt;&gt; {
-<span id="coderef-dsl" class="coderef-off"><span class="linenr"> 2: </span>  <span style="color: #00008b;">object</span> <span style="color: #6b8e23;">cacheDsl</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">CaffeineCache</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">String</span>]   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span></span>
+<span id="coderef-dsl" class="coderef-off"><span class="linenr"> 2: </span>  <span style="color: #00008b;">object</span> <span style="color: #6b8e23;">cacheDsl</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">CaffeineCache</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">String</span>]   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (dsl)</span>
 <span class="linenr"> 3: </span>  <span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
-<span id="coderef-fetch" class="coderef-off"><span class="linenr"> 4: </span>    r1 <span style="color: #00008b;">&lt;-</span> cacheDsl.fetch(<span style="color: #8b0000;">"not exist yet"</span>)                     <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span></span>
-<span id="coderef-fetchOr" class="coderef-off"><span class="linenr"> 5: </span>    r2 <span style="color: #00008b;">&lt;-</span> cacheDsl.fetch(<span style="color: #8b0000;">"not exist yet"</span>, <span style="color: #00008b;">_</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(<span style="color: #8b0000;">"default"</span>)) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span></span>
-<span id="coderef-put" class="coderef-off"><span class="linenr"> 6: </span>    <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> cacheDsl.put(<span style="color: #8b0000;">"not exist yet"</span>, <span style="color: #8b0000;">"now exist"</span>)           <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span></span>
+<span id="coderef-fetch" class="coderef-off"><span class="linenr"> 4: </span>    r1 <span style="color: #00008b;">&lt;-</span> cacheDsl.fetch(<span style="color: #8b0000;">"not exist yet"</span>)                     <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (fetch)</span>
+<span id="coderef-fetchOr" class="coderef-off"><span class="linenr"> 5: </span>    r2 <span style="color: #00008b;">&lt;-</span> cacheDsl.fetch(<span style="color: #8b0000;">"not exist yet"</span>, <span style="color: #00008b;">_</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(<span style="color: #8b0000;">"default"</span>)) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (fetchOr)</span>
+<span id="coderef-put" class="coderef-off"><span class="linenr"> 6: </span>    <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> cacheDsl.put(<span style="color: #8b0000;">"not exist yet"</span>, <span style="color: #8b0000;">"now exist"</span>)           <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (put)</span>
 <span class="linenr"> 7: </span>    r3 <span style="color: #00008b;">&lt;-</span> cacheDsl.fetch(<span style="color: #8b0000;">"not exist yet"</span>)
 <span class="linenr"> 8: </span>    <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> cacheDsl.clear(<span style="color: #8b0000;">"not exist yet"</span>)
 <span class="linenr"> 9: </span>    r4 <span style="color: #00008b;">&lt;-</span> cacheDsl.fetch(<span style="color: #8b0000;">"not exist yet"</span>)
 <span class="linenr">10: </span>  } <span style="color: #00008b;">yield</span> (r1, r2, r3, r4)
-<span id="coderef-run" class="coderef-off"><span class="linenr">11: </span>  program(<span style="color: #6b8e23;">Caffeine</span>().sync)                                    <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span></span>
+<span id="coderef-run" class="coderef-off"><span class="linenr">11: </span>  program(<span style="color: #6b8e23;">Caffeine</span>().sync)                                    <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (run)</span>
 <span class="linenr">12: </span>    .unsafeRunSync() must_== ((<span style="color: #6b8e23;">None</span>, <span style="color: #8b0000;">"default"</span>, <span style="color: #6b8e23;">Some</span>(<span style="color: #8b0000;">"now exist"</span>), <span style="color: #6b8e23;">None</span>))
 <span class="linenr">13: </span>}
 </pre>
@@ -165,20 +215,20 @@ I can walk you through line by line though
 </p>
 
 <ul class="org-ul">
-<li><a href="#coderef-dsl" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-dsl');" onmouseout="CodeHighlightOff(this, 'coderef-dsl');">line-2</a> creates an instance of <code>CaffeineCache</code> which has side effect <code>IO</code>,
+<li><a href="#coderef-dsl" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-dsl');" onmouseout="CodeHighlightOff(this, 'coderef-dsl');">line-dsl</a> creates an instance of <code>CaffeineCache</code> which has side effect <code>IO</code>,
 key is <code>String</code> and value is <code>String</code> as well</li>
-<li><a href="#coderef-fetch" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-fetch');" onmouseout="CodeHighlightOff(this, 'coderef-fetch');">line-4</a>  won't acutally trigger any effect, it just returns a
+<li><a href="#coderef-fetch" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-fetch');" onmouseout="CodeHighlightOff(this, 'coderef-fetch');">line-fetch</a>  won't acutally trigger any effect, it just returns a
  DSL, represent as type <code>Klesili[IO, Cache, String]</code> which in English,
 "give me a <code>Cache</code> and I can provide you an
  <code>IO[String]</code>"</li>
 
-<li><a href="#coderef-fetchOr" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-fetchOr');" onmouseout="CodeHighlightOff(this, 'coderef-fetchOr');">line-5</a> is new <code>fetch</code> DSL, the second parameter is a function
+<li><a href="#coderef-fetchOr" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-fetchOr');" onmouseout="CodeHighlightOff(this, 'coderef-fetchOr');">line-fetchOr</a> is new <code>fetch</code> DSL, the second parameter is a function
 <code>K =&gt; IO[V]</code>, if cache not exist, it will run the function can put the
 result into the cache, and return the value</li>
 
-<li><a href="#coderef-put" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-put');" onmouseout="CodeHighlightOff(this, 'coderef-put');">line-6</a> will update the value of key "not exist yet" to "overrided"</li>
+<li><a href="#coderef-put" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-put');" onmouseout="CodeHighlightOff(this, 'coderef-put');">line-put</a> will update the value of key "not exist yet" to "overrided"</li>
 
-<li><a href="#coderef-run" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-run');" onmouseout="CodeHighlightOff(this, 'coderef-run');">line-11</a> is the Scala idiomatic syntax to build synchronize
+<li><a href="#coderef-run" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-run');" onmouseout="CodeHighlightOff(this, 'coderef-run');">line-run</a> is the Scala idiomatic syntax to build synchronize
 Caffeine Cache<br>
 if you still recall that the <code>program</code> is actually
 <code>Klesili[IO, Cache, String]</code> so now<br>
@@ -189,8 +239,8 @@ and you will get the actual result</li>
 </ul>
 </div>
 
-<div id="outline-container-orgb32ad42" class="outline-3">
-<h3 id="and-cats-io">and Cats IO</h3>
+<div id="outline-container-orgf6a7720" class="outline-3">
+<h3 id="and-cats-io">works with Cats IO</h3>
 <div class="outline-text-3" id="text-and-cats-io">
 <p>
 Jujiu has very flexible DSL, If you don't like Kleisli, it works with IO(technically you IO type just need to be a <code>Async</code>) as well
@@ -231,9 +281,9 @@ and all dsl suffix with <code>F</code>
 </p>
 </div>
 </div>
-<div id="outline-container-orgdc69100" class="outline-3">
-<h3 id="orgdc69100">and Caffeine builder</h3>
-<div class="outline-text-3" id="text-orgdc69100">
+<div id="outline-container-org147e4c1" class="outline-3">
+<h3 id="org147e4c1">idiomatic syntax for Caffeine builder</h3>
+<div class="outline-text-3" id="text-org147e4c1">
 <p>
 Dealing with Java DSL and Java Future is too verbose and painful in
 Scala project
@@ -258,7 +308,7 @@ First you will need caffeine builder syntax
 <div class="org-src-container">
 <pre class="src src-scala"><span style="color: #8b0000;">"it should able to get and set async loading cache"</span> &gt;&gt; {
   <span style="color: #00008b;">object</span> <span style="color: #6b8e23;">cache</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">CaffeineAsyncLoadingCache</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Integer</span>, <span style="color: #6b8e23;">String</span>] {
-<span id="coderef-executionContext" class="coderef-off">    <span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">executionContext</span> <span style="color: #00008b;">=</span> global          <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;--</span> (executionContext)</span>
+<span id="coderef-executionContext" class="coderef-off">    <span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">executionContext</span> <span style="color: #00008b;">=</span> global <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;--</span> (executionContext)</span>
   }
 
   <span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
@@ -267,21 +317,19 @@ First you will need caffeine builder syntax
     r3 <span style="color: #00008b;">&lt;-</span> cache.fetchAll(<span style="color: #6b8e23;">List</span>[<span style="color: #6b8e23;">Integer</span>](<span style="color: #6b8e23;">1</span>, <span style="color: #6b8e23;">2</span>, <span style="color: #6b8e23;">3</span>))
   } <span style="color: #00008b;">yield</span> (r1, r2, r3)
 
-  <span style="color: #00008b;">val</span> <span style="color: #b8860b;">caffeineA</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Caffeine</span>()
-<span id="coderef-global" class="coderef-off">    .executionContext(global)           <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;--</span> (global)</span>
-<span id="coderef-expire" class="coderef-off">    .expire(                            <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;--</span> (expire)</span>
-      (<span style="color: #00008b;">_:</span> <span style="color: #36648b;">Integer</span>, <span style="color: #00008b;">_:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">=&gt;</span> {
-        <span style="color: #6b8e23;">1.</span>second
-      },
+  <span style="color: #00008b;">val</span> <span style="color: #b8860b;">caffeineA</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">com</span>.github.benmanes.caffeine.cache.<span style="color: #6b8e23;">AsyncLoadingCache</span>[<span style="color: #6b8e23;">Integer</span>, <span style="color: #6b8e23;">String</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Caffeine</span>()
+<span id="coderef-global" class="coderef-off">    .executionContext(global) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;--</span> (global)</span>
+<span id="coderef-expire" class="coderef-off">    .withExpire( <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;--</span> (expire)</span>
+      (<span style="color: #00008b;">_:</span> <span style="color: #36648b;">Integer</span>, <span style="color: #00008b;">_:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">1.</span>second,
       (<span style="color: #00008b;">_:</span> <span style="color: #36648b;">Integer</span>, <span style="color: #00008b;">_:</span> <span style="color: #36648b;">String</span>, currentDuration<span style="color: #00008b;">:</span> <span style="color: #36648b;">FiniteDuration</span>) <span style="color: #00008b;">=&gt;</span> currentDuration,
       (<span style="color: #00008b;">_:</span> <span style="color: #36648b;">Integer</span>, <span style="color: #00008b;">_:</span> <span style="color: #36648b;">String</span>, currentDuration<span style="color: #00008b;">:</span> <span style="color: #36648b;">FiniteDuration</span>) <span style="color: #00008b;">=&gt;</span> currentDuration
     )
 <span id="coderef-async" class="coderef-off">    .async((key<span style="color: #00008b;">:</span> <span style="color: #36648b;">Integer</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(<span style="color: #8b0000;">"async string"</span> + key)) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;--</span> (async)</span>
 
   <span style="color: #00008b;">val</span> <span style="color: #b8860b;">caffeineB</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Caffeine</span>()
-    .expireAfterAccess(<span style="color: #6b8e23;">1.</span>second)
-    .expireAfterWrite(<span style="color: #6b8e23;">2.</span>seconds)
-    .refreshAfterWrite(<span style="color: #6b8e23;">3.</span>seconds)
+    .withExpireAfterAccess(<span style="color: #6b8e23;">1.</span>second)
+    .withExpireAfterWrite(<span style="color: #6b8e23;">2.</span>seconds)
+    .withRefreshAfterWrite(<span style="color: #6b8e23;">3.</span>seconds)
     .async((key<span style="color: #00008b;">:</span> <span style="color: #36648b;">Integer</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(<span style="color: #8b0000;">"async string"</span> + key))
 
   <span style="color: #00008b;">val</span> <span style="color: #b8860b;">expected</span> <span style="color: #00008b;">=</span> (
@@ -305,7 +353,7 @@ Future things</li>
 execution context as default to execute java future, otherwise its default java folk join pool.
 alternatively you can also use Akka's execution context.</li>
 
-<li><a href="#coderef-expire" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-expire');" onmouseout="CodeHighlightOff(this, 'coderef-expire');">line-expire</a> default the expiring policy, here it's more Scala way using
+<li><a href="#coderef-expire" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-expire');" onmouseout="CodeHighlightOff(this, 'coderef-expire');">line-expire</a> default the expiring policy, here it's more Scala idiomatic
 lambda and <code>Duration</code></li>
 
 <li><a href="#coderef-async" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-async');" onmouseout="CodeHighlightOff(this, 'coderef-async');">line-async</a> will create an
@@ -328,7 +376,6 @@ i.e. Tagless Final
 </p>
 <div class="org-src-container">
 <pre class="src src-scala"><span style="color: #8b0000;">"works with tagless final"</span> &gt;&gt; {
-  <span style="color: #00008b;">import</span> us.oyanglul.jujiu.syntax.cache.<span style="color: #00008b;">_</span>
   <span style="color: #00008b;">trait</span> <span style="color: #36648b;">LogDsl</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] {
     <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>(msg<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">Unit</span>]
   }
@@ -344,7 +391,7 @@ i.e. Tagless Final
 
   {
     <span style="color: #00008b;">object</span> <span style="color: #6b8e23;">dsl</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">CaffeineCache</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">String</span>] <span style="color: #00008b;">with</span> <span style="color: #36648b;">LogDsl</span>[<span style="color: #6b8e23;">IO</span>] {
-      <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>(msg<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">IO</span>(org.log4s.getLogger.info(msg))
+      <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>(msg<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">IO</span>(println(msg))
     }
 
     <span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">cacheProvider</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">cache</span>.<span style="color: #6b8e23;">Cache</span>[<span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">String</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Caffeine</span>().sync[<span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">String</span>]
@@ -371,7 +418,7 @@ if your code is in ReaderT pattern, good, it will fit in more naturally
 <pre class="src src-scala"><span style="color: #8b0000;">"works with tagless final style readerT"</span> &gt;&gt; {
   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">Layer 1: Environment</span>
   <span style="color: #00008b;">trait</span> <span style="color: #36648b;">HasLogger</span> {
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">logger</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">org</span>.log4s.<span style="color: #6b8e23;">Logger</span>
+    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">logger</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Unit</span>
   }
   <span style="color: #00008b;">trait</span> <span style="color: #36648b;">HasCacheProvider</span> {
     <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">cacheProvider</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">cache</span>.<span style="color: #6b8e23;">Cache</span>[<span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">String</span>]
@@ -381,7 +428,7 @@ if your code is in ReaderT pattern, good, it will fit in more naturally
 
   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">Layer 2: DSL</span>
   <span style="color: #00008b;">trait</span> <span style="color: #36648b;">LogDsl</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] {
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>(msg<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)(<span style="color: #228b22;">implicit</span> <span style="color: #6b8e23;">M</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Applicative</span>[<span style="color: #6b8e23;">F</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Kleisli</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">Env</span>, <span style="color: #6b8e23;">Unit</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>(a <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">M</span>.pure(a.logger.info(msg)))
+    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>(msg<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)(<span style="color: #228b22;">implicit</span> <span style="color: #6b8e23;">M</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Applicative</span>[<span style="color: #6b8e23;">F</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Kleisli</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">Env</span>, <span style="color: #6b8e23;">Unit</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>(a <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">M</span>.pure(a.logger(msg)))
   }
 
   <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Dsl</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">CaffeineCache</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">String</span>] <span style="color: #00008b;">with</span> <span style="color: #36648b;">LogDsl</span>[<span style="color: #6b8e23;">F</span>]
@@ -399,7 +446,7 @@ if your code is in ReaderT pattern, good, it will fit in more naturally
 
   program[<span style="color: #6b8e23;">IO</span>](dsl)
     .run(<span style="color: #00008b;">new</span> <span style="color: #36648b;">HasLogger</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">HasCacheProvider</span> {
-      <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">logger</span> <span style="color: #00008b;">=</span> org.log4s.getLogger
+      <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">logger</span> <span style="color: #00008b;">=</span> println
       <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">cacheProvider</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Caffeine</span>().sync
     })
     .unsafeRunSync() must_== <span style="color: #6b8e23;">None</span>

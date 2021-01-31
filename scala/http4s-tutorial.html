@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-11-18 Wed 02:54 -->
+<!-- 2021-01-31 Sun 02:35 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Http4s x Finagle Tutorial</title>
@@ -85,10 +85,15 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#org24d6ba6">Get Started with Http4s</a>
 <ul>
-<li><a href="#orge2aa66a">Prerequisites</a></li>
-<li><a href="#org7aef404">Verify your environment</a></li>
-<li><a href="#orgbf7517e">Creating a new Joke Application</a>
+<li><a href="#orge2aa66a">Prerequisites</a>
 <ul>
+<li><a href="#org95b53a1">for macOS</a></li>
+<li><a href="#orgc5bf5f9">for Linux(or Windows WSL)</a></li>
+</ul>
+</li>
+<li><a href="#orgbaca50c">Creating a new Http4s Application</a>
+<ul>
+<li><a href="#org7aef404">Verify your environment</a></li>
 <li><a href="#org1b6ae95">file structure</a></li>
 <li><a href="#org3c08723">source structure</a></li>
 </ul>
@@ -118,57 +123,143 @@ for the JavaScript code in this tag.
 follow the structure of <a href="https://guides.rubyonrails.org/getting_started.html">Getting Started with Rails</a>
 </span></h2>
 <div class="outline-text-2" id="text-org24d6ba6">
+
+<figure>
+<object type="image/svg+xml" data="https://github.com/jcouyang/http4s-example/workflows/Build%20and%20Test/badge.svg" class="org-svg">
+Sorry, your browser does not support SVG.</object>
+
+</figure>
+
+<a class="github-button" href="https://github.com/jcouyang/http4s-example" data-icon="octicon-star" aria-label="Star jcouyang/http4s-example on GitHub">Source Code</a>
+
 <p>
 This guide covers getting up and running a production ready http4s example.
 </p>
 
 <p>
-After reader this guide, you will know:
+After reading this guide, you will know:
 </p>
 <ul class="org-ul">
-<li>How to install Http4s, create a new Http4s application, and connect your application to a database.</li>
-<li>The general layout of a Http4s application.</li>
-<li>The basic principles of FP design.</li>
-<li>How to quickly generate the starting pieces of a Http4s application.</li>
-<li>How to package and deploy a Http4s application</li>
-<li>How to monitor a Http4s application</li>
+<li>How to install Http4s, <b>create a new Http4s application</b>, and connect your application to a database.</li>
+<li>The general <b>layout</b> of a Http4s application.</li>
+<li>The basic principles of <b>FP design</b>.</li>
+<li>How to define and <b>migrate database schema</b> with Flyway<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
+<a href="https://flywaydb.org/documentation/">https://flywaydb.org/documentation/</a>
+</span> and Doobie<label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
+<a href="https://tpolecat.github.io/doobie/">https://tpolecat.github.io/doobie/</a>
+</span></li>
+<li>How to <b>stream</b> data using Http4s and Doobie</li>
+<li>How to do <b>A/B testing</b> via finagle feature toggle</li>
+<li>How to add <b>Observability</b> such as logging, distributed tracing, metrics by using Zipkin<label for="4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="4" class="margin-toggle"/><span class="sidenote">
+<a href="https://zipkin.io">https://zipkin.io</a>
+</span>, Prometheus<label for="5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="5" class="margin-toggle"/><span class="sidenote">
+<a href="https://prometheus.io/">https://prometheus.io/</a>
+</span></li>
+<li>How to <b>test Http4s endpoints</b></li>
+<li>How to <b>package and deploy</b> a Http4s application</li>
 </ul>
 </div>
 
 <div id="outline-container-orge2aa66a" class="outline-3">
 <h3 id="orge2aa66a">Prerequisites</h3>
 <div class="outline-text-3" id="text-orge2aa66a">
+<p>
+You don't need to install anything else other than just Nix<label for="6" class="margin-toggle sidenote-number"></label><input type="checkbox" id="6" class="margin-toggle"/><span class="sidenote">
+<a href="https://nixos.org/">https://nixos.org/</a>
+</span>:
+</p>
+
 <ul class="org-ul">
-<li>Nix <code>sh &lt;(curl -L https://nixos.org/nix/install)</code> <label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
-If you're using macOS Catalina follow <a href="https://nixos.org/manual/nix/stable/#sect-macos-installation">https://nixos.org/manual/nix/stable/#sect-macos-installation</a> 
+<li>Nix <code>sh &lt;(curl -L https://nixos.org/nix/install)</code> <label for="7" class="margin-toggle sidenote-number"></label><input type="checkbox" id="7" class="margin-toggle"/><span class="sidenote">
+If you're using macOS Catalina follow <a href="https://nixos.org/manual/nix/stable/#sect-macos-installation">https://nixos.org/manual/nix/stable/#sect-macos-installation</a>
 </span></li>
 </ul>
-</div>
-</div>
-
-<div id="outline-container-org7aef404" class="outline-3">
-<h3 id="org7aef404">Verify your environment</h3>
-<div class="outline-text-3" id="text-org7aef404">
-<p>
-Start server
-</p>
-<pre class="example">
-$ nix-shell
-&gt; sbt ~reStart
-</pre>
 
 <div class="epigraph"><blockquote>
 <p>
-Let us assume all future prefix of <code>&gt;</code> represent for command in <code>nix-shell</code>, and <code>$</code> for <code>bash</code>.
+📝 Nix is a Functional package manager for Linux and macOS, for windows user, WSL(Windows Subsystem for Linux)<label for="8" class="margin-toggle sidenote-number"></label><input type="checkbox" id="8" class="margin-toggle"/><span class="sidenote">
+<a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">https://docs.microsoft.com/en-us/windows/wsl/install-win10</a>
+</span> is required.
 </p>
 
 </blockquote></div>
 
 <p>
-You should able to see a empty list <code>[]</code> since there is nothing in database yet.
+To make sure our dev environment is 100% reproducible, please lock the nix channel to a fix version:
+</p>
+</div>
+<div id="outline-container-org95b53a1" class="outline-4">
+<h4 id="org95b53a1">for macOS</h4>
+<div class="outline-text-4" id="text-org95b53a1">
+<pre class="example">
+nix-channel --add https://nixos.org/channels/nixpkgs-20.09-darwin nixpkgs
+nix-channel --update
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgc5bf5f9" class="outline-4">
+<h4 id="orgc5bf5f9">for Linux(or Windows WSL)</h4>
+<div class="outline-text-4" id="text-orgc5bf5f9">
+<pre class="example">
+nix-channel --add https://nixos.org/channels/nixos-20.09 nixpkgs
+nix-channel --update
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbaca50c" class="outline-3">
+<h3 id="orgbaca50c">Creating a new Http4s Application</h3>
+<div class="outline-text-3" id="text-orgbaca50c">
+<pre class="example">
+~ nix-shell -p sbt
+&gt; sbt new jcouyang/http4s.g8
+</pre>
+
+<p>
+You can either answer all those question that it prompt or press <code>Enter</code> all the way to the end.
+</p>
+</div>
+
+<div id="outline-container-org7aef404" class="outline-4">
+<h4 id="org7aef404">Verify your environment</h4>
+<div class="outline-text-4" id="text-org7aef404">
+<p>
+exit the previous temporary <code>nix-shell -p sbt</code> if you are still in
 </p>
 <pre class="example">
-$ curl localhost:8080/joke
+&gt; exit
+</pre>
+
+<p>
+Enter nix-shell and start the server
+</p>
+
+<div class="epigraph"><blockquote>
+<p>
+📝 first time <code>nix-shell</code> may take few minutes to download dependencies defined in <code>shell.nix</code> such as <code>sbt</code>, <code>docker</code> etc
+</p>
+
+</blockquote></div>
+
+<pre class="example">
+~ nix-shell
+&gt; sbt ~reStart
+</pre>
+
+<div class="epigraph"><blockquote>
+<p>
+📝 Let us assume that all future prefix of <code>&gt;</code> represent for command in <code>nix-shell</code>, and <code>~</code> for <code>bash</code>.
+</p>
+
+</blockquote></div>
+
+<p>
+You should able to see an empty list <code>[]</code> since there is nothing in database yet.
+</p>
+<pre class="example">
+~ curl localhost:8080/joke
 </pre>
 
 <p>
@@ -182,18 +273,6 @@ To run test simply
 Now you have a proven working environment for the service to test and run, let us see how we build it.
 </p>
 </div>
-</div>
-
-<div id="outline-container-orgbf7517e" class="outline-3">
-<h3 id="orgbf7517e">Creating a new Joke Application</h3>
-<div class="outline-text-3" id="text-orgbf7517e">
-<pre class="example">
-$ sbt new jcouyang/http4s.g8
-</pre>
-
-<p>
-You can either answer all those question that it prompt or press <code>Enter</code> all the way to the end.
-</p>
 </div>
 
 <div id="outline-container-org1b6ae95" class="outline-4">
@@ -267,7 +346,7 @@ You can either answer all those question that it prompt or press <code>Enter</co
 <h4 id="org3c08723">source structure</h4>
 <div class="outline-text-4" id="text-org3c08723">
 <pre class="example">
-$ tree src
+~ tree src
 src
 ├── main
 │   ├── resources
@@ -404,6 +483,15 @@ src
 </tr>
 </tbody>
 </table>
+
+<p>
+There are 3 tiers composite the application:
+</p>
+<ul class="org-ul">
+<li><code>root</code>: such as <code>Main.scala</code> where all the side effects actually happen</li>
+<li><code>resource</code>: definitions of side effects</li>
+<li><code>route</code>: where the actual business is defined</li>
+</ul>
 </div>
 </div>
 </div>
@@ -412,7 +500,7 @@ src
 <h3 id="org67608bb">Data migration</h3>
 <div class="outline-text-3" id="text-org67608bb">
 <p>
-Before we start to build the joke service, what we need is a database table,
+Before we start to build the joke service, what we first is to design a database table,
 to store the detail of jokes.
 </p>
 
@@ -440,6 +528,17 @@ Where <code>POSTGRES_DB=joke</code> will help creating the database and name it 
 <p>
 You don't need to run DB migration manually most of the time, since nix-shell hook will run it for you.
 </p>
+<pre class="example">
+shellHook = ''
+          set -a
+          source app.env
+          set +a
+          source ops/bin/deps-up
+          sbt 'db/run migrate'
+          cat ops/sbt-usage.txt
+          set +e
+          '';
+</pre>
 
 <p>
 Every time you enter <code>nix-shell</code>, you will see the migration log:
@@ -470,7 +569,7 @@ INFO: Migrating schema "public" to version 1.0 - CreateJokeTable
 </pre>
 
 <p>
-To migrate when schema changed:
+To manually migrate when schema changed:
 </p>
 <pre class="example">
 &gt; sbt "db/run migration"
@@ -480,7 +579,7 @@ To migrate when schema changed:
 Migration file located in <code>db/src/main/scala/db/migration</code>
 </p>
 <pre class="example">
-$ tree db/src
+~ tree db/src
 db/src
 └── main
     └── scala
@@ -513,7 +612,7 @@ The prefix <code>V1_0__</code> in class name means version 1.0, detail of naming
 </p>
 
 <p>
-Now we have database scheme set, next we need a API to save data into the new table.
+Now we have database scheme set, next we need an API to save data into the new table.
 </p>
 </div>
 </div>
@@ -547,18 +646,18 @@ The following example uses Quill:
 </div>
 <ol class="org-ol">
 <li><a href="#coderef-route" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-route');" onmouseout="CodeHighlightOff(this, 'coderef-route');"><code>AppRoute</code></a> is simply a wrapper of Http4s' <code>HttpRoutes.of[IO]</code> but dependencies injectable.</li>
-<li><a href="#coderef-kleisli" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-kleisli');" onmouseout="CodeHighlightOff(this, 'coderef-kleisli');"><code>Kleisli.ask</code></a> is something like <code>@Inject</code> in Java world except everything is lazy, when you <code>ask[IO, HasDatabase]</code>, it will <code>&lt;-</code> a instance <code>has</code> of <code>HasDatabase</code> type <label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
-Kleisli is also known as ReaderT <a href="https://blog.oyanglul.us/scala/into-the-readert-verse">https://blog.oyanglul.us/scala/into-the-readert-verse</a> 
+<li><a href="#coderef-kleisli" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-kleisli');" onmouseout="CodeHighlightOff(this, 'coderef-kleisli');"><code>Kleisli.ask</code></a> is something like <code>@Inject</code> in Java world except everything is lazy, when you <code>ask[IO, HasDatabase]</code>, it will <code>&lt;-</code> a instance <code>has</code> of <code>HasDatabase</code> type <label for="9" class="margin-toggle sidenote-number"></label><input type="checkbox" id="9" class="margin-toggle"/><span class="sidenote">
+Kleisli is also known as ReaderT <a href="https://blog.oyanglul.us/scala/into-the-readert-verse">https://blog.oyanglul.us/scala/into-the-readert-verse</a>
 </span></li>
 <li>We also need to read the body from the req using Http4s DSL <a href="#coderef-reqbody" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-reqbody');" onmouseout="CodeHighlightOff(this, 'coderef-reqbody');"><code>req.as[Repr.Create]</code></a> will parse the body and return a <code>IO[Repr.Create]</code>.
-We need to <code>liftF</code> because the for comprehension is type <code>Kleisli[IO, HasXYZ, Response[IO]]</code>.</li>
+We need to <code>liftF</code> because the <code>for</code> comprehension is type <code>Kleisli[IO, HasXYZ, Response[IO]]</code>.</li>
 <li><code>has</code> has type <code>HasDatabase</code>, which means it has database <code>transact</code> method, when <code>run</code> convert Quill's <code>quote</code> into <code>ConnectionIO[A]</code>, <code>transact</code>
 can execute it in one transaction.</li>
 </ol>
 
 <div class="epigraph"><blockquote>
 <p>
-It is pretty cool that Quill will translate the DSL directly into SQL at compile time:
+📝 It is pretty cool that Quill will translate the DSL directly into SQL at compile time:
 </p>
 
 
@@ -684,8 +783,8 @@ It is good practice to have <code>id</code> naming with proper namespace too.
 </p>
 
 <p>
-How can we use this toggle in source code?<label for="4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="4" class="margin-toggle"/><span class="sidenote">
-<a href="https://github.com/jcouyang/http4s-example/blob/master/src/main/scala/com/your/domain/http4sexample/resource/toggle.scala#L9">https://github.com/jcouyang/http4s-example/blob/master/src/main/scala/com/your/domain/http4sexample/resource/toggle.scala#L9</a> 
+How can we use this toggle in source code?<label for="10" class="margin-toggle sidenote-number"></label><input type="checkbox" id="10" class="margin-toggle"/><span class="sidenote">
+<a href="https://github.com/jcouyang/http4s-example/blob/master/src/main/scala/com/your/domain/http4sexample/resource/toggle.scala#L9">https://github.com/jcouyang/http4s-example/blob/master/src/main/scala/com/your/domain/http4sexample/resource/toggle.scala#L9</a>
 </span>
 </p>
 
@@ -984,15 +1083,39 @@ follow the structure of <a href="https://guides.rubyonrails.org/getting_started.
 </p></div></div>
 
 <div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
-If you're using macOS Catalina follow <a href="https://nixos.org/manual/nix/stable/#sect-macos-installation">https://nixos.org/manual/nix/stable/#sect-macos-installation</a> 
+<a href="https://flywaydb.org/documentation/">https://flywaydb.org/documentation/</a>
 </p></div></div>
 
 <div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
-Kleisli is also known as ReaderT <a href="https://blog.oyanglul.us/scala/into-the-readert-verse">https://blog.oyanglul.us/scala/into-the-readert-verse</a> 
+<a href="https://tpolecat.github.io/doobie/">https://tpolecat.github.io/doobie/</a>
 </p></div></div>
 
 <div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara">
-<a href="https://github.com/jcouyang/http4s-example/blob/master/src/main/scala/com/your/domain/http4sexample/resource/toggle.scala#L9">https://github.com/jcouyang/http4s-example/blob/master/src/main/scala/com/your/domain/http4sexample/resource/toggle.scala#L9</a> 
+<a href="https://zipkin.io">https://zipkin.io</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5">5</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://prometheus.io/">https://prometheus.io/</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.6" class="footnum" href="#fnr.6">6</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://nixos.org/">https://nixos.org/</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.7" class="footnum" href="#fnr.7">7</a></sup> <div class="footpara"><p class="footpara">
+If you're using macOS Catalina follow <a href="https://nixos.org/manual/nix/stable/#sect-macos-installation">https://nixos.org/manual/nix/stable/#sect-macos-installation</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.8" class="footnum" href="#fnr.8">8</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">https://docs.microsoft.com/en-us/windows/wsl/install-win10</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.9" class="footnum" href="#fnr.9">9</a></sup> <div class="footpara"><p class="footpara">
+Kleisli is also known as ReaderT <a href="https://blog.oyanglul.us/scala/into-the-readert-verse">https://blog.oyanglul.us/scala/into-the-readert-verse</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.10" class="footnum" href="#fnr.10">10</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://github.com/jcouyang/http4s-example/blob/master/src/main/scala/com/your/domain/http4sexample/resource/toggle.scala#L9">https://github.com/jcouyang/http4s-example/blob/master/src/main/scala/com/your/domain/http4sexample/resource/toggle.scala#L9</a>
 </p></div></div>
 
 
