@@ -21,10 +21,9 @@
 {{{ruby(ADT,Algebraic Datatypes)}}} is something that has multiple constructors return single type:
 
 #+BEGIN_SRC scala
-  enum List[+A]{
+  enum List[+A]:
     case Nil
     case Cons(head: A, tail: List[A])
-  }
 #+END_SRC
 
 Here both =Nil= and =Cons= can create a value of type =List[A]=.
@@ -42,15 +41,13 @@ But actually the way Scala 2 using is {{{ruby(GADT,Generalized Algebraic Datatyp
 We can also do GADT using =enum=[fn:1], for instance to define a =SafeList=:[fn:2]
 
 #+BEGIN_SRC scala -n -r
-  enum Size {
+  enum Size:
     case Empty
     case NonEmpty
-  }
 
-  enum SafeList[+A, +S <: Size] {
+  enum SafeList[+A, +S <: Size]:
     case Nil extends SafeList[Nothing, Size.Empty.type] // <- (ref:nil)
     case Cons(head: A, tail: SafeList[A, Size]) extends SafeList[A, Size.NonEmpty.type]
-  }
 #+END_SRC
 
 What GATD provides fine control of type, i.e. line [[(nil)][(nil)]] no longer returns =List[Nothing]=,

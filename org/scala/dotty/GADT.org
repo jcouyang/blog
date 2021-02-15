@@ -23,10 +23,9 @@
 我们都知道 {{{ruby(ADT,Algebraic Datatypes)}}} 指的是 Coproduct 类型, 也就是由多个构造函数返回一种类型, 比如:
 
 #+BEGIN_SRC scala
-  enum List[+A]{
+  enum List[+A]:
     case Nil
     case Cons(head: A, tail: List[A])
-  }
 #+END_SRC
 
 这是普通的 ADT, 也就是 =Nil= 和 =Cons= 构造出来的类型是固定的.
@@ -35,15 +34,13 @@
 
 然我们来定义一个类型更安全的 List, 叫 =SafeList=
 #+BEGIN_SRC scala -n -r
-  enum Size {
+  enum Size:
     case Empty
     case NonEmpty
-  }
 
-  enum SafeList[+A, +S <: Size] {
+  enum SafeList[+A, +S <: Size]:
     case Nil extends SafeList[Nothing, Size.Empty.type] // <- (ref:nil)
     case Cons(head: A, tail: SafeList[A, Size]) extends SafeList[A, Size.NonEmpty.type]
-  }
 #+END_SRC
 
 你看 [[(nil)][这行]] 就不是默认的返回类型 =List[Nothing]= , 我们可以定制这个类型为 =SafeList[Nothing, Size.Empty,type]=, 来在类型上表示
