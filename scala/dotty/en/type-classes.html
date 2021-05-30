@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2021-05-30 Sun 06:09 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Type Classes in Scala 3</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Jichao Ouyang">
+<meta name="description" content="blah"
+>
+<meta name="keywords" content="typeclasses,type classes,scala 3,dotty,meow,cats">
+<link rel="icon" href="/favicon.ico">
+<meta name="theme-color" content="#ffffff">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
+<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
+<meta property="og:title" content="Type Classes in Scala 3" />
+<meta property="og:description" content="" />
+<meta property="og:type" content="article" />
+<meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="preamble" class="status">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJRFJGX"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header>
+    <a accesskey="h" href="/index.html"> HOME </a> |
+    <a href="#" id="edit-in-github">EDIT</a> |
+    <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
+    <a href="https://blog.oyanglul.us/theindex">INDEX</a> |
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
+</header>
+</div>
+<div id="content">
+<header>
+<h1 class="title">Type Classes in Scala 3</h1>
+</header><nav id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org5595119">Implicits</a>
+<ul>
+<li><a href="#org1ffa059">given</a></li>
+<li><a href="#orgdd4507e">using</a></li>
+</ul>
+</li>
+<li><a href="#org03189c5">Hierarchy</a></li>
+<li><a href="#org21984a5">Extensions</a></li>
+<li><a href="#org8e6d254">Prelude</a></li>
+</ul>
+</div>
+</nav>
+<hr>
+
+<p>
+I'm recently migrating some libs and projects to Scala 3, I guess it would be very helpful
+to me or anyone interested to learn some new functional programming features that Scala 3 is bringing to us.
+</p>
+
+<ul class="org-ul">
+<li><a href="./rank-n-type.html">Rank N Types</a></li>
+<li><a href="./functionK.html">FunctionK</a></li>
+<li><a href="./GADT.html">GADT</a></li>
+<li><a href="./phantomType.html">Phantom Types</a></li>
+<li><a href="./dependent-types.html">Dependent Types</a></li>
+<li><a href="./first-class-types.html">"First Class" Types</a></li>
+<li><a href="./type-classes.html">Type Classes</a></li>
+</ul>
+
+<p>
+Source code 👉 <a href="https://github.com/jcouyang/meow">https://github.com/jcouyang/meow</a>
+</p>
+
+<hr>
+
+<p>
+Instead of just introducing the concepts, let's try something more practical this time: redesigning a Category Theory library for Scala 3.
+</p>
+
+<p>
+I like to call it <i>Meow</i> because it makes lib user forget about <b>Cat</b> (egory) itself and focus on its traits.
+</p>
+
+<p>
+First, let's recap some Scala 3 new syntax.
+</p>
+<div id="outline-container-org5595119" class="outline-2">
+<h2 id="org5595119">Implicits</h2>
+<div class="outline-text-2" id="text-org5595119">
+</div>
+<div id="outline-container-org1ffa059" class="outline-3">
+<h3 id="org1ffa059">given</h3>
+<div class="outline-text-3" id="text-org1ffa059">
+<p>
+Defining a type class in Scala 3 is less boilerplate than in Scala 2.
+</p>
+
+<p>
+For instance, a Functor:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span>
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fmap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">B</span>]
+</pre>
+</div>
+
+<p>
+This is basically the same as in Scala 2, but the cool part comes when you implement
+the type class.
+</p>
+
+<p>
+An <code>Option</code> is mappable, so there exist a <code>Functor</code> instance for <code>Option</code>:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Functor</span><span style="color: #00008b;">:</span>
+  given <span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">Option</span>] <span style="color: #00008b;">with</span>
+    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fmap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> (oa<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=&gt;</span> oa.map(f)
+</pre>
+</div>
+
+<p>
+Let me just remind you how it was done in Scala 2:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Functor</span> {
+  <span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">functorOption</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">Option</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">Option</span>] {
+    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fmap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> (oa<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=&gt;</span> oa.map(f)
+  }
+}
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>No longer require a name, implicits are mostly for compiler, type should just explanatory enough</li>
+<li>No longer require <code>new</code></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgdd4507e" class="outline-3">
+<h3 id="orgdd4507e">using</h3>
+<div class="outline-text-3" id="text-orgdd4507e">
+<p>
+Using a type class instance is now via <code>using</code> instead of <code>implicit</code>, which is less confusing because implicit could mean
+different in different places.
+</p>
+
+
+<p>
+Let's say we like a global universal function <code>map</code>, that can map any data type which has a Functor instance:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala"><span class="linenr">1: </span><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span>
+<span id="coderef-rankntype" class="coderef-off"><span class="linenr">2: </span>  [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>]                       <span style="color: #00008b;">=&gt;</span></span>
+<span class="linenr">3: </span>  (f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)                  <span style="color: #00008b;">=&gt;</span>
+<span id="coderef-using" class="coderef-off"><span class="linenr">4: </span>  (using functor<span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">F</span>])  <span style="color: #00008b;">=&gt;</span></span>
+<span class="linenr">5: </span>  (fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])                   <span style="color: #00008b;">=&gt;</span> functor.fmap(f)(fa)
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>line <a href="#coderef-rankntype" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-rankntype');" onmouseout="CodeHighlightOff(this, 'coderef-rankntype');">2</a> was introduced in <a href="./rank-n-type.html">Rank N Types in Scala 3</a></li>
+<li>line <a href="#coderef-using" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-using');" onmouseout="CodeHighlightOff(this, 'coderef-using');">4</a> is the new syntax, just replace <code>implicit</code> with <code>using</code>.</li>
+</ul>
+
+<p>
+In this function, we also delay the <code>[A, B]</code> type parameter and context of <code>using functor: Fucntor[F]</code>, so that you can:
+</p>
+<ul class="org-ul">
+<li>pass <code>map[Option]</code> around, as <code>[A, B]</code> is not yet set.</li>
+<li>pass <code>map[Option](f)</code> around, without immediately providing a Functor instance.</li>
+</ul>
+
+<p>
+There are some other forms of <code>using</code>, i.e. you can omit the <code>using</code> keyword if it is in a lambda, by replacing <code>=&gt;</code> with <code>?=&gt;</code><label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+<a href="https://dotty.epfl.ch/docs/reference/contextual/context-functions.html">https://dotty.epfl.ch/docs/reference/contextual/context-functions.html</a> 
+</span>.
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span>
+  [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>]                       <span style="color: #00008b;">=&gt;</span>
+  (f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)                  <span style="color: #00008b;">=&gt;</span>
+  (functor<span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">F</span>])       ?=&gt;
+  (fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])                   <span style="color: #00008b;">=&gt;</span> functor.fmap(f)(fa)
+</pre>
+</div>
+
+<p>
+Or, omit the name of the instance:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span>
+  [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>]                       <span style="color: #00008b;">=&gt;</span>
+  (f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)                  <span style="color: #00008b;">=&gt;</span>
+  (using <span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">F</span>])           <span style="color: #00008b;">=&gt;</span>
+  (fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])                   <span style="color: #00008b;">=&gt;</span> summon[<span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">F</span>]].fmap(f)(fa)
+</pre>
+</div>
+
+<p>
+<code>summon</code> is the new <code>implicitly</code>.
+</p>
+
+<p>
+That is pretty much what we need to know to start building Meow.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org03189c5" class="outline-2">
+<h2 id="org03189c5">Hierarchy</h2>
+<div class="outline-text-2" id="text-org03189c5">
+<p>
+Meow has a significantly different design than Cats, namely the type class hierarchy, which Meow doesn't have at all.
+</p>
+
+<p>
+<a href="https://cdn.rawgit.com/tpolecat/cats-infographic/master/cats.svg">typeclasses in cats</a>
+</p>
+
+<p>
+Meow uses context bounding to define type class dependencies, similar to Haskell.
+</p>
+
+<p>
+Such as, <code>Applicative</code>, which from Cats implementation, looks like:
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Applicative</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">F</span>] {
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">pure</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>]
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">ap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](ff<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>])(fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>]
+}
+</pre>
+</div>
+
+<p>
+The trick here is OO style <code>extends</code>, when <code>Applicative[F] extends Functor[F]</code>, <code>Applicative</code> is also mappable.
+</p>
+
+<p>
+This save lib maintainer some boilerplate, e.g. <code>Monad</code> probably <code>extends</code> most of typeclasses<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
+If you follow the arrow on the graph it extends <code>FlatMap</code>, <code>Applicative</code>, <code>Apply</code>, <code>Functor</code>, <code>Semigroupal</code>, <code>Invariant</code>.
+</span>, so they just
+implement <code>Monad</code> for <code>Option</code> for instance, and no need to implement <code>Applicative[Option]</code>, <code>Functor[Option]</code>&#x2026;
+</p>
+
+<p>
+But this kind of OO solution has many uncertainties, override introduces mutability.
+</p>
+
+<p>
+When I call <code>*&gt;</code> on <code>Option</code>, which implementation am I actually using?
+</p>
+
+<p>
+The <code>Monad[Option]</code>? or <code>Applicative[Option]</code>? Both instances could have implemented <code>ap</code>, and as a lib user, I have to
+build the hierarchy graph in my mind, to determinate, oh, <code>Monad</code> extends <code>Applicative</code>, and <code>Option</code> has <code>Monad</code> instance, so
+it must use the <code>Monad</code>'s <code>ap</code>.
+</p>
+
+<p>
+Also, even for lib maintainer it is too coupled with the graph, anything changed at the top-level typelass, will cause a chain reaction to
+whatever extends it.
+</p>
+
+<p>
+Instead of using OO style to add capability via <code>extends</code>, Meow simply declare type class <code>Applicaitve</code> need to be in context <code>Functor[F]</code> exists.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Applicative</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]<span style="color: #00008b;">:</span><span style="color: #36648b;">Functor</span>]<span style="color: #00008b;">:</span>
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">pure</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>]
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">liftA2</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">C</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">C</span>]
+</pre>
+</div>
+
+<p>
+By using context bound <code>F</code> must have a <code>Funtor</code> instance, we are definitely sure(so is the compiler) when I <code>fmap</code> something,
+it must use a <code>Functor</code> instance, because there are 0 overlaps from <code>Applicative</code> instance.
+</p>
+
+<p>
+More importantly, users are less confused and less thing to memorize, of which method belongs to which type class<label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
+Or, should they even care? 
+</span>.
+</p>
+
+<p>
+Now we can even safely define functions in global.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=&gt;</span> (f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>) <span style="color: #00008b;">=&gt;</span> (functor<span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">F</span>]) ?=&gt; (fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=&gt;</span> functor.fmap(f)(fa)
+<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">pure</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> (a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">=&gt;</span> (applicative<span style="color: #00008b;">:</span> <span style="color: #36648b;">Applicative</span>[<span style="color: #6b8e23;">F</span>]) ?=&gt; applicative.pure(a)
+<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">liftA2</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>] <span style="color: #00008b;">=&gt;</span> (f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">C</span>) <span style="color: #00008b;">=&gt;</span> (<span style="color: #6b8e23;">A</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Applicative</span>[<span style="color: #6b8e23;">F</span>]) ?=&gt; <span style="color: #6b8e23;">A</span>.liftA2(f)
+<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">flatMap</span>[<span style="color: #6b8e23;">M</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=&gt;</span> (f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">M</span>[<span style="color: #6b8e23;">B</span>]) <span style="color: #00008b;">=&gt;</span> (monad<span style="color: #00008b;">:</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">M</span>]) ?=&gt; (ma<span style="color: #00008b;">:</span> <span style="color: #36648b;">M</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=&gt;</span> monad.bind(f)(ma)
+</pre>
+</div>
+
+<p>
+This enabled a more user friendly interface, as they no longer need to know anything about the type class definitions and which
+method belongs to which type class, they only need to memorize few useful functions, that's it.
+</p>
+
+<ul class="org-ul">
+<li>Option is map-able:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-scala">map[<span style="color: #6b8e23;">Option</span>]((a<span style="color: #00008b;">:</span><span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> a + <span style="color: #6b8e23;">1</span>)(<span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">1</span>))
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>Option is pure-able and apply-able:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">fa</span> <span style="color: #00008b;">=</span> pure[<span style="color: #6b8e23;">Option</span>](<span style="color: #6b8e23;">1</span>)
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">fb</span> <span style="color: #00008b;">=</span> pure[<span style="color: #6b8e23;">Option</span>](<span style="color: #6b8e23;">2</span>)
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">f</span> <span style="color: #00008b;">=</span> (x<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> (y<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> x + y
+
+assertEquals(liftA2(f)(fa)(fb), <span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">3</span>))
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>Option is flatMap-able</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">fa</span> <span style="color: #00008b;">=</span> pure[<span style="color: #6b8e23;">Option</span>](<span style="color: #6b8e23;">1</span>)
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">ff</span> <span style="color: #00008b;">=</span> (x<span style="color: #00008b;">:</span><span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Option</span>(x +<span style="color: #6b8e23;">1</span>)
+
+assertEquals(flatMap[<span style="color: #6b8e23;">Option</span>](ff)(fa), <span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">2</span>))
+</pre>
+</div>
+
+<p>
+Users don't even need to aware of type classes exist, for them these are just a few handy functions help dealing with data types.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org21984a5" class="outline-2">
+<h2 id="org21984a5">Extensions</h2>
+<div class="outline-text-2" id="text-org21984a5">
+<p>
+Once again, I want to emphasize that type classes are not for users, type classes are just a technique for lib authors to abstract and organize traits, the purpose is not just define <code>map</code>, <code>flatMap</code>, they are the building blocks for us to extend the capability of data type.
+</p>
+
+<p>
+For example, if we implement <code>Functor[Option]</code>, <code>map</code> is the only function we need to implement, but from there we will also get a bunch of functions for free, thanks to <code>extension</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span>
+  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fmap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">B</span>]
+  extension [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])
+    infix <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> fmap(f)(fa)
+
+    <span style="color: #8b0000;">/** Usually [[this.fmap]] takes function first, `mapFlipped` takes data first</span>
+<span style="color: #8b0000;">      * @example ```scala</span>
+<span style="color: #8b0000;">      * fa &lt;#&gt; identity == identity(fa)</span>
+<span style="color: #8b0000;">      * ```</span>
+<span style="color: #8b0000;">      */</span>
+    <span style="color: #228b22;">@targetName</span>(<span style="color: #8b0000;">"mapFlipped"</span>)
+    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">&lt;#&gt;</span>(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> fmap(f)(fa)
+
+    <span style="color: #8b0000;">/** Drop whatever value `A` on left and return `F[B]` on the right</span>
+<span style="color: #8b0000;">      * @example ```scala</span>
+<span style="color: #8b0000;">      * Option(1) `$&gt;` 3 == Option(3)</span>
+<span style="color: #8b0000;">      * ```</span>
+<span style="color: #8b0000;">      */</span>
+    <span style="color: #228b22;">@targetName</span>(<span style="color: #8b0000;">"voidLeft"</span>)
+    infix <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">`$&gt;`</span>(a<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> fmap(const[<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">A</span>](a))(fa)
+
+    <span style="color: #8b0000;">/** Void `F[A]` and return `F[Unit]`</span>
+<span style="color: #8b0000;">      * @example ```scala</span>
+<span style="color: #8b0000;">      * Option(2).void == Option(())</span>
+<span style="color: #8b0000;">      * ```</span>
+<span style="color: #8b0000;">      */</span>
+    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">void</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">Unit</span>] <span style="color: #00008b;">=</span> fmap(const[<span style="color: #6b8e23;">Unit</span>, <span style="color: #6b8e23;">A</span>](()))(fa)
+
+end <span style="color: #6b8e23;">Functor</span>
+</pre>
+</div>
+
+<p>
+As you can see <code>map</code>, <code>mapFlipped</code>, <code>voidLeft</code>, <code>void</code> are all dependent and only dependent on <code>fmap</code>, by implementing <code>fmap</code>, you get all of
+these function for <b>free</b>.
+</p>
+
+<p>
+And you can add even more extensions, to its companion object too.
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Functor</span><span style="color: #00008b;">:</span>
+  extension [<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)
+    <span style="color: #8b0000;">/** Infix syntax for [[meow.data.Functor#fmap]]</span>
+<span style="color: #8b0000;">      * @example ```scala</span>
+<span style="color: #8b0000;">      * (f compose g) `&lt;$&gt;` fa  == (map[Option](f) compose map[Option](g))(fa)</span>
+<span style="color: #8b0000;">      * ```</span>
+<span style="color: #8b0000;">      */</span>
+    <span style="color: #228b22;">@targetName</span>(<span style="color: #8b0000;">"fmap"</span>)
+    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">`&lt;$&gt;`</span>(fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])(using <span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">F</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> fa map f
+
+  extension [<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)
+    <span style="color: #8b0000;">/** Void right, pair of [[meow.data.Functor#$&gt;]]</span>
+<span style="color: #8b0000;">      * @example ```scala</span>
+<span style="color: #8b0000;">      * 2 `&lt;$` Option(3) == Option(2)</span>
+<span style="color: #8b0000;">      * ```</span>
+<span style="color: #8b0000;">      */</span>
+    <span style="color: #228b22;">@targetName</span>(<span style="color: #8b0000;">"voidRight"</span>)
+    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">`&lt;$`</span>(fb<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>])(using <span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">F</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> fb.map(const(a))
+</pre>
+</div>
+
+<div class="epigraph"><blockquote>
+<p>
+<b>Quiz:</b> Guess what it will print? 2? 3? or 4?
+</p>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">1</span>) `$&gt;` <span style="color: #6b8e23;">3</span> `&lt;$` <span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">2</span>) &lt;#&gt; (<span style="color: #00008b;">_</span> + <span style="color: #6b8e23;">1</span>)
+</pre>
+</div>
+
+</blockquote></div>
+
+<p>
+With extensions, the <code>Option</code> examples above can be rewritten to be more Haskell-ish:
+</p>
+
+<ul class="org-ul">
+<li>Option is <code>&lt;$&gt;</code>-able:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-scala">(a<span style="color: #00008b;">:</span><span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> a + <span style="color: #6b8e23;">1</span> `&lt;$&gt;` <span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">1</span>)
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>Option is pure-able and <code>&lt;*&gt;</code>-able:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">fa</span> <span style="color: #00008b;">=</span> pure[<span style="color: #6b8e23;">Option</span>](<span style="color: #6b8e23;">1</span>)
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">fb</span> <span style="color: #00008b;">=</span> pure[<span style="color: #6b8e23;">Option</span>](<span style="color: #6b8e23;">2</span>)
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">f</span> <span style="color: #00008b;">=</span> (x<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> (y<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> x + y
+
+assertEquals(f `&lt;$&gt;` fa &lt;*&gt; fb, <span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">3</span>))
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>Option is <code>&gt;&gt;=</code>-able</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">fa</span> <span style="color: #00008b;">=</span> pure[<span style="color: #6b8e23;">Option</span>](<span style="color: #6b8e23;">1</span>)
+<span style="color: #00008b;">val</span> <span style="color: #b8860b;">ff</span> <span style="color: #00008b;">=</span> (x<span style="color: #00008b;">:</span><span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Option</span>(x +<span style="color: #6b8e23;">1</span>)
+
+assertEquals(fa &gt;&gt;= ff, <span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">2</span>))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8e6d254" class="outline-2">
+<h2 id="org8e6d254">Prelude</h2>
+<div class="outline-text-2" id="text-org8e6d254">
+<p>
+Since all functions <code>map</code>, <code>liftA2</code>, <code>flatMap</code>&#x2026; can be just global static, it is
+also safe to export all these functions to a single place &#x2013; <code>prelude</code>, with Scala 3's
+new feature <code>export</code><label for="4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="4" class="margin-toggle"/><span class="sidenote">
+<a href="https://dotty.epfl.ch/docs/reference/other-new-features/export.html">https://dotty.epfl.ch/docs/reference/other-new-features/export.html</a> 
+</span>, which is also much cleaner than Cats <code>extends</code> approach.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala"><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">prelude</span><span style="color: #00008b;">:</span>
+  export data.<span style="color: #6b8e23;">Functor</span>.{given,<span style="color: #00008b;">_</span>}
+  export control.<span style="color: #6b8e23;">Applicative</span>.{given,<span style="color: #00008b;">_</span>}
+  export control.<span style="color: #6b8e23;">Monad</span>.{given,<span style="color: #00008b;">_</span>}
+</pre>
+</div>
+
+<p>
+Then user can just <code>import meow.prelude.{given,*}</code>.
+</p>
+
+<p>
+With all new Scala 3 features, implementing type classes has never been easier and concise.
+</p>
+
+<p>
+There are more type classes implementations and usage examples in <a href="https://github.com/jcouyang/meow">https://github.com/jcouyang/meow</a>.
+You can try them out by cloning the repo and <code>sbt test</code>.
+</p>
+
+<p>
+To be continued&#x2026; in the next blogpost, I'll explain how to implement generic type class deriving without Shapeless in Scala 3.
+</p>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://dotty.epfl.ch/docs/reference/contextual/context-functions.html">https://dotty.epfl.ch/docs/reference/contextual/context-functions.html</a> 
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+If you follow the arrow on the graph it extends <code>FlatMap</code>, <code>Applicative</code>, <code>Apply</code>, <code>Functor</code>, <code>Semigroupal</code>, <code>Invariant</code>.
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+Or, should they even care? 
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://dotty.epfl.ch/docs/reference/other-new-features/export.html">https://dotty.epfl.ch/docs/reference/other-new-features/export.html</a> 
+</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<footer>
+  <p>Author: Jichao Ouyang
+    <a class="github-button" href="https://github.com/sponsors/jcouyang" data-icon="octicon-heart" aria-label="Sponsor @jcouyang on GitHub">Sponsor</a>
+    <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
+    <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
+  </p>
+  <p>Created: 2021:05:24</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
+  <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
+</footer>
+</div>
+</body>
+</html>
