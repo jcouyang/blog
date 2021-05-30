@@ -1,0 +1,304 @@
+#+title: Type Classes in Scala 3
+#+author: Jichao Ouyang
+#+date: 2021:05:24
+#+description: blah
+#+keywords: typeclasses,type classes,scala 3,dotty,meow,cats
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="Type Classes in Scala 3" />
+#+HTML_HEAD_EXTRA: <meta property="og:description" content="" />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+#+HTML_HEAD_EXTRA: <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
+#+index: Scala!Type Classes in Scala 3
+#+index: Dotty!Type Classes in Scala 3
+#+index: FP!Type Classes in Scala 3
+
+#+INCLUDE: !toc.org
+
+Instead of just introducing the concepts, let's try something more practical this time: redesigning a Category Theory library for Scala 3.
+
+I like to call it /Meow/ because it makes lib user forget about *Cat* (egory) itself and focus on its traits.
+
+First, let's recap some Scala 3 new syntax.
+* Implicits
+** given
+   Defining a type class in Scala 3 is less boilerplate than in Scala 2.
+
+   For instance, a Functor:
+   #+begin_src scala
+     trait Functor[F[_]]:
+       def fmap[A, B](f: A => B): F[A] => F[B]
+   #+end_src
+
+   This is basically the same as in Scala 2, but the cool part comes when you implement
+   the type class.
+
+   An =Option= is mappable, so there exist a =Functor= instance for =Option=:
+   #+begin_src scala
+     object Functor:
+       given Functor[Option] with
+         def fmap[A, B](f: A => B): Option[A] => Option[B] = (oa: Option[A]) => oa.map(f)
+   #+end_src
+
+   Let me just remind you how it was done in Scala 2:
+   #+begin_src scala
+     object Functor {
+       implicit val functorOption: Functor[Option] = new Functor[Option] {
+         def fmap[A, B](f: A => B): Option[A] => Option[B] = (oa: Option[A]) => oa.map(f)
+       }
+     }
+   #+end_src
+
+   - No longer require a name, implicits are mostly for compiler, type should just explanatory enough
+   - No longer require =new=
+
+** using
+
+  Using a type class instance is now via =using= instead of =implicit=, which is less confusing because implicit could mean
+  different in different places.
+
+
+  Let's say we like a global universal function =map=, that can map any data type which has a Functor instance:
+
+  #+begin_src scala -n -r
+    def map[F[_]] =
+      [A, B]                       =>   (ref:rankntype)
+      (f: A => B)                  =>
+      (using functor: Functor[F])  =>   (ref:using)
+      (fa: F[A])                   => functor.fmap(f)(fa)
+  #+end_src
+
+  - line [[(rankntype)]] was introduced in [[./rank-n-type.org][Rank N Types in Scala 3]]
+  - line [[(using)]] is the new syntax, just replace =implicit= with =using=.
+
+  In this function, we also delay the =[A, B]= type parameter and context of =using functor: Fucntor[F]=, so that you can:
+  - pass =map[Option]= around, as =[A, B]= is not yet set.
+  - pass =map[Option](f)= around, without immediately providing a Functor instance.
+    
+  There are some other forms of =using=, i.e. you can omit the =using= keyword if it is in a lambda, by replacing ~=>~ with ~?=>~[fn:2].
+  #+begin_src scala
+    def map[F[_]] =
+      [A, B]                       =>
+      (f: A => B)                  =>
+      (functor: Functor[F])       ?=>
+      (fa: F[A])                   => functor.fmap(f)(fa)
+  #+end_src
+
+  Or, omit the name of the instance:
+
+  #+begin_src scala
+    def map[F[_]] =
+      [A, B]                       =>
+      (f: A => B)                  =>
+      (using Functor[F])           =>
+      (fa: F[A])                   => summon[Functor[F]].fmap(f)(fa)
+  #+end_src
+
+  =summon= is the new =implicitly=.
+
+  That is pretty much what we need to know to start building Meow.
+
+* Hierarchy
+   
+   Meow has a significantly different design than Cats, namely the type class hierarchy, which Meow doesn't have at all.
+
+   [[https://cdn.rawgit.com/tpolecat/cats-infographic/master/cats.svg][typeclasses in cats]]
+
+   Meow uses context bounding to define type class dependencies, similar to Haskell.
+
+   Such as, =Applicative=, which from Cats implementation, looks like:
+   #+begin_src scala
+     trait Applicative[F[_]] extends Functor[F] {
+       def pure[A](a: A): F[A]
+       def ap[A, B](ff: F[A => B])(fa: F[A]): F[B]
+     }
+   #+end_src
+
+   The trick here is OO style =extends=, when =Applicative[F] extends Functor[F]=, =Applicative= is also mappable.
+
+   This save lib maintainer some boilerplate, e.g. =Monad= probably =extends= most of typeclasses[fn:3], so they just
+   implement =Monad= for =Option= for instance, and no need to implement =Applicative[Option]=, =Functor[Option]=...
+
+   But this kind of OO solution has many uncertainties, override introduces mutability.
+
+   When I call =*>= on =Option=, which implementation am I actually using?
+
+   The =Monad[Option]=? or =Applicative[Option]=? Both instances could have implemented =ap=, and as a lib user, I have to
+   build the hierarchy graph in my mind, to determinate, oh, =Monad= extends =Applicative=, and =Option= has =Monad= instance, so
+   it must use the =Monad='s =ap=.
+
+   Also, even for lib maintainer it is too coupled with the graph, anything changed at the top-level typelass, will cause a chain reaction to
+   whatever extends it.
+
+   Instead of using OO style to add capability via =extends=, Meow simply declare type class =Applicaitve= need to be in context =Functor[F]= exists.
+
+   #+begin_src scala
+     trait Applicative[F[_]:Functor]:
+       def pure[A](a: A): F[A]
+       def liftA2[A, B, C](f: A => B => C): F[A] => F[B] => F[C]
+   #+end_src
+
+   By using context bound =F= must have a =Funtor= instance, we are definitely sure(so is the compiler) when I =fmap= something,
+   it must use a =Functor= instance, because there are 0 overlaps from =Applicative= instance.
+
+   More importantly, users are less confused and less thing to memorize, of which method belongs to which type class[fn:4].
+
+   Now we can even safely define functions in global.
+
+   #+begin_src scala
+     def map[F[_]] = [A, B] => (f: A => B) => (functor: Functor[F]) ?=> (fa: F[A]) => functor.fmap(f)(fa)
+     def pure[F[_]] = [A] => (a: A) => (applicative: Applicative[F]) ?=> applicative.pure(a)
+     def liftA2[F[_]] = [A, B, C] => (f: A => B => C) => (A: Applicative[F]) ?=> A.liftA2(f)
+     def flatMap[M[_]] = [A, B] => (f: A => M[B]) => (monad: Monad[M]) ?=> (ma: M[A]) => monad.bind(f)(ma)
+   #+end_src
+   
+   This enabled a more user friendly interface, as they no longer need to know anything about the type class definitions and which
+   method belongs to which type class, they only need to memorize few useful functions, that's it.
+
+   - Option is map-able:
+   #+begin_src scala
+     map[Option]((a:Int) => a + 1)(Option(1))
+   #+end_src
+
+   - Option is pure-able and apply-able:
+   #+begin_src scala
+     val fa = pure[Option](1)
+     val fb = pure[Option](2)
+     val f = (x: Int) => (y: Int) => x + y
+
+     assertEquals(liftA2(f)(fa)(fb), Option(3))
+   #+end_src
+
+   - Option is flatMap-able
+   #+begin_src scala
+     val fa = pure[Option](1)
+     val ff = (x:Int) => Option(x +1)
+
+     assertEquals(flatMap[Option](ff)(fa), Option(2))
+   #+end_src
+
+   Users don't even need to aware of type classes exist, for them these are just a few handy functions help dealing with data types.
+
+* Extensions
+   Once again, I want to emphasize that type classes are not for users, type classes are just a technique for lib authors to abstract and organize traits, the purpose is not just define =map=, =flatMap=, they are the building blocks for us to extend the capability of data type.
+
+   For example, if we implement =Functor[Option]=, =map= is the only function we need to implement, but from there we will also get a bunch of functions for free, thanks to =extension=:
+
+   #+begin_src scala
+     trait Functor[F[_]]:
+       def fmap[A, B](f: A => B): F[A] => F[B]
+       extension [A, B](fa: F[A])
+         infix def map(f: A => B): F[B] = fmap(f)(fa)
+
+         /** Usually [[this.fmap]] takes function first, `mapFlipped` takes data first
+           ,* @example ```scala
+           ,* fa <#> identity == identity(fa)
+           ,* ```
+           ,*/
+         @targetName("mapFlipped")
+         def <#>(f: A => B): F[B] = fmap(f)(fa)
+
+         /** Drop whatever value `A` on left and return `F[B]` on the right
+           ,* @example ```scala
+           ,* Option(1) `$>` 3 == Option(3)
+           ,* ```
+           ,*/
+         @targetName("voidLeft")
+         infix def `$>`(a: B): F[B] = fmap(const[B, A](a))(fa)
+
+         /** Void `F[A]` and return `F[Unit]`
+           ,* @example ```scala
+           ,* Option(2).void == Option(())
+           ,* ```
+           ,*/
+         def void: F[Unit] = fmap(const[Unit, A](()))(fa)
+
+     end Functor
+   #+end_src
+
+   As you can see =map=, =mapFlipped=, =voidLeft=, =void= are all dependent and only dependent on =fmap=, by implementing =fmap=, you get all of
+   these function for *free*.
+
+   And you can add even more extensions, to its companion object too.
+   #+begin_src scala
+     object Functor:
+       extension [F[_], A, B](f: A => B)
+         /** Infix syntax for [[meow.data.Functor#fmap]]
+           ,* @example ```scala
+           ,* (f compose g) `<$>` fa  == (map[Option](f) compose map[Option](g))(fa)
+           ,* ```
+           ,*/
+         @targetName("fmap")
+         def `<$>`(fa: F[A])(using Functor[F]): F[B] = fa map f
+
+       extension [F[_], A, B](a: A)
+         /** Void right, pair of [[meow.data.Functor#$>]]
+           ,* @example ```scala
+           ,* 2 `<$` Option(3) == Option(2)
+           ,* ```
+           ,*/
+         @targetName("voidRight")
+         def `<$`(fb: F[B])(using Functor[F]): F[A] = fb.map(const(a))
+   #+end_src
+
+   #+begin_quote
+   *Quiz:* Guess what it will print? 2? 3? or 4?
+   #+begin_src scala
+     Option(1) `$>` 3 `<$` Option(2) <#> (_ + 1)
+   #+end_src
+   #+end_quote
+
+   With extensions, the =Option= examples above can be rewritten to be more Haskell-ish:
+   
+   - Option is =<$>=-able:
+   #+begin_src scala
+     (a:Int) => a + 1 `<$>` Option(1)
+   #+end_src
+
+   - Option is pure-able and =<*>=-able:
+   #+begin_src scala
+     val fa = pure[Option](1)
+     val fb = pure[Option](2)
+     val f = (x: Int) => (y: Int) => x + y
+
+     assertEquals(f `<$>` fa <*> fb, Option(3))
+   #+end_src
+
+   - Option is ~>>=~-able
+   #+begin_src scala
+     val fa = pure[Option](1)
+     val ff = (x:Int) => Option(x +1)
+
+     assertEquals(fa >>= ff, Option(2))
+   #+end_src
+
+* Prelude
+  Since all functions =map=, =liftA2=, =flatMap=... can be just global static, it is
+  also safe to export all these functions to a single place -- =prelude=, with Scala 3's
+  new feature =export=[fn:5], which is also much cleaner than Cats =extends= approach.
+
+  #+begin_src scala
+    object prelude:
+      export data.Functor.{given,_}
+      export control.Applicative.{given,_}
+      export control.Monad.{given,_}
+  #+end_src
+
+  Then user can just =import meow.prelude.{given,*}=.
+  
+  With all new Scala 3 features, implementing type classes has never been easier and concise.
+
+  There are more type classes implementations and usage examples in https://github.com/jcouyang/meow.
+  You can try them out by cloning the repo and =sbt test=.
+  
+  To be continued... in the next blogpost, I'll explain how to implement generic type class deriving without Shapeless in Scala 3.
+
+* Footnotes
+
+[fn:5] https://dotty.epfl.ch/docs/reference/other-new-features/export.html 
+
+[fn:4] Or, should they even care? 
+
+[fn:3] If you follow the arrow on the graph it extends =FlatMap=, =Applicative=, =Apply=, =Functor=, =Semigroupal=, =Invariant=.
+
+[fn:2] https://dotty.epfl.ch/docs/reference/contextual/context-functions.html 
+
+[fn:1] a shorthand of ~(using Context) => b~ https://dotty.epfl.ch/docs/reference/contextual/context-functions.html
