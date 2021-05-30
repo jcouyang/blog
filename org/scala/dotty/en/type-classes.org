@@ -1,7 +1,7 @@
 #+title: Type Classes in Scala 3
 #+author: Jichao Ouyang
 #+date: 2021:05:24
-#+description: blah
+#+description: Let's try something more practical this time: redesigning a Category Theory library for Scala 3.
 #+keywords: typeclasses,type classes,scala 3,dotty,meow,cats
 #+HTML_HEAD_EXTRA: <meta property="og:title" content="Type Classes in Scala 3" />
 #+HTML_HEAD_EXTRA: <meta property="og:description" content="" />
@@ -100,7 +100,7 @@ First, let's recap some Scala 3 new syntax.
    
    Meow has a significantly different design than Cats, namely the type class hierarchy, which Meow doesn't have at all.
 
-   [[https://cdn.rawgit.com/tpolecat/cats-infographic/master/cats.svg][typeclasses in cats]]
+   [[https://cdn.rawgit.com/tpolecat/cats-infographic/master/cats.svg]]
 
    Meow uses context bounding to define type class dependencies, similar to Haskell.
 
@@ -128,7 +128,7 @@ First, let's recap some Scala 3 new syntax.
    Also, even for lib maintainer it is too coupled with the graph, anything changed at the top-level typelass, will cause a chain reaction to
    whatever extends it.
 
-   Instead of using OO style to add capability via =extends=, Meow simply declare type class =Applicaitve= need to be in context =Functor[F]= exists.
+   Instead of using OO style to add capability via =extends=, we can simply declare type class =Applicaitve= in a context where =Functor[F]= exists.
 
    #+begin_src scala
      trait Applicative[F[_]:Functor]:
@@ -188,27 +188,12 @@ First, let's recap some Scala 3 new syntax.
        extension [A, B](fa: F[A])
          infix def map(f: A => B): F[B] = fmap(f)(fa)
 
-         /** Usually [[this.fmap]] takes function first, `mapFlipped` takes data first
-           ,* @example ```scala
-           ,* fa <#> identity == identity(fa)
-           ,* ```
-           ,*/
          @targetName("mapFlipped")
          def <#>(f: A => B): F[B] = fmap(f)(fa)
 
-         /** Drop whatever value `A` on left and return `F[B]` on the right
-           ,* @example ```scala
-           ,* Option(1) `$>` 3 == Option(3)
-           ,* ```
-           ,*/
          @targetName("voidLeft")
          infix def `$>`(a: B): F[B] = fmap(const[B, A](a))(fa)
 
-         /** Void `F[A]` and return `F[Unit]`
-           ,* @example ```scala
-           ,* Option(2).void == Option(())
-           ,* ```
-           ,*/
          def void: F[Unit] = fmap(const[Unit, A](()))(fa)
 
      end Functor
@@ -217,24 +202,18 @@ First, let's recap some Scala 3 new syntax.
    As you can see =map=, =mapFlipped=, =voidLeft=, =void= are all dependent and only dependent on =fmap=, by implementing =fmap=, you get all of
    these function for *free*.
 
+   #+begin_quote
+   =@targetName= [fn:6] is a new Scala 3 annotation, it allow us to define an alternate name for the implementation of that definition. It is recommended that definitions with symbolic names have a =@targetName=.
+   #+end_quote
+
    And you can add even more extensions, to its companion object too.
    #+begin_src scala
      object Functor:
        extension [F[_], A, B](f: A => B)
-         /** Infix syntax for [[meow.data.Functor#fmap]]
-           ,* @example ```scala
-           ,* (f compose g) `<$>` fa  == (map[Option](f) compose map[Option](g))(fa)
-           ,* ```
-           ,*/
          @targetName("fmap")
          def `<$>`(fa: F[A])(using Functor[F]): F[B] = fa map f
 
        extension [F[_], A, B](a: A)
-         /** Void right, pair of [[meow.data.Functor#$>]]
-           ,* @example ```scala
-           ,* 2 `<$` Option(3) == Option(2)
-           ,* ```
-           ,*/
          @targetName("voidRight")
          def `<$`(fb: F[B])(using Functor[F]): F[A] = fb.map(const(a))
    #+end_src
@@ -284,7 +263,7 @@ First, let's recap some Scala 3 new syntax.
 
   Then user can just =import meow.prelude.{given,*}=.
   
-  With all new Scala 3 features, implementing type classes has never been easier and concise.
+  With all the new Scala 3 features, implementing type classes has never been so clean.
 
   There are more type classes implementations and usage examples in https://github.com/jcouyang/meow.
   You can try them out by cloning the repo and =sbt test=.
@@ -292,6 +271,8 @@ First, let's recap some Scala 3 new syntax.
   To be continued... in the next blogpost, I'll explain how to implement generic type class deriving without Shapeless in Scala 3.
 
 * Footnotes
+
+[fn:6] https://dotty.epfl.ch/docs/reference/other-new-features/targetName.html 
 
 [fn:5] https://dotty.epfl.ch/docs/reference/other-new-features/export.html 
 
