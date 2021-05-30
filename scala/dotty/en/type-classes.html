@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-05-30 Sun 06:09 -->
+<!-- 2021-05-30 Sun 06:23 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Type Classes in Scala 3</title>
 <meta name="generator" content="Org mode">
 <meta name="author" content="Jichao Ouyang">
-<meta name="description" content="blah"
+<meta name="description" content="Let's try something more practical this time: redesigning a Category Theory library for Scala 3."
 >
 <meta name="keywords" content="typeclasses,type classes,scala 3,dotty,meow,cats">
 <link rel="icon" href="/favicon.ico">
@@ -270,9 +270,12 @@ That is pretty much what we need to know to start building Meow.
 Meow has a significantly different design than Cats, namely the type class hierarchy, which Meow doesn't have at all.
 </p>
 
-<p>
-<a href="https://cdn.rawgit.com/tpolecat/cats-infographic/master/cats.svg">typeclasses in cats</a>
-</p>
+
+<figure>
+<object type="image/svg+xml" data="https://cdn.rawgit.com/tpolecat/cats-infographic/master/cats.svg" class="org-svg">
+Sorry, your browser does not support SVG.</object>
+
+</figure>
 
 <p>
 Meow uses context bounding to define type class dependencies, similar to Haskell.
@@ -320,7 +323,7 @@ whatever extends it.
 </p>
 
 <p>
-Instead of using OO style to add capability via <code>extends</code>, Meow simply declare type class <code>Applicaitve</code> need to be in context <code>Functor[F]</code> exists.
+Instead of using OO style to add capability via <code>extends</code>, we can simply declare type class <code>Applicaitve</code> in a context where <code>Functor[F]</code> exists.
 </p>
 
 <div class="org-src-container">
@@ -412,27 +415,12 @@ For example, if we implement <code>Functor[Option]</code>, <code>map</code> is t
   extension [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])
     infix <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> fmap(f)(fa)
 
-    <span style="color: #8b0000;">/** Usually [[this.fmap]] takes function first, `mapFlipped` takes data first</span>
-<span style="color: #8b0000;">      * @example ```scala</span>
-<span style="color: #8b0000;">      * fa &lt;#&gt; identity == identity(fa)</span>
-<span style="color: #8b0000;">      * ```</span>
-<span style="color: #8b0000;">      */</span>
     <span style="color: #228b22;">@targetName</span>(<span style="color: #8b0000;">"mapFlipped"</span>)
     <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">&lt;#&gt;</span>(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> fmap(f)(fa)
 
-    <span style="color: #8b0000;">/** Drop whatever value `A` on left and return `F[B]` on the right</span>
-<span style="color: #8b0000;">      * @example ```scala</span>
-<span style="color: #8b0000;">      * Option(1) `$&gt;` 3 == Option(3)</span>
-<span style="color: #8b0000;">      * ```</span>
-<span style="color: #8b0000;">      */</span>
     <span style="color: #228b22;">@targetName</span>(<span style="color: #8b0000;">"voidLeft"</span>)
     infix <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">`$&gt;`</span>(a<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> fmap(const[<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">A</span>](a))(fa)
 
-    <span style="color: #8b0000;">/** Void `F[A]` and return `F[Unit]`</span>
-<span style="color: #8b0000;">      * @example ```scala</span>
-<span style="color: #8b0000;">      * Option(2).void == Option(())</span>
-<span style="color: #8b0000;">      * ```</span>
-<span style="color: #8b0000;">      */</span>
     <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">void</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">Unit</span>] <span style="color: #00008b;">=</span> fmap(const[<span style="color: #6b8e23;">Unit</span>, <span style="color: #6b8e23;">A</span>](()))(fa)
 
 end <span style="color: #6b8e23;">Functor</span>
@@ -444,26 +432,25 @@ As you can see <code>map</code>, <code>mapFlipped</code>, <code>voidLeft</code>,
 these function for <b>free</b>.
 </p>
 
+<div class="epigraph"><blockquote>
+<p>
+<code>@targetName</code> <label for="4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="4" class="margin-toggle"/><span class="sidenote">
+<a href="https://dotty.epfl.ch/docs/reference/other-new-features/targetName.html">https://dotty.epfl.ch/docs/reference/other-new-features/targetName.html</a> 
+</span> is a new Scala 3 annotation, it allow us to define an alternate name for the implementation of that definition. It is recommended that definitions with symbolic names have a <code>@targetName</code>.
+</p>
+
+</blockquote></div>
+
 <p>
 And you can add even more extensions, to its companion object too.
 </p>
 <div class="org-src-container">
 <pre class="src src-scala"><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Functor</span><span style="color: #00008b;">:</span>
   extension [<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)
-    <span style="color: #8b0000;">/** Infix syntax for [[meow.data.Functor#fmap]]</span>
-<span style="color: #8b0000;">      * @example ```scala</span>
-<span style="color: #8b0000;">      * (f compose g) `&lt;$&gt;` fa  == (map[Option](f) compose map[Option](g))(fa)</span>
-<span style="color: #8b0000;">      * ```</span>
-<span style="color: #8b0000;">      */</span>
     <span style="color: #228b22;">@targetName</span>(<span style="color: #8b0000;">"fmap"</span>)
     <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">`&lt;$&gt;`</span>(fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])(using <span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">F</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> fa map f
 
   extension [<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)
-    <span style="color: #8b0000;">/** Void right, pair of [[meow.data.Functor#$&gt;]]</span>
-<span style="color: #8b0000;">      * @example ```scala</span>
-<span style="color: #8b0000;">      * 2 `&lt;$` Option(3) == Option(2)</span>
-<span style="color: #8b0000;">      * ```</span>
-<span style="color: #8b0000;">      */</span>
     <span style="color: #228b22;">@targetName</span>(<span style="color: #8b0000;">"voidRight"</span>)
     <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">`&lt;$`</span>(fb<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>])(using <span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">F</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> fb.map(const(a))
 </pre>
@@ -523,7 +510,7 @@ assertEquals(fa &gt;&gt;= ff, <span style="color: #6b8e23;">Option</span>(<span 
 <p>
 Since all functions <code>map</code>, <code>liftA2</code>, <code>flatMap</code>&#x2026; can be just global static, it is
 also safe to export all these functions to a single place &#x2013; <code>prelude</code>, with Scala 3's
-new feature <code>export</code><label for="4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="4" class="margin-toggle"/><span class="sidenote">
+new feature <code>export</code><label for="5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="5" class="margin-toggle"/><span class="sidenote">
 <a href="https://dotty.epfl.ch/docs/reference/other-new-features/export.html">https://dotty.epfl.ch/docs/reference/other-new-features/export.html</a> 
 </span>, which is also much cleaner than Cats <code>extends</code> approach.
 </p>
@@ -541,7 +528,7 @@ Then user can just <code>import meow.prelude.{given,*}</code>.
 </p>
 
 <p>
-With all new Scala 3 features, implementing type classes has never been easier and concise.
+With all the new Scala 3 features, implementing type classes has never been so clean.
 </p>
 
 <p>
@@ -571,6 +558,10 @@ Or, should they even care?
 </p></div></div>
 
 <div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://dotty.epfl.ch/docs/reference/other-new-features/targetName.html">https://dotty.epfl.ch/docs/reference/other-new-features/targetName.html</a> 
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5">5</a></sup> <div class="footpara"><p class="footpara">
 <a href="https://dotty.epfl.ch/docs/reference/other-new-features/export.html">https://dotty.epfl.ch/docs/reference/other-new-features/export.html</a> 
 </p></div></div>
 
