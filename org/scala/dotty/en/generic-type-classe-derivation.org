@@ -1,0 +1,243 @@
+#+title: Generic Type Class Derivation in Scala 3
+#+author: Jichao Ouyang
+#+date: 2021:08:14
+#+description: Let's try something more practical this time: redesigning a Category Theory library for Scala 3.
+#+keywords: typeclasses,type classes,scala 3,dotty,meow,cats
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="Generic Type Class Derivation in Scala 3" />
+#+HTML_HEAD_EXTRA: <meta property="og:description" content="Let's try something more practical this time: redesigning a Category Theory library for Scala 3." />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+#+HTML_HEAD_EXTRA: <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
+#+index: Scala!Generic Type Class Derivation in Scala 3
+#+index: Dotty!Generic Type Class Derivation in Scala 3
+#+index: FP!Generic Type Class Derivation in Scala 3
+
+#+INCLUDE: !toc.org
+
+In the previous article [[./type-classes.rog][Type Classes]], we know it should be very straightforward to implement a =Functor= instance, i.e. for =Option=.
+
+#+begin_src scala
+given Functor[Option] with
+  def fmap[A, B](f: A => B): Option[A] => Option[B] = (oa: Option[A]) => oa match
+    case Some(a) => Some(f(a))
+    case None => None
+#+end_src
+
+However, there are s many data types to implement, and there are too many boilerplates for each of new data type, eventhough it is simple to do so.
+
+Say we have a new ADT =Tree=:
+#+begin_src scala
+enum Tree[T]:
+  case Branch(left: Tree[T], right: Tree[T])
+  case Leaf(elem: T)
+#+end_src
+
+If we want this =Tree= to be =map=-able, =show=-able, we need to implement =Functor= and =Show= instance for =Tree=.
+
+Since =Tree= is an ADT, which means it can be generic represented as =Product= or =Coproduct=, in Scala 2 that is where shapeless come in handy,
+and with some shapeless-based lib like  [[https://github.com/typelevel/kittens][Kittens]], we can just directly derive these type class instances without actually implement them.
+
+Example with [[https://github.com/typelevel/kittens][Kittens]]:
+#+begin_src scala
+import cats.derived._
+implicit val showTree: Show[Tree] = semiauto.show
+implicit val functorTree: Functor[Tree] = semiauto.functor
+#+end_src
+
+In Scala 3, such thing is natively support and can be done without any lib.
+
+Let's start with the simpler type class =Show=.
+
+* Kind 0 Type Class Derivation
+  =Show= is type class for =A=, since =A= is just a type, let us call =A= Kind 0 and =A[_]= Kind 1.
+  To build a generic type class derivation natively in Scala 3, the steps are pretty similar to how shapeless:
+  
+  1. Find generic representation of type =A=, that is, break =A= into =Product= and =Coproduct= combinations
+  2. implement instances for =Product= and =Coproduct= types.
+
+  For the impatient, the final result of generic =Show= derivation in Scala 3 will be like:
+  #+begin_src scala
+    enum Tree[T] derives Show:
+      case Branch(left: Tree[T], right: Tree[T])
+      case Leaf(elem: T)
+  #+end_src
+  Yeah, it is that simple, just add =derives Show= to the data type.
+
+** Generic representation of =A=
+   Scala 3 is able to derive the generic representation of data types as =Mirror[T]= type[fn:1], in the same way shapeless' =Generic[T]= type did.
+
+   In our example, to derive the generic representation of =Tree=, we can just define a =derived= function:
+   #+begin_src scala
+     inline def derived[T](using m: Mirror.Of[T]): Show[T] =
+       inline m match
+         case s: Mirror.SumOf[T] => ???
+         case p: Mirror.ProductOf[T] => ???
+   #+end_src
+
+   By =using m: Mirror.Of[T]=, compiler will automatically derive the =Mirror.Of[T]= type from =T=, which will looks like:
+   #+begin_src scala
+     new Mirror.Sum:
+       type MirroredType = Tree
+       type MirroredElemTypes[T] = (Branch[T], Leaf[T])
+       type MirroredMonoType = Tree[_]
+       type MirroredLabel = "Tree"
+       type MirroredElemLabels = ("Branch", "Leaf")
+
+       def ordinal(x: MirroredMonoType): Int = x match
+         case _: Branch[_] => 0
+         case _: Leaf[_] => 1
+
+     new Mirror.Product:
+       type MirroredType = Branch
+       type MirroredElemTypes[T] = (Tree[T], Tree[T])
+       type MirroredMonoType = Branch[_]
+       type MirroredLabel = "Branch"
+       type MirroredElemLabels = ("left", "right")
+
+       def fromProduct(p: Product): MirroredMonoType =
+         new Branch(...)
+
+     new Mirror.Product:
+       type MirroredType = Leaf
+       type MirroredElemTypes[T] = Tuple1[T]
+       type MirroredMonoType = Leaf[_]
+       type MirroredLabel = "Leaf"
+       type MirroredElemLabels = Tuple1["elem"]
+
+       def fromProduct(p: Product): MirroredMonoType =
+         new Leaf(...)
+   #+end_src
+   Don't need to memorize all of them for now, we will get to each of those types shortly.
+
+   Since =Tree= is a =Coproduct= (or =Sum=) type, to show the data type =Tree= correctly, we need to first figure out is it a =Branch= or a =Leaf=.
+
+   Hence the process to properly show =Tree=:
+   
+   1. compiler derives =Mirror.Of[Tree]=, the result is a =Mirror.Sum=
+   2. break into =Mirror.Sum=, if type is =Mirror.ProductOf[Branch]=, recursively show its =left= and =right=
+   3. if type is =Mirror.ProductOf[Leaf]=, recursively show its =elem=
+
+   Let's start with the simplest type, when our data type is a =Leaf=, how do we show it?
+
+** Generic instance of  =Show[Product]= type
+
+   There is a singleton type ~MirroredLabel = "Leaf"~ we can use to show, and for its =elem=, we can recursively derive =Show= instances for =MirroredElemTypes=
+   #+begin_src scala
+     inline def summonAsList[T <: Tuple, F[_]]: List[F[Any]] =
+       inline erasedValue[T] match
+         case _: EmptyTuple => Nil
+         case _: (t *: ts) => summonInline[F[t]].asInstanceOf[F[Any]] :: summonAsList[ts, F]
+
+     inline def derived[T](using m: Mirror.Of[T]): Show[T] =
+       lazy val name = constValue[m.MirroredLabel]
+       lazy val elemsShowInstances = summonAsList[m.MirroredElemTypes, Show]
+       inline m match
+         case s: Mirror.SumOf[T] => ???
+         case p: Mirror.ProductOf[T] => ???
+   #+end_src
+
+   - =constValue[m.MirroredLabel]= will get the singleton type's value, which is =Leaf=
+   - =summonAsList= recursively find =Show= instance for each of =Leaf='s elements
+
+   Now we know the =name= of current type =Leaf=, and =elemsShowInstances= of =Leaf='s elements, let's try to fill in the =???= with the actual implementation of =Show[Product]=
+   #+begin_src scala
+      inline def derived[T](using m: Mirror.Of[T]): Show[T] =
+        lazy val name = constValue[m.MirroredLabel]
+        lazy val elemsShowInstances = summonAsList[m.MirroredElemTypes, Show]
+        inline m match
+          case s: Mirror.SumOf[T] => ???
+          case p: Mirror.ProductOf[T] => new Show[T]:          // <- (ref:ProductOf)
+            def show(a: T): String =
+              val elems = elemsShowInstances.iterator
+                .zip(a.asInstanceOf[Product].prodIterator)     // <- (ref:asInstanceOf)
+                .map { _.show(_) }
+              s"${name}(${elems.mkString(", ")})"
+   #+end_src
+   [[(asInstanceOf)][=a.asInstanceOf[Product]=]] looks really dangerous but actually it is safe here, because we know that
+   =T= is definitely a =Product= so =p= is [[(ProductOf)][=Mirror.ProductOf[T]=]].
+
+   The implementation should be capable to derived =Show= for any type that has a =Mirror.Product= instance. Lets give it a try:
+   #+begin_src scala
+     assertEquals(show(Leaf("leaf")), """Leaf("leaf")""")
+   #+end_src
+
+
+   That doesn't work yet, because even we know how to show =Product= but, =Leaf= is one of the =Tree= =Coproduct= type.
+
+   =Coproduct= type has one more concept =ordinal=, if you have pay attention in the =Mirror.Sum= instance of =Tree=:
+   #+begin_src scala
+     new Mirror.Sum:
+       type MirroredType = Tree
+       type MirroredElemTypes[T] = (Branch[T], Leaf[T])
+       type MirroredMonoType = Tree[_]
+       type MirroredLabel = "Tree"
+       type MirroredElemLabels = ("Branch", "Leaf")
+
+       def ordinal(x: MirroredMonoType): Int = x match
+         case _: Branch[_] => 0
+         case _: Leaf[_] => 1
+   #+end_src
+
+   That says if =Tree= is constructed from =Branch=, the ordinal is 0, and =Leaf='s ordinal is 1.
+
+   By simply checking the ordinal of =T=, we can show =T= properly:
+   #+begin_src scala
+     inline def derived[T](using m: Mirror.Of[T]): Show[T] =
+       lazy val name = constValue[m.MirroredLabel]
+       lazy val elemsShowInstances = summonAsList[m.MirroredElemTypes, Show]
+       inline m match
+         case s: Mirror.SumOf[T] => new Show[T]:
+           def show(a: T): String =
+             val ord = s.ordinal(a)   // <- (ref:Ordinal)
+             s"${insts(ord).asInstanceOf[Show[T]].show(a)}: ${name}"
+         case p: Mirror.ProductOf[T] => new Show[T]:          
+           def show(a: T): String =
+             val elems = elemsShowInstances.iterator
+               .zip(a.asInstanceOf[Product].prodIterator)
+               .map { _.show(_) }
+             s"${name}(${elems.mkString(", ")})"
+   #+end_src
+
+   Let us verify if this will work as expected:
+   #+begin_src scala
+    val aTree: Tree[String] = Branch(Leaf("l0"), Branch(Leaf("l1"), Leaf("r1")))
+    assertEquals(show(aTree), """Branch(Leaf("l0"): Tree, Branch(Leaf("l1"): Tree, Leaf("r1"): Tree): Tree): Tree""")
+   #+end_src
+* Kind 1 Type Class Derivation
+  If we are trying to do the same thing to generate generic =Functor= instance, it won't just work.
+
+  Because if we look closer to the type class =Show[A]= and =Functor[F[_]]=, you will notice that =A=
+  in =Show[A]= is a simple type, or we can call it Kind 0 Type. But =F= in is higher kind, and we can call
+  it Kind 1 Type here, because it need to pass in a type to return a type. For instance if =F= is =List=,
+  you will need to pass a =A= to =List= to get a type =List[A]=. In another way, =F= is just short for =[X] =>> F[X]=.[fn:2]
+
+  But, the structure of creating a generic =Functor= instance is pretty much the same as =Show=, except we need a
+  special trick of =Mirror= for Kind 1 type.
+  #+begin_src scala
+  inline given genFunctor[F[_]](using m: K1[F]): Functor[F] =
+    lazy val functors = summonKindAsList[LiftP[Functor, m.MirroredElemTypes], Functor]
+    inline m match
+      case s: K1Sum[F] => ???
+      case p: K1Product[F] => ???
+  #+end_src
+
+  Where =K1= is simply a alias of =Mirror=
+  #+begin_src scala
+    type K1[F[_]] = Mirror { type MirroredType[X] = F[X] ; type MirroredElemTypes[_] <: Tuple }
+    type K1Sum[F[_]] = Mirror.Sum { type MirroredType[X] = F[X] ; type MirroredElemTypes[_] <: Tuple }
+    type K1Product[F[_]] = Mirror.Product { type MirroredType[X] = F[X] ; type MirroredElemTypes[_] <: Tuple }
+  #+end_src
+
+  Which is just a small trick(I borrowed from [shapeless source code](https://github.com/typelevel/shapeless-3/blob/3ce37126f24e6ebb463d3ca7667ad3a6370bb14a/modules/deriving/src/main/scala/shapeless3/deriving/kinds.scala#L154)) to basically add [_] to original K0 Mirror.
+  #+begin_src scala
+    Mirror { type MirroredType = T; type MirroredElemTypes <: Tuple }
+  #+end_src
+
+  That was pretty much it, and the rest of the implementation is pretty much the same as =Show=.
+
+  I will just leave the implement of these =???= as exercise, feel free to look up the answer in [source code of meow](https://github.com/jcouyang/meow/blob/22e5a47682ec15861f45d71692f640bd218e0044/src/main/scala/Functor.scala#L110), send me a PR if you find a better implantation.
+
+* Footnotes
+
+[fn:2] Type lambda: https://dotty.epfl.ch/docs/reference/new-types/type-lambdas.html 
+
+[fn:1] https://dotty.epfl.ch/docs/reference/contextual/derivation.html#types-supporting-derives-clauses 
