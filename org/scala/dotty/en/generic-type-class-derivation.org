@@ -1,6 +1,6 @@
 #+title: Generic Type Class Derivation in Scala 3
 #+author: Jichao Ouyang
-#+date: 2021:08:14
+#+date: <2021-08-14 Sat>
 #+description: Let's try something more practical this time: redesigning a Category Theory library for Scala 3.
 #+keywords: typeclasses,type classes,scala 3,dotty,meow,cats
 #+HTML_HEAD_EXTRA: <meta property="og:title" content="Generic Type Class Derivation in Scala 3" />
@@ -13,7 +13,7 @@
 
 #+INCLUDE: !toc.org
 
-In the previous article [[./type-classes.rog][Type Classes]], we know it should be very straightforward to implement a =Functor= instance, i.e. for =Option=.
+In the previous article [[./type-classes.org][Type Classes]], we know it should be very straightforward to implement a =Functor= instance, i.e. for =Option=.
 
 #+begin_src scala
 given Functor[Option] with
@@ -26,9 +26,10 @@ However, there are s many data types to implement, and there are too many boiler
 
 Say we have a new ADT =Tree=:
 #+begin_src scala
-enum Tree[T]:
-  case Branch(left: Tree[T], right: Tree[T])
-  case Leaf(elem: T)
+  enum Tree[T] {
+    case Branch(left: Tree[T], right: Tree[T])
+    case Leaf(elem: T)
+  }
 #+end_src
 
 If we want this =Tree= to be =map=-able, =show=-able, we need to implement =Functor= and =Show= instance for =Tree=.
@@ -56,9 +57,11 @@ Let's start with the simpler type class =Show=.
 
   For the impatient, the final result of generic =Show= derivation in Scala 3 will be like:
   #+begin_src scala
-    enum Tree[T] derives Show:
+    enum Tree[T] derives Show {
       case Branch(left: Tree[T], right: Tree[T])
       case Leaf(elem: T)
+    }
+
   #+end_src
   Yeah, it is that simple, just add =derives Show= to the data type.
 
@@ -179,7 +182,7 @@ Let's start with the simpler type class =Show=.
 
    That says if =Tree= is constructed from =Branch=, the ordinal is 0, and =Leaf='s ordinal is 1.
 
-   By simply checking the ordinal of =T=, we can show =T= properly:
+   By simply checking the [[(Ordinal)][ordinal]] of =T=, we can show =T= properly:
    #+begin_src scala
      inline def derived[T](using m: Mirror.Of[T]): Show[T] =
        lazy val name = constValue[m.MirroredLabel]
@@ -227,14 +230,14 @@ Let's start with the simpler type class =Show=.
     type K1Product[F[_]] = Mirror.Product { type MirroredType[X] = F[X] ; type MirroredElemTypes[_] <: Tuple }
   #+end_src
 
-  Which is just a small trick(I borrowed from [shapeless source code](https://github.com/typelevel/shapeless-3/blob/3ce37126f24e6ebb463d3ca7667ad3a6370bb14a/modules/deriving/src/main/scala/shapeless3/deriving/kinds.scala#L154)) to basically add [_] to original K0 Mirror.
+  Which is just a small trick(I borrowed from [[https://github.com/typelevel/shapeless-3/blob/3ce37126f24e6ebb463d3ca7667ad3a6370bb14a/modules/deriving/src/main/scala/shapeless3/deriving/kinds.scala#L154][shapeless source code]]) to basically add [_] to original K0 Mirror.
   #+begin_src scala
     Mirror { type MirroredType = T; type MirroredElemTypes <: Tuple }
   #+end_src
 
   That was pretty much it, and the rest of the implementation is pretty much the same as =Show=.
 
-  I will just leave the implement of these =???= as exercise, feel free to look up the answer in [source code of meow](https://github.com/jcouyang/meow/blob/22e5a47682ec15861f45d71692f640bd218e0044/src/main/scala/Functor.scala#L110), send me a PR if you find a better implantation.
+  I will just leave the implement of these =???= as exercise, feel free to look up the answer in [[https://github.com/jcouyang/meow/blob/22e5a47682ec15861f45d71692f640bd218e0044/src/main/scala/Functor.scala#L110][source code of meow]], send me a PR if you find a better implantation.
 
 * Footnotes
 
