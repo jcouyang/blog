@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-05-30 Sun 06:23 -->
+<!-- 2021-08-14 Sat 06:20 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Literal Programming Emacs Configure Literal Programming Emacs Configure</title>
@@ -87,7 +87,6 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#org7a3af0b">UI</a>
 <ul>
-<li><a href="#org0a5fb30">Theme</a></li>
 <li><a href="#org2fbb33e">Fonts</a></li>
 </ul>
 </li>
@@ -98,23 +97,18 @@ for the JavaScript code in this tag.
 <li><a href="#org4b8b2b3">company</a></li>
 <li><a href="#orgc9ef2de">Dhall</a></li>
 <li><a href="#org74664b7">expand region</a></li>
-<li><a href="#org0ff80ab">Flyspell</a></li>
-<li><a href="#org52ce1d7">fish</a></li>
 <li><a href="#orgdf243df">forge</a></li>
 <li><a href="#orgc8e36fa">Haskell</a></li>
 <li><a href="#orgeaa6d1c">helm</a></li>
 <li><a href="#orge225d43">ido</a></li>
 <li><a href="#orgda9622b">indent guide</a></li>
-<li><a href="#orgc755913">js2 mode</a></li>
 <li><a href="#orgd6632e7">key chord</a></li>
 <li><a href="#org92bbc02">Langtool</a></li>
-<li><a href="#org24c81d4">ligature</a></li>
 <li><a href="#orgf22d552">magit</a></li>
 <li><a href="#org296f121">multi cursor</a></li>
 <li><a href="#org0609d1b">Nya mode</a></li>
 <li><a href="#orgbb6b389">on screen</a></li>
 <li><a href="#orgc50d928">org mode</a></li>
-<li><a href="#org50a9826">pallet</a></li>
 <li><a href="#orgfc69c8d">prompt</a></li>
 <li><a href="#org1b45ce1">PureScript</a></li>
 <li><a href="#org74520ee">rainbow delimiter</a></li>
@@ -123,7 +117,6 @@ for the JavaScript code in this tag.
 <li><a href="#org4e41248">shell-mode</a></li>
 <li><a href="#orgfe62dd8">smartparens</a></li>
 <li><a href="#org6272ceb">textmate</a></li>
-<li><a href="#org6a9ef08">undo tree</a></li>
 <li><a href="#orgb92ede1">unicode</a></li>
 <li><a href="#org89c50d9">web-mode</a></li>
 <li><a href="#org1fd315b">which key</a></li>
@@ -138,21 +131,6 @@ for the JavaScript code in this tag.
 <h2 id="org7a3af0b">UI</h2>
 <div class="outline-text-2" id="text-org7a3af0b">
 </div>
-<div id="outline-container-org0a5fb30" class="outline-3">
-<h3 id="org0a5fb30">Theme</h3>
-<div class="outline-text-3" id="text-org0a5fb30">
-<p>
-<a href="https://draculatheme.com/">dracula</a> dark theme
-</p>
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(use-package dracula-theme
-  <span style="color: #228b22;">:config</span>
-  (load-theme 'dracula t))
-</pre>
-</div>
-</div>
-</div>
-
 <div id="outline-container-org2fbb33e" class="outline-3">
 <h3 id="org2fbb33e">Fonts</h3>
 <div class="outline-text-3" id="text-org2fbb33e">
@@ -161,7 +139,7 @@ Download <a href="https://www.jetbrains.com/lp/mono/">JetBrain Mono</a> font.
 </p>
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #00008b;">if</span> (member <span style="color: #8b0000;">"JetBrains Mono"</span> (font-family-list))
-    (set-frame-font <span style="color: #8b0000;">"JetBrains Mono ExtraLight 15"</span>))
+    (set-frame-font <span style="color: #8b0000;">"JetBrains Mono 14"</span>))
 
 (<span style="color: #00008b;">when</span> (eq system-type 'gnu/linux)
   (<span style="color: #00008b;">dolist</span> (charset '(kana han symbol cjk-misc bopomofo))
@@ -180,6 +158,7 @@ Download <a href="https://www.jetbrains.com/lp/mono/">JetBrain Mono</a> font.
 <div class="outline-text-2" id="text-org00477ac">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp"><span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Setting</span>
+(load-theme 'misterioso t)
 (server-start)
 (keyboard-translate ?\C-h ?\C-?)
 (column-number-mode 1)
@@ -203,15 +182,7 @@ Download <a href="https://www.jetbrains.com/lp/mono/">JetBrain Mono</a> font.
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(setenv <span style="color: #8b0000;">"PATH"</span> <span style="color: #8b0000;">"/usr/local/bin:/usr/bin:/sbin:/bin"</span>)
-(<span style="color: #00008b;">if</span> (eq system-type 'gnu/linux)
-    (<span style="color: #00008b;">let</span> ((path-from-shell (shell-command-to-string <span style="color: #8b0000;">"/usr/bin/fish -c \"echo -n \\$PATH[1]; for val in \\$PATH[2..-1];echo -n \\\":\\$val\\\";end\""</span>)))
-      (setenv <span style="color: #8b0000;">"PATH"</span> path-from-shell)
-      (<span style="color: #00008b;">setq</span> exec-path (split-string path-from-shell <span style="color: #8b0000;">":"</span>)))
-  (<span style="color: #00008b;">let</span> ((path-from-shell (shell-command-to-string <span style="color: #8b0000;">"/usr/local/bin/fish -c \"echo -n \\$PATH[1]; for val in \\$PATH[2..-1];echo -n \\\":\\$val\\\";end\""</span>)))
-    (setenv <span style="color: #8b0000;">"PATH"</span> path-from-shell)
-    (<span style="color: #00008b;">setq</span> exec-path (split-string path-from-shell <span style="color: #8b0000;">":"</span>)))
-  )
+<pre class="src src-emacs-lisp"><span style="color: #8c8c8c; font-style: italic;">;;</span><span style="color: #8c8c8c; font-style: italic;">(setenv "PATH" "${HOME}/.nix-profile/bin:/usr/local/bin:/usr/bin:/sbin:/bin")</span>
 </pre>
 </div>
 </div>
@@ -292,47 +263,6 @@ text completion framework
 </div>
 </div>
 
-<div id="outline-container-org0ff80ab" class="outline-3">
-<h3 id="org0ff80ab">Flyspell</h3>
-<div class="outline-text-3" id="text-org0ff80ab">
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(use-package flycheck
-  <span style="color: #228b22;">:ensure</span> t
-  <span style="color: #228b22;">:init</span>
-  (global-flycheck-mode)
-  <span style="color: #228b22;">:config</span>
-  (<span style="color: #00008b;">dolist</span> (hook '(text-mode-hook))
-    (add-hook hook (<span style="color: #00008b;">lambda</span> ()
-                     (flyspell-mode 1)
-                     (add-to-list 'company-backends 'company-ispell)
-                     (message <span style="color: #8b0000;">"company-ispell enable"</span>)
-                     )
-              ))
-  (<span style="color: #00008b;">dolist</span> (hook '(prog-mode-hook))
-    (add-hook hook (<span style="color: #00008b;">lambda</span> ()
-                     (flyspell-prog-mode)
-                     (<span style="color: #00008b;">setq</span> company-backends (delete 'company-ispell company-backends))
-                     (message <span style="color: #8b0000;">"company-ispell disable"</span>)
-                     )))
-  )
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org52ce1d7" class="outline-3">
-<h3 id="org52ce1d7">fish</h3>
-<div class="outline-text-3" id="text-org52ce1d7">
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(use-package company-fish
-<span style="color: #228b22;">:hook</span> (shell-mode-hook . company-mode)
-<span style="color: #228b22;">:init</span> (add-to-list 'company-backends 'company-fish)
-)
-</pre>
-</div>
-</div>
-</div>
-
 <div id="outline-container-orgdf243df" class="outline-3">
 <h3 id="orgdf243df">forge</h3>
 <div class="outline-text-3" id="text-orgdf243df">
@@ -350,7 +280,10 @@ text completion framework
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(use-package lsp-haskell
   <span style="color: #228b22;">:config</span>
-  (<span style="color: #00008b;">setq</span> haskell-stylish-on-save t))   
+  (<span style="color: #00008b;">setq</span> lsp-haskell-server-path <span style="color: #8b0000;">"/nix/store/rpji6p4srv56y24mhbqwc4dmgxknd0x2-haskell-language-server-1.1.0.0/bin/haskell-language-server-wrapper"</span>)
+  (<span style="color: #00008b;">setq</span> haskell-stylish-on-save t)
+  <span style="color: #228b22;">:hook</span>
+  (haskell-mode . lsp))   
 </pre>
 </div>
 </div>
@@ -435,34 +368,6 @@ text completion framework
 </div>
 </div>
 
-<div id="outline-container-orgc755913" class="outline-3">
-<h3 id="orgc755913">js2 mode</h3>
-<div class="outline-text-3" id="text-orgc755913">
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(use-package js2-mode
-<span style="color: #228b22;">:config</span>
-(add-to-list 'auto-mode-alist '(<span style="color: #8b0000;">"\\.js$"</span> . js2-mode))
-(add-to-list 'auto-mode-alist '(<span style="color: #8b0000;">"\\.sjs$"</span> . js2-mode))
-(add-to-list 'auto-mode-alist '(<span style="color: #8b0000;">"\\.es6$"</span> . js2-mode))
-(<span style="color: #00008b;">setq</span> js2-allow-rhino-new-expr-initializer nil)
-(<span style="color: #00008b;">setq</span> js2-enter-indents-newline t)
-(<span style="color: #00008b;">setq</span> js2-global-externs '(<span style="color: #8b0000;">"module"</span> <span style="color: #8b0000;">"require"</span> <span style="color: #8b0000;">"buster"</span> <span style="color: #8b0000;">"sinon"</span> <span style="color: #8b0000;">"assert"</span> <span style="color: #8b0000;">"refute"</span> <span style="color: #8b0000;">"setTimeout"</span> <span style="color: #8b0000;">"clearTimeout"</span> <span style="color: #8b0000;">"setInterval"</span> <span style="color: #8b0000;">"clearInterval"</span> <span style="color: #8b0000;">"location"</span> <span style="color: #8b0000;">"__dirname"</span> <span style="color: #8b0000;">"console"</span> <span style="color: #8b0000;">"JSON"</span>))
-(<span style="color: #00008b;">setq</span> js2-idle-timer-delay 0.1)
-(<span style="color: #00008b;">setq</span> js2-indent-on-enter-key nil)
-(<span style="color: #00008b;">setq</span> js2-mirror-mode nil)
-(<span style="color: #00008b;">setq</span> js2-strict-inconsistent-return-warning nil)
-(<span style="color: #00008b;">setq</span> js2-auto-indent-p t)
-(<span style="color: #00008b;">setq</span> js2-include-rhino-externs nil)
-(<span style="color: #00008b;">setq</span> js2-include-gears-externs nil)
-(<span style="color: #00008b;">setq</span> js2-concat-multiline-strings 'eol)
-(<span style="color: #00008b;">setq</span> js2-rebind-eol-bol-keys nil)
-(<span style="color: #00008b;">setq</span> js2-mode-show-parse-errors t)
-(<span style="color: #00008b;">setq</span> js2-mode-show-strict-warnings nil))
-</pre>
-</div>
-</div>
-</div>
-
 <div id="outline-container-orgd6632e7" class="outline-3">
 <h3 id="orgd6632e7">key chord</h3>
 <div class="outline-text-3" id="text-orgd6632e7">
@@ -502,34 +407,6 @@ extract them into <code>/usr/local/share/LanguageTool</code>
                                 <span style="color: #8b0000;">"EN_QUOTES"</span>)
       langtool-default-language <span style="color: #8b0000;">"en-US"</span>)
 )
-
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org24c81d4" class="outline-3">
-<h3 id="org24c81d4">ligature</h3>
-<div class="outline-text-3" id="text-org24c81d4">
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00008b;">when</span> (cl-search <span style="color: #8b0000;">"27."</span> (emacs-version))
-  (use-package ligature
-    <span style="color: #228b22;">:init</span>
-    (ligature-set-ligatures 'prog-mode '(<span style="color: #8b0000;">"|||&gt;"</span> <span style="color: #8b0000;">"&lt;|||"</span> <span style="color: #8b0000;">"&lt;==&gt;"</span> <span style="color: #8b0000;">"&lt;!--"</span> <span style="color: #8b0000;">"####"</span> <span style="color: #8b0000;">"~~&gt;"</span> <span style="color: #8b0000;">"***"</span> <span style="color: #8b0000;">"||="</span> <span style="color: #8b0000;">"||&gt;"</span>
-                                         <span style="color: #8b0000;">":::"</span> <span style="color: #8b0000;">"::="</span> <span style="color: #8b0000;">"=:="</span> <span style="color: #8b0000;">"==="</span> <span style="color: #8b0000;">"==&gt;"</span> <span style="color: #8b0000;">"=!="</span> <span style="color: #8b0000;">"=&gt;&gt;"</span> <span style="color: #8b0000;">"=&lt;&lt;"</span> <span style="color: #8b0000;">"=/="</span> <span style="color: #8b0000;">"!=="</span>
-                                         <span style="color: #8b0000;">"!!."</span> <span style="color: #8b0000;">"&gt;=&gt;"</span> <span style="color: #8b0000;">"&gt;&gt;="</span> <span style="color: #8b0000;">"&gt;&gt;&gt;"</span> <span style="color: #8b0000;">"&gt;&gt;-"</span> <span style="color: #8b0000;">"&gt;-&gt;"</span> <span style="color: #8b0000;">"-&gt;&gt;"</span> <span style="color: #8b0000;">"--&gt;"</span> <span style="color: #8b0000;">"---"</span> <span style="color: #8b0000;">"-&lt;&lt;"</span>
-                                         <span style="color: #8b0000;">"&lt;~~"</span> <span style="color: #8b0000;">"&lt;~&gt;"</span> <span style="color: #8b0000;">"&lt;*&gt;"</span> <span style="color: #8b0000;">"&lt;||"</span> <span style="color: #8b0000;">"&lt;|&gt;"</span> <span style="color: #8b0000;">"&lt;$&gt;"</span> <span style="color: #8b0000;">"&lt;=="</span> <span style="color: #8b0000;">"&lt;=&gt;"</span> <span style="color: #8b0000;">"&lt;=&lt;"</span> <span style="color: #8b0000;">"&lt;-&gt;"</span>
-                                         <span style="color: #8b0000;">"&lt;--"</span> <span style="color: #8b0000;">"&lt;-&lt;"</span> <span style="color: #8b0000;">"&lt;&lt;="</span> <span style="color: #8b0000;">"&lt;&lt;-"</span> <span style="color: #8b0000;">"&lt;&lt;&lt;"</span> <span style="color: #8b0000;">"&lt;+&gt;"</span> <span style="color: #8b0000;">"&lt;/&gt;"</span> <span style="color: #8b0000;">"###"</span> <span style="color: #8b0000;">"#_("</span> <span style="color: #8b0000;">"..&lt;"</span>
-                                         <span style="color: #8b0000;">"..."</span> <span style="color: #8b0000;">"+++"</span> <span style="color: #8b0000;">"/=="</span> <span style="color: #8b0000;">"///"</span> <span style="color: #8b0000;">"_|_"</span> <span style="color: #8b0000;">"www"</span> <span style="color: #8b0000;">"&amp;&amp;"</span> <span style="color: #8b0000;">"^="</span> <span style="color: #8b0000;">"~~"</span> <span style="color: #8b0000;">"~@"</span> <span style="color: #8b0000;">"~="</span>
-                                         <span style="color: #8b0000;">"~&gt;"</span> <span style="color: #8b0000;">"~-"</span> <span style="color: #8b0000;">"**"</span> <span style="color: #8b0000;">"*&gt;"</span> <span style="color: #8b0000;">"*/"</span> <span style="color: #8b0000;">"||"</span> <span style="color: #8b0000;">"|}"</span> <span style="color: #8b0000;">"|]"</span> <span style="color: #8b0000;">"|="</span> <span style="color: #8b0000;">"|&gt;"</span> <span style="color: #8b0000;">"|-"</span> <span style="color: #8b0000;">"{|"</span>
-                                         <span style="color: #8b0000;">"[|"</span> <span style="color: #8b0000;">"]#"</span> <span style="color: #8b0000;">"::"</span> <span style="color: #8b0000;">":="</span> <span style="color: #8b0000;">":&gt;"</span> <span style="color: #8b0000;">":&lt;"</span> <span style="color: #8b0000;">"$&gt;"</span> <span style="color: #8b0000;">"=="</span> <span style="color: #8b0000;">"=&gt;"</span> <span style="color: #8b0000;">"!="</span> <span style="color: #8b0000;">"!!"</span> <span style="color: #8b0000;">"&gt;:"</span>
-                                         <span style="color: #8b0000;">"&gt;="</span> <span style="color: #8b0000;">"&gt;&gt;"</span> <span style="color: #8b0000;">"&gt;-"</span> <span style="color: #8b0000;">"-~"</span> <span style="color: #8b0000;">"-|"</span> <span style="color: #8b0000;">"-&gt;"</span> <span style="color: #8b0000;">"--"</span> <span style="color: #8b0000;">"-&lt;"</span> <span style="color: #8b0000;">"&lt;~"</span> <span style="color: #8b0000;">"&lt;*"</span> <span style="color: #8b0000;">"&lt;|"</span> <span style="color: #8b0000;">"&lt;:"</span>
-                                         <span style="color: #8b0000;">"&lt;$"</span> <span style="color: #8b0000;">"&lt;="</span> <span style="color: #8b0000;">"&lt;&gt;"</span> <span style="color: #8b0000;">"&lt;-"</span> <span style="color: #8b0000;">"&lt;&lt;"</span> <span style="color: #8b0000;">"&lt;+"</span> <span style="color: #8b0000;">"&lt;/"</span> <span style="color: #8b0000;">"#{"</span> <span style="color: #8b0000;">"#["</span> <span style="color: #8b0000;">"#:"</span> <span style="color: #8b0000;">"#="</span> <span style="color: #8b0000;">"#!"</span>
-                                         <span style="color: #8b0000;">"##"</span> <span style="color: #8b0000;">"#("</span> <span style="color: #8b0000;">"#?"</span> <span style="color: #8b0000;">"#_"</span> <span style="color: #8b0000;">"%%"</span> <span style="color: #8b0000;">".="</span> <span style="color: #8b0000;">".-"</span> <span style="color: #8b0000;">".."</span> <span style="color: #8b0000;">".?"</span> <span style="color: #8b0000;">"+&gt;"</span> <span style="color: #8b0000;">"++"</span> <span style="color: #8b0000;">"?:"</span>
-                                         <span style="color: #8b0000;">"?="</span> <span style="color: #8b0000;">"?."</span> <span style="color: #8b0000;">"??"</span> <span style="color: #8b0000;">";;"</span> <span style="color: #8b0000;">"/*"</span> <span style="color: #8b0000;">"/="</span> <span style="color: #8b0000;">"/&gt;"</span> <span style="color: #8b0000;">"//"</span> <span style="color: #8b0000;">"__"</span> <span style="color: #8b0000;">"~~"</span> <span style="color: #8b0000;">"(*"</span> <span style="color: #8b0000;">"*)"</span>
-                                          <span style="color: #8b0000;">"://"</span>))
-    (global-ligature-mode t))
-  )
 
 </pre>
 </div>
@@ -648,19 +525,6 @@ extract them into <code>/usr/local/share/LanguageTool</code>
   (<span style="color: #00008b;">setq</span> ido-default-buffer-method 'selected-window)
   <span style="color: #8c8c8c; font-style: italic;">; </span><span style="color: #8c8c8c; font-style: italic;">Use the current window for indirect buffer display</span>
   (<span style="color: #00008b;">setq</span> org-indirect-buffer-display 'current-window)
-
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org50a9826" class="outline-3">
-<h3 id="org50a9826">pallet</h3>
-<div class="outline-text-3" id="text-org50a9826">
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(use-package pallet
-<span style="color: #228b22;">:config</span>
-(pallet-mode t))
 </pre>
 </div>
 </div>
@@ -731,39 +595,37 @@ extract them into <code>/usr/local/share/LanguageTool</code>
 <h3 id="org978d772">Scala Metals</h3>
 <div class="outline-text-3" id="text-org978d772">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">    <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable scala-mode for highlighting, indentation and motion commands</span>
-    (use-package scala-mode
-      <span style="color: #228b22;">:mode</span> <span style="color: #8b0000;">"\\.s</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">(</span><span style="color: #8b0000;">cala</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">|</span><span style="color: #8b0000;">bt</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">)</span><span style="color: #8b0000;">$"</span>
-      )
-
-    <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable sbt mode for executing sbt commands</span>
-    (use-package sbt-mode
-      <span style="color: #228b22;">:commands</span> sbt-start sbt-command
-      <span style="color: #228b22;">:config</span>
-      <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31</span>
-      <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">allows using SPACE when in the minibuffer</span>
-      (substitute-key-definition
-       'minibuffer-complete-word
-       'self-insert-command
-       minibuffer-local-completion-map)
-       <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152</span>
-       (<span style="color: #00008b;">setq</span> sbt:program-options '(<span style="color: #8b0000;">"-Dsbt.supershell=false"</span>))
-    )
-
-    (use-package lsp-mode
-      <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Optional - enable lsp-mode automatically in scala files</span>
-      <span style="color: #228b22;">:hook</span>  (scala-mode . lsp)
-             (lsp-mode . lsp-lens-mode)
-             (dhall-mode . lsp)
-      <span style="color: #228b22;">:config</span> (<span style="color: #00008b;">setq</span> lsp-prefer-flymake nil))
-
-    <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Add metals backend for lsp-mode</span>
-    (use-package lsp-metals)
-
-    <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable nice rendering of documentation on hover</span>
-    (use-package lsp-ui)
-
+<pre class="src src-emacs-lisp"><span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable scala-mode for highlighting, indentation and motion commands</span>
+(use-package scala-mode
+  <span style="color: #228b22;">:mode</span> <span style="color: #8b0000;">"\\.s</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">(</span><span style="color: #8b0000;">cala</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">|</span><span style="color: #8b0000;">bt</span><span style="color: #8b0000; font-weight: bold;">\\</span><span style="color: #8b0000; font-weight: bold;">)</span><span style="color: #8b0000;">$"</span>
+  )
+<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable sbt mode for executing sbt commands</span>
+(use-package sbt-mode
+  <span style="color: #228b22;">:commands</span> sbt-start sbt-command
+  <span style="color: #228b22;">:config</span>
+  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31</span>
+  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">allows using SPACE when in the minibuffer</span>
+  (substitute-key-definition
+   'minibuffer-complete-word
+   'self-insert-command
+   minibuffer-local-completion-map)
+   <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152</span>
+   (<span style="color: #00008b;">setq</span> sbt:program-options '(<span style="color: #8b0000;">"-Dsbt.supershell=false"</span>))
 )
+
+(use-package lsp-mode
+  <span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Optional - enable lsp-mode automatically in scala files</span>
+  <span style="color: #228b22;">:hook</span>  (scala-mode . lsp)
+         (lsp-mode . lsp-lens-mode)
+         (dhall-mode . lsp)
+       (haskell-mode . lsp)
+  <span style="color: #228b22;">:config</span> (<span style="color: #00008b;">setq</span> lsp-prefer-flymake nil))
+
+<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Add metals backend for lsp-mode</span>
+(use-package lsp-metals)
+
+<span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">Enable nice rendering of documentation on hover</span>
+(use-package lsp-ui)
 </pre>
 </div>
 </div>
@@ -829,16 +691,6 @@ extract them into <code>/usr/local/share/LanguageTool</code>
 </div>
 </div>
 
-<div id="outline-container-org6a9ef08" class="outline-3">
-<h3 id="org6a9ef08">undo tree</h3>
-<div class="outline-text-3" id="text-org6a9ef08">
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(use-package undo-tree
-  <span style="color: #228b22;">:init</span> (global-undo-tree-mode))
-</pre>
-</div>
-</div>
-</div>
 <div id="outline-container-orgb92ede1" class="outline-3">
 <h3 id="orgb92ede1">unicode</h3>
 <div class="outline-text-3" id="text-orgb92ede1">
