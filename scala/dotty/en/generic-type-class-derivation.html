@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-14 Sat 06:23 -->
+<!-- 2021-08-15 Sun 01:49 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Generic Type Class Derivation in Scala 3</title>
@@ -125,7 +125,7 @@ Source code 👉 <a href="https://github.com/jcouyang/meow">https://github.com/j
 <hr>
 
 <p>
-In the previous article <a href="./type-classes.html">Type Classes</a>, we know it should be very straightforward to implement a <code>Functor</code> instance, i.e. for <code>Option</code>.
+From the previous article <a href="./type-classes.html">Type Classes</a>, we know that it should be very straightforward to implement a <code>Functor</code> instance, e.g. for <code>Option</code>.
 </p>
 
 <div class="org-src-container">
@@ -137,11 +137,11 @@ In the previous article <a href="./type-classes.html">Type Classes</a>, we know 
 </div>
 
 <p>
-However, there are s many data types to implement, and there are too many boilerplate for each of new data type, even though it is simple to do so.
+However, there are so many data types to implement, and there is too much boilerplate for each new data type, although it is easy to do so.
 </p>
 
 <p>
-Say we have a new ADT <code>Tree</code>:
+Let's say we have a new ADT <code>Tree</code>:
 </p>
 <div class="org-src-container">
 <pre class="src src-scala">enum <span style="color: #6b8e23;">Tree</span>[<span style="color: #6b8e23;">T</span>] {
@@ -156,12 +156,14 @@ If we want this <code>Tree</code> to be <code>map</code>-able, <code>show</code>
 </p>
 
 <p>
-Since <code>Tree</code> is an ADT, which means it can be generic represented as <code>Product</code> or <code>Coproduct</code>, in Scala 2 that is where shapeless come in handy,
-and with some shapeless-based lib like  <a href="https://github.com/typelevel/kittens">Kittens</a>, we can just directly derive these type class instances without actually implement them.
+Since <code>Tree</code> is an ADT, which means it can be represented as a generic type <code>Product</code> or <code>Coproduct</code>, this is where shapeless come in handy in Scala 2,
+and with some shapeless-based libs like  <a href="https://github.com/typelevel/kittens">Kittens</a>, we can just simply derive these type class instances without actually implementing them.
 </p>
 
 <p>
-Example with <a href="https://github.com/typelevel/kittens">Kittens</a>:
+Example in Kittens<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+<a href="https://github.com/typelevel/kittens#derive-functor">https://github.com/typelevel/kittens#derive-functor</a>
+</span>:
 </p>
 <div class="org-src-container">
 <pre class="src src-scala"><span style="color: #00008b;">import</span> cats.derived.<span style="color: #00008b;">_</span>
@@ -171,7 +173,7 @@ Example with <a href="https://github.com/typelevel/kittens">Kittens</a>:
 </div>
 
 <p>
-In Scala 3, such thing is natively support and can be done without any lib.
+In Scala 3, something like this is natively supported, it can be done without any lib.
 </p>
 
 <p>
@@ -183,16 +185,16 @@ Let's start with the simpler type class <code>Show</code>.
 <div class="outline-text-2" id="text-orgdd850b4">
 <p>
 <code>Show</code> is type class for <code>A</code>, since <code>A</code> is just a type, let us call <code>A</code> Kind 0 and <code>A[_]</code> Kind 1.
-To build a generic type class derivation natively in Scala 3, the steps are pretty similar to how shapeless:
+To create a generic type class derivation natively in Scala 3, the steps are pretty similar to shapeless:
 </p>
 
 <ol class="org-ol">
 <li>Find generic representation of type <code>A</code>, that is, break <code>A</code> into <code>Product</code> and <code>Coproduct</code> combinations</li>
-<li>implement instances for <code>Product</code> and <code>Coproduct</code> types.</li>
+<li>Implement instances for <code>Product</code> and <code>Coproduct</code> types.</li>
 </ol>
 
 <p>
-For the impatient, the final result of generic <code>Show</code> derivation in Scala 3 will be like:
+For the impatient, the final result of generic <code>Show</code> derivation in Scala 3 will look like:
 </p>
 <div class="org-src-container">
 <pre class="src src-scala">enum <span style="color: #6b8e23;">Tree</span>[<span style="color: #6b8e23;">T</span>] derives <span style="color: #6b8e23;">Show</span> {
@@ -211,13 +213,13 @@ Yeah, it is that simple, just add <code>derives Show</code> to the data type.
 <h3 id="org0cace50">Generic representation of <code>A</code></h3>
 <div class="outline-text-3" id="text-org0cace50">
 <p>
-Scala 3 is able to derive the generic representation of data types as <code>Mirror[T]</code> type<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+Scala 3 is able to derive the generic representation of data types as <code>Mirror[T]</code> type<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
 <a href="https://dotty.epfl.ch/docs/reference/contextual/derivation.html#types-supporting-derives-clauses">https://dotty.epfl.ch/docs/reference/contextual/derivation.html#types-supporting-derives-clauses</a> 
 </span>, in the same way shapeless' <code>Generic[T]</code> type did.
 </p>
 
 <p>
-In our example, to derive the generic representation of <code>Tree</code>, we can just define a <code>derived</code> function:
+In our example, to derive the generic representation of <code>Tree</code>, we can simply define a <code>derived</code> function:
 </p>
 <div class="org-src-container">
 <pre class="src src-scala"><span style="color: #00008b;">inline</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">derived</span>[<span style="color: #6b8e23;">T</span>](using m<span style="color: #00008b;">:</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">Of</span>[<span style="color: #6b8e23;">T</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=</span>
@@ -228,7 +230,7 @@ In our example, to derive the generic representation of <code>Tree</code>, we ca
 </div>
 
 <p>
-By <code>using m: Mirror.Of[T]</code>, compiler will automatically derive the <code>Mirror.Of[T]</code> type from <code>T</code>, which will looks like:
+By <code>using m: Mirror.Of[T]</code>, the compiler will automatically derive the <code>Mirror.Of[T]</code> type from <code>T</code>, which will look like:
 </p>
 <div class="org-src-container">
 <pre class="src src-scala"><span style="color: #00008b;">new</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">Sum</span><span style="color: #00008b;">:</span>
@@ -264,11 +266,11 @@ By <code>using m: Mirror.Of[T]</code>, compiler will automatically derive the <c
 </pre>
 </div>
 <p>
-Don't need to memorize all of them for now, we will get to each of those types shortly.
+You don't have to memorize them all, we will get to each of these types shortly.
 </p>
 
 <p>
-Since <code>Tree</code> is a <code>Coproduct</code> (or <code>Sum</code>) type, to show the data type <code>Tree</code> correctly, we need to first figure out is it a <code>Branch</code> or a <code>Leaf</code>.
+Since <code>Tree</code> is a <code>Coproduct</code> (<code>Sum</code>) type, we first need to figure out if it is a <code>Branch</code> or a <code>Leaf</code> to correctly represent the <code>Tree</code> data type.
 </p>
 
 <p>
@@ -282,7 +284,7 @@ Hence, the process to properly show <code>Tree</code>:
 </ol>
 
 <p>
-Let's start with the simplest type, when our data type is a <code>Leaf</code>, how do we show it?
+Let's start with the simplest type, if our data type is a <code>Leaf</code>, how do we show it?
 </p>
 </div>
 </div>
@@ -291,7 +293,7 @@ Let's start with the simplest type, when our data type is a <code>Leaf</code>, h
 <h3 id="org1b1ec6a">Generic instance of  <code>Show[Product]</code> type</h3>
 <div class="outline-text-3" id="text-org1b1ec6a">
 <p>
-There is a singleton type <code>MirroredLabel = "Leaf"</code> we can use to show, and for its <code>elem</code>, we can recursively derive <code>Show</code> instances for <code>MirroredElemTypes</code>
+There is a singleton type <code>MirroredLabel = "Leaf"</code> we can use to show, and for whose <code>elem</code>, we can recursively derive <code>Show</code> instances for <code>MirroredElemTypes</code>
 </p>
 <div class="org-src-container">
 <pre class="src src-scala"><span style="color: #00008b;">inline</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">summonAsList</span>[<span style="color: #6b8e23;">T</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">Tuple</span>, <span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">List</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">Any</span>]] <span style="color: #00008b;">=</span>
@@ -314,7 +316,7 @@ There is a singleton type <code>MirroredLabel = "Leaf"</code> we can use to show
 </ul>
 
 <p>
-Now we know the <code>name</code> of current type <code>Leaf</code>, and <code>elemsShowInstances</code> of <code>Leaf</code>'s elements, let's try to fill in the <code>???</code> with the actual implementation of <code>Show[Product]</code>
+Now we know the <code>name</code> of current type <code>Leaf</code>, and <code>elemsShowInstances</code> of <code>Leaf</code>'s elements, let's try to fill the <code>???</code> with the actual implementation of <code>Show[Product]</code>
 </p>
 <div class="org-src-container">
 <pre class="src src-scala"><span style="color: #00008b;">inline</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">derived</span>[<span style="color: #6b8e23;">T</span>](using m<span style="color: #00008b;">:</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">Of</span>[<span style="color: #6b8e23;">T</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=</span>
@@ -331,12 +333,12 @@ Now we know the <code>name</code> of current type <code>Leaf</code>, and <code>e
 </pre>
 </div>
 <p>
-<a href="#coderef-asInstanceOf" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-asInstanceOf');" onmouseout="CodeHighlightOff(this, 'coderef-asInstanceOf');"><code>a.asInstanceOf[Product]</code></a> looks really dangerous but actually it is safe here, because we know that
-<code>T</code> is definitely a <code>Product</code> so <code>p</code> is <a href="#coderef-ProductOf" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-ProductOf');" onmouseout="CodeHighlightOff(this, 'coderef-ProductOf');"><code>Mirror.ProductOf[T]</code></a>.
+<a href="#coderef-asInstanceOf" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-asInstanceOf');" onmouseout="CodeHighlightOff(this, 'coderef-asInstanceOf');"><code>a.asInstanceOf[Product]</code></a> looks really dangerous, but it's actually safe here, because we know that
+<code>T</code> is definitely a <code>Product</code>, so <code>p</code> must be a <a href="#coderef-ProductOf" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-ProductOf');" onmouseout="CodeHighlightOff(this, 'coderef-ProductOf');"><code>Mirror.ProductOf[T]</code></a>.
 </p>
 
 <p>
-The implementation should be capable to derived <code>Show</code> for any type that has a <code>Mirror.Product</code> instance. Let's give it a try:
+The implementation should be capable to derive <code>Show</code> for any type that has a <code>Mirror.Product</code> instance. Let's give it a try:
 </p>
 <div class="org-src-container">
 <pre class="src src-scala">assertEquals(show(<span style="color: #6b8e23;">Leaf</span>(<span style="color: #8b0000;">"leaf"</span>)), <span style="color: #8b0000;">"""Leaf("leaf")"""</span>)
@@ -345,7 +347,7 @@ The implementation should be capable to derived <code>Show</code> for any type t
 
 
 <p>
-That doesn't work yet, because even we know how to show <code>Product</code> but, <code>Leaf</code> is one of the <code>Tree</code> <code>Coproduct</code> type.
+But that doesn't work yet, because even we know how to show <code>Product</code> but, <code>Leaf</code> is one of the <code>Tree</code> <code>Coproduct</code> type.
 </p>
 
 <p>
@@ -366,7 +368,7 @@ That doesn't work yet, because even we know how to show <code>Product</code> but
 </div>
 
 <p>
-That says if <code>Tree</code> is constructed from <code>Branch</code>, the ordinal is 0, and <code>Leaf</code>'s ordinal is 1.
+That is, when <code>Tree</code> is constructed from <code>Branch</code>, the ordinal is 0, and the ordinal of <code>Leaf</code>'s is 1.
 </p>
 
 <p>
@@ -391,7 +393,7 @@ By simply checking the <a href="#coderef-Ordinal" class="coderef" onmouseover="C
 </div>
 
 <p>
-Let us verify if this will work as expected:
+Finally, let's verify that works as expected:
 </p>
 <div class="org-src-container">
 <pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">aTree</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Tree</span>[<span style="color: #6b8e23;">String</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Branch</span>(<span style="color: #6b8e23;">Leaf</span>(<span style="color: #8b0000;">"l0"</span>), <span style="color: #6b8e23;">Branch</span>(<span style="color: #6b8e23;">Leaf</span>(<span style="color: #8b0000;">"l1"</span>), <span style="color: #6b8e23;">Leaf</span>(<span style="color: #8b0000;">"r1"</span>)))
@@ -405,14 +407,14 @@ assertEquals(show(aTree), <span style="color: #8b0000;">"""Branch(Leaf("l0"): Tr
 <h2 id="org1cadb52">Kind 1 Type Class Derivation</h2>
 <div class="outline-text-2" id="text-org1cadb52">
 <p>
-If we are trying to do the same thing to generate generic <code>Functor</code> instance, it won't just work.
+If we try to do the same thing to create a generic <code>Functor</code> instance, it won't just work.
 </p>
 
 <p>
-Because if we look closer to the type class <code>Show[A]</code> and <code>Functor[F[_]]</code>, you will notice that <code>A</code>
+Because if we take a look closer look at the type class <code>Show[A]</code> and <code>Functor[F[_]]</code>, you will notice that <code>A</code>
 in <code>Show[A]</code> is a simple type, or we can call it Kind 0 Type. But <code>F</code> in is higher kind, and we can call
-it Kind 1 Type here, because it needs to pass in a type to return a type. For instance if <code>F</code> is <code>List</code>,
-you will need to pass a <code>A</code> to <code>List</code> to get a type <code>List[A]</code>. In another way, <code>F</code> is just short for <code>[X] =&gt;&gt; F[X]</code>.<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
+it Kind 1 Type here, because it must pass in a type to return a type. For example if <code>F</code> is <code>List</code>,
+you will need to pass a <code>A</code> to <code>List</code> to get a type <code>List[A]</code>. In other words, <code>F</code> is just a shortcut for <code>[X] =&gt;&gt; F[X]</code>.<label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
 Type lambda: <a href="https://dotty.epfl.ch/docs/reference/new-types/type-lambdas.html">https://dotty.epfl.ch/docs/reference/new-types/type-lambdas.html</a> 
 </span>
 </p>
@@ -441,7 +443,7 @@ Where <code>K1</code> is simply a alias of <code>Mirror</code>
 </div>
 
 <p>
-Which is just a small trick(I borrowed from <a href="https://github.com/typelevel/shapeless-3/blob/3ce37126f24e6ebb463d3ca7667ad3a6370bb14a/modules/deriving/src/main/scala/shapeless3/deriving/kinds.scala#L154">shapeless source code</a>) to basically add [_] to original K0 Mirror.
+Which is just a little trick(I borrowed from <a href="https://github.com/typelevel/shapeless-3/blob/3ce37126f24e6ebb463d3ca7667ad3a6370bb14a/modules/deriving/src/main/scala/shapeless3/deriving/kinds.scala#L154">shapeless source code</a>) to basically add [_] to original K0 Mirror.
 </p>
 <div class="org-src-container">
 <pre class="src src-scala"><span style="color: #6b8e23;">Mirror</span> { <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredType</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">T</span>; <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredElemTypes</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">Tuple</span> }
@@ -449,11 +451,11 @@ Which is just a small trick(I borrowed from <a href="https://github.com/typeleve
 </div>
 
 <p>
-That was pretty much it, and the rest of the implementation is pretty much the same as <code>Show</code>.
+That's about it, and the rest of the implementation is pretty much the same as <code>Show</code>.
 </p>
 
 <p>
-I will just leave the implement of these <code>???</code> as exercise, feel free to look up the answer in <a href="https://github.com/jcouyang/meow/blob/22e5a47682ec15861f45d71692f640bd218e0044/src/main/scala/Functor.scala#L110">source code of meow</a>, send me a PR if you find a better implantation.
+I will just leave the implementation of these <code>???</code> as an exercise, feel free to look up the answer in <a href="https://github.com/jcouyang/meow/blob/22e5a47682ec15861f45d71692f640bd218e0044/src/main/scala/Functor.scala#L110">source code of meow</a>, send me a PR if you find a better implantation.
 </p>
 </div>
 </div>
@@ -462,10 +464,14 @@ I will just leave the implement of these <code>???</code> as exercise, feel free
 <div id="text-footnotes">
 
 <div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
-<a href="https://dotty.epfl.ch/docs/reference/contextual/derivation.html#types-supporting-derives-clauses">https://dotty.epfl.ch/docs/reference/contextual/derivation.html#types-supporting-derives-clauses</a> 
+<a href="https://github.com/typelevel/kittens#derive-functor">https://github.com/typelevel/kittens#derive-functor</a>
 </p></div></div>
 
 <div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://dotty.epfl.ch/docs/reference/contextual/derivation.html#types-supporting-derives-clauses">https://dotty.epfl.ch/docs/reference/contextual/derivation.html#types-supporting-derives-clauses</a> 
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
 Type lambda: <a href="https://dotty.epfl.ch/docs/reference/new-types/type-lambdas.html">https://dotty.epfl.ch/docs/reference/new-types/type-lambdas.html</a> 
 </p></div></div>
 
