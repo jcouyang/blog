@@ -1,0 +1,160 @@
+#+title: Write your AWS DevOps tool in Haskell for Gread Good
+#+description: Why I rewrite all DevOps tools in Haskell, and you should too!
+#+keywords: devops,haskell,amazonka,amazon aws,aws
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="Write your AWS DevOps tool in Haskell for Gread Good!" />
+#+HTML_HEAD_EXTRA: <meta property="og:description" content="Why I rewrite all DevOps tools in Haskell, and you should too!" />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+#+author: Jichao Ouyang
+#+date: <2021-08-15 Sun>
+#+index: FP!Write your AWS DevOps tool in Haskell for Gread Good
+#+index: DevOps!Write your AWS DevOps tool in Haskell for Gread Good
+#+index: Haskell!Write your AWS DevOps tool in Haskell for Gread Good
+
+Let's just simply compare AWS CLI, Haskell Amazonka, and official Go SDK with the following very simple tasks:
+
+* List files in one S3 bucket
+
+** AWS CLI [fn:4]
+  #+begin_src sh
+    aws s3 ls s3://mybucket --recursive --page-size 100
+  #+end_src
+
+** Haskell Amazonka[fn:1]
+   #+begin_src haskell
+     send $ listObjects "mybucket" & loMaxKeys ~? 100
+   #+end_src
+
+   #+begin_quote
+   Of course the Haskell code is pure and lazy, so =send= just returns a data that describes the command and produce no side effect, to actually exec the command
+   we can create a function =awsRun= to execute the command:
+   
+   #+begin_src haskell
+     awsRun = runResourceT . runAWS (newEnv Discover & envLogger .~ newLogger Info stdout) . within Sydney
+   #+end_src
+
+   It is similar to the step that Go SDK need to create a session first:
+   #+begin_src c
+     sess := session.Must(session.NewSession(&aws.Config{
+         Region: aws.String(endpoints.ApSoutheast2RegionID),
+     }))
+   #+end_src
+   #+end_quote
+
+** Go SDK [fn:3]
+   #+begin_src c
+     svc := s3.New(session.New())
+     input := &s3.ListObjectsInput{
+         Bucket:  aws.String("mybucket"),
+         MaxKeys: aws.Int64(100),
+     }
+
+     result, err := svc.ListObjects(input)
+     if err != nil {
+      ...
+   #+end_src
+
+* List _ALL FILES_ in a bucket
+  This time we need all, not just one page of files, let's compare
+
+** AWS CLI
+  Can't really do it...if there are more than 1000 files 🤷‍♂
+  #+begin_quote
+  --page-size (integer) The number of results to return in each response to a list operation. The default value is 1000 (the maximum allowed) [fn:7]
+  #+end_quote
+
+** Haskell Amazonka
+  #+begin_src haskell
+  paginate $ listObjects "mybucket" & loMaxKeys ~? 100
+  #+end_src
+
+  Simply replace =send= with =paginate=, amazonka will automatically **pull** objects into a Conduit[fn:5] stream, you can simply map over the stream, =.| takeC 3= to go over only first 3 pages, or even =.| sinkList= to load the very large list into memory.
+
+** Go SDK [fn:2]
+   #+begin_src c
+     objects := []string{}
+     err := svc.ListObjectsPagesWithContext(ctx, &s3.ListObjectsInput{
+         Bucket: aws.String(myBucket),
+     }, func(p *s3.ListObjectsOutput, lastPage bool) bool {
+         for _, o := range p.Contents {
+             objects = append(objects, aws.StringValue(o.Key))
+         }
+         return true // continue paging
+     })
+     if err != nil {
+         panic(fmt.Sprintf("failed to list objects for bucket, %s, %v", myBucket, err))
+     }
+
+     fmt.Println("Objects in bucket:", objects)
+   #+end_src
+
+   Go SDK uses callback function to go over pages, it is less effecient then stream and more verbose.
+
+* Query a DynamoDB table
+
+** AWS CLI[fn:6]
+   #+begin_src sh
+     aws dynamodb query \
+         --expression-attribute-values file://put-a-json-here \
+         --key-condition-expression "Artist = :v1" \
+         --projection-expression "SongTitle" \
+         --table-name Music
+   #+end_src
+** Haskell Amazonka
+   #+begin_src haskell
+     send $ query "Music"
+       & qExpressionAttributeValues .~ HashMap.singleton ":v1" (attributeValue & avS ?~ "No One You Know")
+       & qKeyConditionExpression ?~ "Artist = :v1"
+       & qProjectionExpression ?~ "SongTitle"
+   #+end_src
+** Go SDK
+   #+begin_src c
+     svc := dynamodb.New(session.New())
+     input := &dynamodb.QueryInput{
+         ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+             ":v1": {
+                 S: aws.String("No One You Know"),
+             },
+         },
+         KeyConditionExpression: aws.String("Artist = :v1"),
+         ProjectionExpression:   aws.String("SongTitle"),
+         TableName:              aws.String("Music"),
+     }
+
+     result, err := svc.Query(input)
+     if err != nil {
+         ...
+   #+end_src
+
+   You should get the idea by now.
+
+   I guess anyone even can't read Haskell at all can identify the Haskell version is basically the same as AWS CLI, with some simple syntax mapping you can instantly translate any AWS CLI command into Haskell code.
+   - =--= to =&=
+   - kebab-case to CamelCase
+   - connect option name and value with =.~= instead of space, or =?~= when the option is optional
+
+* COMMENT Stream all filenames in S3 bucket to Dynamodb table
+  Guess how many lines of code will this be in Bash or Go?
+  #+begin_src haskell
+    s3ToDb = (transPipe awsRun $ paginate $ listObject "mybucket")
+      .| concatMapC (view lorsContents)
+      .| mapC (view oKey)
+      .| mapMC saveDb
+      where
+        saveDb name = awsRun $ putItem "mytable"
+          & piItem .~ HashMap.singleton "filename" (attributeValue & avS ~? (show name))
+  #+end_src
+* Footnotes
+
+[fn:7] https://docs.aws.amazon.com/cli/latest/reference/s3/ls.html#options 
+
+[fn:6] https://docs.aws.amazon.com/cli/latest/reference/dynamodb/query.html 
+
+[fn:5] https://github.com/snoyberg/conduit 
+
+[fn:4] https://docs.aws.amazon.com/cli/latest/reference/s3/ls.html 
+
+[fn:3] https://docs.aws.amazon.com/sdk-for-go/api/service/s3/#S3.ListObjects 
+
+[fn:2] https://docs.aws.amazon.com/sdk-for-go/api/service/s3/#S3.ListObjectsPagesWithContext 
+
+[fn:1] https://hackage.haskell.org/package/amazonka-s3-1.6.1/docs/Network-AWS-S3-ListObjects.htm 
