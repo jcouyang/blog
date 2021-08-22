@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-16 Mon 09:21 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Applied Evolutionary Design</title>
@@ -22,50 +22,26 @@
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/patterns-and-practices/applied-evolutionary-design/images/barista-retry.png" property="og:image">
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -172,7 +148,7 @@ Somehow they are all connected because of our story. So if we model these actors
 </p>
 
 
-<figure>
+<figure id="orgc103f39">
 <img src="./images/schema-v1.png" alt="schema-v1.png">
 
 </figure>
@@ -204,8 +180,7 @@ I've tried in <a href="http://ammonite.io/#Ammonite-REPL">amm</a>, the code real
 </span>
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">DrawsyCafeService</span> {
+<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">DrawsyCafeService</span> {
   <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">ProductId</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Int</span>
   <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">OrderId</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Int</span>
   <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">UserId</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Int</span>
@@ -233,8 +208,7 @@ I've tried in <a href="http://ammonite.io/#Ammonite-REPL">amm</a>, the code real
       brew(product <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">1</span>) <span style="color: #00008b;">else</span> <span style="color: #6b8e23;">IO</span>.raiseError(<span style="color: #00008b;">new</span> <span style="color: #36648b;">Exception</span>(<span style="color: #8b0000;">"payment failed please retry"</span>))
   } <span style="color: #00008b;">yield</span> coffee
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 Seems very straight forward, just few line of code, we should start
@@ -266,7 +240,7 @@ When <b>Guy</b> <i>Sleepy</i> swipe an credit card on pos terminal<br>
 </blockquote></div>
 
 
-<figure>
+<figure id="orgb0d0eff">
 <img src="./images/creditcard-rejected.png" alt="creditcard-rejected.png">
 
 </figure>
@@ -284,7 +258,7 @@ When <b>Guy</b> <i>Sleepy</i> order one <b>product</b> <i>Latte</i><br>
 </blockquote></div>
 
 
-<figure>
+<figure id="orgcb0550c">
 <img src="./images/order-rejected.png" alt="order-rejected.png">
 
 </figure>
@@ -299,13 +273,13 @@ When all these story is done, <i>Drowsy Cafe</i> can open their service
 to the market.
 </p>
 
-<pre class="example">
+<pre class="example" id="org9b765b8">
 1. As a sleepy guy, I should able to order a latte from /Drowsy Cafe/
 </pre>
-<pre class="example">
+<pre class="example" id="org390cb3a">
 2. As a sleepy guy, I should able to pay for the latte with my master credit card
 </pre>
-<pre class="example">
+<pre class="example" id="orge174392">
 3. As a sleepy guy, I should able to get my latte 2 mins after the credit card transaction is done.
 </pre>
 
@@ -346,7 +320,7 @@ As business grow, service need to evolve as well, so they hire another one, now 
 </p>
 
 
-<figure>
+<figure id="org342999e">
 <img src="./images/barista.png" alt="barista.png">
 
 </figure>
@@ -359,11 +333,9 @@ Now the <i>Drowsy Cafe</i> become something like microservices, it evolves into 
 <li>A service just take care of taking order, process payment</li>
 <li>A Service just take care of brewing coffee</li>
 </ol>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">This now become a remote call to another service</span>
+<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">This now become a remote call to another service</span>
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">brew</span>(product<span style="color: #00008b;">:</span> <span style="color: #36648b;">ProductId</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Product</span>]
-</pre>
-</div>
+</code></pre>
 
 <p>
 The investment of hiring another barista is soon paying back.<label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
@@ -392,7 +364,7 @@ or the barista is offline:
 </p>
 
 
-<figure>
+<figure id="org74af7c0">
 <img src="./images/barista-retry.png" alt="barista-retry.png">
 
 </figure>
@@ -501,7 +473,7 @@ This is so call <a href="https://martinfowler.com/articles/microservice-trade-of
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2020-01-03 Fri 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

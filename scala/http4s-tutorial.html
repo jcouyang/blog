@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-16 Mon 09:21 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Http4s Guides</title>
@@ -18,50 +18,26 @@
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -187,7 +163,7 @@ To make sure our dev environment is 100% reproducible, please lock the nix chann
 <div id="outline-container-org95b53a1" class="outline-4">
 <h4 id="org95b53a1">for macOS</h4>
 <div class="outline-text-4" id="text-org95b53a1">
-<pre class="example">
+<pre class="example" id="org5acfb0a">
 nix-channel --add https://nixos.org/channels/nixpkgs-20.09-darwin nixpkgs
 nix-channel --update
 </pre>
@@ -197,7 +173,7 @@ nix-channel --update
 <div id="outline-container-orgc5bf5f9" class="outline-4">
 <h4 id="orgc5bf5f9">for Linux(or Windows WSL)</h4>
 <div class="outline-text-4" id="text-orgc5bf5f9">
-<pre class="example">
+<pre class="example" id="org21bf38c">
 nix-channel --add https://nixos.org/channels/nixos-20.09 nixpkgs
 nix-channel --update
 </pre>
@@ -208,7 +184,7 @@ nix-channel --update
 <div id="outline-container-orgbaca50c" class="outline-3">
 <h3 id="orgbaca50c">Creating a new Http4s Application</h3>
 <div class="outline-text-3" id="text-orgbaca50c">
-<pre class="example">
+<pre class="example" id="org3f426ef">
 ~ nix-shell -p sbt
 &gt; sbt new jcouyang/http4s.g8
 </pre>
@@ -224,7 +200,7 @@ You can either answer all those question that it prompt or press <code>Enter</co
 <p>
 exit the previous temporary <code>nix-shell -p sbt</code> if you are still in
 </p>
-<pre class="example">
+<pre class="example" id="orgc03ece5">
 &gt; exit
 </pre>
 
@@ -239,7 +215,7 @@ Enter nix-shell and start the server
 
 </blockquote></div>
 
-<pre class="example">
+<pre class="example" id="org49058fc">
 ~ nix-shell
 &gt; sbt ~reStart
 </pre>
@@ -254,14 +230,14 @@ Enter nix-shell and start the server
 <p>
 You should able to see an empty list <code>[]</code> since there is nothing in database yet.
 </p>
-<pre class="example">
+<pre class="example" id="orgaa9748c">
 ~ curl localhost:8080/joke
 </pre>
 
 <p>
 To run test simply
 </p>
-<pre class="example">
+<pre class="example" id="orgd47fe66">
 &gt; sbt test
 </pre>
 
@@ -341,7 +317,7 @@ Now you have a proven working environment for the service to test and run, let u
 <div id="outline-container-org3c08723" class="outline-4">
 <h4 id="org3c08723">source structure</h4>
 <div class="outline-text-4" id="text-org3c08723">
-<pre class="example">
+<pre class="example" id="org85690b2">
 ~ tree src
 src
 ├── main
@@ -507,16 +483,14 @@ You might ask, where is our local DB?
 <p>
 The Postgres DB is defined in <code>docker-compose.yml</code> for local development
 </p>
-<div class="org-src-container">
-<pre class="src src-yaml">db:
+<pre class="code"><code>db:
   image: postgres:10
   environment:
     - POSTGRES_DB=joke
     - POSTGRES_HOST_AUTH_METHOD=trust
   ports:
     - 5432:5432
-</pre>
-</div>
+</code></pre>
 <p>
 Where <code>POSTGRES_DB=joke</code> will help creating the database and name it <code>joke</code>.
 </p>
@@ -524,7 +498,7 @@ Where <code>POSTGRES_DB=joke</code> will help creating the database and name it 
 <p>
 You don't need to run DB migration manually most of the time, since nix-shell hook will run it for you.
 </p>
-<pre class="example">
+<pre class="example" id="org222e8ba">
 shellHook = ''
           set -a
           source app.env
@@ -539,7 +513,7 @@ shellHook = ''
 <p>
 Every time you enter <code>nix-shell</code>, you will see the migration log:
 </p>
-<pre class="example">
+<pre class="example" id="org07f92c5">
 nix-shell
 Creating network "http4s-example_default" with the default driver
 Creating http4s-example_zipkin_1 ... done
@@ -567,14 +541,14 @@ INFO: Migrating schema "public" to version 1.0 - CreateJokeTable
 <p>
 To manually migrate when schema changed:
 </p>
-<pre class="example">
+<pre class="example" id="org657fc07">
 &gt; sbt "db/run migration"
 </pre>
 
 <p>
 Migration file located in <code>db/src/main/scala/db/migration</code>
 </p>
-<pre class="example">
+<pre class="example" id="org235a5ae">
 ~ tree db/src
 db/src
 └── main
@@ -589,8 +563,7 @@ db/src
 <p>
 A migration file is actually a Scala <a href="https://tpolecat.github.io/doobie/">doobie</a> source code.
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">class</span> <span style="color: #36648b;">V1_0_</span>_CreateJokeTable <span style="color: #00008b;">extends</span> <span style="color: #36648b;">DoobieMigration</span> {
+<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">V1_0_</span>_CreateJokeTable <span style="color: #00008b;">extends</span> <span style="color: #36648b;">DoobieMigration</span> {
   <span style="color: #228b22;">override</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">migrate</span> <span style="color: #00008b;">=</span>
     sql<span style="color: #8b0000;">"""create table joke (</span>
 <span style="color: #8b0000;">                id serial not null</span>
@@ -600,8 +573,7 @@ A migration file is actually a Scala <a href="https://tpolecat.github.io/doobie/
 <span style="color: #8b0000;">                created timestamptz default now() not null</span>
 <span style="color: #8b0000;">          )"""</span>.update.run
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 The prefix <code>V1_0__</code> in class name means version 1.0, detail of naming convention please refer to <a href="https://flywaydb.org/documentation/migrations#java-based-migrations">Flyway</a>
@@ -623,12 +595,11 @@ To be to able to save data, a database library such as <a href="https://tpolecat
 <p>
 The following example uses Quill:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span id="coderef-route" class="coderef-off"><span class="linenr"> 1: </span><span style="color: #00008b;">val</span> <span style="color: #b8860b;">CRUD</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">AppRoute</span> {                               <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (route)</span>
+<pre class="code"><code><span id="coderef-route" class="coderef-off"><span class="linenr"> 1: </span><span style="color: #00008b;">val</span> <span style="color: #b8860b;">CRUD</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">AppRoute</span> {                               <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (route)</span>
 <span class="linenr"> 2: </span>    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">req</span> <span style="color: #00008b;">@</span> <span style="color: #6b8e23;">POST</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"joke"</span> <span style="color: #00008b;">=&gt;</span>
 <span class="linenr"> 3: </span>      <span style="color: #00008b;">for</span> {
 <span id="coderef-kleisli" class="coderef-off"><span class="linenr"> 4: </span>        has <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>.ask[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">HasDatabase</span>]         <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (kleisli)</span>
-<span id="coderef-reqbody" class="coderef-off"><span class="linenr"> 5: </span>        joke <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>.liftF(req.as[<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">Create</span>])  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (reqbody)</span>
+<span id="coderef-reqbody" class="coderef-off"><span class="linenr"> 5: </span>        joke <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>.liftF(req.<span style="color: #00008b;">as</span>[<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">Create</span>])  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (reqbody)</span>
 <span id="coderef-quill" class="coderef-off"><span class="linenr"> 6: </span>        id <span style="color: #00008b;">&lt;-</span> has.transact(run(quote {              <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (quill)</span>
 <span class="linenr"> 7: </span>          query[<span style="color: #6b8e23;">Dao</span>.<span style="color: #6b8e23;">Joke</span>]
 <span class="linenr"> 8: </span>            .insert(<span style="color: #00008b;">_</span>.text -&gt; lift(joke.text))
@@ -638,8 +609,7 @@ The following example uses Quill:
 <span class="linenr">12: </span>        resp <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Created</span>(json<span style="color: #8b0000;">"""{"id": </span><span style="color: #b8860b;">$id</span><span style="color: #8b0000;">}"""</span>)
 <span class="linenr">13: </span>      } <span style="color: #00008b;">yield</span> resp
 <span class="linenr">14: </span>}
-</pre>
-</div>
+</code></pre>
 <ol class="org-ol">
 <li><a href="#coderef-route" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-route');" onmouseout="CodeHighlightOff(this, 'coderef-route');"><code>AppRoute</code></a> is simply a wrapper of Http4s' <code>HttpRoutes.of[IO]</code> but dependencies injectable.</li>
 <li><a href="#coderef-kleisli" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-kleisli');" onmouseout="CodeHighlightOff(this, 'coderef-kleisli');"><code>Kleisli.ask</code></a> is something like <code>@Inject</code> in Java world except everything is lazy, when you <code>ask[IO, HasDatabase]</code>, it will <code>&lt;-</code> a instance <code>has</code> of <code>HasDatabase</code> type <label for="9" class="margin-toggle sidenote-number"></label><input type="checkbox" id="9" class="margin-toggle"/><span class="sidenote">
@@ -657,7 +627,7 @@ can execute it in one transaction.</li>
 </p>
 
 
-<figure>
+<figure id="org65df271">
 <img src="https://www.evernote.com/l/ABeuNCR1bIpMa4xqHKyccGy5mbbxVrzlj2AB/image.png" alt="image.png">
 
 </figure>
@@ -667,20 +637,18 @@ can execute it in one transaction.</li>
 <p>
 If you're not fan of Macro it is very easy to switch back to doobie DSL:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span class="linenr"> 1: </span><span style="color: #00008b;">val</span> <span style="color: #b8860b;">CRUD</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">AppRoute</span> {
+<pre class="code"><code><span class="linenr"> 1: </span><span style="color: #00008b;">val</span> <span style="color: #b8860b;">CRUD</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">AppRoute</span> {
 <span class="linenr"> 2: </span>    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">req</span> <span style="color: #00008b;">@</span> <span style="color: #6b8e23;">POST</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"joke"</span> <span style="color: #00008b;">=&gt;</span>
 <span class="linenr"> 3: </span>      <span style="color: #00008b;">for</span> {
 <span class="linenr"> 4: </span>        has <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>.ask[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">HasDatabase</span>]
-<span class="linenr"> 5: </span>        joke <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>.liftF(req.as[<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">Create</span>])
+<span class="linenr"> 5: </span>        joke <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>.liftF(req.<span style="color: #00008b;">as</span>[<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">Create</span>])
 <span class="linenr"> 6: </span>        id <span style="color: #00008b;">&lt;-</span> has.transact(
 <span id="coderef-doobie" class="coderef-off"><span class="linenr"> 7: </span>          sql<span style="color: #8b0000;">"insert into joke (text) values </span><span style="color: #b8860b;">${joke.text}</span><span style="color: #8b0000;">"</span>.update.withUniqueGeneratedKeys(<span style="color: #8b0000;">"id"</span>)) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (doobie)</span>
 <span class="linenr"> 8: </span>        <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> log.infoF(s<span style="color: #8b0000;">"created joke with id </span><span style="color: #b8860b;">$id</span><span style="color: #8b0000;">"</span>)
 <span class="linenr"> 9: </span>        resp <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Created</span>(json<span style="color: #8b0000;">"""{"id": </span><span style="color: #b8860b;">$id</span><span style="color: #8b0000;">}"""</span>)
 <span class="linenr">10: </span>      } <span style="color: #00008b;">yield</span> resp
 <span class="linenr">11: </span>}
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 
@@ -697,8 +665,7 @@ Which means you don't actually need to read all jokes into memory, and then retu
 can actually flow through your Http4s server without accumulating in the memory.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span class="linenr"> 1: </span><span style="color: #00008b;">case</span> <span style="color: #6b8e23;">GET</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"joke"</span> <span style="color: #00008b;">=&gt;</span>
+<pre class="code"><code><span class="linenr"> 1: </span><span style="color: #00008b;">case</span> <span style="color: #6b8e23;">GET</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"joke"</span> <span style="color: #00008b;">=&gt;</span>
 <span class="linenr"> 2: </span>  <span style="color: #6b8e23;">Kleisli</span>
 <span class="linenr"> 3: </span>    .ask[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">HasDatabase</span>]
 <span class="linenr"> 4: </span>    .flatMap(
@@ -710,8 +677,7 @@ can actually flow through your Http4s server without accumulating in the memory.
 <span class="linenr">10: </span>            .map(<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">View</span>.from)
 <span class="linenr">11: </span>        )
 <span class="linenr">12: </span>    )
-</pre>
-</div>
+</code></pre>
 
 <p>
 <a href="#coderef-stream" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-stream');" onmouseout="CodeHighlightOff(this, 'coderef-stream');"><code>stream</code></a> is provide by doobie, which returns <code>Stream[ConnectionIO, A]</code>, when <code>transact</code> it we will get a <code>Stream[IO, A]</code>,
@@ -726,8 +692,7 @@ luckly Http4s response accept a <code>Stream[IO, A]</code> as long as we have a 
 <p>
 It is too straightforward to implement a <code>GET /joke/:id</code>:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">case</span> <span style="color: #6b8e23;">GET</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"joke"</span> <span style="color: #6b8e23;">/</span> <span style="color: #36648b;">IntVar</span>(<span style="color: #b8860b;">id</span>) <span style="color: #00008b;">=&gt;</span>
+<pre class="code"><code><span style="color: #00008b;">case</span> <span style="color: #6b8e23;">GET</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"joke"</span> <span style="color: #6b8e23;">/</span> <span style="color: #36648b;">IntVar</span>(<span style="color: #b8860b;">id</span>) <span style="color: #00008b;">=&gt;</span>
   <span style="color: #00008b;">for</span> {
     has <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>.ask[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">HasDatabase</span>]
     joke <span style="color: #00008b;">&lt;-</span> log.infoF(s<span style="color: #8b0000;">"getting joke </span><span style="color: #b8860b;">$id</span><span style="color: #8b0000;">"</span>) *&gt; <span style="color: #6b8e23;">Kleisli</span>.liftF(
@@ -740,8 +705,7 @@ It is too straightforward to implement a <code>GET /joke/:id</code>:
       <span style="color: #00008b;">case</span> <span style="color: #00008b;">_</span>        <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">NotFound</span>(id)
     }
   } <span style="color: #00008b;">yield</span> resp
-</pre>
-</div>
+</code></pre>
 
 <p>
 Let's add some feature to it, for instance, if there is no joke in database, how about
@@ -757,8 +721,7 @@ where <code>com.your.domain.http4sexample</code> is your application package.
 <p>
 And then put in the toggle:
 </p>
-<div class="org-src-container">
-<pre class="src src-json">{
+<pre class="code"><code>{
   "toggles": [
     {
       "id": "com.your.domain.http4sexample.useDadJoke",
@@ -767,8 +730,7 @@ And then put in the toggle:
     }
   ]
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 It is good practice to have <code>id</code> naming with proper namespace too.
@@ -787,17 +749,14 @@ How can we use this toggle in source code?<label for="10" class="margin-toggle s
 <p>
 Inject <code>HasToggle</code> effect
 </p>
-<div class="org-src-container">
-<pre class="src src-diff">- has &lt;- Kleisli.ask[IO, HasDatabase]
+<pre class="code"><code>- has &lt;- Kleisli.ask[IO, HasDatabase]
 + has &lt;- Kleisli.ask[IO, HasDatabase with HasToggle]
-</pre>
-</div>
+</code></pre>
 
 <p>
 Switch on the toggle
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span id="coderef-declare" class="coderef-off"><span class="linenr">1: </span>dadJoke <span style="color: #00008b;">=</span>                             <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (declare)</span>
+<pre class="code"><code><span id="coderef-declare" class="coderef-off"><span class="linenr">1: </span>dadJoke <span style="color: #00008b;">=</span>                             <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (declare)</span>
 <span class="linenr">2: </span>  <span style="color: #00008b;">if</span> (has.toggleOn(<span style="color: #8b0000;">"com.your.domain.http4sexample.useDadJoke"</span>))
 <span class="linenr">3: </span>    log.infoF(s<span style="color: #8b0000;">"cannot find joke </span><span style="color: #b8860b;">$id</span><span style="color: #8b0000;">"</span>) *&gt; dadJokeApp.flatMap(<span style="color: #6b8e23;">NotFound</span>(<span style="color: #00008b;">_</span>))
 <span class="linenr">4: </span>  <span style="color: #00008b;">else</span>
@@ -806,8 +765,7 @@ Switch on the toggle
 <span class="linenr">7: </span>  <span style="color: #00008b;">case</span> <span style="color: #b8860b;">a</span> <span style="color: #36648b;">::</span> <span style="color: #6b8e23;">Nil</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Ok</span>(a)
 <span id="coderef-usage" class="coderef-off"><span class="linenr">8: </span>  <span style="color: #00008b;">case</span> <span style="color: #00008b;">_</span>        <span style="color: #00008b;">=&gt;</span> dadJoke            <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (usage)</span>
 <span class="linenr">9: </span>}
-</pre>
-</div>
+</code></pre>
 <p>
 <code>dadJokeApp</code> is a HTTP effect which call another API, we will go through later.
 </p>
@@ -841,19 +799,15 @@ Finagle Client is actually a RPC client, which means a client will bind to parti
 <p>
 Assuming we have already define a <code>jokeClient</code> in <code>HasClient</code>, a dad joke endpoint will be as simple as:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">dadJokeApp</span> <span style="color: #00008b;">=</span>
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">dadJokeApp</span> <span style="color: #00008b;">=</span>
   <span style="color: #6b8e23;">Kleisli</span>.ask[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">HasClient</span>].flatMapF(<span style="color: #00008b;">_</span>.jokeClient.expect[<span style="color: #6b8e23;">DadJoke</span>](<span style="color: #8b0000;">"/"</span>))
-</pre>
-</div>
+</code></pre>
 
 <p>
 The client can be make from <code>resource/package.scala</code> and then inject into <code>AppResource</code>
 </p>
-<div class="org-src-container">
-<pre class="src src-scala">js <span style="color: #00008b;">&lt;-</span> http.mk(cfg.jokeService)
-</pre>
-</div>
+<pre class="code"><code>js <span style="color: #00008b;">&lt;-</span> http.mk(cfg.jokeService)
+</code></pre>
 
 <p>
 where <code>cfg.jokeService</code> is <code>uri"https://icanhazdadjoke.com"</code>
@@ -869,7 +823,7 @@ Finagle already provide sophisticated tracing and metrics, zipkin tracing is by 
 but it is sample rate is 0.1%, to verify it work, we could start the server with parameter
 </p>
 
-<pre class="example">
+<pre class="example" id="org38e80c4">
 &gt; sbt '~reStart -zipkin.initialSampleRate=1'
 </pre>
 
@@ -877,7 +831,7 @@ but it is sample rate is 0.1%, to verify it work, we could start the server with
 Sample rate 1 means 100% of trace will report to zipkin.
 </p>
 
-<pre class="example">
+<pre class="example" id="orga7bfd65">
 curl localhost:8080/random-joke
 </pre>
 </div>
@@ -887,7 +841,7 @@ curl localhost:8080/random-joke
 <p>
 You can see the server console will print something like:
 </p>
-<pre class="example">
+<pre class="example" id="orgbd4d526">
 root [7cb6f08c27a8b33c finagle/netty4-2-2] INFO  c.y.d.h.r.joke - generating random joke
 root [7cb6f08c27a8b33c finagle/netty4-2-2] INFO  c.y.d.h.r.joke - getting dad joke...
 </pre>
@@ -899,12 +853,10 @@ Logs belong to the same request will print the exactly same <code>TRACE ID</code
 <p>
 Logger format can be adjusted in <code>src/main/resources/logback.xml</code>
 </p>
-<div class="org-src-container">
-<pre class="src src-xml">&lt;<span style="color: #6a5acd;">encoder</span>&gt;
+<pre class="code"><code>&lt;<span style="color: #6a5acd;">encoder</span>&gt;
   &lt;<span style="color: #6a5acd;">pattern</span>&gt;[%X{trace.id} %thread] %highlight(%-5level) %cyan(%logger{15}) - %msg %n&lt;/<span style="color: #6a5acd;">pattern</span>&gt;
 &lt;/<span style="color: #6a5acd;">encoder</span>&gt;
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 <div id="outline-container-org77d0ca2" class="outline-4">
@@ -915,7 +867,7 @@ if you grab <code>7cb6f08c27a8b33c</code> and search as trace id in <code>localh
 </p>
 
 
-<figure>
+<figure id="org96ee4de">
 <img src="https://www.evernote.com/l/ABdFXDYBcnBAFYGQ-8X_us6xcsq42kL2Vn0B/image.png" alt="image.png">
 
 </figure>
@@ -944,8 +896,7 @@ If you have <a href="https://prometheus.io">Prometheus</a> setup, scrap <code>lo
 <p>
 The resource maker's type is slightly tricky because it is <code>Resource[IO, Resource[IO, AppResource]]</code>:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">mk</span>(<span style="color: #228b22;">implicit</span> ctx<span style="color: #00008b;">:</span> <span style="color: #36648b;">ContextShift</span>[<span style="color: #6b8e23;">IO</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Resource</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Resource</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">AppResource</span>]] <span style="color: #00008b;">=</span>
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">mk</span>(<span style="color: #228b22;">implicit</span> ctx<span style="color: #00008b;">:</span> <span style="color: #36648b;">ContextShift</span>[<span style="color: #6b8e23;">IO</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Resource</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Resource</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">AppResource</span>]] <span style="color: #00008b;">=</span>
   <span style="color: #00008b;">for</span> {
     cfg <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Resource</span>.liftF(<span style="color: #6b8e23;">Config</span>.all.load[<span style="color: #6b8e23;">IO</span>])
     js <span style="color: #00008b;">&lt;-</span> http.mk(cfg.jokeService)
@@ -959,8 +910,7 @@ The resource maker's type is slightly tricky because it is <code>Resource[IO, Re
   }) { res <span style="color: #00008b;">=&gt;</span>
     res.logEval
   }
-</pre>
-</div>
+</code></pre>
 
 <p>
 Why should we have nested Resource here?
@@ -995,23 +945,21 @@ And there are few resources not share across server, they are acquired when requ
 Once we implemented all CRUD endpoints for <code>/joke</code>, testing these endpoints actually are very easy via <a href="https://github.com/typelevel/scalacheck">ScalaCheck</a>
 property based testing:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span class="linenr"> 1: </span>property(<span style="color: #8b0000;">"CRUD"</span>) {
+<pre class="code"><code><span class="linenr"> 1: </span>property(<span style="color: #8b0000;">"CRUD"</span>) {
 <span id="coderef-testResource" class="coderef-off"><span class="linenr"> 2: </span>  <span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">appRes</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">TestAppResource</span>              <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (testResource)</span>
 <span class="linenr"> 3: </span>  forAll { (requestBody<span style="color: #00008b;">:</span> <span style="color: #36648b;">joke</span>.<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">Create</span>, updateBody<span style="color: #00008b;">:</span> <span style="color: #36648b;">joke</span>.<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">Create</span>) <span style="color: #00008b;">=&gt;</span>
 <span id="coderef-toggleOff" class="coderef-off"><span class="linenr"> 4: </span>    when(appRes.toggleMap.apply(useDadJokeToggleName))   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (toggleOff)</span>
 <span class="linenr"> 5: </span>      .thenReturn(<span style="color: #6b8e23;">Toggle</span>.off(useDadJokeToggleName))
 <span id="coderef-createDelete" class="coderef-off"><span class="linenr"> 6: </span>    createAndDelete(requestBody)                         <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (createDelete)</span>
 <span class="linenr"> 7: </span>      .use { id <span style="color: #00008b;">=&gt;</span>
-<span class="linenr"> 8: </span>        assertEquals(query(id).flatMap(<span style="color: #00008b;">_</span>.as[joke.<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">View</span>]).unsafeRunSync().text, requestBody.text)
+<span class="linenr"> 8: </span>        assertEquals(query(id).flatMap(<span style="color: #00008b;">_</span>.<span style="color: #00008b;">as</span>[joke.<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">View</span>]).unsafeRunSync().text, requestBody.text)
 <span id="coderef-update" class="coderef-off"><span class="linenr"> 9: </span>        update(id, updateBody)                           <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (update)</span>
-<span class="linenr">10: </span>          .map(<span style="color: #00008b;">_</span> <span style="color: #00008b;">=&gt;</span> assertEquals(query(id).flatMap(<span style="color: #00008b;">_</span>.as[joke.<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">View</span>]).unsafeRunSync().text, updateBody.text))
+<span class="linenr">10: </span>          .map(<span style="color: #00008b;">_</span> <span style="color: #00008b;">=&gt;</span> assertEquals(query(id).flatMap(<span style="color: #00008b;">_</span>.<span style="color: #00008b;">as</span>[joke.<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">View</span>]).unsafeRunSync().text, updateBody.text))
 <span class="linenr">11: </span>      }
 <span id="coderef-execute" class="coderef-off"><span class="linenr">12: </span>      .unsafeRunSync()                                   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (execute)</span>
 <span class="linenr">13: </span>  }
 <span class="linenr">14: </span>}
-</pre>
-</div>
+</code></pre>
 
 <p>
 To test all CRUD we just need scalacheck to randomly generate arbitrary create request body and update request body.
@@ -1022,11 +970,9 @@ To test all CRUD we just need scalacheck to randomly generate arbitrary create r
 <li>Don't forget to <a href="#coderef-toggleOff" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-toggleOff');" onmouseout="CodeHighlightOff(this, 'coderef-toggleOff');">toggle off</a> our fancy dad joke toggle</li>
 <li>Make <a href="#coderef-createDelete" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-createDelete');" onmouseout="CodeHighlightOff(this, 'coderef-createDelete');">create and delete</a> a resource so our test data will always clean after assertion</li>
 </ol>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">createAndDelete</span>(req<span style="color: #00008b;">:</span> <span style="color: #36648b;">joke</span>.<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">Create</span>)(<span style="color: #228b22;">implicit</span> router<span style="color: #00008b;">:</span> <span style="color: #36648b;">HttpApp</span>[<span style="color: #6b8e23;">IO</span>]) <span style="color: #00008b;">=</span>
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">createAndDelete</span>(req<span style="color: #00008b;">:</span> <span style="color: #36648b;">joke</span>.<span style="color: #6b8e23;">Repr</span>.<span style="color: #6b8e23;">Create</span>)(<span style="color: #228b22;">implicit</span> router<span style="color: #00008b;">:</span> <span style="color: #36648b;">HttpApp</span>[<span style="color: #6b8e23;">IO</span>]) <span style="color: #00008b;">=</span>
     <span style="color: #6b8e23;">Resource</span>.make[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">String</span>](create(req))(delete)
-</pre>
-</div>
+</code></pre>
 <ol class="org-ol">
 <li>Assert there will be a joke created</li>
 <li><a href="#coderef-update" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-update');" onmouseout="CodeHighlightOff(this, 'coderef-update');">Update the joke</a> and then query again to verify the data is updated</li>
@@ -1041,21 +987,21 @@ To test all CRUD we just need scalacheck to randomly generate arbitrary create r
 <p>
 To package the server into a runable binary, simply:
 </p>
-<pre class="example">
+<pre class="example" id="org42834ad">
 &gt; sbt bootstrap
 </pre>
 
 <p>
 To run:
 </p>
-<pre class="example">
+<pre class="example" id="orgeeda148">
 &gt; ./http4s-example
 </pre>
 
 <p>
 Package it to docker to ship to heroku or k8s
 </p>
-<pre class="example">
+<pre class="example" id="org884f1f1">
 &gt; docker build . -t http4s-example
 </pre>
 
@@ -1063,7 +1009,7 @@ Package it to docker to ship to heroku or k8s
 The same way we can package and deploy migration scripts as well
 </p>
 
-<pre class="example">
+<pre class="example" id="org199763c">
 &gt; sbt db/bootstrap
 &gt; ./http4s-example-db-migration migrate
 </pre>
@@ -1125,7 +1071,7 @@ Kleisli is also known as ReaderT <a href="https://blog.oyanglul.us/scala/into-th
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2020-11-07 Sat 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

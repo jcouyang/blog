@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-16 Mon 09:20 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Functional Ruby</title>
@@ -15,50 +15,26 @@
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -145,7 +121,7 @@ for the JavaScript code in this tag.
 </div>
 
 
-<figure>
+<figure id="orgf68aeb4">
 <img src="./images/data-port.gif" alt="data-port.gif">
 
 </figure>
@@ -160,31 +136,35 @@ for the JavaScript code in this tag.
 <p>
 不出所料，函数式一定要先有 lambda，跟所有的 ruby 对象一样，lambda 也就是一个正常的对象
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby">plus1 = -&gt;(x) { x + 1 }
+<pre class="code"><code>plus1 = -&gt;(x) { x + 1 }
+</code></pre>
+
+<pre class="example">
+#&lt;Proc:0x007fbaea988030@-:3 (lambda)&gt;
 </pre>
-</div>
+
 
 <p>
 明显，lambda 构造出一个 Proc 的实例，如果我们调用这个 lambda，效果跟 method 没有什么区别：
 </p>
 
-<div class="org-src-container">
-<pre class="src src-ruby">plus1 = -&gt;(x) { x + 1 }
+<pre class="code"><code>plus1 = -&gt;(x) { x + 1 }
 plus1.(3)
+</code></pre>
+
+<pre class="example">
+4
 </pre>
-</div>
+
 
 <p>
 好玩的是，method 不能高阶
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">plus1</span> x
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">plus1</span> x
   x + 1
 <span style="color: #00008b;">end</span>
 [1,2,3,4].map &amp;plus1
-</pre>
-</div>
+</code></pre>
 
 <pre class="example">
 `plus1': wrong number of arguments (0 for 1) (ArgumentError)
@@ -199,11 +179,13 @@ plus1.(3)
 而 lambda 就可以：
 </p>
 
-<div class="org-src-container">
-<pre class="src src-ruby">plus1 = -&gt;(x) { x + 1 }
+<pre class="code"><code>plus1 = -&gt;(x) { x + 1 }
 [1,2,3,4].map &amp;plus1
+</code></pre>
+
+<pre class="example">
+[2, 3, 4, 5]
 </pre>
-</div>
 </div>
 </div>
 
@@ -213,18 +195,14 @@ plus1.(3)
 <p>
 这里的 magic 是 <code>&amp;</code> 把 <code>plus1</code> 变成 Block 发给数组了，Block 也就是我们常见的 <code>{}</code> ，等价于：
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby">[1,2,3,4].map {|x| x + 1}
-</pre>
-</div>
+<pre class="code"><code>[1,2,3,4].map {|x| x + 1}
+</code></pre>
 
 <p>
 也等价于：
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby">[1,2,3,4].map &amp;<span style="color: #36648b;">Proc</span>.new{|x| x + 1 }
-</pre>
-</div>
+<pre class="code"><code>[1,2,3,4].map &amp;<span style="color: #36648b;">Proc</span>.new{|x| x + 1 }
+</code></pre>
 
 <p>
 注意如果没有 <code>&amp;</code> ，解释器无法分辨到底在调用 <code>map</code> 时，把 Proc 当成正常参数，而不是 block
@@ -233,18 +211,19 @@ plus1.(3)
 <p>
 当得知 <code>&amp;</code> 的魔法之后，我们很容易解释 <code>&amp;:symbol</code> 这个语法糖
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby"><span style="color: #8b0000;">%w(ouyang jichao)</span>.map &amp;<span style="color: #6b8e23;">:capitalize</span> 
+<pre class="code"><code><span style="color: #8b0000;">%w(ouyang jichao)</span>.map &amp;<span style="color: #6b8e23;">:capitalize</span> 
+</code></pre>
+
+<pre class="example">
+["Ouyang", "Jichao"]
 </pre>
-</div>
+
 
 <p>
 desuger 完其实就是
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby"><span style="color: #8b0000;">%w(ouyang jichao)</span>.map &amp;<span style="color: #36648b;">Proc</span>.new(|x| x.send(<span style="color: #6b8e23;">:capitalize</span>))
-</pre>
-</div>
+<pre class="code"><code><span style="color: #8b0000;">%w(ouyang jichao)</span>.map &amp;<span style="color: #36648b;">Proc</span>.new(|x| x.send(<span style="color: #6b8e23;">:capitalize</span>))
+</code></pre>
 
 <p>
 为什么可以产生这样的语法糖，是 Symbol 类型有 <code>to_proc</code> 方法，当 <code>&amp;</code> 尝试将后面的东西变成 Proc 类型后传给 map 当 Block， <code>to_proc</code> 就是用来转换成 proc 的方法。
@@ -253,10 +232,12 @@ desuger 完其实就是
 <p>
 所以就是：
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby"><span style="color: #8b0000;">%w(ouyang jichao)</span>.map &amp;<span style="color: #6b8e23;">:capitalize</span>.to_proc
+<pre class="code"><code><span style="color: #8b0000;">%w(ouyang jichao)</span>.map &amp;<span style="color: #6b8e23;">:capitalize</span>.to_proc
+</code></pre>
+
+<pre class="example">
+["Ouyang", "Jichao"]
 </pre>
-</div>
 </div>
 </div>
 
@@ -278,10 +259,13 @@ desuger 完其实就是
 来看个诡异的，下面这段代码我们可能会期望是返回一个数组，只是 <code>jichao</code> 会变成 <code>lulu</code> 而已
 </p>
 
-<div class="org-src-container">
-<pre class="src src-ruby"><span style="color: #8b0000;">%w(ouyang jichao)</span>.map { |x| <span style="color: #00008b;">return</span> <span style="color: #8b0000;">'lulu'</span> <span style="color: #00008b;">if</span> x == <span style="color: #8b0000;">'jichao'</span>; x}
+<pre class="code"><code><span style="color: #8b0000;">%w(ouyang jichao)</span>.map { |x| <span style="color: #00008b;">return</span> <span style="color: #8b0000;">'lulu'</span> <span style="color: #00008b;">if</span> x == <span style="color: #8b0000;">'jichao'</span>; x}
+</code></pre>
+
+<pre class="example">
+"lulu"
 </pre>
-</div>
+
 
 <p>
 显然 return 之后的代码就再也走不到了，整个map会直接返回
@@ -290,10 +274,13 @@ desuger 完其实就是
 <p>
 但是如果你用 lambda 而不是普通 Proc，你会发现
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby"><span style="color: #8b0000;">%w(ouyang jichao)</span>.map &amp;-&gt;(x){ <span style="color: #00008b;">return</span> <span style="color: #8b0000;">'lulu'</span> <span style="color: #00008b;">if</span> x == <span style="color: #8b0000;">'jichao'</span>; x}
+<pre class="code"><code><span style="color: #8b0000;">%w(ouyang jichao)</span>.map &amp;-&gt;(x){ <span style="color: #00008b;">return</span> <span style="color: #8b0000;">'lulu'</span> <span style="color: #00008b;">if</span> x == <span style="color: #8b0000;">'jichao'</span>; x}
+</code></pre>
+
+<pre class="example">
+["ouyang", "lulu"]
 </pre>
-</div>
+
 
 <p>
 嗒哒，输出我们的期望了，lambda 的表现跟一个普通函数是一样的，函数的 return 当然不会导致调用者的返回。
@@ -307,13 +294,11 @@ desuger 完其实就是
 <p>
 确切的说是参数元数 arity 的检查，比如随便定义一个method，如果你给的参数元数不匹配，会得到一个异常
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">heheda</span> who
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">heheda</span> who
   <span style="color: #8b0000;">"heheda </span><span style="color: #b8860b;">#{who}</span><span style="color: #8b0000;">"</span>
 <span style="color: #00008b;">end</span>
 heheda
-</pre>
-</div>
+</code></pre>
 
 <pre class="example">
 `heheda': wrong number of arguments (0 for 1) (ArgumentError)
@@ -327,11 +312,14 @@ heheda
 <p>
 但是 Proc 是不会管这个的
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby">heheda = <span style="color: #36648b;">Proc</span>.new{|who| <span style="color: #228b22;">p</span> <span style="color: #8b0000;">"heheda </span><span style="color: #b8860b;">#{who}</span><span style="color: #8b0000;">"</span>}
+<pre class="code"><code>heheda = <span style="color: #36648b;">Proc</span>.new{|who| <span style="color: #228b22;">p</span> <span style="color: #8b0000;">"heheda </span><span style="color: #b8860b;">#{who}</span><span style="color: #8b0000;">"</span>}
 heheda.()
+</code></pre>
+
+<pre class="example">
+"heheda "
 </pre>
-</div>
+
 
 <p>
 Proc 完全不会理会参数，如果binding能找到，就用了，如果没有，也继续运行。
@@ -340,11 +328,9 @@ Proc 完全不会理会参数，如果binding能找到，就用了，如果没�
 <p>
 lambda，则更像一个method
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby">heheda = <span style="color: #228b22;">lambda</span> {|who| <span style="color: #228b22;">p</span> <span style="color: #8b0000;">"heheda </span><span style="color: #b8860b;">#{who}</span><span style="color: #8b0000;">"</span>}
+<pre class="code"><code>heheda = <span style="color: #228b22;">lambda</span> {|who| <span style="color: #228b22;">p</span> <span style="color: #8b0000;">"heheda </span><span style="color: #b8860b;">#{who}</span><span style="color: #8b0000;">"</span>}
 heheda.()
-</pre>
-</div>
+</code></pre>
 
 <pre class="example">
 `block in main': wrong number of arguments (0 for 1) (ArgumentError)
@@ -359,8 +345,7 @@ heheda.()
 <p>
 通常面向对象的捕捉一个绑定通常会通过 <code>@</code>
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby"><span style="color: #00008b;">class</span> <span style="color: #36648b;">HeHe</span>
+<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">HeHe</span>
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">initialize</span> who
   <span style="color: #b8860b;">@who</span> = who
 <span style="color: #00008b;">end</span>
@@ -368,8 +353,7 @@ heheda.()
   <span style="color: #8b0000;">"heheda </span><span style="color: #b8860b;">#{@who}</span><span style="color: #8b0000;">"</span>
 <span style="color: #00008b;">end</span>
 <span style="color: #00008b;">end</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 <code>HeHe</code> 对 who 进行了封装，如果需要访问 <code>who</code> 需要通过 <code>heheda</code> 方法。
@@ -378,16 +362,19 @@ heheda.()
 <p>
 同样的东西，在函数式叫闭包，通过闭包我们依然能找到闭包内的绑定
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby">who = <span style="color: #8b0000;">'jichao'</span>
+<pre class="code"><code>who = <span style="color: #8b0000;">'jichao'</span>
 heheda = -&gt;(){ <span style="color: #8b0000;">"heheda </span><span style="color: #b8860b;">#{who}</span><span style="color: #8b0000;">"</span> }
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">hehedaToOuyang</span> &amp;heheda
   who = <span style="color: #8b0000;">'ouyang'</span>
   heheda.()
 <span style="color: #00008b;">end</span>
 hehedaToOuyang &amp;heheda
+</code></pre>
+
+<pre class="example">
+"heheda jichao"
 </pre>
-</div>
+
 
 <p>
 注意看 heheda 找到的绑定不是离他调用最近的 <code>who</code>, 而是当初定义的 <code>who=jichao</code>
@@ -410,23 +397,51 @@ ruby 支持简单的几种模式匹配
 <div id="outline-container-org1fb0109" class="outline-3">
 <h3 id="org1fb0109">destructure</h3>
 <div class="outline-text-3" id="text-org1fb0109">
-<div class="org-src-container">
-<pre class="src src-ruby">first, *middle_and_last = [<span style="color: #8b0000;">'Phillip'</span>, <span style="color: #8b0000;">'Jay'</span>, <span style="color: #8b0000;">'Fry'</span>]
+<pre class="code"><code>first, *middle_and_last = [<span style="color: #8b0000;">'Phillip'</span>, <span style="color: #8b0000;">'Jay'</span>, <span style="color: #8b0000;">'Fry'</span>]
 <span style="color: #228b22;">p</span> first, middle_and_last
-</pre>
-</div>
+</code></pre>
+
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Phillip</td>
+<td class="org-left">(Jay Fry)</td>
+</tr>
+</tbody>
+</table>
 
 <p>
 destructuring 一个数组如此简单，但是hash就不这么容易，好在，方法的参数会自带 destructure的功能：
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby">  fry = {<span style="color: #6b8e23;">first:</span> <span style="color: #8b0000;">'Phillip'</span>, <span style="color: #6b8e23;">middle:</span> <span style="color: #8b0000;">'Jay'</span>, <span style="color: #6b8e23;">last:</span> <span style="color: #8b0000;">'Fry'</span>}
+<pre class="code"><code>  fry = {<span style="color: #6b8e23;">first:</span> <span style="color: #8b0000;">'Phillip'</span>, <span style="color: #6b8e23;">middle:</span> <span style="color: #8b0000;">'Jay'</span>, <span style="color: #6b8e23;">last:</span> <span style="color: #8b0000;">'Fry'</span>}
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">printFirstName</span> <span style="color: #6b8e23;">first:</span>, **rest
     <span style="color: #228b22;">p</span> first, rest
   <span style="color: #00008b;">end</span>
 printFirstName fry
-</pre>
-</div>
+</code></pre>
+
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Phillip</td>
+<td class="org-left">(:middle=&gt; Jay :last=&gt; Fry)</td>
+</tr>
+</tbody>
+</table>
 
 <p>
 这玩意 ruby 叫它 keyword arguments, <code>first:</code> 会匹配 <code>fry</code> 中的 <code>first</code> 并将值绑定到 <code>first</code> ， <code>**rest</code> 绑定剩下的所有东西。
@@ -436,14 +451,28 @@ printFirstName fry
 数组也可以这样搞：
 </p>
 
-<div class="org-src-container">
-<pre class="src src-ruby"><span class="linenr">1: </span>fry = [<span style="color: #8b0000;">'Phillip'</span>, <span style="color: #8b0000;">'Jay'</span>, <span style="color: #8b0000;">'Fry'</span>]
+<pre class="code"><code><span class="linenr">1: </span>fry = [<span style="color: #8b0000;">'Phillip'</span>, <span style="color: #8b0000;">'Jay'</span>, <span style="color: #8b0000;">'Fry'</span>]
 <span class="linenr">2: </span><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">printFirstName</span> first, *rest
 <span class="linenr">3: </span><span style="color: #228b22;">p</span> first, rest
 <span class="linenr">4: </span><span style="color: #00008b;">end</span>
 <span id="coderef-star" class="coderef-off"><span class="linenr">5: </span>printFirstName *fry</span>
-</pre>
-</div>
+</code></pre>
+
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Phillip</td>
+<td class="org-left">(Jay Fry)</td>
+</tr>
+</tbody>
+</table>
 
 <p>
 要注意第<a href="#coderef-star" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-star');" onmouseout="CodeHighlightOff(this, 'coderef-star');">5</a>行, 调用时记得给数组加 <code>*</code>, 这样解释器才知道不是把整个 fry 扔给 <code>printFirstName</code> 当参数，而是把 fry 的内容扔过去当参数。
@@ -467,23 +496,24 @@ ruby 中的 case<label for="1" class="margin-toggle sidenote-number"></label><in
 <p>
 这个很简单，应该都有用过
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby">me = <span style="color: #8b0000;">'ouyang'</span>
+<pre class="code"><code>me = <span style="color: #8b0000;">'ouyang'</span>
 <span style="color: #00008b;">case</span> me
 <span style="color: #00008b;">when</span> <span style="color: #8b0000;">'ouyang'</span> 
   <span style="color: #8b0000;">"hehe </span><span style="color: #b8860b;">#{me}</span><span style="color: #8b0000;">"</span>
 <span style="color: #00008b;">else</span> <span style="color: #8b0000;">'hehe jichao'</span>
 <span style="color: #00008b;">end</span>
+</code></pre>
+
+<pre class="example">
+hehe ouyang
 </pre>
-</div>
 </div>
 </div>
 
 <div id="outline-container-orge9e83d2" class="outline-4">
 <h4 id="orge9e83d2">类型</h4>
 <div class="outline-text-4" id="text-orge9e83d2">
-<div class="org-src-container">
-<pre class="src src-ruby"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Me</span>
+<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">Me</span>
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">initialize</span> name
     <span style="color: #b8860b;">@name</span> = name
   <span style="color: #00008b;">end</span>
@@ -501,8 +531,7 @@ me = <span style="color: #36648b;">Me</span>.new <span style="color: #8b0000;">'
 <span style="color: #00008b;">else</span>
   <span style="color: #8b0000;">'hehedale'</span>
 <span style="color: #00008b;">end</span>
-</pre>
-</div>
+</code></pre>
 
 <pre class="example">
 "heheda ouyang"
@@ -516,44 +545,50 @@ me = <span style="color: #36648b;">Me</span>.new <span style="color: #8b0000;">'
 <p>
 跟 <code>if else</code> 一样用
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby"><span style="color: #228b22;">require</span> <span style="color: #8b0000;">'ostruct'</span>
+<pre class="code"><code><span style="color: #228b22;">require</span> <span style="color: #8b0000;">'ostruct'</span>
   me = <span style="color: #36648b;">OpenStruct</span>.new(<span style="color: #6b8e23;">name:</span> <span style="color: #8b0000;">'jichao'</span>, <span style="color: #6b8e23;">first_name:</span> <span style="color: #8b0000;">'ouyang'</span>)
   <span style="color: #00008b;">case</span>
   <span style="color: #00008b;">when</span> me.name == <span style="color: #8b0000;">'jichao'</span>
     <span style="color: #8b0000;">"hehe </span><span style="color: #b8860b;">#{me}</span><span style="color: #8b0000;">"</span>
   <span style="color: #00008b;">else</span> <span style="color: #8b0000;">'gewuen'</span>
   <span style="color: #00008b;">end</span>
+</code></pre>
+
+<pre class="example">
+hehe #&lt;OpenStruct name="jichao", first_name="ouyang"&gt;
 </pre>
-</div>
 </div>
 </div>
 
 <div id="outline-container-org3be8af2" class="outline-4">
 <h4 id="org3be8af2">lambda （aka guard）</h4>
 <div class="outline-text-4" id="text-org3be8af2">
-<div class="org-src-container">
-<pre class="src src-ruby"><span style="color: #228b22;">require</span> <span style="color: #8b0000;">'ostruct'</span>
+<pre class="code"><code><span style="color: #228b22;">require</span> <span style="color: #8b0000;">'ostruct'</span>
   me = <span style="color: #36648b;">OpenStruct</span>.new(<span style="color: #6b8e23;">name:</span> <span style="color: #8b0000;">'jichao'</span>, <span style="color: #6b8e23;">first_name:</span> <span style="color: #8b0000;">'ouyang'</span>)
   <span style="color: #00008b;">case</span> me
   <span style="color: #00008b;">when</span> -&gt;(who){who.name==<span style="color: #8b0000;">'jichao'</span>}
     <span style="color: #8b0000;">"hehe </span><span style="color: #b8860b;">#{me}</span><span style="color: #8b0000;">"</span>
   <span style="color: #00008b;">end</span>
+</code></pre>
+
+<pre class="example">
+hehe #&lt;OpenStruct name="jichao", first_name="ouyang"&gt;
 </pre>
-</div>
 </div>
 </div>
 
 <div id="outline-container-org0b8c970" class="outline-4">
 <h4 id="org0b8c970"><i>正则</i></h4>
 <div class="outline-text-4" id="text-org0b8c970">
-<div class="org-src-container">
-<pre class="src src-ruby"><span style="color: #00008b;">case</span> <span style="color: #8b0000;">'jichao ouyang'</span>
+<pre class="code"><code><span style="color: #00008b;">case</span> <span style="color: #8b0000;">'jichao ouyang'</span>
 <span style="color: #00008b;">when</span> <span style="color: #8b0000;">/ouyang/</span>
 <span style="color: #8b0000;">"heheda"</span>
 <span style="color: #00008b;">end</span>
+</code></pre>
+
+<pre class="example">
+heheda
 </pre>
-</div>
 </div>
 </div>
 
@@ -563,12 +598,10 @@ me = <span style="color: #36648b;">Me</span>.new <span style="color: #8b0000;">'
 <p>
 case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的正则
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby"><span style="color: #00008b;">if</span>(<span style="color: #8b0000;">/ouyang/</span> === <span style="color: #8b0000;">'jichao'</span>)
+<pre class="code"><code><span style="color: #00008b;">if</span>(<span style="color: #8b0000;">/ouyang/</span> === <span style="color: #8b0000;">'jichao'</span>)
   <span style="color: #8b0000;">"heheda"</span>
 <span style="color: #00008b;">end</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 所以 magic 则是所有 when 的对象都实现了 <code>===</code> 方法而已
@@ -620,8 +653,7 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
 <div id="outline-container-orgd2c4d32" class="outline-4">
 <h4 id="orgd2c4d32">Functor</h4>
 <div class="outline-text-4" id="text-orgd2c4d32">
-<div class="org-src-container">
-<pre class="src src-ruby"><span style="color: #00008b;">module</span> <span style="color: #36648b;">Either</span>
+<pre class="code"><code><span style="color: #00008b;">module</span> <span style="color: #36648b;">Either</span>
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">initialize</span> v
     <span style="color: #b8860b;">@v</span> = v
   <span style="color: #00008b;">end</span>
@@ -635,15 +667,13 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
     <span style="color: #00008b;">end</span>
   <span style="color: #00008b;">end</span>
   <span style="color: #00008b;">alias</span> <span style="color: #6b8e23;">:fmap</span> <span style="color: #6b8e23;">:map</span>
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 <div id="outline-container-org743ae98" class="outline-4">
 <h4 id="org743ae98">Monad</h4>
 <div class="outline-text-4" id="text-org743ae98">
-<div class="org-src-container">
-<pre class="src src-ruby"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">bind</span>
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">bind</span>
   <span style="color: #00008b;">case</span> <span style="color: #00008b;">self</span>
   <span style="color: #00008b;">when</span> <span style="color: #36648b;">Right</span>
     <span style="color: #00008b;">yield</span> <span style="color: #b8860b;">@v</span>
@@ -654,15 +684,13 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
 
 <span style="color: #00008b;">alias</span> <span style="color: #6b8e23;">:chain</span> <span style="color: #6b8e23;">:bind</span>
 <span style="color: #00008b;">alias</span> <span style="color: #6b8e23;">:flat_map</span> <span style="color: #6b8e23;">:bind</span>
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 <div id="outline-container-org0f8512d" class="outline-4">
 <h4 id="org0f8512d">一个好看的 inspect</h4>
 <div class="outline-text-4" id="text-org0f8512d">
-<div class="org-src-container">
-<pre class="src src-ruby">  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">inspect</span>
+<pre class="code"><code>  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">inspect</span>
     <span style="color: #00008b;">case</span> <span style="color: #00008b;">self</span>
     <span style="color: #00008b;">when</span> <span style="color: #36648b;">Left</span>
       <span style="color: #8b0000;">"#&lt;Left value=</span><span style="color: #b8860b;">#{@v}</span><span style="color: #8b0000;">&gt;"</span>
@@ -671,8 +699,7 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
     <span style="color: #00008b;">end</span>
   <span style="color: #00008b;">end</span>
 <span style="color: #00008b;">end</span>
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 <div id="outline-container-org1d493d7" class="outline-4">
@@ -681,8 +708,7 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
 <p>
 在实现了 Either 接口之后,我们可以很容易的实现  Left | Right
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby"><span style="color: #00008b;">class</span> <span style="color: #36648b;">Left</span>
+<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">Left</span>
   <span style="color: #228b22;">include</span> <span style="color: #36648b;">Either</span>
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">initialize</span> v=<span style="color: #6b8e23;">nil</span>
     <span style="color: #b8860b;">@v</span>=v
@@ -709,8 +735,7 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
     <span style="color: #00008b;">end</span>
   <span style="color: #00008b;">end</span>
 <span style="color: #00008b;">end</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 这个Either非常轻量, 我还是把它抽成gem以便单独管理, 与其他一些 Maybe 和 Free 一块收到 <a href="https://github.com/jcouyang/cats.rb">cats.rb</a> 中.
@@ -722,8 +747,7 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
 <div id="outline-container-org0f07bea" class="outline-3">
 <h3 id="org0f07bea">用 Either 做控制流</h3>
 <div class="outline-text-3" id="text-org0f07bea">
-<div class="org-src-container">
-<pre class="src src-ruby"><span class="linenr">1: </span><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">run</span>
+<pre class="code"><code><span class="linenr">1: </span><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">run</span>
 <span class="linenr">2: </span>  list_of_error_or_detail =
 <span id="coderef-listof_error_or_id" class="coderef-off"><span class="linenr">3: </span>    listof_error_or_id.map <span style="color: #00008b;">do</span> |error_or_id| <span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span></span>
 <span id="coderef-error_or_id" class="coderef-off"><span class="linenr">4: </span>    error_or_id.flat_map <span style="color: #00008b;">do</span> |id| <span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span></span>
@@ -732,8 +756,7 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
 <span class="linenr">7: </span>  <span style="color: #00008b;">end</span>
 <span id="coderef-error_or_saved" class="coderef-off"><span class="linenr">8: </span>  list_of_error_or_detail.map { |error_or_detail| error_or_saved error_or_detail} <span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span></span>
 <span class="linenr">9: </span><span style="color: #00008b;">end</span>
-</pre>
-</div>
+</code></pre>
 
 <ol class="org-ol">
 <li><a href="#coderef-listof_error_or_id" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-listof_error_or_id');" onmouseout="CodeHighlightOff(this, 'coderef-listof_error_or_id');"><code>listof_error_or_id</code></a> 是一个 IO, 去某个地方拿一串 id, 或者返回一串错误, 所以类型是 <code>[Either error id]</code></li>
@@ -747,15 +770,13 @@ case when 并不是magic，其实只是 if else 的语法糖, 比如上面说的
 那么我们的业务逻辑的流程走完了，该负责监控的逻辑了，注意现在 run 的返回值类型是 <code>Either[Error, [Either[Error, Data]]]</code>
 </p>
 
-<div class="org-src-container">
-<pre class="src src-ruby">failures, success = run.partition {|lr| !lr.is_a? <span style="color: #36648b;">Right</span>}
+<pre class="code"><code>failures, success = run.partition {|lr| !lr.is_a? <span style="color: #36648b;">Right</span>}
 error_msg = failures.map <span style="color: #00008b;">do</span> |failure|
   failure.left_map &amp;<span style="color: #6b8e23;">:message</span>
 <span style="color: #00008b;">end</span>.join <span style="color: #8b0000;">"\n"</span>
 logger.error <span style="color: #8b0000;">"processing failure </span><span style="color: #b8860b;">#{failues.length}</span><span style="color: #8b0000;">:\n</span><span style="color: #b8860b;">#{error_msg}</span><span style="color: #8b0000;">"</span> <span style="color: #00008b;">unless</span> error_msg.blank?
 logger.info <span style="color: #8b0000;">"processing success </span><span style="color: #b8860b;">#{success.length}</span><span style="color: #8b0000;">: </span><span style="color: #b8860b;">#{success}</span><span style="color: #8b0000;">"</span>
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 </div>
@@ -771,16 +792,14 @@ logger.info <span style="color: #8b0000;">"processing success </span><span style
 <div id="outline-container-orga032614" class="outline-3">
 <h3 id="orga032614">pmap</h3>
 <div class="outline-text-3" id="text-orga032614">
-<div class="org-src-container">
-<pre class="src src-ruby"><span style="color: #228b22;">require</span> <span style="color: #8b0000;">"celluloid/autostart"</span>
+<pre class="code"><code><span style="color: #228b22;">require</span> <span style="color: #8b0000;">"celluloid/autostart"</span>
 <span style="color: #00008b;">module</span> <span style="color: #36648b;">Enumerable</span>
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">pmap</span>(&amp;block)
     futures = map { |elem| <span style="color: #36648b;">Celluloid</span>::<span style="color: #36648b;">Future</span>.new(elem, &amp;block) }
     futures.map(&amp;<span style="color: #6b8e23;">:value</span>)
   <span style="color: #00008b;">end</span>
 <span style="color: #00008b;">end</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 你懂的，把我们feeder的 <code>map</code> 都换成 <code>pmap</code> ,多线程就这么简单
@@ -811,7 +830,7 @@ logger.info <span style="color: #8b0000;">"processing success </span><span style
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2016-07-14 Thu 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

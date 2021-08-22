@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-16 Mon 09:21 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Finch vs Http4s, which is FPer</title>
@@ -17,50 +17,26 @@
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -135,13 +111,11 @@ Scale from 1 to 5:
 <p>
 finch takes full advantage of shapeless' product and coproduct to routes <b>Matcher</b>
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span>) { <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>)} 
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span>) { <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>)} 
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApple</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span> :: path[<span style="color: #6b8e23;">Int</span>]) { (id<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;"</span>)}
 
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">routes</span> <span style="color: #00008b;">=</span> getApples :+: getApple
-</pre>
-</div>
+</code></pre>
 
 <p>
 <code>::</code> here is a product, means the path will match if there is an <code>"apple"</code> and an Int in the path <code>path[Int]</code>
@@ -154,22 +128,18 @@ finch takes full advantage of shapeless' product and coproduct to routes <b>Matc
 <p>
 About <b>Middleware</b>, finch need to mix finagle filter to do the job. so it will end up very ugly and inconsistent from the routes above
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">class</span> <span style="color: #36648b;">AuthFilter</span>(<span style="color: #228b22;">implicit</span> ttf<span style="color: #00008b;">:</span> <span style="color: #36648b;">ToTwitterFuture</span>[<span style="color: #6b8e23;">ProgramF</span>]) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">SimpleFilter</span>[<span style="color: #6b8e23;">Request</span>, <span style="color: #6b8e23;">Response</span>] {
+<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">AuthFilter</span>(<span style="color: #228b22;">implicit</span> ttf<span style="color: #00008b;">:</span> <span style="color: #36648b;">ToTwitterFuture</span>[<span style="color: #6b8e23;">ProgramF</span>]) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">SimpleFilter</span>[<span style="color: #6b8e23;">Request</span>, <span style="color: #6b8e23;">Response</span>] {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>(req<span style="color: #00008b;">:</span> <span style="color: #36648b;">Request</span>, service<span style="color: #00008b;">:</span> <span style="color: #36648b;">Service</span>[<span style="color: #6b8e23;">Request</span>, <span style="color: #6b8e23;">Response</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Future</span>[<span style="color: #6b8e23;">Response</span>] <span style="color: #00008b;">=</span> {
     (req.path, req.headerMap.get(<span style="color: #8b0000;">"TOKEN"</span>)) <span style="color: #00008b;">match</span> {
       <span style="color: #00008b;">case</span> (<span style="color: #8b0000;">"/login"</span>, <span style="color: #00008b;">_</span>)        <span style="color: #00008b;">=&gt;</span> service(req)
       <span style="color: #00008b;">case</span> (<span style="color: #b8860b;">url</span>, <span style="color: #36648b;">Some</span>(<span style="color: #b8860b;">token</span>)) <span style="color: #00008b;">=&gt;</span> ??? <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">fetch user info and pass to service</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 and then compose filter and service
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">new</span> <span style="color: #36648b;">AuthFilter</span> andThen routes.toServiceAs[<span style="color: #6b8e23;">Application</span>.<span style="color: #6b8e23;">Json</span>]
-</pre>
-</div>
+<pre class="code"><code><span style="color: #00008b;">new</span> <span style="color: #36648b;">AuthFilter</span> andThen routes.toServiceAs[<span style="color: #6b8e23;">Application</span>.<span style="color: #6b8e23;">Json</span>]
+</code></pre>
 
 <p>
 you may have notice that the finangle filter is more lower level verbose code and inconsistent with the previous shapeless DSL.
@@ -183,10 +153,8 @@ you may have notice that the finangle filter is more lower level verbose code an
 <p>
 finch has a lot of internal custom types, e.g. the magic happen behind the DSL above:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span>) { <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>)} 
-</pre>
-</div>
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span>) { <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>)} 
+</code></pre>
 <p>
 is:
 </p>
@@ -220,10 +188,8 @@ For example my controller will actually return me a <a href="https://typelevel.o
 How can I get it to work with the router?
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span>) { <span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">Program</span>, <span style="color: #6b8e23;">Output</span>[<span style="color: #6b8e23;">String</span>]].pure(<span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>))} 
-</pre>
-</div>
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span>) { <span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">Program</span>, <span style="color: #6b8e23;">Output</span>[<span style="color: #6b8e23;">String</span>]].pure(<span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>))} 
+</code></pre>
 
 <p>
 it won't compile because the implicit conversion expecting an <code>Output[_]</code> type
@@ -237,13 +203,11 @@ actually it only supports <code>IO[_]</code>, <code>Output[_]</code>, <code>Resp
 UPDATE: from <a href="https://github.com/finagle/finch/pull/1045">0.27.0</a> it supports custom converter to convert any user custom type to IO
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">conv</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">ToEffect</span>[<span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">Program</span>, ?], <span style="color: #6b8e23;">IO</span>] {
+<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">conv</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">ToEffect</span>[<span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">Program</span>, ?], <span style="color: #6b8e23;">IO</span>] {
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">Program</span>, <span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> ???
 }
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span>) { <span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">Program</span>, <span style="color: #6b8e23;">Output</span>[<span style="color: #6b8e23;">String</span>]].pure(<span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>))} 
-</pre>
-</div>
+</code></pre>
 
 <p>
 But still, it's so many implicits magic happen behind and the journey wasn't so fun.
@@ -277,8 +241,7 @@ any knowledge about cats before using finch.
 <p>
 meanwhile, http4s takes advantage of cats to achieve path <b>Matcher</b>
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">HttpRoutes</span>.of[<span style="color: #6b8e23;">IO</span>] {
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">HttpRoutes</span>.of[<span style="color: #6b8e23;">IO</span>] {
   <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">GET</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"apple"</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>)
 }
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApple</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">HttpRoutes</span>.of[<span style="color: #6b8e23;">IO</span>] {
@@ -286,8 +249,7 @@ meanwhile, http4s takes advantage of cats to achieve path <b>Matcher</b>
 }
 
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">routes</span> <span style="color: #00008b;">=</span> getApples &lt;+&gt; getApple
-</pre>
-</div>
+</code></pre>
 
 <p>
 what happen here is <code>HttpRoutes.of[IO] {...}</code> return a data type <a href="https://typelevel.org/cats/datatypes/kleisli.html"><code>Kleisli{OptionT{F, ?}, Request{F}, F{Response{F}}}</code></a>
@@ -328,8 +290,7 @@ or compose a Kleisli of type <code>Kleisli[Option[F,?], Response[F], F[Response[
 <p>
 e.g. auth user before <code>getApple</code>
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">auth</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span> { req<span style="color: #00008b;">:</span> <span style="color: #36648b;">Request</span>[<span style="color: #6b8e23;">IO</span>] <span style="color: #00008b;">=&gt;</span>
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">auth</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span> { req<span style="color: #00008b;">:</span> <span style="color: #36648b;">Request</span>[<span style="color: #6b8e23;">IO</span>] <span style="color: #00008b;">=&gt;</span>
   findUserInDatabase(req) <span style="color: #00008b;">match</span> {
     <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">true</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">OptionT</span>(<span style="color: #6b8e23;">IO</span>(<span style="color: #6b8e23;">Some</span>(req)))
     <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">false</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">OptionT</span>.fromOption[<span style="color: #6b8e23;">IO</span>](<span style="color: #6b8e23;">None</span>)
@@ -337,8 +298,7 @@ e.g. auth user before <code>getApple</code>
 }
 
 auth andThen getApple
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 <div id="outline-container-org64928b2" class="outline-3">
@@ -353,8 +313,7 @@ be much simpler.
 For the same example as above in finch, that my controller will return a free program <code>Free[Program, IO[Response[IO]]]</code> instead of <code>IO[Response[IO]]</code>
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">type alias for route that return free monad</span>
+<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">type alias for route that return free monad</span>
 <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">FreeRoute</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span>
   <span style="color: #6b8e23;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">ProgramF</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]]]]
 
@@ -367,8 +326,7 @@ For the same example as above in finch, that my controller will return a free pr
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> route {
   <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">GET</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"apple"</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>).pure[<span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">Program</span>,?]]
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 since getApples is still Kleisli, all the methods such as <code>&lt;+&gt;</code> are still available
@@ -378,12 +336,10 @@ since getApples is still Kleisli, all the methods such as <code>&lt;+&gt;</code>
 to hook it back to http4s route, simply map interpreter to <code>getApples</code>
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">interp</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Program</span> ~&gt; <span style="color: #6b8e23;">IO</span> <span style="color: #00008b;">=</span> ???
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">interp</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Program</span> ~&gt; <span style="color: #6b8e23;">IO</span> <span style="color: #00008b;">=</span> ???
 
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">router</span> <span style="color: #00008b;">=</span> getApples flatMapF interp
-</pre>
-</div>
+</code></pre>
 
 <p>
 here I used flatMapF because interp will give it another <code>IO</code>, which need to be flatten
@@ -419,7 +375,7 @@ for:
 </p>
 
 
-<figure>
+<figure id="org34f93e0">
 <object type="image/svg+xml" data="https://cdn.rawgit.com/tpolecat/cats-infographic/master/cats.svg" class="org-svg">
 Sorry, your browser does not support SVG.</object>
 
@@ -445,7 +401,7 @@ by just using Kleisli data type.
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2018-12-11 Tue 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

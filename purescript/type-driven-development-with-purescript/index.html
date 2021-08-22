@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-16 Mon 09:20 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Type-Driven Development with PureScript</title>
@@ -20,50 +20,26 @@
 <meta property="og:title" content="Type-Driven Development with PureScript" />
 <meta property="og:type" content="article" />
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -91,31 +67,31 @@ for the JavaScript code in this tag.
 <li><a href="#org3b60075">Prerequisites</a></li>
 <li><a href="#orgfa7edf1">User should be able to view a list of Todos</a>
 <ul>
-<li><a href="#org37c0657">Type</a></li>
-<li><a href="#org6d8857b">Define</a></li>
+<li><a href="#org95ccf63">Type</a></li>
+<li><a href="#orgd1121cd">Define</a></li>
 <li><a href="#orgb71fc98"><span class="todo TODO">TODO</span> But Why?</a></li>
-<li><a href="#org123217c">Refine</a></li>
-<li><a href="#org6a9dd1c">Type</a></li>
-<li><a href="#org5c787a7">Define</a></li>
-<li><a href="#orgd837ac4">Refine</a></li>
-<li><a href="#org4f3f50c">Refine</a></li>
-<li><a href="#org5d75fa6">Define</a></li>
-<li><a href="#org6bf03e7">Type</a></li>
-<li><a href="#orga6f5aaf">Define</a></li>
-<li><a href="#org5b4ed7e">Type</a></li>
-<li><a href="#org7814a9c">Define</a></li>
-<li><a href="#orgd36dd87"><span class="todo TODO">TODO</span> Refine</a></li>
+<li><a href="#orgd36dd87">Refine</a></li>
+<li><a href="#orgfdf2f0c">Type</a></li>
+<li><a href="#org670a6ba">Define</a></li>
+<li><a href="#org833c46a">Refine</a></li>
+<li><a href="#orgfe64995">Refine</a></li>
+<li><a href="#org2a02a5a">Define</a></li>
+<li><a href="#org73d6c08">Type</a></li>
+<li><a href="#org1c3dd69">Define</a></li>
+<li><a href="#org6631a96">Type</a></li>
+<li><a href="#orgc63c0e9">Define</a></li>
+<li><a href="#org2431af1"><span class="todo TODO">TODO</span> Refine</a></li>
 <li><a href="#org5a88dd0">Final Version</a></li>
 </ul>
 </li>
 <li><a href="#org231d689">User should be able to add new todo into list</a>
 <ul>
-<li><a href="#orga17ca8d">Type</a></li>
-<li><a href="#org8b6c408">Define</a></li>
-<li><a href="#orgde41e83">Define</a></li>
-<li><a href="#orga0858b8">Type</a></li>
-<li><a href="#org95ccf63">Type</a></li>
-<li><a href="#orgd1121cd">Define</a></li>
+<li><a href="#org2cd3443">Type</a></li>
+<li><a href="#org08b891f">Define</a></li>
+<li><a href="#orgaefc8fc">Define</a></li>
+<li><a href="#orgfeb5e8b">Type</a></li>
+<li><a href="#org18ae63c">Type</a></li>
+<li><a href="#org319f6ef">Define</a></li>
 </ul>
 </li>
 <li><a href="#org2332d92">Exercise</a></li>
@@ -176,7 +152,7 @@ type more precise.
 <li><a href="https://nixos.org/nixos/nix-pills/install-on-your-running-system.html#idm140737316665792">nix</a></li>
 </ul>
 
-<pre class="example">
+<pre class="example" id="org548d5ce">
 curl https://nixos.org/nix/install | sh
 nix-shell
 yarn
@@ -215,8 +191,7 @@ If you visit:
 <p>
 It returns data in such JSON format:
 </p>
-<div class="org-src-container">
-<pre class="src src-js">[
+<pre class="code"><code>[
   {
     <span style="color: #8b0000;">"userId"</span>: 1,
     <span style="color: #8b0000;">"id"</span>: 1,
@@ -230,19 +205,17 @@ It returns data in such JSON format:
     <span style="color: #8b0000;">"completed"</span>: <span style="color: #6b8e23;">false</span>
   }
 ]
-</pre>
-</div>
+</code></pre>
 
 <p>
 Ok, so this will clearly be the Data Type we need.
 </p>
 </div>
 
-<div id="outline-container-org37c0657" class="outline-3">
-<h3 id="org37c0657">Type</h3>
-<div class="outline-text-3" id="text-org37c0657">
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #00008b;">module</span> <span style="color: #36648b;">Data.Todo</span> <span style="color: #00008b;">where</span>
+<div id="outline-container-org95ccf63" class="outline-3">
+<h3 id="org95ccf63">Type</h3>
+<div class="outline-text-3" id="text-org95ccf63">
+<pre class="code"><code><span style="color: #00008b;">module</span> <span style="color: #36648b;">Data.Todo</span> <span style="color: #00008b;">where</span>
 
 <span style="color: #00008b;">type</span> <span style="color: #36648b;">Todo</span> <span style="color: #b8860b;">=</span> {
   userId<span style="color: #b8860b;">::</span> <span style="color: #36648b;">Int</span>,
@@ -252,8 +225,7 @@ Ok, so this will clearly be the Data Type we need.
 }
 
 <span style="color: #00008b;">type</span> <span style="color: #36648b;">Todos</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Array</span> <span style="color: #36648b;">Todo</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 To initiating the behavior, the data need to be load from remote server at the first place.
@@ -265,16 +237,14 @@ such behavior. I supposed we need to specify a <code>Path</code> so that we know
 from.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #00008b;">module</span> <span style="color: #36648b;">Behavior.Load</span> <span style="color: #00008b;">where</span>
+<pre class="code"><code><span style="color: #00008b;">module</span> <span style="color: #36648b;">Behavior.Load</span> <span style="color: #00008b;">where</span>
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">Effect.Aff</span>
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">Data.Todo</span>
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">Prelude</span>
 
 <span style="color: #00008b;">type</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">String</span>
 <span style="color: #6a5acd;">load</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> (<span style="color: #36648b;">Array</span> <span style="color: #36648b;">Todo</span>)
-</pre>
-</div>
+</code></pre>
 
 <p>
 Here is the type we need that can describe our behavior very accurate:
@@ -290,11 +260,10 @@ Now we have a decent type, let us "Define" it, by pressing <code>C-c C-a</code>
 </div>
 </div>
 
-<div id="outline-container-org6d8857b" class="outline-3">
-<h3 id="org6d8857b">Define</h3>
-<div class="outline-text-3" id="text-org6d8857b">
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #00008b;">module</span> <span style="color: #36648b;">Behavior.Load</span> <span style="color: #00008b;">where</span>
+<div id="outline-container-orgd1121cd" class="outline-3">
+<h3 id="orgd1121cd">Define</h3>
+<div class="outline-text-3" id="text-orgd1121cd">
+<pre class="code"><code><span style="color: #00008b;">module</span> <span style="color: #36648b;">Behavior.Load</span> <span style="color: #00008b;">where</span>
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">Effect.Aff</span>
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">Data.Todo</span>
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">Prelude</span>
@@ -302,13 +271,12 @@ Now we have a decent type, let us "Define" it, by pressing <code>C-c C-a</code>
 <span style="color: #00008b;">type</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">String</span>
 <span style="color: #6a5acd;">load</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> (<span style="color: #36648b;">Array</span> <span style="color: #36648b;">Todo</span>)
 <span style="color: #6a5acd;">load</span> <span style="color: #00008b;">_</span> <span style="color: #b8860b;">=</span> <span style="color: #b8860b;">?</span>load
-</pre>
-</div>
+</code></pre>
 
 <p>
 Oh, compiler generate an function definition for us, let us hover the cursor on that question mark <code>?load</code> thing
 </p>
-<pre class="example">
+<pre class="example" id="org6594021">
   Hole 'load' has the inferred type
 
     Aff
@@ -348,8 +316,7 @@ But which one should I use?
 <p>
 Let's try all of them, replace <code>?load</code> with <code>empty</code>
 </p>
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #00008b;">module</span> <span style="color: #36648b;">Behavior.Load</span> <span style="color: #00008b;">where</span>
+<pre class="code"><code><span style="color: #00008b;">module</span> <span style="color: #36648b;">Behavior.Load</span> <span style="color: #00008b;">where</span>
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">Effect.Aff</span>
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">Data.Todo</span>
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">Prelude</span>
@@ -357,15 +324,13 @@ Let's try all of them, replace <code>?load</code> with <code>empty</code>
 <span style="color: #00008b;">type</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">String</span>
 <span style="color: #6a5acd;">load</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> (<span style="color: #36648b;">Array</span> <span style="color: #36648b;">Todo</span>)
 <span style="color: #6a5acd;">load</span> <span style="color: #00008b;">_</span> <span style="color: #b8860b;">=</span> empty
-</pre>
-</div>
+</code></pre>
 
 <p>
 <code>C-c C-i</code> editor will ask you which Module to import from? Tell it <code>Control.Plus</code>
 </p>
 
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #00008b;">module</span> <span style="color: #36648b;">Behavior.Load</span> <span style="color: #00008b;">where</span>
+<pre class="code"><code><span style="color: #00008b;">module</span> <span style="color: #36648b;">Behavior.Load</span> <span style="color: #00008b;">where</span>
 
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">Data.Todo</span>
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">Effect.Aff</span>
@@ -376,8 +341,7 @@ Let's try all of them, replace <code>?load</code> with <code>empty</code>
 <span style="color: #00008b;">type</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">String</span>
 <span style="color: #6a5acd;">load</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> (<span style="color: #36648b;">Array</span> <span style="color: #36648b;">Todo</span>)
 <span style="color: #6a5acd;">load</span> <span style="color: #00008b;">_</span> <span style="color: #b8860b;">=</span> empty
-</pre>
-</div>
+</code></pre>
 
 <p>
 Oh my&#x2026; it compiled. We just did it.
@@ -398,14 +362,14 @@ Actually all of them work.
 </div>
 </div>
 
-<div id="outline-container-org123217c" class="outline-3">
-<h3 id="org123217c">Refine</h3>
-<div class="outline-text-3" id="text-org123217c">
+<div id="outline-container-orgd36dd87" class="outline-3">
+<h3 id="orgd36dd87">Refine</h3>
+<div class="outline-text-3" id="text-orgd36dd87">
 <p>
 So, if we run it, what will happen?
 </p>
 
-<pre class="example">
+<pre class="example" id="org9bebcb4">
 &gt; runAff_ (\x -&gt; log (show x)) $ load "asdf"
 (Left Error: Always fails
     at Object.exports.error (/home/jcouyang/Documents/blog/org/purescript/type-driven-development-with-purescript/.psci_modules/node_modules/Effect.Exception/foreign.js:8:10)
@@ -432,10 +396,8 @@ Seems we did not finish yet, we probably should be more specific about what shou
 <p>
 Maybe?
 </p>
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">load</span> path <span style="color: #b8860b;">=</span> ajax path
-</pre>
-</div>
+<pre class="code"><code><span style="color: #6a5acd;">load</span> path <span style="color: #b8860b;">=</span> ajax path
+</code></pre>
 
 <p>
 There are lot of implementation of making Ajax call for PureScript like <a href="https://github.com/slamdata/purescript-affjax">Affjax</a>, but I like to show how easy to make your own one by
@@ -445,8 +407,7 @@ PureScript's FFI.
 <p>
 A little bit JavaScript to call <code>window.fetch</code>, to make it FFI, we need to name it the same <code>Behavior.Load.js</code>
 </p>
-<div class="org-src-container">
-<pre class="src src-js"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">get</span>(<span style="color: #b8860b;">url</span>) {
+<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">get</span>(<span style="color: #b8860b;">url</span>) {
   <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">onError</span>, <span style="color: #b8860b;">onSuccess</span>) {  
     window.fetch(url).then(<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">res</span>){
       <span style="color: #00008b;">return</span> res.text()
@@ -459,25 +420,22 @@ A little bit JavaScript to call <code>window.fetch</code>, to make it FFI, we ne
   }
 }
 exports._get = get
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 
 
-<div id="outline-container-org6a9dd1c" class="outline-3">
-<h3 id="org6a9dd1c">Type</h3>
-<div class="outline-text-3" id="text-org6a9dd1c">
+<div id="outline-container-orgfdf2f0c" class="outline-3">
+<h3 id="orgfdf2f0c">Type</h3>
+<div class="outline-text-3" id="text-orgfdf2f0c">
 <p>
 Now you can <code>foreign import</code> the <code>get</code> function from JavaScript
 </p>
 
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #00008b;">import</span> <span style="color: #36648b;">Effect.Aff.Compat</span> (<span style="color: #36648b;">EffectFnAff</span>(<span style="color: #b8860b;">..</span>))
+<pre class="code"><code><span style="color: #00008b;">import</span> <span style="color: #36648b;">Effect.Aff.Compat</span> (<span style="color: #36648b;">EffectFnAff</span>(<span style="color: #b8860b;">..</span>))
 
 <span style="color: #00008b;">foreign</span> <span style="color: #00008b;">import</span> _get <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">EffectFnAff</span> <span style="color: #36648b;">String</span>
-</pre>
-</div>
+</code></pre>
 
 
 <p>
@@ -495,14 +453,12 @@ Then another layer of abstraction to provide us the domain type is needed.
 <p>
 Just call it <code>ajaxGet</code> for now.
 </p>
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #00008b;">import</span> <span style="color: #36648b;">Data.Either</span> (<span style="color: #36648b;">Either</span>)
+<pre class="code"><code><span style="color: #00008b;">import</span> <span style="color: #36648b;">Data.Either</span> (<span style="color: #36648b;">Either</span>)
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">Simple.JSON</span> (<span style="color: #00008b;">class</span> <span style="color: #36648b;">ReadForeign</span>)
 
 <span style="color: #6a5acd;">ajaxGet</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">ReadForeign</span> a <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> (<span style="color: #36648b;">Either</span> <span style="color: #36648b;">Error</span> a)
 <span style="color: #6a5acd;">ajaxGet</span> <span style="color: #00008b;">_</span> <span style="color: #b8860b;">=</span> <span style="color: #b8860b;">?</span>ajaxGet
-</pre>
-</div>
+</code></pre>
 
 <p>
 Type of <code>ajaxGet</code> can read as "given type <code>a</code> which has instance of <code>ReadForeign a</code>,
@@ -511,9 +467,9 @@ input a <code>Path</code> and it can return an <code>Aff</code> of <code>Either 
 </div>
 </div>
 
-<div id="outline-container-org5c787a7" class="outline-3">
-<h3 id="org5c787a7">Define</h3>
-<div class="outline-text-3" id="text-org5c787a7">
+<div id="outline-container-org670a6ba" class="outline-3">
+<h3 id="org670a6ba">Define</h3>
+<div class="outline-text-3" id="text-org670a6ba">
 <p>
 <code>C-c C-a</code> compiler will define <code>ajaxGet _ = ?ajaxGet</code>
 </p>
@@ -521,7 +477,7 @@ input a <code>Path</code> and it can return an <code>Aff</code> of <code>Either 
 <p>
 Move cursor to <code>?ajaxGet</code> and&#x2026;
 </p>
-<pre class="example">
+<pre class="example" id="org8b61529">
   Hole 'ajaxGet' has the inferred type
 
     Aff (Either Error a0)
@@ -542,32 +498,28 @@ where a0 is a rigid type variable
 <p>
 Hmm, clearly we don't want an empty, look what we have currently
 </p>
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">_get</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">EffectFnAff</span> <span style="color: #36648b;">String</span> <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">FFI</span>
+<pre class="code"><code><span style="color: #6a5acd;">_get</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">EffectFnAff</span> <span style="color: #36648b;">String</span> <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">FFI</span>
 <span style="color: #6a5acd;">fromEffectFnAff</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">EffectFnAff</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> a <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">from Effect.Aff.Compat</span>
 <span style="color: #6a5acd;">readJSON</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">ReadForeign</span> a <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Either</span> <span style="color: #36648b;">MultipleErrors</span> a <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">from Simple.JSON</span>
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 
-<div id="outline-container-orgd837ac4" class="outline-3">
-<h3 id="orgd837ac4">Refine</h3>
-<div class="outline-text-3" id="text-orgd837ac4">
+<div id="outline-container-org833c46a" class="outline-3">
+<h3 id="org833c46a">Refine</h3>
+<div class="outline-text-3" id="text-org833c46a">
 <p>
 It's like solve puzzles, return type of <code>_get</code> match <code>fromEffectFnAff</code> input type. Let us we compose, see what we got
 </p>
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">ajaxGet</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">ReadForeign</span> a <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> (<span style="color: #36648b;">Either</span> <span style="color: #36648b;">Error</span> a)
+<pre class="code"><code><span style="color: #6a5acd;">ajaxGet</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">ReadForeign</span> a <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> (<span style="color: #36648b;">Either</span> <span style="color: #36648b;">Error</span> a)
 <span style="color: #6a5acd;">ajaxGet</span> path <span style="color: #b8860b;">=</span> <span style="color: #b8860b;">?</span>toJSON <span style="color: #b8860b;">$</span> fromEffectFnAff (_get path)
-</pre>
-</div>
+</code></pre>
 
 <p>
 Move cursor to <code>?toJSON</code> see what we need to put in here now.
 </p>
 
-<pre class="example">
+<pre class="example" id="orgd8843cd">
 Hole 'toJson' has the inferred type
 
   Aff String -&gt; Aff (Either Error a0)
@@ -576,10 +528,8 @@ Hole 'toJson' has the inferred type
 <p>
 Great, we have 
 </p>
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">readJSON</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">ReadForeign</span> a <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Either</span> <span style="color: #36648b;">MultipleErrors</span> a
-</pre>
-</div>
+<pre class="code"><code><span style="color: #6a5acd;">readJSON</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">ReadForeign</span> a <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Either</span> <span style="color: #36648b;">MultipleErrors</span> a
+</code></pre>
 
 <p>
 which is pretty similar though&#x2026;
@@ -597,16 +547,14 @@ If we lift <code>String -&gt; Either Error a</code> to Aff level, we should able
 That is exactly <code>&lt;&gt;</code> does, put a <code>&lt;&gt;</code> around <code>$</code> and it will lift the left hand side
 </p>
 
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">ajaxGet</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">ReadForeign</span> a <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> (<span style="color: #36648b;">Either</span> <span style="color: #36648b;">Error</span> a)
+<pre class="code"><code><span style="color: #6a5acd;">ajaxGet</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">ReadForeign</span> a <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> (<span style="color: #36648b;">Either</span> <span style="color: #36648b;">Error</span> a)
 <span style="color: #6a5acd;">ajaxGet</span> path <span style="color: #b8860b;">=</span> <span style="color: #b8860b;">?</span>toJSON <span style="color: #b8860b;">&lt;$&gt;</span> fromEffectFnAff (_get path)
-</pre>
-</div>
+</code></pre>
 
 <p>
 Now compiler says:
 </p>
-<pre class="example">
+<pre class="example" id="org5cb48e1">
 Hole 'toJson' has the inferred type
 
   String -&gt; Either Error a0
@@ -614,21 +562,19 @@ Hole 'toJson' has the inferred type
 </div>
 </div>
 
-<div id="outline-container-org4f3f50c" class="outline-3">
-<h3 id="org4f3f50c">Refine</h3>
-<div class="outline-text-3" id="text-org4f3f50c">
+<div id="outline-container-orgfe64995" class="outline-3">
+<h3 id="orgfe64995">Refine</h3>
+<div class="outline-text-3" id="text-orgfe64995">
 <p>
 So close, now just need <code>Either MutipleErrors a -&gt; Either Error a</code>, isn't that exactly type signature of <code>lmap</code>?
 </p>
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">ajaxGet</span> path <span style="color: #b8860b;">=</span> (lmap <span style="color: #b8860b;">?</span>adaptError <span style="color: #b8860b;">&lt;&lt;&lt;</span> parseJSON )<span style="color: #b8860b;">&lt;$&gt;</span> fromEffectFnAff (_get path)
+<pre class="code"><code><span style="color: #6a5acd;">ajaxGet</span> path <span style="color: #b8860b;">=</span> (lmap <span style="color: #b8860b;">?</span>adaptError <span style="color: #b8860b;">&lt;&lt;&lt;</span> parseJSON )<span style="color: #b8860b;">&lt;$&gt;</span> fromEffectFnAff (_get path)
   <span style="color: #00008b;">where</span>
     parseJSON <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Either</span> <span style="color: #36648b;">MultipleErrors</span> a
     parseJSON <span style="color: #b8860b;">=</span> readJSON
-</pre>
-</div>
+</code></pre>
 
-<pre class="example">
+<pre class="example" id="orgfddb53b">
 Hole 'adaptError' has the inferred type
 
   NonEmptyList ForeignError -&gt; Error
@@ -639,18 +585,16 @@ Seems to be a very easy function to implement, finally!
 </p>
 </div>
 </div>
-<div id="outline-container-org5d75fa6" class="outline-3">
-<h3 id="org5d75fa6">Define</h3>
-<div class="outline-text-3" id="text-org5d75fa6">
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">ajaxGet</span> path <span style="color: #b8860b;">=</span> (lmap adaptError <span style="color: #b8860b;">&lt;&lt;&lt;</span> parseJSON )<span style="color: #b8860b;">&lt;$&gt;</span> fromEffectFnAff (_get path)
+<div id="outline-container-org2a02a5a" class="outline-3">
+<h3 id="org2a02a5a">Define</h3>
+<div class="outline-text-3" id="text-org2a02a5a">
+<pre class="code"><code><span style="color: #6a5acd;">ajaxGet</span> path <span style="color: #b8860b;">=</span> (lmap adaptError <span style="color: #b8860b;">&lt;&lt;&lt;</span> parseJSON )<span style="color: #b8860b;">&lt;$&gt;</span> fromEffectFnAff (_get path)
   <span style="color: #00008b;">where</span>
     parseJSON <span style="color: #b8860b;">::</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Either</span> <span style="color: #36648b;">MultipleErrors</span> a
     parseJSON <span style="color: #b8860b;">=</span> readJSON
     adaptError <span style="color: #b8860b;">::</span> <span style="color: #36648b;">MultipleErrors</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Error</span>
     adaptError <span style="color: #b8860b;">=</span> error <span style="color: #b8860b;">&lt;&lt;&lt;</span> show
-</pre>
-</div>
+</code></pre>
 
 <p>
 Without single line of test, and run time red-green. We just follow the compiler's hint, compose different pieces of type together
@@ -667,23 +611,21 @@ I'm not saying we should not write any unit test, the part FFI calling the JavaS
 </div>
 
 
-<div id="outline-container-org6bf03e7" class="outline-3">
-<h3 id="org6bf03e7">Type</h3>
-<div class="outline-text-3" id="text-org6bf03e7">
+<div id="outline-container-org73d6c08" class="outline-3">
+<h3 id="org73d6c08">Type</h3>
+<div class="outline-text-3" id="text-org73d6c08">
 <p>
 Now that we have <code>ajaxGet</code>, we can replace <code>empty</code> in <code>load</code> with
 the real ajax call function.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">load</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> (<span style="color: #36648b;">Array</span> <span style="color: #36648b;">Todo</span>)
+<pre class="code"><code><span style="color: #6a5acd;">load</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> (<span style="color: #36648b;">Array</span> <span style="color: #36648b;">Todo</span>)
 <span style="color: #6a5acd;">load</span> path <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
   resp <span style="color: #b8860b;">&lt;-</span> <span style="color: #b8860b;">?</span>ajaxGetTodos path
   <span style="color: #b8860b;">?</span>doSomethingAbout resp
-</pre>
-</div>
+</code></pre>
 
-<pre class="example">
+<pre class="example" id="org3c28645">
 Hole 'ajaxGetTodos' has the inferred type
 
   String -&gt; Aff t0
@@ -691,33 +633,31 @@ Hole 'ajaxGetTodos' has the inferred type
 </div>
 </div>
 
-<div id="outline-container-orga6f5aaf" class="outline-3">
-<h3 id="orga6f5aaf">Define</h3>
-<div class="outline-text-3" id="text-orga6f5aaf">
+<div id="outline-container-org1c3dd69" class="outline-3">
+<h3 id="org1c3dd69">Define</h3>
+<div class="outline-text-3" id="text-org1c3dd69">
 <p>
 That is <code>ajaxGet</code>, let us put that in
 </p>
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">load</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> (<span style="color: #36648b;">Array</span> <span style="color: #36648b;">Todo</span>)
+<pre class="code"><code><span style="color: #6a5acd;">load</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> (<span style="color: #36648b;">Array</span> <span style="color: #36648b;">Todo</span>)
 <span style="color: #6a5acd;">load</span> path <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
   resp <span style="color: #b8860b;">&lt;-</span> ajaxGetTodos path
   <span style="color: #b8860b;">?</span>doSomethingAbout resp
   <span style="color: #00008b;">where</span>
     ajaxGetTodos <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> (<span style="color: #36648b;">Either</span> <span style="color: #36648b;">Error</span> (<span style="color: #36648b;">Array</span> <span style="color: #36648b;">Todo</span>))
     ajaxGetTodos <span style="color: #b8860b;">=</span> ajaxGet
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 
 
-<div id="outline-container-org5b4ed7e" class="outline-3">
-<h3 id="org5b4ed7e">Type</h3>
-<div class="outline-text-3" id="text-org5b4ed7e">
+<div id="outline-container-org6631a96" class="outline-3">
+<h3 id="org6631a96">Type</h3>
+<div class="outline-text-3" id="text-org6631a96">
 <p>
 Now what is <code>?doSomethingAbout</code>
 </p>
-<pre class="example">
+<pre class="example" id="orgfbe8320">
 Hole 'doSomethingAbout' has the inferred type
 
   Either Error
@@ -743,8 +683,7 @@ Hole 'doSomethingAbout' has the inferred type
 I think we need a <code>liftEither :: forall a. Either Error a -&gt; Aff a</code>,
 let us define it
 </p>
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">load</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> (<span style="color: #36648b;">Array</span> <span style="color: #36648b;">Todo</span>)
+<pre class="code"><code><span style="color: #6a5acd;">load</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> (<span style="color: #36648b;">Array</span> <span style="color: #36648b;">Todo</span>)
 <span style="color: #6a5acd;">load</span> path <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
     resp <span style="color: #b8860b;">&lt;-</span> ajaxGetTodos path
     liftEither resp
@@ -753,14 +692,13 @@ let us define it
       ajaxGetTodos <span style="color: #b8860b;">=</span> ajaxGet
       liftEither <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">Either</span> <span style="color: #36648b;">Error</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> a
       liftEither <span style="color: #00008b;">_</span> <span style="color: #b8860b;">=</span> <span style="color: #b8860b;">?</span>liftEither
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 
-<div id="outline-container-org7814a9c" class="outline-3">
-<h3 id="org7814a9c">Define</h3>
-<div class="outline-text-3" id="text-org7814a9c">
+<div id="outline-container-orgc63c0e9" class="outline-3">
+<h3 id="orgc63c0e9">Define</h3>
+<div class="outline-text-3" id="text-orgc63c0e9">
 <p>
 <code>C-c C-c</code> on <code>_</code>, compiler will prompt you what type you what to split.
 </p>
@@ -768,22 +706,18 @@ let us define it
 <p>
 Tell it <code>Either</code>
 </p>
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">liftEither</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">Either</span> <span style="color: #36648b;">Error</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> a
+<pre class="code"><code><span style="color: #6a5acd;">liftEither</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">Either</span> <span style="color: #36648b;">Error</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> a
 <span style="color: #6a5acd;">liftEither</span> (<span style="color: #36648b;">Left</span> <span style="color: #00008b;">_</span>) <span style="color: #b8860b;">=</span> <span style="color: #b8860b;">?</span>liftEither
 <span style="color: #6a5acd;">liftEither</span> (<span style="color: #36648b;">Right</span> <span style="color: #00008b;">_</span>) <span style="color: #b8860b;">=</span> <span style="color: #b8860b;">?</span>liftEither
-</pre>
-</div>
+</code></pre>
 
 <p>
 Now it's all clear, <code>?liftEither</code> is <code>Aff a</code>:
 </p>
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">liftEither</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">Either</span> <span style="color: #36648b;">Error</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> a
+<pre class="code"><code><span style="color: #6a5acd;">liftEither</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">Either</span> <span style="color: #36648b;">Error</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> a
 <span style="color: #6a5acd;">liftEither</span> (<span style="color: #36648b;">Left</span> e) <span style="color: #b8860b;">=</span> throwError e
 <span style="color: #6a5acd;">liftEither</span> (<span style="color: #36648b;">Right</span> v) <span style="color: #b8860b;">=</span> pure v
-</pre>
-</div>
+</code></pre>
 
 <p>
 All feature of <code>load</code> function is done since compiler is very
@@ -792,9 +726,9 @@ happy about it. But, we never rich the <b>Refine</b> yet.
 </div>
 </div>
 
-<div id="outline-container-orgd36dd87" class="outline-3">
-<h3 id="orgd36dd87"><span class="todo TODO">TODO</span> Refine</h3>
-<div class="outline-text-3" id="text-orgd36dd87">
+<div id="outline-container-org2431af1" class="outline-3">
+<h3 id="org2431af1"><span class="todo TODO">TODO</span> Refine</h3>
+<div class="outline-text-3" id="text-org2431af1">
 <p>
 One thing that is able to refine is <code>liftEither</code>, maybe this
 is not the best time to refine, since only one place is using it.
@@ -802,23 +736,20 @@ But it seems like it should be a typeclass not just a scoped function.
 Because it looks very generic.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #00008b;">class</span> <span style="color: #36648b;">MonadAff</span> m <span style="color: #b8860b;">&lt;=</span> <span style="color: #36648b;">MonadEither</span> m <span style="color: #00008b;">where</span>
+<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">MonadAff</span> m <span style="color: #b8860b;">&lt;=</span> <span style="color: #36648b;">MonadEither</span> m <span style="color: #00008b;">where</span>
   liftEither <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Either</span> <span style="color: #36648b;">Error</span> <span style="color: #b8860b;">~&gt;</span> m
 
 <span style="color: #00008b;">instance</span> monadEitherAff <span style="color: #b8860b;">::</span> <span style="color: #36648b;">MonadEither</span> <span style="color: #36648b;">Aff</span> <span style="color: #00008b;">where</span>
   liftEither (<span style="color: #36648b;">Left</span> e) <span style="color: #b8860b;">=</span> throwError e
   liftEither (<span style="color: #36648b;">Right</span> v) <span style="color: #b8860b;">=</span> pure v
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 
 <div id="outline-container-org5a88dd0" class="outline-3">
 <h3 id="org5a88dd0">Final Version</h3>
 <div class="outline-text-3" id="text-org5a88dd0">
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #00008b;">module</span> <span style="color: #36648b;">Behavior.Load</span> <span style="color: #00008b;">where</span>
+<pre class="code"><code><span style="color: #00008b;">module</span> <span style="color: #36648b;">Behavior.Load</span> <span style="color: #00008b;">where</span>
 
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">Data.Todo</span>
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">Effect.Aff</span>
@@ -864,8 +795,7 @@ Because it looks very generic.
 <span style="color: #00008b;">instance</span> monadEitherAff <span style="color: #b8860b;">::</span> <span style="color: #36648b;">MonadEither</span> <span style="color: #36648b;">Aff</span> <span style="color: #00008b;">where</span>
   liftEither (<span style="color: #36648b;">Left</span> e) <span style="color: #b8860b;">=</span> throwError e
   liftEither (<span style="color: #36648b;">Right</span> v) <span style="color: #b8860b;">=</span> pure v
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 </div>
@@ -873,46 +803,40 @@ Because it looks very generic.
 <h2 id="org231d689">User should be able to add new todo into list</h2>
 <div class="outline-text-2" id="text-org231d689">
 </div>
-<div id="outline-container-orga17ca8d" class="outline-3">
-<h3 id="orga17ca8d">Type</h3>
-<div class="outline-text-3" id="text-orga17ca8d">
+<div id="outline-container-org2cd3443" class="outline-3">
+<h3 id="org2cd3443">Type</h3>
+<div class="outline-text-3" id="text-org2cd3443">
 <p>
 New story, similarly let us create a new file <code>src/Behavior.Add.purs</code>.
 </p>
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #00008b;">module</span> <span style="color: #36648b;">Behavior.Add</span> <span style="color: #00008b;">where</span>
+<pre class="code"><code><span style="color: #00008b;">module</span> <span style="color: #36648b;">Behavior.Add</span> <span style="color: #00008b;">where</span>
 
 <span style="color: #6a5acd;">addTodo</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Todo</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">State</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> <span style="color: #36648b;">State</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 <code>C-c C-a</code>
 </p>
 
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">addTodo</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Todo</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">State</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> <span style="color: #36648b;">State</span>
+<pre class="code"><code><span style="color: #6a5acd;">addTodo</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Todo</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">State</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> <span style="color: #36648b;">State</span>
 <span style="color: #6a5acd;">addTodo</span> <span style="color: #00008b;">_</span> <span style="color: #00008b;">_</span> <span style="color: #b8860b;">=</span> <span style="color: #b8860b;">?</span>addTodo
-</pre>
+</code></pre>
 </div>
 </div>
-</div>
-<div id="outline-container-org8b6c408" class="outline-3">
-<h3 id="org8b6c408">Define</h3>
-<div class="outline-text-3" id="text-org8b6c408">
+<div id="outline-container-org08b891f" class="outline-3">
+<h3 id="org08b891f">Define</h3>
+<div class="outline-text-3" id="text-org08b891f">
 <p>
 What should we do first? post it to the server? Let us find out.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">addTodo</span> todo state <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
+<pre class="code"><code><span style="color: #6a5acd;">addTodo</span> todo state <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
   status <span style="color: #b8860b;">&lt;-</span> <span style="color: #b8860b;">?</span>ajaxPost <span style="color: #8b0000;">"https://jsonplaceholder.typicode.com/todos"</span> todo
   purs <span style="color: #b8860b;">?</span>whatnext
 
 <span style="color: #6a5acd;">ajaxPost</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> <span style="color: #36648b;">Int</span>
 <span style="color: #6a5acd;">ajaxPost</span> <span style="color: #00008b;">_</span> <span style="color: #00008b;">_</span> <span style="color: #b8860b;">=</span> <span style="color: #b8860b;">?</span>ajaxPost
-</pre>
-</div>
+</code></pre>
 
 <p>
 <code>ajaxPost</code> is very similar to <code>ajaxGet</code>
@@ -924,18 +848,16 @@ we rely on js to actually send out the ajax request
 </div>
 </div>
 
-<div id="outline-container-orgde41e83" class="outline-3">
-<h3 id="orgde41e83">Define</h3>
-<div class="outline-text-3" id="text-orgde41e83">
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #00008b;">foreign</span> <span style="color: #00008b;">import</span> _post <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">EffectFnAff</span> <span style="color: #36648b;">Int</span>
+<div id="outline-container-orgaefc8fc" class="outline-3">
+<h3 id="orgaefc8fc">Define</h3>
+<div class="outline-text-3" id="text-orgaefc8fc">
+<pre class="code"><code><span style="color: #00008b;">foreign</span> <span style="color: #00008b;">import</span> _post <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">EffectFnAff</span> <span style="color: #36648b;">Int</span>
 
 <span style="color: #6a5acd;">ajaxPost</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> <span style="color: #36648b;">Int</span>
 <span style="color: #6a5acd;">ajaxPost</span> path body <span style="color: #b8860b;">=</span> fromEffectFnAff (_post path <span style="color: #b8860b;">$</span> <span style="color: #b8860b;">?</span>toJSON body)
-</pre>
-</div>
+</code></pre>
 
-<pre class="example">
+<pre class="example" id="org2e0c321">
 Hole 'toJSON' has the inferred type
 
   a0 -&gt; String
@@ -948,20 +870,18 @@ try <a href="https://pursuit.purescript.org/search?q=a+-%3E+String">https://purs
 </div>
 </div>
 
-<div id="outline-container-orga0858b8" class="outline-3">
-<h3 id="orga0858b8">Type</h3>
-<div class="outline-text-3" id="text-orga0858b8">
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">writeJSON</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">WriteForeign</span> a <span style="color: #b8860b;">=&gt;</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
-</pre>
-</div>
+<div id="outline-container-orgfeb5e8b" class="outline-3">
+<h3 id="orgfeb5e8b">Type</h3>
+<div class="outline-text-3" id="text-orgfeb5e8b">
+<pre class="code"><code><span style="color: #6a5acd;">writeJSON</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">WriteForeign</span> a <span style="color: #b8860b;">=&gt;</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
+</code></pre>
 
 <p>
 Hmm, a need to have Typeclass <code>WriteForeign a</code> instance. Again, don't worry
 the compile will give you the hint if you did not add the TypeClass bound
 </p>
 
-<pre class="example">
+<pre class="example" id="org4b015dc">
 No type class instance was found for
 
   Simple.JSON.WriteForeign a1
@@ -970,28 +890,24 @@ No type class instance was found for
 <p>
 All set!
 </p>
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">ajaxPost</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">WriteForeign</span> a <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> <span style="color: #36648b;">Int</span>
+<pre class="code"><code><span style="color: #6a5acd;">ajaxPost</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">WriteForeign</span> a <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> <span style="color: #36648b;">Int</span>
 <span style="color: #6a5acd;">ajaxPost</span> path body <span style="color: #b8860b;">=</span> fromEffectFnAff (_post path <span style="color: #b8860b;">$</span> writeJSON body)
-</pre>
-</div>
+</code></pre>
 
 <p>
 Now hover back to <code>?ajaxPost</code> in <code>addTodo</code> see what happen.
 </p>
 </div>
 </div>
-<div id="outline-container-org95ccf63" class="outline-3">
-<h3 id="org95ccf63">Type</h3>
-<div class="outline-text-3" id="text-org95ccf63">
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">addTodo</span> todo state <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
+<div id="outline-container-org18ae63c" class="outline-3">
+<h3 id="org18ae63c">Type</h3>
+<div class="outline-text-3" id="text-org18ae63c">
+<pre class="code"><code><span style="color: #6a5acd;">addTodo</span> todo state <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
   status <span style="color: #b8860b;">&lt;-</span> <span style="color: #b8860b;">?</span>ajaxPost <span style="color: #8b0000;">"https://jsonplaceholder.typicode.com/todos"</span> todo
   pure <span style="color: #b8860b;">?</span>whatnext
-</pre>
-</div>
+</code></pre>
 
-<pre class="example">
+<pre class="example" id="org37122ba">
 Hole 'ajaxPost' has the inferred type
 
   String
@@ -1018,17 +934,15 @@ Awesome, compile say you could substitute it with <code>Behavior.Add.ajaxPost</c
 <p>
 Simply remove the <code>?</code>.
 </p>
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">addTodo</span> todo state <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
+<pre class="code"><code><span style="color: #6a5acd;">addTodo</span> todo state <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
   status <span style="color: #b8860b;">&lt;-</span> ajaxPost <span style="color: #8b0000;">"https://jsonplaceholder.typicode.com/todos"</span> todo
   pure <span style="color: #b8860b;">?</span>whatnext
-</pre>
-</div>
+</code></pre>
 
 <p>
 What next?
 </p>
-<pre class="example">
+<pre class="example" id="org7e271cf">
 Hole 'whatnext' has the inferred type
 
   { todos :: Array
@@ -1050,17 +964,15 @@ of the request, we can do different things.
 </p>
 </div>
 </div>
-<div id="outline-container-orgd1121cd" class="outline-3">
-<h3 id="orgd1121cd">Define</h3>
-<div class="outline-text-3" id="text-orgd1121cd">
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">addTodo</span> todo state <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
+<div id="outline-container-org319f6ef" class="outline-3">
+<h3 id="org319f6ef">Define</h3>
+<div class="outline-text-3" id="text-org319f6ef">
+<pre class="code"><code><span style="color: #6a5acd;">addTodo</span> todo state <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
   status <span style="color: #b8860b;">&lt;-</span> ajaxPost <span style="color: #8b0000;">"https://jsonplaceholder.typicode.com/todos"</span> todo
   <span style="color: #00008b;">case</span> status <span style="color: #00008b;">of</span>
     201 <span style="color: #b8860b;">-&gt;</span> pure <span style="color: #b8860b;">?</span>success
     <span style="color: #00008b;">_</span> <span style="color: #b8860b;">-&gt;</span> pure <span style="color: #b8860b;">?</span>fail
-</pre>
-</div>
+</code></pre>
 
 <p>
 Of cause <code>?fail</code> should do nothing, or add some error indicator in <code>State</code>
@@ -1072,21 +984,18 @@ should put into <code>?success</code>?
 For user, the first todo should be updated to the one just added.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #6a5acd;">addTodo</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Todo</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">State</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> <span style="color: #36648b;">State</span>
+<pre class="code"><code><span style="color: #6a5acd;">addTodo</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Todo</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">State</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> <span style="color: #36648b;">State</span>
 <span style="color: #6a5acd;">addTodo</span> todo state <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
   status <span style="color: #b8860b;">&lt;-</span> ajaxPost <span style="color: #8b0000;">"https://jsonplaceholder.typicode.com/todos"</span> todo
   <span style="color: #00008b;">case</span> status <span style="color: #00008b;">of</span>
     201 <span style="color: #b8860b;">-&gt;</span> pure <span style="color: #b8860b;">$</span> state {todos <span style="color: #b8860b;">=</span> todo <span style="color: #36648b;">:</span> state<span style="color: #b8860b;">.</span>todos}
     <span style="color: #00008b;">_</span> <span style="color: #b8860b;">-&gt;</span> pure state
-</pre>
-</div>
+</code></pre>
 
 <p>
 And.. do not forget implement the JavaScript FFI <code>_post</code>
 </p>
-<div class="org-src-container">
-<pre class="src src-javascript"><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">post</span>(<span style="color: #b8860b;">url</span>) {
+<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">post</span>(<span style="color: #b8860b;">url</span>) {
   <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">body</span>) {
     <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">onError</span>, <span style="color: #b8860b;">onSuccess</span>) {  
       window.fetch(url, {
@@ -1107,15 +1016,13 @@ And.. do not forget implement the JavaScript FFI <code>_post</code>
   }
 }
 exports._post = post
-</pre>
-</div>
+</code></pre>
 
 <p>
 The whole piece of <code>Behavior.Add</code>.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-purescript"><span style="color: #00008b;">module</span> <span style="color: #36648b;">Behavior.Add</span> <span style="color: #00008b;">where</span>
+<pre class="code"><code><span style="color: #00008b;">module</span> <span style="color: #36648b;">Behavior.Add</span> <span style="color: #00008b;">where</span>
 
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">Data.Array</span>
 <span style="color: #00008b;">import</span> <span style="color: #36648b;">Data.Todo</span>
@@ -1136,8 +1043,7 @@ The whole piece of <code>Behavior.Add</code>.
 
 <span style="color: #6a5acd;">ajaxPost</span> <span style="color: #b8860b;">::</span> forall a<span style="color: #b8860b;">.</span> <span style="color: #36648b;">WriteForeign</span> a <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Path</span> <span style="color: #b8860b;">-&gt;</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Aff</span> <span style="color: #36648b;">Int</span>
 <span style="color: #6a5acd;">ajaxPost</span> path body <span style="color: #b8860b;">=</span> fromEffectFnAff (_post path <span style="color: #b8860b;">$</span> writeJSON body)
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 </div>
@@ -1167,7 +1073,7 @@ how to Type-Driven the implementation by thinking about Type first.
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2019-08-30 Fri 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

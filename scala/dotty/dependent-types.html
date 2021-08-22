@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-16 Mon 09:21 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scala 3 从属类型</title>
@@ -22,50 +22,26 @@
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -129,8 +105,7 @@ for the JavaScript code in this tag.
 比如:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>] {
+<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>] {
   <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Out</span>
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>(value<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Out</span>
 }
@@ -143,12 +118,11 @@ for the JavaScript code in this tag.
 }
 
 <span style="color: #6b8e23;">Second</span>(<span style="color: #6b8e23;">1</span> :: <span style="color: #8b0000;">"2"</span> :: <span style="color: #6b8e23;">HNil</span>)
-</pre>
-</div>
+</code></pre>
 <p>
 输出：
 </p>
-<pre class="example">
+<pre class="example" id="org18ec52b">
 "2"
 </pre>
 
@@ -156,11 +130,9 @@ for the JavaScript code in this tag.
 可以看见这个 Second 是 dependent types, 也就是说他的类型取决于输入的类型， 比如现在换一个 HList，他的
 输出就不是 String 了：
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #6b8e23;">Second</span>(<span style="color: #8b0000;">"1"</span> :: <span style="color: #6b8e23;">2</span> :: <span style="color: #6b8e23;">HNil</span>)
+<pre class="code"><code><span style="color: #6b8e23;">Second</span>(<span style="color: #8b0000;">"1"</span> :: <span style="color: #6b8e23;">2</span> :: <span style="color: #6b8e23;">HNil</span>)
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; 2</span>
-</pre>
-</div>
+</code></pre>
 <p>
 输入变成 Int 了。
 </p>
@@ -176,8 +148,7 @@ for the JavaScript code in this tag.
 </span>。
 也就是上面那个例子，可以进一步的简化：
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>] {
+<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>] {
   <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Out</span>
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>(value<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Out</span>
 }
@@ -185,8 +156,7 @@ for the JavaScript code in this tag.
 <span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second</span> {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>](value<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>) <span style="color: #00008b;">=</span> (inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>]) ?=&gt; inst(value)
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 其中 <code>?=&gt;</code> <label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
@@ -197,12 +167,10 @@ for the JavaScript code in this tag.
 <p>
 注意看前后的区别:
 </p>
-<div class="org-src-container">
-<pre class="src src-diff">- def apply[L &lt;: HList](implicit inst: Second[L]): Aux[L, inst.Out] =
+<pre class="code"><code>- def apply[L &lt;: HList](implicit inst: Second[L]): Aux[L, inst.Out] =
     inst
 + def apply[L &lt;: HList](value: L) = (inst: Second[L]) ?=&gt; inst(value)
-</pre>
-</div>
+</code></pre>
 
 <p>
 以前需要标明method类型为dependent types <code>Aux[L, inst.Out]</code>
@@ -215,11 +183,9 @@ for the JavaScript code in this tag.
 <p>
 如果你给这个 dependent function 标类型的话：
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>](value<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)<span style="color: #00008b;">:</span> (inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>]) ?=&gt; inst.<span style="color: #6b8e23;">Out</span> <span style="color: #00008b;">=</span>
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>](value<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)<span style="color: #00008b;">:</span> (inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>]) ?=&gt; inst.<span style="color: #6b8e23;">Out</span> <span style="color: #00008b;">=</span>
  (inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>]) ?=&gt; inst(value)
-</pre>
-</div>
+</code></pre>
 
 <p>
 它就跟Scala 2 dependent method的时候很像了，但是我们还是不用 Aux 类型的帮助。
@@ -257,7 +223,7 @@ for the JavaScript code in this tag.
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2020-04-05 Sun 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

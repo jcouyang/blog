@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-16 Mon 09:21 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scala 3 原生 FunctionK</title>
@@ -22,50 +22,26 @@
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -129,11 +105,9 @@ for the JavaScript code in this tag.
 比如:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">import</span> cats.~&gt;
+<pre class="code"><code><span style="color: #00008b;">import</span> cats.~&gt;
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">tupledOptionToList</span>[<span style="color: #6b8e23;">B</span>,<span style="color: #6b8e23;">C</span>](a<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">B</span>], <span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">C</span>]), fnk<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span> ~&gt; <span style="color: #6b8e23;">List</span>)<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">List</span>[<span style="color: #6b8e23;">B</span>], <span style="color: #6b8e23;">List</span>[<span style="color: #6b8e23;">C</span>])  
-</pre>
-</div>
+</code></pre>
 
 <p>
 至于为什么不能直接用普通类型为 <code>Option[A] =&gt; List[A]</code> 的函数而要用 FunctionK 呢? 请看 <a href="./rank-N-type.html">Rank-N types</a>.
@@ -148,8 +122,7 @@ for the JavaScript code in this tag.
 在 Dotty 中, 已经实现了 Rank N Types, 叫 <a href="https://dotty.epfl.ch/blog/2019/06/11/16th-dotty-milestone-release.html#polymorphic-function-types">Polymorphic function types</a>, 就可以很轻松的定义出 <code>~&gt;</code>:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">kind * -&gt; *</span>
+<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">kind * -&gt; *</span>
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">FunctionK (* -&gt; *) -&gt; (* -&gt; *)</span>
 
 <span style="color: #00008b;">type</span> ~&gt;[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>],<span style="color: #6b8e23;">G</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">G</span>[<span style="color: #6b8e23;">A</span>]
@@ -157,19 +130,18 @@ for the JavaScript code in this tag.
 <span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Main</span> {
   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">rank 2 type (forall a. Option a -&gt; List a)</span>
   <span style="color: #00008b;">val</span> <span style="color: #b8860b;">optionToList</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span> ~&gt; <span style="color: #6b8e23;">List</span> <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> (a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=&gt;</span> a.toList
-
+  
   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">forall b c. (Option b, Option c) -&gt; (forall a. Option a -&gt; List a) -&gt; (List b, List c)</span>
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">tupledOptionToList</span>[<span style="color: #6b8e23;">B</span>,<span style="color: #6b8e23;">C</span>](a<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">B</span>], <span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">C</span>]), fnk<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span> ~&gt; <span style="color: #6b8e23;">List</span>)<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">List</span>[<span style="color: #6b8e23;">B</span>], <span style="color: #6b8e23;">List</span>[<span style="color: #6b8e23;">C</span>]) <span style="color: #00008b;">=</span>
       (fnk(a._1), fnk(a._2))
-
+  
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">main</span>(args<span style="color: #00008b;">:</span> <span style="color: #36648b;">Array</span>[<span style="color: #6b8e23;">String</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Unit</span> <span style="color: #00008b;">=</span> {
     println(
       tupledOptionToList((<span style="color: #6b8e23;">Some</span>(<span style="color: #6b8e23;">1</span>), <span style="color: #6b8e23;">Some</span>(<span style="color: #8b0000;">"2"</span>)), optionToList)
     )
   }
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 不需任何cats, 是可以完美编译运行的.
@@ -199,7 +171,7 @@ for the JavaScript code in this tag.
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2020-03-22 Sun 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

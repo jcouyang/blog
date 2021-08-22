@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-16 Mon 09:21 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dependent Types in Scala 3</title>
@@ -22,50 +22,26 @@
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -143,8 +119,7 @@ basically a pattern to derive output type
 </span>:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>] {
+<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>] {
   <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Out</span>
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>(value<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Out</span>
 }
@@ -157,13 +132,12 @@ basically a pattern to derive output type
 }
 
 <span style="color: #6b8e23;">Second</span>(<span style="color: #6b8e23;">1</span> :: <span style="color: #8b0000;">"2"</span> :: <span style="color: #6b8e23;">HNil</span>)
-</pre>
-</div>
+</code></pre>
 
 <p>
 will output:
 </p>
-<pre class="example">
+<pre class="example" id="orgc402bbb">
 "2"
 </pre>
 
@@ -174,11 +148,9 @@ Here <code>Second.apply</code> is actually dependent type, since you can basical
 <p>
 e.g. when the input is another HList:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #6b8e23;">Second</span>(<span style="color: #8b0000;">"1"</span> :: <span style="color: #6b8e23;">2</span> :: <span style="color: #6b8e23;">HNil</span>)
+<pre class="code"><code><span style="color: #6b8e23;">Second</span>(<span style="color: #8b0000;">"1"</span> :: <span style="color: #6b8e23;">2</span> :: <span style="color: #6b8e23;">HNil</span>)
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; 2</span>
-</pre>
-</div>
+</code></pre>
 <p>
 Output type will become <code>Int</code>.
 </p>
@@ -187,13 +159,11 @@ Output type will become <code>Int</code>.
 Actually with <i>dependent method</i>, this could be simplified as:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second</span> {
+<pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second</span> {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>, <span style="color: #6b8e23;">R</span>](l<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)(<span style="color: #228b22;">implicit</span> inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">inst</span>.<span style="color: #6b8e23;">Out</span> <span style="color: #00008b;">=</span>
     inst(l)
 }
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 
@@ -210,12 +180,10 @@ In Scala 3 it is even better, not only dependent method, we can define <i>depend
 With dependent function, it looks like:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span class="linenr">1: </span><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second</span> {
+<pre class="code"><code><span class="linenr">1: </span><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second</span> {
 <span id="coderef-implicit-lambda" class="coderef-off"><span class="linenr">2: </span>  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>](value<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>) <span style="color: #00008b;">=</span> (inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>]) ?=&gt; inst(value) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;--</span></span>
 <span class="linenr">3: </span>}
-</pre>
-</div>
+</code></pre>
 
 <p>
 <a href="#coderef-implicit-lambda" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-implicit-lambda');" onmouseout="CodeHighlightOff(this, 'coderef-implicit-lambda');"><code>?=&gt;</code> in line 2</a> <label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
@@ -226,11 +194,9 @@ With dependent function, it looks like:
 <p>
 If we add the type for the function it will be like:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>](value<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)<span style="color: #00008b;">:</span> (inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>]) ?=&gt; inst.<span style="color: #6b8e23;">Out</span> <span style="color: #00008b;">=</span>
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>](value<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)<span style="color: #00008b;">:</span> (inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>]) ?=&gt; inst.<span style="color: #6b8e23;">Out</span> <span style="color: #00008b;">=</span>
  (inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>]) ?=&gt; inst(value)
-</pre>
-</div>
+</code></pre>
 </div>
 
 <div id="outline-container-orgd447989" class="outline-3">
@@ -244,14 +210,12 @@ Ok, there is another problem though, so why do we need Aux pattern anymore if de
 If we need to implement a 2 dimensional <code>Second</code>, which means it will take the second element's second element.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second2D</span> {
+<pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second2D</span> {
   <span style="color: #00008b;">import</span> <span style="color: #6b8e23;">Second</span>.<span style="color: #6b8e23;">Aux</span>
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>, <span style="color: #6b8e23;">R</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>, <span style="color: #6b8e23;">R2</span>](l<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)(<span style="color: #228b22;">implicit</span> inst1D<span style="color: #00008b;">:</span> <span style="color: #36648b;">Aux</span>[<span style="color: #6b8e23;">L</span>, <span style="color: #6b8e23;">R</span>], inst2D<span style="color: #00008b;">:</span> <span style="color: #36648b;">Aux</span>[<span style="color: #6b8e23;">R</span>, <span style="color: #6b8e23;">R2</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">R2</span> <span style="color: #00008b;">=</span>
     inst2D(inst1D(l))
 }
-</pre>
-</div>
+</code></pre>
 
 
 <p>
@@ -261,18 +225,16 @@ The <code>inst1D</code> depends on the input type <code>L</code>, <code>inst2D</
 <p>
 See what happen if we try to transform this to dependent method:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second2D</span> {
+<pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second2D</span> {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>](l<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)(<span style="color: #228b22;">implicit</span> inst1D<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>], inst2D<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[inst1D.<span style="color: #6b8e23;">Out</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">inst2D</span>.<span style="color: #6b8e23;">Out</span> <span style="color: #00008b;">=</span>
     inst2D(inst1D(l))
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 You got a compile error:
 </p>
-<pre class="example">
+<pre class="example" id="org8b36afe">
 Type argument inst1D.Out does not conform to upper bound shapeless.HList 
 </pre>
 
@@ -319,7 +281,7 @@ basically a pattern to derive output type
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2020-06-07 Sun 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

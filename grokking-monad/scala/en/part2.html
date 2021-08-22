@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2021-08-16 Mon 09:20 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grokking Monad in Scala</title>
 <meta name="generator" content="Org mode">
-<meta name="author" content="root">
+<meta name="author" content="unknown">
 <meta name="description" content="Type classes and some Monads"
 >
 <link rel="icon" href="/favicon.ico">
@@ -21,50 +21,26 @@
 <meta property="og:type" content="article" />
 <meta content="https://static-2.gumroad.com/res/gumroad/1806288866681/asset_previews/dd7001d38dd3151e4f02f72579258e2f/retina/don_27t_20wish_20for_20it.work_20for_20it..png" property="og:image">
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -89,12 +65,12 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org238d232">Type classes</a>
+<li><a href="#orgdc356d3">Type classes</a>
 <ul>
 <li><a href="#org341891f">Algebraic Data Type</a></li>
 <li><a href="#org37e9dc3">Recursive Data Type</a></li>
 <li><a href="#org0be981a">Variance</a></li>
-<li><a href="#orgdc356d3">Type classes</a></li>
+<li><a href="#org89ab61f">Type classes</a></li>
 <li><a href="#orgc1b2f83">Type enrichment</a></li>
 </ul>
 </li>
@@ -149,9 +125,9 @@ you can actually run <code>sbt testOnly *&lt;className&gt;</code> to finish thes
 
 </blockquote></div>
 
-<div id="outline-container-org238d232" class="outline-2">
-<h2 id="org238d232">Type classes</h2>
-<div class="outline-text-2" id="text-org238d232">
+<div id="outline-container-orgdc356d3" class="outline-2">
+<h2 id="orgdc356d3">Type classes</h2>
+<div class="outline-text-2" id="text-orgdc356d3">
 <p>
 Type classes is somewhat like an FP design pattern, with type classes
 you can extend new functionality without touch any of your existing
@@ -199,6 +175,14 @@ But FP has pretty elegant [way](<a href="https://oleksandrmanzyuk.wordpress.com/
 <div id="outline-container-org341891f" class="outline-3">
 <h3 id="org341891f">Algebraic Data Type</h3>
 <div class="outline-text-3" id="text-org341891f">
+<pre class="code"><code><span style="color: #00008b;">package</span> <span style="color: #8b0000;">typeclass</span>
+
+<span style="color: #00008b;">import</span> org.scalatest.<span style="color: #00008b;">_</span>
+
+<span style="color: #00008b;">class</span> <span style="color: #36648b;">`2.1.ADT`</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">FlatSpec</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">Matchers</span> {
+
+</code></pre>
+
 <p>
 We all familiar with how to implement traffic light in OO with class and interface. Simply 3 classes Red Green Yellow extend a TrafficLight interface, and implement <code>next</code>
 method in each of the 3 classes.
@@ -208,16 +192,14 @@ method in each of the 3 classes.
 But how can we do differently with Scala <code>trait</code> and <code>pattern matching</code>?
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">behavior of <span style="color: #8b0000;">"TrafficLight"</span>
+<pre class="code"><code>behavior of <span style="color: #8b0000;">"TrafficLight"</span>
 
 it should <span style="color: #8b0000;">"follow the rules"</span> in {
   <span style="color: #6b8e23;">Red</span>.next shouldBe <span style="color: #6b8e23;">Green</span>
   <span style="color: #6b8e23;">Green</span>.next shouldBe <span style="color: #6b8e23;">Yellow</span>
   <span style="color: #6b8e23;">Yellow</span>.next shouldBe <span style="color: #6b8e23;">Red</span>
 }
-</pre>
-</div>
+</code></pre>
 
 
 <p>
@@ -227,19 +209,28 @@ The other algebra is <code>x</code>, we've already tried <code>case class</code>
 e.g. Cat is product type because it's <code>String x String</code>. You also can simply translate <code>+</code> as <code>or</code> and <code>x</code> as <code>and</code>
 then it will make more sense.
 </p>
+
+<pre class="code"><code>}
+</code></pre>
 </div>
 </div>
 
 <div id="outline-container-org37e9dc3" class="outline-3">
 <h3 id="org37e9dc3">Recursive Data Type</h3>
 <div class="outline-text-3" id="text-org37e9dc3">
+<pre class="code"><code><span style="color: #00008b;">package</span> <span style="color: #8b0000;">typeclass</span>
+
+<span style="color: #00008b;">import</span> org.scalatest.<span style="color: #00008b;">_</span>
+
+<span style="color: #00008b;">class</span> <span style="color: #36648b;">`2.2.RecursiveDataType`</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">FlatSpec</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">Matchers</span> {
+</code></pre>
+
 <p>
 with ADT it's very easy to implement a linked list in Scala as well.
 Try using sum and product type to implement a <code>LinkedList</code>. Type can be recursive as well.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">behavior of <span style="color: #8b0000;">"LinkedList of 2 elements"</span>
+<pre class="code"><code>behavior of <span style="color: #8b0000;">"LinkedList of 2 elements"</span>
 
 it should <span style="color: #8b0000;">"be able to get first"</span> in {
   <span style="color: #6b8e23;">Pair</span>(<span style="color: #6b8e23;">1</span>, <span style="color: #6b8e23;">Pair</span>(<span style="color: #6b8e23;">2</span>, <span style="color: #6b8e23;">End</span>()))(<span style="color: #6b8e23;">0</span>) shouldBe <span style="color: #6b8e23;">1</span>
@@ -252,8 +243,10 @@ it should <span style="color: #8b0000;">"be able to get second element"</span> i
 it should <span style="color: #8b0000;">"throw error Out of Boundary exception if try to get 3rd"</span> in {
   the[<span style="color: #6b8e23;">Exception</span>] thrownBy <span style="color: #6b8e23;">Pair</span>(<span style="color: #6b8e23;">1</span>, <span style="color: #6b8e23;">Pair</span>(<span style="color: #6b8e23;">2</span>, <span style="color: #6b8e23;">End</span>()))(<span style="color: #6b8e23;">2</span>) should have message <span style="color: #8b0000;">"Out of Boundary"</span>
 }
-</pre>
-</div>
+</code></pre>
+
+<pre class="code"><code>}
+</code></pre>
 </div>
 </div>
 
@@ -269,18 +262,15 @@ just need one instance of <code>End</code>.
 Try changing it into <code>case object</code>, uncomment the following case and fix the compiler errors.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">package</span> <span style="color: #8b0000;">typeclass</span>
+<pre class="code"><code><span style="color: #00008b;">package</span> <span style="color: #8b0000;">typeclass</span>
 
 <span style="color: #00008b;">import</span> org.scalatest.<span style="color: #00008b;">_</span>
 
 <span style="color: #00008b;">class</span> <span style="color: #36648b;">`2.3.Variance`</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">FlatSpec</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">Matchers</span> {
 
-</pre>
-</div>
+</code></pre>
 
-<div class="org-src-container">
-<pre class="src src-scala">behavior of <span style="color: #8b0000;">"Covarian LinkedList"</span>
+<pre class="code"><code>behavior of <span style="color: #8b0000;">"Covarian LinkedList"</span>
 
 it should <span style="color: #8b0000;">"have the same behaviors as LinkedList"</span> in {
   pending
@@ -289,8 +279,7 @@ it should <span style="color: #8b0000;">"have the same behaviors as LinkedList"<
   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">the [Exception] thrownBy CoPair(1, CoPair(2, CoEnd))(2) should have message "Out of Boundary"</span>
 }
 
-</pre>
-</div>
+</code></pre>
 
 <p>
 The way you fix the compiler error is called <b>Covarian</b>, which means if <code>B</code> is <code>A</code>'s subtype, <code>CoLinkedList[B]</code>
@@ -300,12 +289,16 @@ is then <code>CoLinkedList[A]</code>'s subtype
 <p>
 Here <code>Nothing</code> is subtype of any type, since <code>A</code> is covariance, <code>End</code> of type <code>CoLinkedList[Nothing]</code> become subtype of <code>CoLinkedList[A]</code>
 </p>
+
+<pre class="code"><code>}
+</code></pre>
 </div>
 </div>
 
-<div id="outline-container-orgdc356d3" class="outline-3">
-<h3 id="orgdc356d3">Type classes</h3>
-<div class="outline-text-3" id="text-orgdc356d3">
+
+<div id="outline-container-org89ab61f" class="outline-3">
+<h3 id="org89ab61f">Type classes</h3>
+<div class="outline-text-3" id="text-org89ab61f">
 <p>
 <code>Person</code> is a simple case class, when we want to print it nicely as JSON format, what we usually does is to create a
 interface e.g. <code>JsonWriter</code> with method <code>toJson</code> and implements it in <code>Person</code>. But if you think about it, if we need
@@ -321,8 +314,14 @@ in type class, and then implicitly implement the type class for <code>Person</co
 Now try not touching class <code>Person</code> and let it able to print as JSON and sortable by name.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">behavior of <span style="color: #8b0000;">"Person"</span>
+<pre class="code"><code><span style="color: #00008b;">package</span> <span style="color: #8b0000;">typeclass</span>
+
+<span style="color: #00008b;">import</span> org.scalatest.<span style="color: #00008b;">_</span>
+
+<span style="color: #00008b;">class</span> <span style="color: #36648b;">`2.4.TypeClasses`</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">FlatSpec</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">Matchers</span> {
+</code></pre>
+
+<pre class="code"><code>behavior of <span style="color: #8b0000;">"Person"</span>
 
 it should <span style="color: #8b0000;">"able to convert to JSON"</span> in {
   <span style="color: #6b8e23;">JsonWriter</span>.write(<span style="color: #6b8e23;">Person</span>(<span style="color: #8b0000;">"o"</span>, <span style="color: #8b0000;">"oyanglulu@gmail.com"</span>)) shouldBe <span style="color: #8b0000;">"""{"name": "o", "email": "oyanglulu@gmail.com"}"""</span>
@@ -337,15 +336,13 @@ it should <span style="color: #8b0000;">"able to sort by name"</span> in {
     <span style="color: #6b8e23;">Person</span>(<span style="color: #8b0000;">"b"</span>, <span style="color: #8b0000;">"c"</span>))
 }
 
-</pre>
-</div>
+</code></pre>
 
 <p>
 It's easy to add the same behavior to any other type as well.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">behavior of <span style="color: #8b0000;">"Cat"</span>
+<pre class="code"><code>behavior of <span style="color: #8b0000;">"Cat"</span>
 it should <span style="color: #8b0000;">"able to convert to JSON"</span> in {
   <span style="color: #6b8e23;">JsonWriter</span>.write(<span style="color: #6b8e23;">Cat</span>(<span style="color: #8b0000;">"Garfield"</span>, <span style="color: #8b0000;">"coke"</span>)) shouldBe <span style="color: #8b0000;">"""{"name": "Garfield", "food": "coke"}"""</span>
 }
@@ -355,8 +352,10 @@ behavior of <span style="color: #8b0000;">"CatPerson"</span>
 it should <span style="color: #8b0000;">"be very easy to convert to JSON"</span> in {
   <span style="color: #6b8e23;">JsonWriter</span>.write(<span style="color: #6b8e23;">CatPerson</span>(<span style="color: #6b8e23;">Person</span>(<span style="color: #8b0000;">"a"</span>, <span style="color: #8b0000;">"b"</span>), <span style="color: #6b8e23;">Cat</span>(<span style="color: #8b0000;">"Garfield"</span>, <span style="color: #8b0000;">"chips"</span>))) shouldBe <span style="color: #8b0000;">"""{"person":{"name": "a", "email": "b"},"cat":{"name": "Garfield", "food": "chips"}}"""</span>
 }
-</pre>
-</div>
+</code></pre>
+
+<pre class="code"><code>}
+</code></pre>
 </div>
 </div>
 
@@ -367,20 +366,25 @@ it should <span style="color: #8b0000;">"be very easy to convert to JSON"</span>
 With implicit class, you can magically add methods to any Type
 </p>
 
+<pre class="code"><code><span style="color: #00008b;">package</span> <span style="color: #8b0000;">typeclass</span>
+
+<span style="color: #00008b;">import</span> org.scalatest.<span style="color: #00008b;">_</span>
+
+<span style="color: #00008b;">class</span> <span style="color: #36648b;">`2.5.TypeEnrichment`</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">FlatSpec</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">Matchers</span> {
+</code></pre>
+
 <p>
 For example to add a new method <code>numberOfVowels</code> to <code>String</code> type, we can simply define
 a implicit class, and add the method there
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">ExtraStringMethods</span>(str<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) {
+<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">ExtraStringMethods</span>(str<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) {
   <span style="color: #00008b;">val</span> <span style="color: #b8860b;">vowels</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Seq</span>(<span style="color: #8b0000;">'a'</span>, <span style="color: #8b0000;">'e'</span>, <span style="color: #8b0000;">'i'</span>, <span style="color: #8b0000;">'o'</span>, <span style="color: #8b0000;">'u'</span>)
 
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">numberOfVowels</span> <span style="color: #00008b;">=</span>
     str.toList.filter(vowels contains <span style="color: #00008b;">_</span>).length
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 When you do <code>"the quick brown fox".numberOfVowels</code>, Scala compiler can't find <code>numberOfVowels</code>
@@ -390,32 +394,31 @@ an instance of <code>ExtraStringMethods</code> from string "the quick brown fox"
 will just work like it's builtin implemented method of <code>String</code> type.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">it should <span style="color: #8b0000;">"able to use `writeJson` method"</span> in {
+<pre class="code"><code>it should <span style="color: #8b0000;">"able to use `writeJson` method"</span> in {
   <span style="color: #6b8e23;">CatPerson</span>(
     <span style="color: #6b8e23;">Person</span>(<span style="color: #8b0000;">"oyjc"</span>, <span style="color: #8b0000;">"oyanglulu@gmail.com"</span>),
     <span style="color: #6b8e23;">Cat</span>(<span style="color: #8b0000;">"Hello Kitty"</span>, <span style="color: #8b0000;">"rainbow"</span>)).writeJson shouldBe <span style="color: #8b0000;">"""{"person":{"name": "oyjc", "email": "oyanglulu@gmail.com"},"cat":{"name": "Hello Kitty", "food": "rainbow"}}"""</span>
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 But, it's not generic enough, we still need to implement <code>Cat.writeJson</code> and <code>Person.writeJson</code>.
 How can we have a generic <code>writeJson</code> method which automatically works for all <code>JsonWrite[_]</code> type
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #8b0000;">"Cat and Person"</span> should <span style="color: #8b0000;">"also be able to use `writeJson` without any changes"</span> in {
+<pre class="code"><code><span style="color: #8b0000;">"Cat and Person"</span> should <span style="color: #8b0000;">"also be able to use `writeJson` without any changes"</span> in {
   <span style="color: #00008b;">import</span> <span style="color: #6b8e23;">JsonWriter</span>.<span style="color: #6b8e23;">Ops</span>
   <span style="color: #6b8e23;">Cat</span>(<span style="color: #8b0000;">"Garfield"</span>, <span style="color: #8b0000;">"chips"</span>).writeJson shouldBe <span style="color: #8b0000;">"""{"name": "Garfield", "food": "chips"}"""</span>
   <span style="color: #6b8e23;">Person</span>(<span style="color: #8b0000;">"Philip"</span>, <span style="color: #8b0000;">"Fry"</span>).writeJson shouldBe <span style="color: #8b0000;">"""{"name": "Philip", "email": "Fry"}"""</span>
 }
-</pre>
-</div>
-</div>
-</div>
-</div>
+</code></pre>
 
+
+<pre class="code"><code>}
+</code></pre>
+</div>
+</div>
+</div>
 
 <div id="outline-container-orgacb9cde" class="outline-2">
 <h2 id="orgacb9cde">Monad</h2>
@@ -424,6 +427,14 @@ How can we have a generic <code>writeJson</code> method which automatically work
 <div id="outline-container-org4fb10f0" class="outline-3">
 <h3 id="org4fb10f0">Functor</h3>
 <div class="outline-text-3" id="text-org4fb10f0">
+<pre class="code"><code><span style="color: #00008b;">package</span> <span style="color: #8b0000;">monad</span>
+
+<span style="color: #00008b;">import</span> cats.<span style="color: #6b8e23;">Functor</span>
+<span style="color: #00008b;">import</span> cats.syntax.functor.<span style="color: #00008b;">_</span>
+<span style="color: #00008b;">import</span> org.scalatest.<span style="color: #00008b;">_</span>
+
+<span style="color: #00008b;">class</span> <span style="color: #36648b;">`3.1.Functor`</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">AsyncFlatSpec</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">Matchers</span> {
+</code></pre>
 <p>
 Function is a Typeclass that generic abstract the <code>map</code> behavior.
 </p>
@@ -433,8 +444,7 @@ If we map a function to a List, it will apply the function to each of it's eleme
 new List. What if we need to map a function to our own custom data type, for example: Tree
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">behavior of <span style="color: #8b0000;">"Tree"</span>
+<pre class="code"><code>behavior of <span style="color: #8b0000;">"Tree"</span>
 
 it should <span style="color: #8b0000;">"able to be map"</span> in {
   <span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">Tree</span>].map(<span style="color: #6b8e23;">Branch</span>(<span style="color: #6b8e23;">Leaf</span>(<span style="color: #6b8e23;">1</span>), <span style="color: #6b8e23;">Leaf</span>(<span style="color: #6b8e23;">2</span>)))(<span style="color: #00008b;">_</span> * <span style="color: #6b8e23;">2</span>) shouldBe <span style="color: #6b8e23;">Branch</span>(<span style="color: #6b8e23;">Leaf</span>(<span style="color: #6b8e23;">2</span>),
@@ -449,8 +459,7 @@ it should <span style="color: #8b0000;">"have implicit map method automatically"
   branch(leaf(<span style="color: #6b8e23;">1</span>), branch(leaf(<span style="color: #6b8e23;">3</span>), leaf(<span style="color: #6b8e23;">4</span>)))
     .map(<span style="color: #00008b;">_</span> * <span style="color: #6b8e23;">3</span>) shouldBe <span style="color: #6b8e23;">Branch</span>(<span style="color: #6b8e23;">Leaf</span>(<span style="color: #6b8e23;">3</span>), <span style="color: #6b8e23;">Branch</span>(<span style="color: #6b8e23;">Leaf</span>(<span style="color: #6b8e23;">9</span>), <span style="color: #6b8e23;">Leaf</span>(<span style="color: #6b8e23;">12</span>)))
 }
-</pre>
-</div>
+</code></pre>
 </div>
 <div id="outline-container-org1dc9598" class="outline-4">
 <h4 id="org1dc9598">Contravariant Functor</h4>
@@ -480,40 +489,46 @@ and you can convert B to A with function <code>B =&gt; A</code>, than you can sa
 Now please implement <code>boxPrintable</code> using <code>contracmap</code> and the next spec shall pass.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">behavior of <span style="color: #8b0000;">"Printable"</span>
+<pre class="code"><code>behavior of <span style="color: #8b0000;">"Printable"</span>
 
 it should <span style="color: #8b0000;">"print anything that can be converted to string or int"</span> in {
   <span style="color: #6b8e23;">Printable</span>.format(<span style="color: #6b8e23;">Box</span>(<span style="color: #8b0000;">"hill"</span>)) shouldBe <span style="color: #8b0000;">"</span><span style="color: #6b8e23;">\"</span><span style="color: #8b0000;">hill</span><span style="color: #6b8e23;">\"</span><span style="color: #8b0000;">"</span>
   <span style="color: #6b8e23;">Printable</span>.format(<span style="color: #6b8e23;">Box</span>(<span style="color: #6b8e23;">true</span>)) shouldBe <span style="color: #8b0000;">"yes"</span>
 }
-</pre>
-</div>
-</div>
-</div>
-</div>
+</code></pre>
 
+<pre class="code"><code>}
+</code></pre>
+</div>
+</div>
+</div>
 <div id="outline-container-org2545482" class="outline-3">
 <h3 id="org2545482">Identity Monad</h3>
 <div class="outline-text-3" id="text-org2545482">
+<pre class="code"><code><span style="color: #00008b;">package</span> <span style="color: #8b0000;">monad</span>
+
+<span style="color: #00008b;">import</span> cats.{<span style="color: #6b8e23;">Monad</span>, <span style="color: #6b8e23;">Id</span>}
+<span style="color: #00008b;">import</span> cats.instances.future.<span style="color: #00008b;">_</span>
+<span style="color: #00008b;">import</span> org.scalatest.<span style="color: #00008b;">_</span>
+<span style="color: #00008b;">import</span> scala.concurrent.<span style="color: #6b8e23;">Future</span>
+
+<span style="color: #00008b;">class</span> <span style="color: #36648b;">`3.2.IdentityMonad`</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">AsyncFlatSpec</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">Matchers</span> {
+</code></pre>
+
 <p>
 Monad is also a Functor, but with two more method <code>pure</code> and <code>flatMap</code>.
 The simplest Monad is Id Monad, which has type:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Id</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">A</span>
-</pre>
-</div>
+<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Id</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">A</span>
+</code></pre>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">a</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Monad</span>[<span style="color: #6b8e23;">Id</span>].pure(<span style="color: #6b8e23;">3</span>)
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">a</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Monad</span>[<span style="color: #6b8e23;">Id</span>].pure(<span style="color: #6b8e23;">3</span>)
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">a: cats.Id[Int] = 3</span>
 
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">b</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Monad</span>[<span style="color: #6b8e23;">Id</span>].flatMap(a)(<span style="color: #00008b;">_</span> + <span style="color: #6b8e23;">1</span>)
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">b: cats.Id[Int] = 4</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 type of <code>a</code> is equal to <code>Int</code> as well
@@ -524,20 +539,17 @@ It seems simple but it's actually very powerful and usaful because a is now a Mo
 which means you can <code>map</code> or <code>flatMap</code> it just like any Monad.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">for</span> {
+<pre class="code"><code><span style="color: #00008b;">for</span> {
   x <span style="color: #00008b;">&lt;-</span> a
   y <span style="color: #00008b;">&lt;-</span> b
 } <span style="color: #00008b;">yield</span> x + y
-</pre>
-</div>
+</code></pre>
 
 <p>
 Now let's implement a generic <code>sumSquare</code> function to see how useful is <code>Id</code>
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">behavior of <span style="color: #8b0000;">"Id Monad"</span>
+<pre class="code"><code>behavior of <span style="color: #8b0000;">"Id Monad"</span>
 
 it should <span style="color: #8b0000;">"able to calculate sum square of Future values"</span> in {
   <span style="color: #6b8e23;">IdMonad</span>.sumSquare(<span style="color: #6b8e23;">Future</span>(<span style="color: #6b8e23;">3</span>), <span style="color: #6b8e23;">Future</span>(<span style="color: #6b8e23;">4</span>)) map { result <span style="color: #00008b;">=&gt;</span>
@@ -547,23 +559,23 @@ it should <span style="color: #8b0000;">"able to calculate sum square of Future 
 it should <span style="color: #8b0000;">"able to use Id monad to lower the type level and verify the calculation logic much more easier"</span> in {
   <span style="color: #6b8e23;">IdMonad</span>.sumSquare(<span style="color: #6b8e23;">Monad</span>[<span style="color: #6b8e23;">Id</span>].pure(<span style="color: #6b8e23;">3</span>), <span style="color: #6b8e23;">Monad</span>[<span style="color: #6b8e23;">Id</span>].pure(<span style="color: #6b8e23;">4</span>)) shouldBe <span style="color: #6b8e23;">25</span>
 }
-</pre>
-</div>
+</code></pre>
+
+<pre class="code"><code>}
+</code></pre>
 </div>
 </div>
 
 <div id="outline-container-orgc0d163a" class="outline-3">
 <h3 id="orgc0d163a">Reader Writer Monad</h3>
 <div class="outline-text-3" id="text-orgc0d163a">
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">package</span> <span style="color: #8b0000;">monad</span>
+<pre class="code"><code><span style="color: #00008b;">package</span> <span style="color: #8b0000;">monad</span>
 
 <span style="color: #00008b;">import</span> org.scalatest.<span style="color: #00008b;">_</span>
 <span style="color: #00008b;">import</span> scala.concurrent.<span style="color: #6b8e23;">Future</span>
 
 <span style="color: #00008b;">class</span> <span style="color: #36648b;">`3.3.ReaderWriter`</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">AsyncFlatSpec</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">Matchers</span> {
-</pre>
-</div>
+</code></pre>
 </div>
 <div id="outline-container-org111f0ed" class="outline-4">
 <h4 id="org111f0ed">Writer Monad</h4>
@@ -573,14 +585,12 @@ Writer monad is very useful for logging, especially in a concurrent system, for 
  <code>factorial</code> may executed concurrently, if it's not implemented in Writer, will be something looks like this:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">factorial</span>(n<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span> <span style="color: #00008b;">=</span> {
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">factorial</span>(n<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span> <span style="color: #00008b;">=</span> {
   <span style="color: #00008b;">val</span> <span style="color: #b8860b;">ans</span> <span style="color: #00008b;">=</span> slowly(<span style="color: #00008b;">if</span>(n == <span style="color: #6b8e23;">0</span>) <span style="color: #6b8e23;">1</span> <span style="color: #00008b;">else</span> n * factorial(n - <span style="color: #6b8e23;">1</span>))
   println(s<span style="color: #8b0000;">"fact </span><span style="color: #b8860b;">$n</span><span style="color: #8b0000;"> </span><span style="color: #b8860b;">$ans</span><span style="color: #8b0000;">"</span>)
   ans
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 if you have 2 thread runs it, the logs of <code>factorial(3)</code> may interleave with <code>factorial(6)</code>, then it's hard to tell which log belongs to which calculation.
@@ -590,8 +600,7 @@ if you have 2 thread runs it, the logs of <code>factorial(3)</code> may interlea
 Please reimplement the <code>factorial</code> to return a Wrtier.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">behavior of <span style="color: #8b0000;">"Writer"</span>
+<pre class="code"><code>behavior of <span style="color: #8b0000;">"Writer"</span>
 
 it should <span style="color: #8b0000;">"logs are not interleave"</span> in {
   <span style="color: #6b8e23;">Future</span>.sequence(
@@ -612,8 +621,7 @@ it should <span style="color: #8b0000;">"logs are not interleave"</span> in {
     )
   }
 }
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 
@@ -632,12 +640,10 @@ We can simply create a <code>Reader[A, B]</code> from <code>A =&gt; B</code> usi
 <p>
 Fun facts:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">catName</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Reader</span>[<span style="color: #6b8e23;">Cat</span>, <span style="color: #6b8e23;">String</span>] <span style="color: #00008b;">=</span>
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">catName</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Reader</span>[<span style="color: #6b8e23;">Cat</span>, <span style="color: #6b8e23;">String</span>] <span style="color: #00008b;">=</span>
   <span style="color: #6b8e23;">Reader</span>(cat <span style="color: #00008b;">=&gt;</span> cat.name)
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">catName: cats.data.Reader[Cat,String] = Kleisli(&lt;function1&gt;)</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 You may found that the value of a <code>Reader</code> is <code>Kleisli</code> instead of <code>Reader</code>, actually, <code>Kleisli</code> more generic form of <code>Reader</code>
@@ -651,8 +657,7 @@ You may found that the value of a <code>Reader</code> is <code>Kleisli</code> in
 where <code>Kleisli</code> is generic type represents function <code>A =&gt; F[B]</code>.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">behavior of <span style="color: #8b0000;">"Reader"</span>
+<pre class="code"><code>behavior of <span style="color: #8b0000;">"Reader"</span>
 
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">config</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Readers</span>.<span style="color: #6b8e23;">Db</span>(
   <span style="color: #6b8e23;">Map</span>(<span style="color: #6b8e23;">1</span> -&gt; <span style="color: #8b0000;">"Jichao"</span>, <span style="color: #6b8e23;">2</span> -&gt; <span style="color: #8b0000;">"Ouyang"</span>),
@@ -669,8 +674,10 @@ it should <span style="color: #8b0000;">"check password"</span> in {
 it should <span style="color: #8b0000;">"check login"</span> in {
   <span style="color: #6b8e23;">Readers</span>.checkLogin(<span style="color: #6b8e23;">2</span>, <span style="color: #8b0000;">"dr0wss4p"</span>).run(config) shouldBe <span style="color: #6b8e23;">true</span>
 }
-</pre>
-</div>
+</code></pre>
+
+<pre class="code"><code>}
+</code></pre>
 </div>
 </div>
 </div>
@@ -689,17 +696,21 @@ Regardless it's name is <code>State</code>, it's pure functional, lazy and immut
 <p>
 Very similar to Reader, you can use <code>State.apply</code> to create a State Monad
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #6b8e23;">State</span>[<span style="color: #6b8e23;">Int</span>, <span style="color: #6b8e23;">String</span>](state <span style="color: #00008b;">=&gt;</span> (state, <span style="color: #8b0000;">"result"</span>))
-</pre>
-</div>
+<pre class="code"><code><span style="color: #6b8e23;">State</span>[<span style="color: #6b8e23;">Int</span>, <span style="color: #6b8e23;">String</span>](state <span style="color: #00008b;">=&gt;</span> (state, <span style="color: #8b0000;">"result"</span>))
+</code></pre>
 
 <p>
 the differences from <code>Reader</code> is that it return a tuple which includes the new state.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">behavior of <span style="color: #8b0000;">"State"</span>
+<pre class="code"><code><span style="color: #00008b;">package</span> <span style="color: #8b0000;">monad</span>
+
+<span style="color: #00008b;">import</span> org.scalatest.<span style="color: #00008b;">_</span>
+
+<span style="color: #00008b;">class</span> <span style="color: #36648b;">`3.4.State`</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">AsyncFlatSpec</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">Matchers</span> {
+</code></pre>
+
+<pre class="code"><code>behavior of <span style="color: #8b0000;">"State"</span>
 
 it should <span style="color: #8b0000;">"eval Int"</span> in {
   <span style="color: #6b8e23;">States</span>.evalOne(<span style="color: #8b0000;">"42"</span>).runA(<span style="color: #6b8e23;">Nil</span>).value shouldBe <span style="color: #6b8e23;">42</span>
@@ -730,37 +741,40 @@ it should <span style="color: #8b0000;">"be pure and composable"</span> in {
   } <span style="color: #00008b;">yield</span> ans
   calculator.runA(<span style="color: #6b8e23;">Nil</span>).value shouldBe <span style="color: #6b8e23;">21</span>
 }
-</pre>
-</div>
+</code></pre>
+
+<pre class="code"><code>}
+</code></pre>
 </div>
 </div>
 
 <div id="outline-container-org9591faf" class="outline-3">
 <h3 id="org9591faf">Monad Transformer</h3>
 <div class="outline-text-3" id="text-org9591faf">
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">ErrorOr</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Either</span>[<span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">A</span>]
+<pre class="code"><code><span style="color: #00008b;">package</span> <span style="color: #8b0000;">monad</span>
+
+<span style="color: #00008b;">import</span> org.scalatest.<span style="color: #00008b;">_</span>
+
+<span style="color: #00008b;">class</span> <span style="color: #36648b;">`3.5.MonadTransformer`</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">AsyncFlatSpec</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">Matchers</span> {
+</code></pre>
+
+<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">ErrorOr</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Either</span>[<span style="color: #6b8e23;">String</span>, <span style="color: #6b8e23;">A</span>]
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">ihave10</span><span style="color: #00008b;">:</span><span style="color: #36648b;">ErrorOr</span>[<span style="color: #6b8e23;">Int</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Right</span>(<span style="color: #6b8e23;">Some</span>(<span style="color: #6b8e23;">10</span>)
-</pre>
-</div>
+</code></pre>
 
 <p>
 If I just want to map <code>10</code> in side <code>Right</code> and <code>Some</code>, I have to map a function and inside which map again
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">ihave10.map(r <span style="color: #00008b;">=&gt;</span> r.map(<span style="color: #00008b;">_</span> + <span style="color: #6b8e23;">1</span>))
-</pre>
-</div>
+<pre class="code"><code>ihave10.map(r <span style="color: #00008b;">=&gt;</span> r.map(<span style="color: #00008b;">_</span> + <span style="color: #6b8e23;">1</span>))
+</code></pre>
 
 <p>
 If you have a <code>OptionT</code>, which is the Monad Transformer for <code>Option</code>, things will be lot easier
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">ihaveOneMore</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">ErrorOr</span>, <span style="color: #6b8e23;">Int</span>](ihave10).map(<span style="color: #00008b;">_</span> + <span style="color: #6b8e23;">1</span>)
-</pre>
-</div>
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">ihaveOneMore</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">ErrorOr</span>, <span style="color: #6b8e23;">Int</span>](ihave10).map(<span style="color: #00008b;">_</span> + <span style="color: #6b8e23;">1</span>)
+</code></pre>
 
 <p>
 if you map on the <code>OptionT</code>, it will transfer the <code>map</code> to the Option type inside <code>ErrorOr</code>
@@ -771,8 +785,7 @@ Please implement <code>getPowerLevel</code> to return a EitherT, you may find <a
 useful to create a EitherT.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">it should <span style="color: #8b0000;">"get Bumblebee's power lever"</span> in {
+<pre class="code"><code>it should <span style="color: #8b0000;">"get Bumblebee's power lever"</span> in {
   <span style="color: #6b8e23;">Transformer</span>.getPowerLevel(<span style="color: #8b0000;">"Bumblebee"</span>).value map { level <span style="color: #00008b;">=&gt;</span>
     level shouldEqual <span style="color: #6b8e23;">Right</span>(<span style="color: #6b8e23;">8</span>)
   }
@@ -783,16 +796,14 @@ it should <span style="color: #8b0000;">"not able to reach Smurf"</span> in {
     level shouldEqual <span style="color: #6b8e23;">Left</span>(<span style="color: #8b0000;">"Smurf unreachable"</span>)
   }
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 Two autobots can perform a special move if their combined power level is greater than 15.
 Implement <code>canSpecialMove</code> method, you'll find out why we need a Monad Transformer here.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">it should <span style="color: #8b0000;">"get special move when Bumblebee and Hot Rod together"</span> in {
+<pre class="code"><code>it should <span style="color: #8b0000;">"get special move when Bumblebee and Hot Rod together"</span> in {
   <span style="color: #6b8e23;">Transformer</span>.canSpecialMove(<span style="color: #8b0000;">"Bumblebee"</span>, <span style="color: #8b0000;">"Hot Rod"</span>).value map { level <span style="color: #00008b;">=&gt;</span>
     level shouldEqual <span style="color: #6b8e23;">Right</span>(<span style="color: #6b8e23;">true</span>)
   }
@@ -803,16 +814,14 @@ it should <span style="color: #8b0000;">"not get special move when Bumblebee and
     level shouldEqual <span style="color: #6b8e23;">Right</span>(<span style="color: #6b8e23;">false</span>)
   }
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 Finally, write a method tacticalReport that takes two ally names and prints a message
 saying whether they can perform a special move.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">it should <span style="color: #8b0000;">"return a nice msg when Bumblebee and Hot Rod together"</span> in {
+<pre class="code"><code>it should <span style="color: #8b0000;">"return a nice msg when Bumblebee and Hot Rod together"</span> in {
   <span style="color: #6b8e23;">Transformer</span>.tacticalReport(<span style="color: #8b0000;">"Bumblebee"</span>, <span style="color: #8b0000;">"Hot Rod"</span>) shouldBe <span style="color: #8b0000;">"Bumblebee and Hot Rod are ready to roll out!"</span>
 }
 
@@ -823,31 +832,39 @@ it should <span style="color: #8b0000;">"return a nice msg when Bumblebee and Ja
 it should <span style="color: #8b0000;">"return a error msg when Bumblebee and Smurf together"</span> in {
   <span style="color: #6b8e23;">Transformer</span>.tacticalReport(<span style="color: #8b0000;">"Bumblebee"</span>, <span style="color: #8b0000;">"Smurf"</span>) shouldBe <span style="color: #8b0000;">"Comms error: Smurf unreachable"</span>
 }
-</pre>
-</div>
+</code></pre>
+
+<pre class="code"><code>}
+</code></pre>
 </div>
 </div>
 
 <div id="outline-container-org858b215" class="outline-3">
 <h3 id="org858b215">Semigroupal a.k.a Cartesian</h3>
 <div class="outline-text-3" id="text-org858b215">
+<pre class="code"><code><span style="color: #00008b;">package</span> <span style="color: #8b0000;">monad</span>
+
+<span style="color: #00008b;">import</span> cats.<span style="color: #00008b;">_</span>
+<span style="color: #00008b;">import</span> cats.instances.option.<span style="color: #00008b;">_</span>
+<span style="color: #00008b;">import</span> org.scalatest.<span style="color: #00008b;">_</span>
+<span style="color: #00008b;">import</span> scala.concurrent.<span style="color: #6b8e23;">Future</span>
+
+<span style="color: #00008b;">class</span> <span style="color: #36648b;">`3.6.Semigroupal`</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">AsyncFlatSpec</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">Matchers</span> {
+</code></pre>
 <p>
 Semigroupal is a type class that allows us to combine contexts with method <code>product</code>
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Semigroupal</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] {
+<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Semigroupal</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">product</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>], fb<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[(<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>)]
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 If we have a <code>F[A]</code> and <code>F[B]</code>, <code>product</code> method can combine them into <code>F[(A, B)]</code>
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">behavior of <span style="color: #8b0000;">"Semigroupal"</span>
+<pre class="code"><code>behavior of <span style="color: #8b0000;">"Semigroupal"</span>
 
 it should <span style="color: #8b0000;">"join 2 contexts"</span> in {
   <span style="color: #6b8e23;">Semigroupal</span>[<span style="color: #6b8e23;">Option</span>].product(<span style="color: #6b8e23;">Some</span>(<span style="color: #6b8e23;">123</span>), <span style="color: #6b8e23;">Some</span>(<span style="color: #8b0000;">"abc"</span>)) shouldBe <span style="color: #6b8e23;">Some</span>(
@@ -857,8 +874,7 @@ it should <span style="color: #8b0000;">"join 2 contexts"</span> in {
 it should <span style="color: #8b0000;">"join 3 contexts"</span> in {
   <span style="color: #6b8e23;">Semigroupal</span>.tuple3(<span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">1</span>), <span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">2</span>), <span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">3</span>)) shouldBe <span style="color: #6b8e23;">Some</span>((<span style="color: #6b8e23;">1</span>, <span style="color: #6b8e23;">2</span>, <span style="color: #6b8e23;">3</span>))
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 Semigroupal has predefined up to tuple22, the same size as tuple.
@@ -867,26 +883,25 @@ Semigroupal has predefined up to tuple22, the same size as tuple.
 <p>
 There is also a shortcut syntax for tupleN from <code>cats.syntax.apply</code>
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">import</span> cats.syntax.apply.<span style="color: #00008b;">_</span>
+<pre class="code"><code><span style="color: #00008b;">import</span> cats.syntax.apply.<span style="color: #00008b;">_</span>
 (<span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">1</span>), <span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">2</span>), <span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">3</span>)).tupled
-</pre>
-</div>
+</code></pre>
 
 <p>
 Try create a Cat with some Future value using <code>tupled</code> and map:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">it should <span style="color: #8b0000;">"create Cat from Future value"</span> in {
+<pre class="code"><code>it should <span style="color: #8b0000;">"create Cat from Future value"</span> in {
   <span style="color: #6b8e23;">SemiNAppli</span>.createCatFromFuture(<span style="color: #6b8e23;">Future</span>(<span style="color: #8b0000;">"Garfield"</span>),
                                  <span style="color: #6b8e23;">Future</span>(<span style="color: #6b8e23;">1978</span>),
                                  <span style="color: #6b8e23;">Future</span>(<span style="color: #8b0000;">"Lasagne"</span>)) map { cat <span style="color: #00008b;">=&gt;</span>
     cat shouldBe <span style="color: #6b8e23;">Cat</span>(<span style="color: #8b0000;">"Garfield"</span>, <span style="color: #6b8e23;">1978</span>, <span style="color: #8b0000;">"Lasagne"</span>)
   }
 }
-</pre>
-</div>
+</code></pre>
+
+<pre class="code"><code>}
+</code></pre>
 </div>
 </div>
 
@@ -900,14 +915,21 @@ Hint: There is also a shortcut for <code>tupled</code> and <code>map</code> &#x2
 
 </blockquote></div>
 
+<pre class="code"><code><span style="color: #00008b;">package</span> <span style="color: #8b0000;">monad</span>
+
+<span style="color: #00008b;">import</span> cats.data.<span style="color: #6b8e23;">Validated</span>.{<span style="color: #6b8e23;">Invalid</span>, <span style="color: #6b8e23;">Valid</span>}
+<span style="color: #00008b;">import</span> org.scalatest.<span style="color: #00008b;">_</span>
+
+<span style="color: #00008b;">class</span> <span style="color: #36648b;">`3.7.Validated`</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">AsyncFlatSpec</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">Matchers</span> {
+</code></pre>
+
 <p>
 Either is a fail fast data type, which means if something goes wrong, it will skip everything
 else. But when it comes to a senario of validationg form, we would rather validate everything
 and return all invalid message at one go.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">behavior of <span style="color: #8b0000;">"create Cat from form input"</span>
+<pre class="code"><code>behavior of <span style="color: #8b0000;">"create Cat from form input"</span>
 it should <span style="color: #8b0000;">"check empty input "</span> in {
   <span style="color: #6b8e23;">SemiNAppli</span>.createCatFromForm(<span style="color: #6b8e23;">Map</span>()) shouldBe <span style="color: #6b8e23;">Invalid</span>(
     <span style="color: #6b8e23;">List</span>(<span style="color: #8b0000;">"name field not specified"</span>,
@@ -943,8 +965,10 @@ it should <span style="color: #8b0000;">"be the same as mapN"</span> in {
                           <span style="color: #8b0000;">"food"</span> -&gt; <span style="color: #8b0000;">"Lasagne"</span>)) shouldBe <span style="color: #6b8e23;">Valid</span>(
     <span style="color: #6b8e23;">Cat</span>(<span style="color: #8b0000;">"Garfield"</span>, <span style="color: #6b8e23;">1978</span>, <span style="color: #8b0000;">"Lasagne"</span>))
 }
-</pre>
-</div>
+</code></pre>
+
+<pre class="code"><code>}
+</code></pre>
 </div>
 </div>
 
@@ -956,20 +980,23 @@ All Traversable need to be Foldable, but Traversable provide a more convenient, 
 Let's say we have a list of hosts and we need to check if all of them are up and running well.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">hostnames</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">List</span>(
+<pre class="code"><code><span style="color: #00008b;">package</span> <span style="color: #8b0000;">monad</span>
+
+<span style="color: #00008b;">import</span> org.scalatest.<span style="color: #00008b;">_</span>
+
+<span style="color: #00008b;">class</span> <span style="color: #36648b;">`3.8.Traverse`</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">AsyncFlatSpec</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">Matchers</span> {
+</code></pre>
+
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">hostnames</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">List</span>(
   <span style="color: #8b0000;">"alpha.example.com"</span>,
   <span style="color: #8b0000;">"beta.example.com"</span>,
   <span style="color: #8b0000;">"gamma.demo.com"</span>
 )
-</pre>
-</div>
+</code></pre>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">getUptime</span>(hostname<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Future</span>[<span style="color: #6b8e23;">Int</span>] <span style="color: #00008b;">=</span>
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">getUptime</span>(hostname<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Future</span>[<span style="color: #6b8e23;">Int</span>] <span style="color: #00008b;">=</span>
   <span style="color: #6b8e23;">Future</span>(hostname.length * <span style="color: #6b8e23;">60</span>)
-</pre>
-</div>
+</code></pre>
 
 <p>
 How would you implement a <code>allUptimes</code> method to fetch each of the server and then return a <code>Future[List[Int]]</code>?
@@ -978,8 +1005,7 @@ How would you implement a <code>allUptimes</code> method to fetch each of the se
 <p>
 We could fold the list from Future of course
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">allUptimes</span>(hosts<span style="color: #00008b;">:</span> <span style="color: #36648b;">List</span>[<span style="color: #6b8e23;">String</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Future</span>[<span style="color: #6b8e23;">List</span>[<span style="color: #6b8e23;">Int</span>]] <span style="color: #00008b;">=</span> {
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">allUptimes</span>(hosts<span style="color: #00008b;">:</span> <span style="color: #36648b;">List</span>[<span style="color: #6b8e23;">String</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Future</span>[<span style="color: #6b8e23;">List</span>[<span style="color: #6b8e23;">Int</span>]] <span style="color: #00008b;">=</span> {
     hosts.foldLeft(<span style="color: #6b8e23;">Future</span>(<span style="color: #6b8e23;">List</span>.empty[<span style="color: #6b8e23;">Int</span>])) {
       (accum, host) <span style="color: #00008b;">=&gt;</span>
       <span style="color: #00008b;">val</span> <span style="color: #b8860b;">uptime</span> <span style="color: #00008b;">=</span> getUptime(host)
@@ -989,8 +1015,7 @@ We could fold the list from Future of course
       } <span style="color: #00008b;">yield</span> accum :+ uptime
     }
   }
-</pre>
-</div>
+</code></pre>
 
 <p>
 If we can traverse the list with <code>String =&gt; Future[Int]</code>, it would be much more concise and eligant.
@@ -1003,24 +1028,20 @@ Hint: using <code>Future.traverse</code>
 
 </blockquote></div>
 
-<div class="org-src-container">
-<pre class="src src-scala">behavior of <span style="color: #8b0000;">"Uptime robot"</span>
+<pre class="code"><code>behavior of <span style="color: #8b0000;">"Uptime robot"</span>
 
 it should <span style="color: #8b0000;">"check each host's uptime"</span> in {
   <span style="color: #6b8e23;">UptimeRobot</span>.allUptimes(hostnames) map { result <span style="color: #00008b;">=&gt;</span>
     result shouldBe <span style="color: #6b8e23;">List</span>(<span style="color: #6b8e23;">1020</span>, <span style="color: #6b8e23;">960</span>, <span style="color: #6b8e23;">840</span>)
   }
 }
-</pre>
-</div>
+</code></pre>
 <p>
 With traverse and identity, you can easily just create another very useful function <code>sequence</code>
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">sequence</span>[<span style="color: #6b8e23;">G</span>[<span style="color: #00008b;">_</span>]<span style="color: #00008b;">:</span> <span style="color: #36648b;">Applicative</span>, <span style="color: #6b8e23;">B</span>](inputs<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">G</span>[<span style="color: #6b8e23;">B</span>]])<span style="color: #00008b;">:</span> <span style="color: #36648b;">G</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">B</span>]]  <span style="color: #00008b;">=</span> traverse(inputs)(identity)
-</pre>
-</div>
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">sequence</span>[<span style="color: #6b8e23;">G</span>[<span style="color: #00008b;">_</span>]<span style="color: #00008b;">:</span> <span style="color: #36648b;">Applicative</span>, <span style="color: #6b8e23;">B</span>](inputs<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">G</span>[<span style="color: #6b8e23;">B</span>]])<span style="color: #00008b;">:</span> <span style="color: #36648b;">G</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">B</span>]]  <span style="color: #00008b;">=</span> traverse(inputs)(identity)
+</code></pre>
 
 <p>
 which is very useful e.g. you want to convert a <code>List[Future[?]]</code> to <code>Future[List[?]]</code>
@@ -1031,25 +1052,26 @@ The Uptime Robot in previous implementation was checking uptime synchronously, l
 asynchronously
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">it should <span style="color: #8b0000;">"check hosts asynchronously"</span> in {
+<pre class="code"><code>it should <span style="color: #8b0000;">"check hosts asynchronously"</span> in {
   <span style="color: #6b8e23;">UptimeRobot</span>.asyncGetUptimes(hostnames.map(<span style="color: #6b8e23;">UptimeRobot</span>.getUptime)) map {
     result <span style="color: #00008b;">=&gt;</span>
       result shouldBe <span style="color: #6b8e23;">List</span>(<span style="color: #6b8e23;">1020</span>, <span style="color: #6b8e23;">960</span>, <span style="color: #6b8e23;">840</span>)
   }
 }
-</pre>
-</div>
+</code></pre>
+
+<pre class="code"><code>}
+</code></pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org1cecf7b" class="outline-2">
+<div id="outline-container-applied-category-theory-in-scala---choice" class="outline-2">
 <h2 id="applied-category-theory-in-scala---choice">Choice</h2>
 <div class="outline-text-2" id="text-applied-category-theory-in-scala---choice">
 </div>
 
-<div id="outline-container-orgae83b0a" class="outline-3">
+<div id="outline-container-rationale" class="outline-3">
 <h3 id="rationale">Rationale</h3>
 <div class="outline-text-3" id="text-rationale">
 <p>
@@ -1074,16 +1096,14 @@ This is exactly <code>Choice</code> <i>typeclass</i> for, replacing <code>=&gt;<
 will get a <code>Choice</code>
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Choice</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>]] {
+<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Choice</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>]] {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">choice</span>(fac<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">C</span>], fbc<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">Either</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>], <span style="color: #6b8e23;">C</span>]
 }
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 
-<div id="outline-container-org10a8de7" class="outline-3">
+<div id="outline-container-applied" class="outline-3">
 <h3 id="applied">Applied</h3>
 <div class="outline-text-3" id="text-applied">
 <p>
@@ -1096,18 +1116,16 @@ Take Http4s for example:
 </p>
 </div>
 
-<div id="outline-container-org453d443" class="outline-4">
+<div id="outline-container-httproutesf" class="outline-4">
 <h4 id="httproutesf">HttpRoutes[F]</h4>
 <div class="outline-text-4" id="text-httproutesf">
 <p>
 http4s defined routes using <code>Kleisli</code>
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">HttpRoutes</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]]
+<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">HttpRoutes</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]]
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">routes</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">HttpRoutes</span>[<span style="color: #6b8e23;">F</span>] <span style="color: #00008b;">=</span> ???
-</pre>
-</div>
+</code></pre>
 
 <p>
 But before going through <code>routes</code>, most request must pass middleware to
@@ -1130,22 +1148,20 @@ So the return type of <code>middleware</code> will be like
 </div>
 </div>
 
-<div id="outline-container-orgf10c7a0" class="outline-4">
+<div id="outline-container-middlewaref" class="outline-4">
 <h4 id="middlewaref">Middleware[F]</h4>
 <div class="outline-text-4" id="text-middlewaref">
 <p>
 if we define middleware like
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Middleware</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Either</span>[<span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>]]]
+<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Middleware</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Either</span>[<span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>]]]
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">passThrough</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>.ask[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]]
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">middleware</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">Middleware</span>[<span style="color: #6b8e23;">F</span>] <span style="color: #00008b;">=</span> ???
-</pre>
-</div>
+</code></pre>
 
 
-<figure>
+<figure id="orgcd6fa3b">
 <img src="https://user-images.githubusercontent.com/1235045/61630772-ea415700-accb-11e9-9b4b-5abffa0d5bf4.png" alt="61630772-ea415700-accb-11e9-9b4b-5abffa0d5bf4.png">
 
 </figure>
@@ -1155,10 +1171,8 @@ Compose middleware and routes together is now easy thanks to <code>Kleisli</code
 has instance of <code>Choice</code>
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">middleware andThen passThrough.choice(routes)
-</pre>
-</div>
+<pre class="code"><code>middleware andThen passThrough.choice(routes)
+</code></pre>
 </div>
 </div>
 </div>
@@ -1166,13 +1180,13 @@ has instance of <code>Choice</code>
 </div>
 <div id="postamble" class="status">
 <footer>
-  <p>Author: root
+  <p>Author: unknown
     <a class="github-button" href="https://github.com/sponsors/jcouyang" data-icon="octicon-heart" aria-label="Sponsor @jcouyang on GitHub">Sponsor</a>
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2018-11-28 Wed 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

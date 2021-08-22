@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-16 Mon 09:20 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Clojure The Mini Book</title>
 <meta name="generator" content="Org mode">
-<meta name="author" content="root">
+<meta name="author" content="unknown">
 <meta name="description" content="Why we need to learn clojure and why it's so awesome"
 >
 <meta name="keywords" content="clojure,tutorial,emacs,lisp">
@@ -18,50 +18,26 @@
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -133,6 +109,15 @@ for the JavaScript code in this tag.
 </ul>
 </div>
 </nav>
+<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">;; </span><span style="color: #8c8c8c; font-style: italic;">please using cider version of ob-clojure </span>
+(<span style="color: #00008b;">require</span> '<span style="color: #6b8e23;">ob-clojure</span>)
+(<span style="color: #00008b;">require</span> '<span style="color: #6b8e23;">ob-js</span>)
+<span style="color: #8c8c8c; font-style: italic;">;;</span><span style="color: #8c8c8c; font-style: italic;">(setq org-babel-clojure-backend 'cider)</span>
+</code></pre>
+
+<pre class="example">
+cider
+</pre>
 
 <div id="outline-container-org05487fb" class="outline-2">
 <h2 id="org05487fb">我每天用括号当早饭</h2>
@@ -159,7 +144,7 @@ for the JavaScript code in this tag.
 <h4 id="orga9bfe86">lisp 是好东西</h4>
 <div class="outline-text-4" id="text-orga9bfe86">
 
-<figure>
+<figure id="org73eae19">
 <img src="./images/lisp_cycles.png" alt="lisp_cycles.png">
 
 </figure>
@@ -209,10 +194,8 @@ OO的多态的概念倒是有趣的好东西。一个函数在不同类型的参
 如果你用mac，简单的用brew安装leiningen
 </p>
 
-<div class="org-src-container">
-<pre class="src src-bash">brew install leiningen
-</pre>
-</div>
+<pre class="code"><code>brew install leiningen
+</code></pre>
 
 <p>
 clojure的编辑器我推荐使用emacs，如果你觉得emacs学习曲线太陡峭，那么<a href="http://lighttable.com/">light table</a>是个不错的选择。
@@ -231,10 +214,12 @@ clojure的编辑器我推荐使用emacs，如果你觉得emacs学习曲线太陡
 <p>
 Cojure支持全面的数字类型，甚至包括分数。
 </p>
-<div class="org-src-container">
-<pre class="src src-clojure">1/2
+<pre class="code"><code>1/2
+</code></pre>
+
+<pre class="example">
+=&gt; 1/2
 </pre>
-</div>
 </div>
 </div>
 
@@ -245,10 +230,12 @@ Cojure支持全面的数字类型，甚至包括分数。
 字符串只能用双引号定义哦，字符串的连接不再是加号，而是str
 </p>
 
-<div class="org-src-container">
-<pre class="src src-clojure">(str <span style="color: #8b0000;">"What's your name? "</span> <span style="color: #8b0000;">"I'm fine! "</span> <span style="color: #8b0000;">"thank you! "</span> <span style="color: #8b0000;">"and you?"</span>)
+<pre class="code"><code>(str <span style="color: #8b0000;">"What's your name? "</span> <span style="color: #8b0000;">"I'm fine! "</span> <span style="color: #8b0000;">"thank you! "</span> <span style="color: #8b0000;">"and you?"</span>)
+</code></pre>
+
+<pre class="example">
+=&gt; "What's your name? I'm fine! thank you! and you?"
 </pre>
-</div>
 </div>
 </div>
 
@@ -258,19 +245,24 @@ Cojure支持全面的数字类型，甚至包括分数。
 <p>
 向量是indexed的集合，用方括号初始化
 </p>
-<div class="org-src-container">
-<pre class="src src-clojure">[1 2 3 4]
+<pre class="code"><code>[1 2 3 4]
 (vector 1 2 3 4)
+</code></pre>
+
+<pre class="example">
+=&gt; [1 2 3 4]
 </pre>
-</div>
+
 
 <p>
 由于动态类型，还支持向量内的元素可以是任何类型
 </p>
-<div class="org-src-container">
-<pre class="src src-clojure">(get [1 <span style="color: #8b0000;">"2"</span> {3 <span style="color: #8b0000;">"4"</span>}] 2)
+<pre class="code"><code>(get [1 <span style="color: #8b0000;">"2"</span> {3 <span style="color: #8b0000;">"4"</span>}] 2)
+</code></pre>
+
+<pre class="example">
+=&gt; {3 "4"}
 </pre>
-</div>
 </div>
 </div>
 
@@ -280,19 +272,24 @@ Cojure支持全面的数字类型，甚至包括分数。
 <p>
 和vector类似，但是却稍微不同
 </p>
-<div class="org-src-container">
-<pre class="src src-clojure">'(1 2 3 4)
+<pre class="code"><code>'(1 2 3 4)
 (list 1 2 3 4)
+</code></pre>
+
+<pre class="example">
+=&gt; (1 2 3 4)(1 2 3 4)
 </pre>
-</div>
+
 
 <p>
 但是取元素的时候就和vector有所不同了
 </p>
-<div class="org-src-container">
-<pre class="src src-clojure">(nth '(1 2 3 4) 2)
+<pre class="code"><code>(nth '(1 2 3 4) 2)
+</code></pre>
+
+<pre class="example">
+=&gt; 3
 </pre>
-</div>
 </div>
 </div>
 
@@ -302,11 +299,13 @@ Cojure支持全面的数字类型，甚至包括分数。
 <p>
 集合也一样，元素类型可以随意
 </p>
-<div class="org-src-container">
-<pre class="src src-clojure">#{<span style="color: #8b0000;">"1"</span> 2 :3}
+<pre class="code"><code>#{<span style="color: #8b0000;">"1"</span> 2 :3}
 (set [<span style="color: #8b0000;">"1"</span> 2 :3 :3])
+</code></pre>
+
+<pre class="example">
+=&gt; #{2 "1" :3}
 </pre>
-</div>
 </div>
 </div>
 
@@ -324,14 +323,16 @@ Cojure支持全面的数字类型，甚至包括分数。
 <p>
 没有错了，那么我们其实是可以用中文和可爱的emoji编程的，虽然有点杀马特
 </p>
-<div class="org-src-container">
-<pre class="src src-clojure"><span style="color: #6b8e23;">:abc</span>
+<pre class="code"><code><span style="color: #6b8e23;">:abc</span>
 :34
 <span style="color: #6b8e23;">:&gt;_&lt;b</span>
 <span style="color: #6b8e23;">:&#20320;&#22909;</span>
 <span style="color: #6b8e23;">:&#128561;</span>
+</code></pre>
+
+<pre class="example">
+=&gt; :abc:34:&gt;_&lt;b:你好:😱
 </pre>
-</div>
 </div>
 </div>
 
@@ -345,12 +346,15 @@ map 非常简单，就像将键值对写在list里，不过需要用花括号
 <p>
 跟其他语言不一样的是key可以是任何东西，甚至是list都可以作为key
 </p>
-<div class="org-src-container">
-<pre class="src src-clojure">{<span style="color: #6b8e23;">:smile</span> &#128512;}
+<pre class="code"><code>{<span style="color: #6b8e23;">:smile</span> &#128512;}
 (get-in {<span style="color: #6b8e23;">:first-name</span> <span style="color: #8b0000;">"NiMa"</span> <span style="color: #6b8e23;">:last-name</span> <span style="color: #8b0000;">"Wang"</span> <span style="color: #6b8e23;">:&#23646;&#24615;</span> {<span style="color: #6b8e23;">:&#39068;&#20540;</span> 0 <span style="color: #6b8e23;">:&#21520;&#27133;&#33021;&#37327;</span> 100 }} [<span style="color: #6b8e23;">:&#23646;&#24615;</span> <span style="color: #6b8e23;">:&#39068;&#20540;</span>])
 
+</code></pre>
+
+<pre class="example">
+=&gt; 0
 </pre>
-</div>
+
 
 <p>
 <code>get-in</code> 通过一个path数组来找到深度的某个值。
@@ -372,15 +376,13 @@ map 非常简单，就像将键值对写在list里，不过需要用花括号
 如果在lisp里面见到单引号，那么你完全可以理解成literally后面那个东西，什么意思呢。
 </p>
 
-<div class="org-src-container">
-<pre class="src src-clojure">(<span style="color: #00008b;">let</span> [&#30007;&#31070; '(&#29579;&#23612;&#29595; &#29579;&#22823;&#38180; &#24352;&#20840;&#34507;) &#22899;&#31070; '(&#23380;&#36830;&#39034;)]
+<pre class="code"><code>(<span style="color: #00008b;">let</span> [&#30007;&#31070; '(&#29579;&#23612;&#29595; &#29579;&#22823;&#38180; &#24352;&#20840;&#34507;) &#22899;&#31070; '(&#23380;&#36830;&#39034;)]
   (first &#30007;&#31070;)<span style="color: #8c8c8c; font-style: italic;">;=&gt; &#29579;&#23612;&#29595;</span>
   (first &#22899;&#31070;)<span style="color: #8c8c8c; font-style: italic;">;=&gt; &#23380;&#36830;&#39034;</span>
   (first ['&#30007;&#31070; '&#22899;&#31070;])<span style="color: #8c8c8c; font-style: italic;">;=&gt;&#30007;&#31070;</span>
   )
 
-</pre>
-</div>
+</code></pre>
 <p>
 可以看到 <code>男神</code> <code>女神</code> 都是list，但是如果在他们前面加个单引号后，他们就变成了字面的值，他们符号本身，而不会被eval成一个list。
 </p>
@@ -404,10 +406,13 @@ map 非常简单，就像将键值对写在list里，不过需要用花括号
 <p>
 <code>def</code> 创建一个全局的绑定
 </p>
-<div class="org-src-container">
-<pre class="src src-clojure">(<span style="color: #00008b;">def</span> <span style="color: #b8860b;">a-symbol</span> 'init)
+<pre class="code"><code>(<span style="color: #00008b;">def</span> <span style="color: #b8860b;">a-symbol</span> 'init)
+</code></pre>
+
+<pre class="example">
+=&gt; #'user/a-symbol
 </pre>
-</div>
+
 
 <p>
 不管是在哪里(甚至是thread里)调用 <code>def</code> 都会创建成全局绑定
@@ -420,23 +425,19 @@ map 非常简单，就像将键值对写在list里，不过需要用花括号
 <p>
 let关键字非常有意思，在其他语言如js里虽然没有这个关键字，但是功能大致可以翻译成
 </p>
-<div class="org-src-container">
-<pre class="src src-js">(<span style="color: #00008b;">function</span>(&#30007;&#31070;,&#22899;&#31070;){
+<pre class="code"><code>(<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">&#30007;&#31070;</span>,<span style="color: #b8860b;">&#22899;&#31070;</span>){
   &#30007;&#31070;[0]
   &#22899;&#31070;[0]
 }).call(<span style="color: #6b8e23;">this</span>, [<span style="color: #8b0000;">'&#29579;&#23612;&#29595;'</span>,<span style="color: #8b0000;">'&#29579;&#22823;&#38180;'</span>,<span style="color: #8b0000;">'&#24352;&#20840;&#34507;'</span>],[<span style="color: #8b0000;">'&#23380;&#36830;&#39034;'</span>])
-</pre>
-</div>
+</code></pre>
 
 <p>
 但是js里面很少这么干，不是么。我们通常会直接。
 </p>
-<div class="org-src-container">
-<pre class="src src-js"><span style="color: #00008b;">var</span> &#30007;&#31070;=[<span style="color: #8b0000;">'&#29579;&#23612;&#29595;'</span>,<span style="color: #8b0000;">'&#29579;&#22823;&#38180;'</span>,<span style="color: #8b0000;">'&#24352;&#20840;&#34507;'</span>],&#22899;&#31070;=[<span style="color: #8b0000;">'&#23380;&#36830;&#39034;'</span>];
+<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">&#30007;&#31070;</span>=[<span style="color: #8b0000;">'&#29579;&#23612;&#29595;'</span>,<span style="color: #8b0000;">'&#29579;&#22823;&#38180;'</span>,<span style="color: #8b0000;">'&#24352;&#20840;&#34507;'</span>],<span style="color: #b8860b;">&#22899;&#31070;</span>=[<span style="color: #8b0000;">'&#23380;&#36830;&#39034;'</span>];
 &#30007;&#31070;[0];
 &#22899;&#31070;[0];
-</pre>
-</div>
+</code></pre>
 
 <p>
 用 <code>var</code> 有什么区别。当然就是scope不一样，前例中函数内部的 <code>男神</code> <code>女神</code> 两个值的绑定不会受到函数外的影响，同样也不会对外界造成任何影响。
@@ -445,14 +446,12 @@ let关键字非常有意思，在其他语言如js里虽然没有这个关键字
 <p>
 比如
 </p>
-<div class="org-src-container">
-<pre class="src src-js"><span style="color: #00008b;">var</span> &#30007;&#31070;=<span style="color: #8b0000;">'&#33899;&#33446;&#23043;'</span>;
-  (<span style="color: #00008b;">function</span>(&#30007;&#31070;,&#22899;&#31070;){
+<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">&#30007;&#31070;</span>=<span style="color: #8b0000;">'&#33899;&#33446;&#23043;'</span>;
+  (<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">&#30007;&#31070;</span>,<span style="color: #b8860b;">&#22899;&#31070;</span>){
     &#30007;&#31070;[0]; <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; &#29579;&#23612;&#29595;</span>
   }).call(<span style="color: #6b8e23;">this</span>, [<span style="color: #8b0000;">'&#29579;&#23612;&#29595;'</span>,<span style="color: #8b0000;">'&#29579;&#22823;&#38180;'</span>,<span style="color: #8b0000;">'&#24352;&#20840;&#34507;'</span>],[<span style="color: #8b0000;">'&#23380;&#36830;&#39034;'</span>])
 &#30007;&#31070;; <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; &#33899;&#33446;&#23043;</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 所以 <code>let</code> 理解成一个函数, binding其实就是参数
@@ -474,22 +473,18 @@ clojure没有statement, 全是表达式, 有了do, 可以像statement一样按�
 <p>
 clojure的数据结构都是immutable的，意味着你（如果不用macro的话）不能像其他语言一样写for循环，也不能像其他语言这样这样的&#x2026;
 </p>
-<div class="org-src-container">
-<pre class="src src-js"><span style="color: #00008b;">var</span> &#30007;&#31070;=[<span style="color: #8b0000;">'&#29579;&#23612;&#29595;'</span>,<span style="color: #8b0000;">'&#29579;&#22823;&#38180;'</span>,<span style="color: #8b0000;">'&#24352;&#20840;&#34507;'</span>]
+<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">&#30007;&#31070;</span>=[<span style="color: #8b0000;">'&#29579;&#23612;&#29595;'</span>,<span style="color: #8b0000;">'&#29579;&#22823;&#38180;'</span>,<span style="color: #8b0000;">'&#24352;&#20840;&#34507;'</span>]
 &#30007;&#31070;[0]=<span style="color: #8b0000;">'&#33899;&#33446;&#23043;'</span>
 &#30007;&#31070; <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; ['&#33899;&#33446;&#23043;','&#29579;&#22823;&#38180;','&#24352;&#20840;&#34507;']</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 后一种好解决，大不了创建一个新的 <code>男神</code> 但是for循环怎么搞？我又不能改变一个值.
 </p>
-<div class="org-src-container">
-<pre class="src src-js"><span style="color: #00008b;">var</span> <span style="color: #b8860b;">sum</span>=0;
+<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">sum</span>=0;
 <span style="color: #00008b;">for</span>(<span style="color: #00008b;">var</span> <span style="color: #b8860b;">i</span>=0; i&lt;10;i++)
   sum+=i
-</pre>
-</div>
+</code></pre>
 
 <p>
 在函数式语言中，循环和遍历都必须要通过递归来实现呢。也就是我不能改变值,但是我能利用函数递归调用重新绑定参数
@@ -498,26 +493,32 @@ clojure的数据结构都是immutable的，意味着你（如果不用macro的�
 <p>
 而在clojure中，写一个递归是如此的简单。
 </p>
-<div class="org-src-container">
-<pre class="src src-clojure">(<span style="color: #00008b;">do</span>
+<pre class="code"><code>(<span style="color: #00008b;">do</span>
   (<span style="color: #00008b;">defn</span> <span style="color: #6a5acd;">sum-to-10</span> [sum i]
     (<span style="color: #00008b;">if</span> (&gt; i 10) 
       sum
       (<span style="color: #00008b;">recur</span> (+ sum i) (inc i))))
   (sum-to-10 0 0))
+</code></pre>
+
+<pre class="example">
+=&gt; 55
 </pre>
-</div>
+
 
 <p>
 还有更简单的, 不需要定义函数的递归, 更像for循环
 </p>
-<div class="org-src-container">
-<pre class="src src-clojure">(<span style="color: #00008b;">loop</span> [sum 0 i 0]
+<pre class="code"><code>(<span style="color: #00008b;">loop</span> [sum 0 i 0]
   (<span style="color: #00008b;">if</span> (&gt; i 10)
     sum
     (<span style="color: #00008b;">recur</span> (+ sum i) (inc i))))
+</code></pre>
+
+<pre class="example">
+=&gt; 55
 </pre>
-</div>
+
 
 <p>
 recur总是会递归到离它最近的 <code>loop</code> 或者函数
@@ -536,10 +537,8 @@ recur总是会递归到离它最近的 <code>loop</code> 或者函数
 <p>
 list 是数据, 但是他是可以eval的数据, eval的过程中第一个元素就变成了函数, 啊哈哈哈, 甚至是加减乘除. 比如 <code>(+ 1 2)</code>,  你可能觉得读着别扭. 但是如果
 </p>
-<div class="org-src-container">
-<pre class="src src-clojure">(+ 1 2 3 4 5)
-</pre>
-</div>
+<pre class="code"><code>(+ 1 2 3 4 5)
+</code></pre>
 
 <p>
 所以list是可以执行的, list 也是代码, 因此 lisp 叫做 list processing 语言.
@@ -559,11 +558,13 @@ list 是数据, 但是他是可以eval的数据, eval的过程中第一个元素
 <li><p>
 用第一个元素作为函数, 后边所有元素作为参数
 </p>
-<div class="org-src-container">
-<pre class="src src-clojure">((<span style="color: #00008b;">or</span> <span style="color: #6b8e23;">nil</span> +) 1 2 (+ 3 4))
+<pre class="code"><code>((<span style="color: #00008b;">or</span> <span style="color: #6b8e23;">nil</span> +) 1 2 (+ 3 4))
 <span style="color: #8c8c8c; font-style: italic;">; </span><span style="color: #8c8c8c; font-style: italic;">=&gt; (+ 1 2 7)</span>
-</pre>
-</div></li>
+</code></pre>
+
+<pre class="example">
+=&gt; 10
+</pre></li>
 </ol>
 
 <p>
@@ -604,10 +605,12 @@ Reader的工作有些像JavaScript的 <code>JSON.parse</code>, 读取json, 转�
 macro 可以扩展一个 form 成另一种 form, 比如 <code>when</code> macro
 </p>
 
-<div class="org-src-container">
-<pre class="src src-clojure">(macroexpand '(<span style="color: #00008b;">when</span> (&gt; 1 2) (println <span style="color: #8b0000;">"you suck"</span>)))
+<pre class="code"><code>(macroexpand '(<span style="color: #00008b;">when</span> (&gt; 1 2) (println <span style="color: #8b0000;">"you suck"</span>)))
+</code></pre>
+
+<pre class="example">
+=&gt; (if (&gt; 1 2) (do (println "you suck")))
 </pre>
-</div>
 </div>
 </div>
 </div>
@@ -630,13 +633,13 @@ macro 可以扩展一个 form 成另一种 form, 比如 <code>when</code> macro
 </div>
 <div id="postamble" class="status">
 <footer>
-  <p>Author: root
+  <p>Author: unknown
     <a class="github-button" href="https://github.com/sponsors/jcouyang" data-icon="octicon-heart" aria-label="Sponsor @jcouyang on GitHub">Sponsor</a>
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2015-02-26 Thu 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

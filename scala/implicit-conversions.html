@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-16 Mon 09:20 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Implicit, to be or not to be</title>
 <meta name="generator" content="Org mode">
-<meta name="author" content="root">
+<meta name="author" content="unknown">
 <meta name="description" content="隐式转换是什么鬼"
 >
 <link rel="icon" href="/favicon.ico">
@@ -17,50 +17,26 @@
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -107,10 +83,9 @@ for the JavaScript code in this tag.
 <p>
 有时候，一加一等于 11，比如 JavaScript
 </p>
-<div class="org-src-container">
-<pre class="src src-js">1+<span style="color: #8b0000;">"1"</span>
-</pre>
-</div>
+<pre class="code"><code>1+<span style="color: #8b0000;">"1"</span>
+</code></pre>
+
 <p>
 "11"
 </p>
@@ -127,10 +102,13 @@ for the JavaScript code in this tag.
 奇怪的是 scala 是强类型语言，1+"1" 编译器居然也是过的
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #6b8e23;">1</span> + <span style="color: #8b0000;">"1"</span>
+<pre class="code"><code><span style="color: #6b8e23;">1</span> + <span style="color: #8b0000;">"1"</span>
+</code></pre>
+
+<pre class="example">
+11
 </pre>
-</div>
+
 
 <p>
 怎么做到的？
@@ -144,12 +122,10 @@ for the JavaScript code in this tag.
 <p>
 如果你用的IntelliJ，光标在 <code>+</code> 号上，按 <code>cmd</code> + <code>b</code> ，就会跳转到这样一坨代码：
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #228b22;">implicit</span> <span style="color: #228b22;">final</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">any2stringadd</span>[<span style="color: #6b8e23;">A</span>](<span style="color: #228b22;">private</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">self</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">AnyVal</span> {
+<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #228b22;">final</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">any2stringadd</span>[<span style="color: #6b8e23;">A</span>](<span style="color: #228b22;">private</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">self</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">AnyVal</span> {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">+</span>(other<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">String</span>.valueOf(self) + other
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 <code>implicit</code> 关键字代表后面这个 <code>class</code> 是隐式的，这样编译器在寻找隐式转换的时候就能找到它。
@@ -166,22 +142,18 @@ for the JavaScript code in this tag.
 <p>
 隐式转换接收对象的类型还可以轻松弄一些语法糖DSL，比如 Map
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #6b8e23;">Map</span>(<span style="color: #6b8e23;">1</span> -&gt; <span style="color: #8b0000;">"one"</span>, <span style="color: #6b8e23;">2</span> -&gt; <span style="color: #8b0000;">"two"</span>, <span style="color: #6b8e23;">3</span> -&gt; <span style="color: #8b0000;">"three"</span>)
-</pre>
-</div>
+<pre class="code"><code><span style="color: #6b8e23;">Map</span>(<span style="color: #6b8e23;">1</span> -&gt; <span style="color: #8b0000;">"one"</span>, <span style="color: #6b8e23;">2</span> -&gt; <span style="color: #8b0000;">"two"</span>, <span style="color: #6b8e23;">3</span> -&gt; <span style="color: #8b0000;">"three"</span>)
+</code></pre>
 
 <p>
 1 -&gt; "one" 其实是 tuple <code>(1, 2)</code> ，隐式转换帮我们实现这个箭头DSL
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #228b22;">implicit</span> <span style="color: #228b22;">final</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">ArrowAssoc</span>[<span style="color: #6b8e23;">A</span>](<span style="color: #228b22;">private</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">self</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">AnyVal</span> {
+<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #228b22;">final</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">ArrowAssoc</span>[<span style="color: #6b8e23;">A</span>](<span style="color: #228b22;">private</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">self</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">AnyVal</span> {
    <span style="color: #00008b;">@inline</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">-&gt;</span> [<span style="color: #6b8e23;">B</span>](y<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Tuple2</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Tuple2</span>(self, y)
    <span style="color: #00008b;">def</span> &#8594;[<span style="color: #6b8e23;">B</span>](y<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Tuple2</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> -&gt;(y)
  }
-</pre>
-</div>
+</code></pre>
 
 <p>
 同样的道理，当编译器去寻找 1 的 <code>-&gt;</code> 方法时，发现没有，但是隐式转换成 ArrowAssoc 就会具备 <code>-&gt;</code> 方法。
@@ -203,8 +175,7 @@ for the JavaScript code in this tag.
 </span>：
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">class</span> <span style="color: #36648b;">PreferredPrompt</span>(<span style="color: #00008b;">val</span> <span style="color: #b8860b;">preference</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)
+<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">PreferredPrompt</span>(<span style="color: #00008b;">val</span> <span style="color: #b8860b;">preference</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)
 <span style="color: #00008b;">class</span> <span style="color: #36648b;">PreferredDrink</span>(<span style="color: #00008b;">val</span> <span style="color: #b8860b;">preference</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)
 
 <span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Greeter</span> {
@@ -220,8 +191,7 @@ for the JavaScript code in this tag.
 <span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">prompt</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">PreferredPrompt</span>(<span style="color: #8b0000;">"Yes, master&gt; "</span>)
 <span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">drink</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">PreferredDrink</span>(<span style="color: #8b0000;">"tea"</span>)
 <span style="color: #6b8e23;">Greeter</span>.greet(<span style="color: #8b0000;">"Joe"</span>)
-</pre>
-</div>
+</code></pre>
 
 <pre class="example">
 Welcome, Joe. The system is ready.
@@ -244,8 +214,7 @@ Yes, master&gt;
 </span>
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">A</span>] {
+<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">A</span>] {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">show</span>(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>
 }
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)(<span style="color: #228b22;">implicit</span> s<span style="color: #00008b;">:</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=</span> println(s.show(a))
@@ -253,8 +222,7 @@ Yes, master&gt;
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">show</span>(s<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">=</span> s
 }
 log(<span style="color: #8b0000;">"a string"</span>)
-</pre>
-</div>
+</code></pre>
 
 <pre class="example">
 a string
@@ -277,8 +245,7 @@ Some(Some(hello))
 <p>
 要继续实现别的类型的 Show 实例，只需要继续添加隐式转换，例如 Option 的 Show 实例
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">A</span>] {
+<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">A</span>] {
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">show</span>(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>
 }
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)(<span style="color: #228b22;">implicit</span> s<span style="color: #00008b;">:</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=</span> println(s.show(a))
@@ -292,8 +259,7 @@ Some(Some(hello))
   }
 }
 log(<span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">Option</span>(<span style="color: #8b0000;">"hello"</span>)))
-</pre>
-</div>
+</code></pre>
 
 <pre class="example">
 Some(Some(hello))
@@ -310,10 +276,8 @@ Some(Some(hello))
 <p>
 另一种签名也同样适用
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>[<span style="color: #6b8e23;">A</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Show</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">=</span> println(implicitly[<span style="color: #6b8e23;">Show</span>[<span style="color: #6b8e23;">A</span>]].show(a))
-</pre>
-</div>
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>[<span style="color: #6b8e23;">A</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Show</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">=</span> println(implicitly[<span style="color: #6b8e23;">Show</span>[<span style="color: #6b8e23;">A</span>]].show(a))
+</code></pre>
 <ul class="org-ul">
 <li><code>A:Show</code> 约束 <code>A</code> 是 <code>Show</code> 的一个实例</li>
 <li><code>implicitly[Show[A]]</code> 会去寻找类型为 <code>Show[A]</code> 隐式转换</li>
@@ -322,10 +286,8 @@ Some(Some(hello))
 <p>
 这是更类似于 Haskell 的签名
 </p>
-<div class="org-src-container">
-<pre class="src src-haskell">log<span style="color: #b8860b;">::</span>(<span style="color: #36648b;">Show</span> a) <span style="color: #b8860b;">=&gt;</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
-</pre>
-</div>
+<pre class="code"><code>log<span style="color: #b8860b;">::</span>(<span style="color: #36648b;">Show</span> a) <span style="color: #b8860b;">=&gt;</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
+</code></pre>
 
 <p>
 只是 Haskell 会更聪明一些，直接写 <code>show</code> 就好，无需声明 implicitly 寻找类型。
@@ -372,13 +334,13 @@ Some(Some(hello))
 </div></div>
 <div id="postamble" class="status">
 <footer>
-  <p>Author: root
+  <p>Author: unknown
     <a class="github-button" href="https://github.com/sponsors/jcouyang" data-icon="octicon-heart" aria-label="Sponsor @jcouyang on GitHub">Sponsor</a>
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2016-06-09 Thu 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

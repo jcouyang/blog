@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-16 Mon 09:21 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>3 Layer Scala Cake</title>
@@ -22,50 +22,26 @@
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/scala/images/readerT-cake.png" property="og:image">
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -129,8 +105,13 @@ for the JavaScript code in this tag.
 </ul>
 </div>
 </nav>
+<pre class="code"><code>(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((ditaa . t)))
+</code></pre>
 
-<figure>
+
+<figure id="org97e5c1d">
 <a href="https://github.com/jcouyang/luci"><object type="image/svg+xml" data="https://upload.wikimedia.org/wikipedia/commons/0/0a/Imperial_Encyclopaedia_-_Animal_Kingdom_-_pic057_-_%E9%B8%95%E9%B6%BF%E5%9C%96.svg" class="org-svg">
 Sorry, your browser does not support SVG.</object></a>
 
@@ -168,8 +149,7 @@ But before cutting the cake, let's <del>wash our hands</del> describe the most c
 It will read output a log, query a data base, and do the calculation.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">xa</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Transactor</span>.fromDriverManager[<span style="color: #6b8e23;">IO</span>](<span style="color: #8b0000;">"org.postgresql.Driver"</span>, <span style="color: #8b0000;">"jdbc:postgresql:postgres"</span>, <span style="color: #8b0000;">"postgres"</span>)
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">xa</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Transactor</span>.fromDriverManager[<span style="color: #6b8e23;">IO</span>](<span style="color: #8b0000;">"org.postgresql.Driver"</span>, <span style="color: #8b0000;">"jdbc:postgresql:postgres"</span>, <span style="color: #8b0000;">"postgres"</span>)
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span> <span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span> <span style="color: #00008b;">=</span> {
   <span style="color: #00008b;">val</span> <span style="color: #b8860b;">initState</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">1</span>
   getLogger.log(s<span style="color: #8b0000;">"init state is </span><span style="color: #b8860b;">$initState</span><span style="color: #8b0000;">"</span>)
@@ -178,8 +158,7 @@ It will read output a log, query a data base, and do the calculation.
   } <span style="color: #00008b;">catch</span> { <span style="color: #00008b;">case</span> <span style="color: #00008b;">_:</span> <span style="color: #36648b;">Throwable</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">0</span>}
   initState + valueInDatabase
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 Your real business logic might be fancier, but basically this is the most common case
@@ -231,15 +210,13 @@ Let us refactor in a baby step, with <code>IO</code>
 modeling your problem with <code>IO</code> is easy, just wrap everything in IO
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span> <span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span> <span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
   initState <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">IO</span>(<span style="color: #6b8e23;">1</span>)
   <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">IO</span>(getLogger.log(s<span style="color: #8b0000;">"init state is </span><span style="color: #b8860b;">$initState</span><span style="color: #8b0000;">"</span>))
   valueInDatabase <span style="color: #00008b;">&lt;-</span> sql<span style="color: #8b0000;">"select 32"</span>.query[<span style="color: #6b8e23;">Int</span>].unique.transact(xa)
     .handleError{<span style="color: #00008b;">_=&gt;</span><span style="color: #6b8e23;">0</span>}
 } <span style="color: #00008b;">yield</span> initState + valueInDatabase
-</pre>
-</div>
+</code></pre>
 
 <p>
 How the hell this is better than previous one?
@@ -261,28 +238,24 @@ When we mention something that is Pure, it means that thing is Referential Trans
 In human words, it means I can do this:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">logState</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">IO</span>(getLogger.log(s<span style="color: #8b0000;">"log something"</span>))
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">logState</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">IO</span>(getLogger.log(s<span style="color: #8b0000;">"log something"</span>))
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span> <span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Unit</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
   <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> logState
   <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> logState
   <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> logState
 } <span style="color: #00008b;">yield</span> ()
-</pre>
-</div>
+</code></pre>
 
 <p>
 But you can't do:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">logState</span> <span style="color: #00008b;">=</span> getLogger.log(s<span style="color: #8b0000;">"log something"</span>)
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">logState</span> <span style="color: #00008b;">=</span> getLogger.log(s<span style="color: #8b0000;">"log something"</span>)
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span> <span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span> <span style="color: #00008b;">=</span> {
   logState
   logState
   logState
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 Probably not the best example but you should get the idea, that I can place IO anywhere
@@ -293,22 +266,18 @@ and that won't change the semantic and behavior of your program.
 Fine, let's place those IO else where, so we can inject them into program
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span>(getState<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>], log<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>[<span style="color: #6b8e23;">Unit</span>], queryDB<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span>(getState<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>], log<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>[<span style="color: #6b8e23;">Unit</span>], queryDB<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
   initState <span style="color: #00008b;">&lt;-</span> getState
   <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> log(s<span style="color: #8b0000;">"initState is: </span><span style="color: #b8860b;">$initState</span><span style="color: #8b0000;">"</span>)
   valueInDatabase <span style="color: #00008b;">&lt;-</span> queryDB
 } <span style="color: #00008b;">yield</span> initState + valueInDatabase
-</pre>
-</div>
+</code></pre>
 
 <p>
 Now it's better, in our test, we could simply test <code>program</code> like
 </p>
-<div class="org-src-container">
-<pre class="src src-scala">program(<span style="color: #6b8e23;">IO</span>(<span style="color: #6b8e23;">1</span>), (msg<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">=&gt;</span><span style="color: #6b8e23;">IO</span>(()), <span style="color: #6b8e23;">IO</span>(<span style="color: #6b8e23;">10</span>)) must_== <span style="color: #6b8e23;">11</span>
-</pre>
-</div>
+<pre class="code"><code>program(<span style="color: #6b8e23;">IO</span>(<span style="color: #6b8e23;">1</span>), (msg<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">=&gt;</span><span style="color: #6b8e23;">IO</span>(()), <span style="color: #6b8e23;">IO</span>(<span style="color: #6b8e23;">10</span>)) must_== <span style="color: #6b8e23;">11</span>
+</code></pre>
 
 <p>
 To verify our program can do the math.
@@ -317,16 +286,14 @@ To verify our program can do the math.
 <p>
 But still, it won't scale, e.g. we need to query 3 value from db
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span>(getState<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>], log<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>[<span style="color: #6b8e23;">Unit</span>], queryDB<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>], queryDB2<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>], queryDB3<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span>(getState<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>], log<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>[<span style="color: #6b8e23;">Unit</span>], queryDB<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>], queryDB2<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>], queryDB3<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
     initState <span style="color: #00008b;">&lt;-</span> getState
     <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> log(s<span style="color: #8b0000;">"initState is: </span><span style="color: #b8860b;">$initState</span><span style="color: #8b0000;">"</span>)
     valueInDatabase1 <span style="color: #00008b;">&lt;-</span> queryDB1
     valueInDatabase2 <span style="color: #00008b;">&lt;-</span> queryDB2
     valueInDatabase3 <span style="color: #00008b;">&lt;-</span> queryDB3
   } <span style="color: #00008b;">yield</span> initState + valueInDatabase1 + valueInDatabase2 + valueInDatabase3
-</pre>
-</div>
+</code></pre>
 
 <p>
 our program will end up very long parameters
@@ -354,20 +321,17 @@ Here's the ReaderT pattern to help.
 <p>
 First we move all dependency out, let's model it as <code>trait Env</code>
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Env</span>{
+<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Env</span>{
   <span style="color: #00008b;">val</span> <span style="color: #b8860b;">state</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>(msg<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>(<span style="color: #6b8e23;">Unit</span>)
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">query</span>[<span style="color: #6b8e23;">A</span>](c<span style="color: #00008b;">:</span> <span style="color: #36648b;">ConnectionIO</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">A</span>]
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 Then we can move parameters of <code>program</code> out as standalone methods:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>(msg<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">ReaderT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Env</span>, <span style="color: #6b8e23;">Unit</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>(msg<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">ReaderT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Env</span>, <span style="color: #6b8e23;">Unit</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
   env <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>.ask[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Env</span>]
   <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>.liftF(env.log(msg))
 } <span style="color: #00008b;">yield</span> ()
@@ -376,8 +340,7 @@ Then we can move parameters of <code>program</code> out as standalone methods:
   env <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>.ask[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Env</span>]
   res <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>.liftF(env.query(query))
 } <span style="color: #00008b;">yield</span> res
-</pre>
-</div>
+</code></pre>
 
 <p>
 These methods just return data type that describe that they need a <code>Env</code> but not provided yet,
@@ -388,15 +351,13 @@ so you could put it anywhere you want, without knowing where exactly the instanc
 Finally, the program, without any parameters!!!
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">ReaderT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Env</span>, <span style="color: #6b8e23;">Int</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">ReaderT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Env</span>, <span style="color: #6b8e23;">Int</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
   env <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>.ask[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Int</span>]
   initState <span style="color: #00008b;">=</span> env.state
   <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> log(s<span style="color: #8b0000;">"initState is: </span><span style="color: #b8860b;">$state</span><span style="color: #8b0000;">"</span>)
   valueInDatabase <span style="color: #00008b;">&lt;-</span> doobieQuery(sql<span style="color: #8b0000;">"select 32"</span>.query[<span style="color: #6b8e23;">Int</span>].unique)
 } <span style="color: #00008b;">yield</span> initState + valueInDatabase
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 
@@ -411,10 +372,8 @@ Let us retro the evolving progress of the type of <code>program</code>
 <div id="outline-container-orgf1557a5" class="outline-4">
 <h4 id="orgf1557a5">Imperative</h4>
 <div class="outline-text-4" id="text-orgf1557a5">
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>
-</pre>
-</div>
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>
+</code></pre>
 <p>
 I'd name this layer <b>Bare Metal</b>. Here only exists raw values, 0 abstraction.
 </p>
@@ -424,10 +383,8 @@ I'd name this layer <b>Bare Metal</b>. Here only exists raw values, 0 abstractio
 <div id="outline-container-orgff73211" class="outline-4">
 <h4 id="orgff73211">IO</h4>
 <div class="outline-text-4" id="text-orgff73211">
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span>(deps...)<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>]
-</pre>
-</div>
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span>(deps...)<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Int</span>]
+</code></pre>
 
 <p>
 Introduce a new layer of abstraction <code>IO</code>, and I'd like to name it <b>VM</b> layer
@@ -440,10 +397,8 @@ It's better than Bare metal, but still low level abstraction.
 <p>
 when we need value, just run the IO layer
 </p>
-<div class="org-src-container">
-<pre class="src src-scala">program(deps...).unsafeRunSync()
-</pre>
-</div>
+<pre class="code"><code>program(deps...).unsafeRunSync()
+</code></pre>
 
 <p>
 Effects are now Referential Transparent, but the way to inject and use effects is not scalable.
@@ -454,10 +409,8 @@ Effects are now Referential Transparent, but the way to inject and use effects i
 <div id="outline-container-org10534eb" class="outline-4">
 <h4 id="org10534eb">ReaderT</h4>
 <div class="outline-text-4" id="text-org10534eb">
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">ReaderT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Env</span>, <span style="color: #6b8e23;">Int</span>]
-</pre>
-</div>
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">ReaderT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Env</span>, <span style="color: #6b8e23;">Int</span>]
+</code></pre>
 
 <p>
 <code>ReaderT[IO, Env, Int]</code> consists 2 layers, <code>IO</code> and <code>Reader[Env, Int]</code>, this is the layer of <b>Functional Programming</b>
@@ -467,16 +420,14 @@ Effects are now Referential Transparent, but the way to inject and use effects i
 pure business, 0 effect, lazy
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">program <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;- ReaderT[IO, Env, Int]</span>
+<pre class="code"><code>program <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;- ReaderT[IO, Env, Int]</span>
 .run(<span style="color: #00008b;">new</span> <span style="color: #36648b;">Env</span>{
   <span style="color: #00008b;">val</span> <span style="color: #b8860b;">state</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">1</span>
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>(msg<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">IO</span>(getLogger.log(msg))
   <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">query</span>[<span style="color: #6b8e23;">A</span>](c<span style="color: #00008b;">:</span> <span style="color: #36648b;">ConnectionIO</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=</span> c.transact(xa)
 }) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;- IO[Int]</span>
 .unsafeRunSync() <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;- Int</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 We need to run this layer by layer, first <code>Reader</code>, and then <code>IO</code>
@@ -504,8 +455,7 @@ ReaderT is pretty good "pattern" after all:
 <p>
 if we make some type alias for readerT, it's pretty much the same thing as the recent trending "design pattern" - <i>Tagless Final</i>
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"> <span style="color: #00008b;">trait</span> <span style="color: #36648b;">AlgInterp</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] {
+<pre class="code"><code> <span style="color: #00008b;">trait</span> <span style="color: #36648b;">AlgInterp</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] {
    <span style="color: #00008b;">val</span> <span style="color: #b8860b;">state</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">Int</span>]
    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>(msg<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">Unit</span>]
    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">query</span>[<span style="color: #6b8e23;">A</span>](c<span style="color: #00008b;">:</span> <span style="color: #36648b;">ConnectionIO</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>]
@@ -530,8 +480,7 @@ if we make some type alias for readerT, it's pretty much the same thing as the r
    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">query</span>[<span style="color: #6b8e23;">A</span>](c<span style="color: #00008b;">:</span> <span style="color: #36648b;">ConnectionIO</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=</span> c.transact(xa)
  }
  program[<span style="color: #6b8e23;">IO</span>].run(interp).unsafeRunSync()
-</pre>
-</div>
+</code></pre>
 
 <p>
 If you look close enough, here it actually becomes 3 layers:
@@ -542,8 +491,32 @@ If you look close enough, here it actually becomes 3 layers:
 <li>Layer 3: Alg (program)</li>
 </ul>
 
+<pre class="code"><code>                  |    
+        Production| Test
++--------------+  |
+|Layer 3:      |  |
+|     Alg      +-------------+
+|cGRE          |  |          |
++------+-------+  |          :run           
+       |run       |          |
+/--------------\  |   /--------------\
+|Layer 2:      |  |   |Layer 2:      |
+| AlgInterp[IO]|  |   |FakeAlgInterp[IO]
+|cRED          |  |   |cRED          |
+\--------------/  |   \--------------/
+       |          |          |
+       v          |          :
++--------------+  |          |
+|Layer 1:      |  |          |
+|      IO      |&lt;------------+
+|cBLU          |  |
++--------------+  |
+                  |
 
-<figure>
+</code></pre>
+
+
+<figure id="orgd705d85">
 <img src="images/readerT-cake.png" alt="readerT-cake.png">
 
 </figure>
@@ -613,8 +586,7 @@ Usually we will need to get user's info in middleware, and use the user info in 
 So, here is the case, since I want a modular code base, so these 3 layers should not be just single <code>Alg[F]</code>, but 3
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">middleware</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">Alg</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">User</span>] <span style="color: #00008b;">=</span> ???
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">middleware</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">Alg</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">User</span>] <span style="color: #00008b;">=</span> ???
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">controller</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">Alg</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">Response</span>] <span style="color: #00008b;">=</span> ???
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">repository</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]](user<span style="color: #00008b;">:</span> <span style="color: #36648b;">User</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Alg</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">DBResult</span>] <span style="color: #00008b;">=</span> ???
 
@@ -623,15 +595,13 @@ So, here is the case, since I want a modular code base, so these 3 layers should
   dbresult <span style="color: #00008b;">&lt;-</span> respository(user)
   response <span style="color: #00008b;">&lt;-</span> controller
 } <span style="color: #00008b;">yield</span> response
-</pre>
-</div>
+</code></pre>
 
 <p>
 someday your controller become bigger and bigger and tech lead said there should be another layer - service, between controller and repository
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
   user <span style="color: #00008b;">&lt;-</span> middleware
   dbresult <span style="color: #00008b;">&lt;-</span> service(user)
   response <span style="color: #00008b;">&lt;-</span> controller
@@ -641,8 +611,7 @@ someday your controller become bigger and bigger and tech lead said there should
   dbresult <span style="color: #00008b;">&lt;-</span> respository(user)
   result <span style="color: #00008b;">&lt;-</span> doSomthingWith(dbresult)
 } <span style="color: #00008b;">yield</span> result
-</pre>
-</div>
+</code></pre>
 <p>
 then it will become a nightmare that you have to pass such thing all over your code base.
 </p>
@@ -651,21 +620,18 @@ then it will become a nightmare that you have to pass such thing all over your c
 But that's exactly State Monad solved, no matter how many State monad you split, every piece always can share the exactly same state.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">middleware</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">StateT</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">User</span>, <span style="color: #6b8e23;">Unit</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">StateT</span>.set[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">User</span>](<span style="color: #6b8e23;">User</span>(<span style="color: #8b0000;">"abc"</span>))
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">middleware</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">StateT</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">User</span>, <span style="color: #6b8e23;">Unit</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">StateT</span>.set[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">User</span>](<span style="color: #6b8e23;">User</span>(<span style="color: #8b0000;">"abc"</span>))
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">controller</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">StateT</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">User</span>, <span style="color: #6b8e23;">Response</span>] <span style="color: #00008b;">=</span> ???
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">repository</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">StateT</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">User</span>, <span style="color: #6b8e23;">DBResult</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
   user <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">StateT</span>.get[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">User</span>]
   dbResult <span style="color: #00008b;">&lt;-</span> findResourceInDB(user)
 } <span style="color: #00008b;">yield</span> dbResult
-</pre>
-</div>
+</code></pre>
 
 <p>
 So our program don't have to passing around user as parameter everywhere
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
   <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> middleware
   dbresult <span style="color: #00008b;">&lt;-</span> service
   response <span style="color: #00008b;">&lt;-</span> controller
@@ -675,8 +641,7 @@ So our program don't have to passing around user as parameter everywhere
   dbresult <span style="color: #00008b;">&lt;-</span> respository
   result <span style="color: #00008b;">&lt;-</span> doSomthingWith(dbresult)
 } <span style="color: #00008b;">yield</span> result
-</pre>
-</div>
+</code></pre>
 
 <p>
 The new problem introduced by <code>StateT</code> is, everything else(controller, repository, service) need to be <code>StateT</code> as well. If we change them
@@ -698,15 +663,13 @@ Monad Transformer Library
 MTL is like stacking those transformers together to <code>F</code>, at the end, you will get something very nice:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">middleware</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]](<span style="color: #228b22;">implicit</span> <span style="color: #6b8e23;">S</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">MonadState</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">User</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">Unit</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">S</span>.set(<span style="color: #6b8e23;">User</span>(<span style="color: #8b0000;">"abc"</span>))
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">middleware</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]](<span style="color: #228b22;">implicit</span> <span style="color: #6b8e23;">S</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">MonadState</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">User</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">Unit</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">S</span>.set(<span style="color: #6b8e23;">User</span>(<span style="color: #8b0000;">"abc"</span>))
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">controller</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">Response</span>] <span style="color: #00008b;">=</span> ???
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">repository</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]](<span style="color: #228b22;">implicit</span> <span style="color: #6b8e23;">S</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">MonadState</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">User</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">DBResult</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
   user <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">S</span>.get
   dbResult <span style="color: #00008b;">&lt;-</span> findResourceInDB(user)
 } <span style="color: #00008b;">yield</span> dbResult
-</pre>
-</div>
+</code></pre>
 
 <p>
 Such DSL is nearly ideal, where
@@ -725,12 +688,10 @@ it.
 At the very end, provide the monad transformer stacks, so <code>F</code> is finally:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">program[<span style="color: #6b8e23;">Alg</span>[<span style="color: #6b8e23;">StateT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">User</span>,? ], <span style="color: #6b8e23;">A</span>]]
+<pre class="code"><code>program[<span style="color: #6b8e23;">Alg</span>[<span style="color: #6b8e23;">StateT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">User</span>,? ], <span style="color: #6b8e23;">A</span>]]
 <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">which expended to..</span>
 program[<span style="color: #6b8e23;">ReaderT</span>[<span style="color: #6b8e23;">StateT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">User</span>,? ], <span style="color: #6b8e23;">AlgInterp</span>[<span style="color: #6b8e23;">StateT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">User</span>,? ]], <span style="color: #6b8e23;">A</span>]]
-</pre>
-</div>
+</code></pre>
 
 
 <p>
@@ -738,10 +699,8 @@ There's no perfect solution for all, only perfect solution for particular case. 
 have more effects, e.g. WriterT(to output something Monoid), EitherT(to provide MonadError) &#x2026; the MTL stack is not very easy to reason about, DSL is still nice though.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">program[<span style="color: #6b8e23;">ReaderT</span>[<span style="color: #6b8e23;">WriterT</span>[<span style="color: #6b8e23;">StateT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">User</span>,? ], <span style="color: #6b8e23;">Chain</span>[<span style="color: #6b8e23;">String</span>], ?], <span style="color: #6b8e23;">AlgInterp</span>[<span style="color: #6b8e23;">WriterT</span>[<span style="color: #6b8e23;">StateT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">User</span>,? ], <span style="color: #6b8e23;">Chain</span>[<span style="color: #6b8e23;">String</span>], ?]], <span style="color: #6b8e23;">A</span>]]
-</pre>
-</div>
+<pre class="code"><code>program[<span style="color: #6b8e23;">ReaderT</span>[<span style="color: #6b8e23;">WriterT</span>[<span style="color: #6b8e23;">StateT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">User</span>,? ], <span style="color: #6b8e23;">Chain</span>[<span style="color: #6b8e23;">String</span>], ?], <span style="color: #6b8e23;">AlgInterp</span>[<span style="color: #6b8e23;">WriterT</span>[<span style="color: #6b8e23;">StateT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">User</span>,? ], <span style="color: #6b8e23;">Chain</span>[<span style="color: #6b8e23;">String</span>], ?]], <span style="color: #6b8e23;">A</span>]]
+</code></pre>
 </div>
 </div>
 
@@ -762,36 +721,29 @@ The advantage of Free Monad is providing ability to create your own custom Monad
 But let's try rewrite previous example first, since <code>State</code> and <code>Reader</code> are already data type, we could just stack(inject) them into a Free Monad.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">import</span> <span style="color: #6b8e23;">Free</span>.{liftInject <span style="color: #00008b;">=&gt;</span> free}
+<pre class="code"><code><span style="color: #00008b;">import</span> <span style="color: #6b8e23;">Free</span>.{liftInject <span style="color: #00008b;">=&gt;</span> free}
 <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Program</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">EitherK</span>[<span style="color: #6b8e23;">Reader</span>[<span style="color: #6b8e23;">AlgoInterp</span>[<span style="color: #6b8e23;">IO</span>], ?], <span style="color: #6b8e23;">State</span>[<span style="color: #6b8e23;">User</span>, ?], <span style="color: #6b8e23;">A</span>]
 <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">ProgramF</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">Program</span>, <span style="color: #6b8e23;">A</span>]
-</pre>
-</div>
+</code></pre>
 
 <p>
 Oh, since we have Free Monad, we don't need a reader monad to inject Interpreter, we can provide interpreter later for <code>foldMap</code>. 
 Great, we save one effect then. Let's have another effect for demonstration i.e. Writer
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Program</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">EitherK</span>[<span style="color: #6b8e23;">Writer</span>[<span style="color: #6b8e23;">Chain</span>[<span style="color: #6b8e23;">String</span>], ?], <span style="color: #6b8e23;">State</span>[<span style="color: #6b8e23;">User</span>, ?], <span style="color: #6b8e23;">A</span>]
+<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Program</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">EitherK</span>[<span style="color: #6b8e23;">Writer</span>[<span style="color: #6b8e23;">Chain</span>[<span style="color: #6b8e23;">String</span>], ?], <span style="color: #6b8e23;">State</span>[<span style="color: #6b8e23;">User</span>, ?], <span style="color: #6b8e23;">A</span>]
 <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">ProgramF</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">Program</span>, <span style="color: #6b8e23;">A</span>]
-</pre>
-</div>
+</code></pre>
 
 <p>
 Next you'll need to create two interpreters correspond to <code>Writer</code> and <code>State</code> effect.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">stateInterp</span>(initState<span style="color: #00008b;">:</span> <span style="color: #36648b;">User</span>) <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Lambda</span>[<span style="color: #6b8e23;">State</span>[<span style="color: #6b8e23;">User</span>, ?] ~&gt; <span style="color: #6b8e23;">IO</span>[(<span style="color: #6b8e23;">Int</span>, ?)]] { <span style="color: #00008b;">_</span>.run(initState).value}
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">stateInterp</span>(initState<span style="color: #00008b;">:</span> <span style="color: #36648b;">User</span>) <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Lambda</span>[<span style="color: #6b8e23;">State</span>[<span style="color: #6b8e23;">User</span>, ?] ~&gt; <span style="color: #6b8e23;">IO</span>[(<span style="color: #6b8e23;">Int</span>, ?)]] { <span style="color: #00008b;">_</span>.run(initState).value}
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">writerInterp</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Lambda</span>[<span style="color: #6b8e23;">Writer</span>[<span style="color: #6b8e23;">Chain</span>[<span style="color: #6b8e23;">String</span>], ?] ~&gt; <span style="color: #6b8e23;">IO</span>] { <span style="color: #00008b;">_</span>.run(<span style="color: #6b8e23;">Chain</span>.empty[<span style="color: #6b8e23;">String</span>])}
-</pre>
-</div>
+</code></pre>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span>{
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span>{
   initState <span style="color: #00008b;">&lt;-</span> free[<span style="color: #6b8e23;">Program</span>](<span style="color: #6b8e23;">State</span>.get[<span style="color: #6b8e23;">User</span>])
   <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> free[<span style="color: #6b8e23;">Program</span>](<span style="color: #6b8e23;">Chain</span>.one(s<span style="color: #8b0000;">"init state: </span><span style="color: #b8860b;">$initState</span><span style="color: #8b0000;">"</span>).tell)
   <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> free[<span style="color: #6b8e23;">Program</span>](<span style="color: #6b8e23;">State</span>.set(<span style="color: #6b8e23;">User</span>(<span style="color: #8b0000;">"jcoy"</span>)))
@@ -799,8 +751,7 @@ Next you'll need to create two interpreters correspond to <code>Writer</code> an
   logs <span style="color: #00008b;">&lt;-</span> free[<span style="color: #6b8e23;">Program</span>](<span style="color: #6b8e23;">Chain</span>.one(s<span style="color: #8b0000;">"next state: </span><span style="color: #b8860b;">$res</span><span style="color: #8b0000;">"</span>).tell)
 } <span style="color: #00008b;">yield</span> (res, logs)
 program foldMap (writerInterp or stateInterp(<span style="color: #6b8e23;">User</span>(<span style="color: #8b0000;">"anonymous"</span>)))
-</pre>
-</div>
+</code></pre>
 <p>
 Guess what, the output will not be <code>User("jcoy")</code>, instead, <code>User("anounymous")</code>, also writer will only contain the second log.
 </p>
@@ -902,8 +853,7 @@ For demonstrating the power of ReaderT + MTL + Free, here we compose a program t
 <p>
 to create a EDSL for Business, just use the Effects
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">1. Somthing to read</span>
   config <span style="color: #00008b;">&lt;-</span> free[<span style="color: #6b8e23;">Program</span>](<span style="color: #6b8e23;">Reader</span>(identity[<span style="color: #6b8e23;">Config</span>]))
   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">2. Something to write</span>
@@ -917,15 +867,13 @@ to create a EDSL for Business, just use the Effects
   <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> free[<span style="color: #6b8e23;">Program</span>](<span style="color: #6b8e23;">State</span>.modify[<span style="color: #6b8e23;">Int</span>](<span style="color: #6b8e23;">1</span> + <span style="color: #00008b;">_</span>))
   state <span style="color: #00008b;">&lt;-</span> free[<span style="color: #6b8e23;">Program</span>](<span style="color: #6b8e23;">State</span>.modify[<span style="color: #6b8e23;">Int</span>](<span style="color: #6b8e23;">1</span> + <span style="color: #00008b;">_</span>))
 } <span style="color: #00008b;">yield</span> state
-</pre>
-</div>
+</code></pre>
 
 <p>
 from here we can easily tell that <code>Program</code> should contain following effects:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Program</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Eff5</span>[
+<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Program</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Eff5</span>[
       <span style="color: #6b8e23;">Http4sClient</span>[<span style="color: #6b8e23;">IO</span>, ?],
       <span style="color: #6b8e23;">Writer</span>[<span style="color: #6b8e23;">Chain</span>[<span style="color: #6b8e23;">String</span>], ?],
       <span style="color: #6b8e23;">Reader</span>[<span style="color: #6b8e23;">Config</span>, ?],
@@ -933,8 +881,7 @@ from here we can easily tell that <code>Program</code> should contain following 
       <span style="color: #6b8e23;">Either</span>[<span style="color: #6b8e23;">Throwable</span>, ?],
       <span style="color: #6b8e23;">A</span>
     ]
-</pre>
-</div>
+</code></pre>
 
 <p>
 <code>EffX</code> is predefined alias of type to construct multiple kind in EitherK in luci.
@@ -958,8 +905,7 @@ Layer 2 is like a VM, it connects the business and bare metal, here we can deal 
 <p>
 i.e. the state compiler
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">stateCompiler</span>[<span style="color: #6b8e23;">L</span>](<span style="color: #228b22;">implicit</span> ev<span style="color: #00008b;">:</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">E</span>]) <span style="color: #00008b;">=</span>
+<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">stateCompiler</span>[<span style="color: #6b8e23;">L</span>](<span style="color: #228b22;">implicit</span> ev<span style="color: #00008b;">:</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">E</span>]) <span style="color: #00008b;">=</span>
   <span style="color: #00008b;">new</span> <span style="color: #36648b;">Compiler</span>[<span style="color: #6b8e23;">State</span>[<span style="color: #6b8e23;">L</span>, ?], <span style="color: #6b8e23;">E</span>] {
     <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Env</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">MonadState</span>[<span style="color: #6b8e23;">E</span>, <span style="color: #6b8e23;">L</span>] :: <span style="color: #6b8e23;">HNil</span>
     <span style="color: #00008b;">val</span> <span style="color: #b8860b;">compile</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Lambda</span>[<span style="color: #6b8e23;">State</span>[<span style="color: #6b8e23;">L</span>, ?] ~&gt; <span style="color: #6b8e23;">Bin</span>](state <span style="color: #00008b;">=&gt;</span>
@@ -970,15 +916,13 @@ i.e. the state compiler
           <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> env.head.set(nextState)
         } <span style="color: #00008b;">yield</span> value))
   }
-</pre>
-</div>
+</code></pre>
 
 <p>
 the original MTL way is to implicitly find <code>MonadState</code> from context
 </p>
 
-<div class="org-src-container">
-<pre class="src src-diff">- implicit def stateCompiler[L](implicit ev: Monad[E]) =
+<pre class="code"><code>- implicit def stateCompiler[L](implicit ev: Monad[E]) =
 + implicit def stateCompiler[L](implicit ev: Monad[E], S: MonadState[E, L]) =
     new Compiler[State[L, ?], E] {
 -     type Env = MonadState[E, L] :: HNil
@@ -992,8 +936,7 @@ the original MTL way is to implicitly find <code>MonadState</code> from context
 +           _ &lt;- S.set(nextState)            
           } yield value))
     }
-</pre>
-</div>
+</code></pre>
 
 <p>
 But since we have ReaderT, I'll prefer 
@@ -1009,11 +952,9 @@ explicitly inject <code>MonadState</code> to have everything explicitly managed 
 Once we compile the program, a binary is produced.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">import</span> us.oyanglul.luci.compilers.io.<span style="color: #00008b;">_</span>
+<pre class="code"><code><span style="color: #00008b;">import</span> us.oyanglul.luci.compilers.io.<span style="color: #00008b;">_</span>
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">binary</span> <span style="color: #00008b;">=</span> compile(program)
-</pre>
-</div>
+</code></pre>
 
 <p>
 Everything is automatically infer thanks to <a href="https://github.com/milessabin/shapeless/">Shapeless</a>, so you don't need to figure out what type <code>binary</code> has, just follow the compiler.
@@ -1022,8 +963,7 @@ Everything is automatically infer thanks to <a href="https://github.com/milessab
 <p>
 Now we can safely run the binary with all dependencies explicitly
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">args</span> <span style="color: #00008b;">=</span> (httpclient ::
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">args</span> <span style="color: #00008b;">=</span> (httpclient ::
     logRef.tellInstance ::
     config ::
     stateRef.stateInstance ::
@@ -1031,8 +971,7 @@ Now we can safely run the binary with all dependencies explicitly
     <span style="color: #6b8e23;">HNil</span>).map(coflatten)
 
 binary.run(args)
-</pre>
-</div>
+</code></pre>
 
 <p>
 Don't worry about types and order since compiler will tell you where exactly the type of args you provided is wrong.
@@ -1054,8 +993,38 @@ Anyway It's very easy to explain and compose args though!
 Of course there is one more layer missing - <b>Layer 0</b>, if you focus enough you will find out <code>binary.run(args)</code> will return <code>IO</code>
 </p>
 
+<pre class="code"><code>                   |
+         Production| Test
++--------------+   |
+|Layer 3:      |   |
+|   Program    +------------+
+|cGRE          |   |        :
++------+-------+   |        |compile
+       |compile    |        v
+/--------------\   | /--------------\
+|Layer 2:      |   | |Layer 2:      |
+|   Compiler   |   | |  Fake Compiler
+|cRED          |   | |cRED          |
+\--------------/   | \------+-------/
+       |           |        |
+       v           |        :
++--------------+   |        |
+|Layer 1:      |&lt;-----------+
+|   Binary     |   |
+|cPNK          +------------+
++------+-------+   |        :
+       | run(args) |        |
+       v           | run(fake_args)
++--------------+   |        |
+|Layer 0:      |   |        |
+|     IO       |&lt;-----------+
+|cBLU          |   |
++--------------+   |
+                   |
+</code></pre>
 
-<figure>
+
+<figure id="org545b77c">
 <img src="images/free-cake.png" alt="free-cake.png">
 
 </figure>
@@ -1185,7 +1154,7 @@ Sorted based on my experience/observation by difficulty ASC
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2019-03-25 Mon 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

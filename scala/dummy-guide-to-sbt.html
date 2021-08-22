@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-16 Mon 09:21 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dummy Guide to sbt</title>
@@ -21,50 +21,26 @@
 <meta property="og:description" content="It is actually a Simple Build Tool if you use it correctly" />
 <meta property="og:type" content="article" />
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -124,7 +100,7 @@ In <a href="https://scalacenter.github.io/scala-developer-survey-2019/">Scala Su
 </p>
 
 
-<figure>
+<figure id="orgbc72959">
 <img src="https://www.evernote.com/l/ABfkUXRmO9xM36PSw2wUvg9GNHeaqsgbEB8B/image.png" alt="image.png">
 
 </figure>
@@ -142,7 +118,7 @@ Which build tools do you use?
 </p>
 
 
-<figure>
+<figure id="org8086736">
 <img src="https://www.evernote.com/l/ABectL9KKVlPhpjxmYX2PwExprn8N779IbYB/image.png" alt="image.png">
 
 </figure>
@@ -177,15 +153,13 @@ you need to do is to look up the document and copy paste key value into your jso
 It is actually more of dependencies manage tool rather than build tool, the build feature is very
 limited so you probably still need Makefile.
 </p>
-<div class="org-src-container">
-<pre class="src src-json">{ "scripts" :
+<pre class="code"><code>{ "scripts" :
   { "preinstall" : "./configure"
   , "install" : "make &amp;&amp; make install"
   , "test" : "make test"
   }
 }
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 <div id="outline-container-orgd9b4055" class="outline-3">
@@ -199,21 +173,17 @@ you do bash.
 <p>
 Rakefile:
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby">task <span style="color: #6b8e23;">name:</span> [<span style="color: #6b8e23;">:prereq1</span>, <span style="color: #6b8e23;">:prereq2</span>] <span style="color: #00008b;">do</span> |t|
+<pre class="code"><code>task <span style="color: #6b8e23;">name:</span> [<span style="color: #6b8e23;">:prereq1</span>, <span style="color: #6b8e23;">:prereq2</span>] <span style="color: #00008b;">do</span> |t|
   <span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">ruby script goes here</span>
 <span style="color: #00008b;">end</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 Makefile:
 </p>
-<div class="org-src-container">
-<pre class="src src-make">name: prereq1 prereq2
+<pre class="code"><code>name: prereq1 prereq2
   # bash script goes here
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 </div>
@@ -254,19 +224,15 @@ So let us start with package management.
 <p>
 in bundler dependencies can be defined as:
 </p>
-<div class="org-src-container">
-<pre class="src src-ruby">gem <span style="color: #8b0000;">'httparty'</span>, <span style="color: #8b0000;">'0.17.3'</span>
-</pre>
-</div>
+<pre class="code"><code>gem <span style="color: #8b0000;">'httparty'</span>, <span style="color: #8b0000;">'0.17.3'</span>
+</code></pre>
 
 <p>
 Let us define `finagle` as sbt project dependencies, you can find how to add it from the right hand side of:
  <a href="https://index.scala-lang.org/twitter/finagle/finagle-core/20.5.0?target=_2.13">https://index.scala-lang.org/twitter/finagle/finagle-core/20.5.0?target=_2.13</a>
 </p>
-<div class="org-src-container">
-<pre class="src src-scala">libraryDependencies += <span style="color: #8b0000;">"com.twitter"</span> %% <span style="color: #8b0000;">"finagle-core"</span> % <span style="color: #8b0000;">"20.5.0"</span>
-</pre>
-</div>
+<pre class="code"><code>libraryDependencies += <span style="color: #8b0000;">"com.twitter"</span> %% <span style="color: #8b0000;">"finagle-core"</span> % <span style="color: #8b0000;">"20.5.0"</span>
+</code></pre>
 
 <p>
 where
@@ -298,10 +264,15 @@ are noises and if you put the wrong thing it won't compile.
 Here is a quick guide how to use <code>%</code>
 </p>
 
-<div class="org-src-container">
-<pre class="src src-nillangnilswitchesnilflags">nilbody
-</pre>
-</div>
+<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">Java library</span>
+libraryDependencies += <span style="color: #8b0000;">"ch.qos.logback"</span> % <span style="color: #8b0000;">"logback-classic"</span> % <span style="color: #8b0000;">"1.2.3"</span>
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">Scala library %%</span>
+libraryDependencies += <span style="color: #8b0000;">"com.twitter"</span> %% <span style="color: #8b0000;">"finagle-core"</span> % <span style="color: #8b0000;">"20.5.0"</span>
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">Scala lib % with hard coded Scala version</span>
+libraryDependencies += <span style="color: #8b0000;">"com.twitter"</span> % <span style="color: #8b0000;">"finagle-core_2.13"</span> % <span style="color: #8b0000;">"20.5.0"</span>
+<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">Test only library</span>
+libraryDependencies += <span style="color: #8b0000;">"org.scalameta"</span> %% <span style="color: #8b0000;">"munit-scalacheck"</span> % <span style="color: #8b0000;">"0.7.7"</span> % <span style="color: #6b8e23;">Test</span>
+</code></pre>
 
 <p>
 That is all you need to know to get a basic dependencies working.
@@ -316,28 +287,22 @@ That is all you need to know to get a basic dependencies working.
 don't care the patch version, pick the bigest patch
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">libraryDependencies += <span style="color: #8b0000;">"com.twitter"</span> %% <span style="color: #8b0000;">"finagle-core"</span> % <span style="color: #8b0000;">"20.5.+"</span>
-</pre>
-</div>
+<pre class="code"><code>libraryDependencies += <span style="color: #8b0000;">"com.twitter"</span> %% <span style="color: #8b0000;">"finagle-core"</span> % <span style="color: #8b0000;">"20.5.+"</span>
+</code></pre>
 
 <p>
 don't care the minor version, pick the bigest patch
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">libraryDependencies += <span style="color: #8b0000;">"com.twitter"</span> %% <span style="color: #8b0000;">"finagle-core"</span> % <span style="color: #8b0000;">"20.+"</span>
-</pre>
-</div>
+<pre class="code"><code>libraryDependencies += <span style="color: #8b0000;">"com.twitter"</span> %% <span style="color: #8b0000;">"finagle-core"</span> % <span style="color: #8b0000;">"20.+"</span>
+</code></pre>
 
 <p>
 rang of version
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">libraryDependencies += <span style="color: #8b0000;">"com.twitter"</span> %% <span style="color: #8b0000;">"finagle-core"</span> % <span style="color: #8b0000;">"[19.4.0, 20.5.0)"</span>
-</pre>
-</div>
+<pre class="code"><code>libraryDependencies += <span style="color: #8b0000;">"com.twitter"</span> %% <span style="color: #8b0000;">"finagle-core"</span> % <span style="color: #8b0000;">"[19.4.0, 20.5.0)"</span>
+</code></pre>
 
 <p>
 Package management actually isn't the most painful setting in sbt, since all library
@@ -363,8 +328,7 @@ In Rakefile, we can have very simply task flow, i.e.
 <li>stop database</li>
 </ol>
 
-<div class="org-src-container">
-<pre class="src src-ruby">task <span style="color: #6b8e23;">:db_up</span> <span style="color: #00008b;">do</span>
+<pre class="code"><code>task <span style="color: #6b8e23;">:db_up</span> <span style="color: #00008b;">do</span>
   sh <span style="color: #8b0000;">"docker-compose up -d db"</span>
 <span style="color: #00008b;">end</span>
 
@@ -380,16 +344,14 @@ desc <span style="color: #8b0000;">'run db up test and db down'</span>
 task <span style="color: #6b8e23;">default:</span> [<span style="color: #6b8e23;">:spec</span>] <span style="color: #00008b;">do</span>
   task(<span style="color: #6b8e23;">:db_down</span>).invoke
 <span style="color: #00008b;">end</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 Let us define the same tasks in sbt<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
 <a href="https://www.scala-sbt.org/1.x/docs/Tasks.html">https://www.scala-sbt.org/1.x/docs/Tasks.html</a>
 </span>:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">for the `!` syntax to exec external command</span>
+<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">for the `!` syntax to exec external command</span>
 <span style="color: #00008b;">import</span> scala.sys.process.<span style="color: #00008b;">_</span>
 
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">dbUp</span> <span style="color: #00008b;">=</span> taskKey[<span style="color: #6b8e23;">Unit</span>](<span style="color: #8b0000;">"start database"</span>)
@@ -413,8 +375,7 @@ default := <span style="color: #6b8e23;">Def</span>.sequential(
   runTest,
   dbDown
 ).value
-</pre>
-</div>
+</code></pre>
 
 <p>
 It is bit more verbose than Rake because of the Type things, but generally
@@ -426,21 +387,17 @@ it is as simply as rake when defining external process<label for="2" class="marg
 <p>
 There are lot of ways you can define <code>default</code> in sbt, as a new command:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala">commands += <span style="color: #6b8e23;">Command</span>.command(<span style="color: #8b0000;">"defaultCommand"</span>) { state <span style="color: #00008b;">=&gt;</span>
+<pre class="code"><code>commands += <span style="color: #6b8e23;">Command</span>.command(<span style="color: #8b0000;">"defaultCommand"</span>) { state <span style="color: #00008b;">=&gt;</span>
   <span style="color: #8b0000;">"runTest"</span> :: <span style="color: #8b0000;">"dbDown"</span> ::
   state
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 or as command alias:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala">addCommandAlias(<span style="color: #8b0000;">"defaultCommand"</span>, <span style="color: #8b0000;">"runTest;dbDown"</span>)
-</pre>
-</div>
+<pre class="code"><code>addCommandAlias(<span style="color: #8b0000;">"defaultCommand"</span>, <span style="color: #8b0000;">"runTest;dbDown"</span>)
+</code></pre>
 
 <p>
 Another example is you can operate on files as well from sbt.
@@ -452,14 +409,12 @@ For instance there is built-in task in sbt called <code>makePom</code>, but it w
 so Github can pick it up and analyst what jar file is in CVE list.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">genPom</span> <span style="color: #00008b;">=</span> taskKey[<span style="color: #6b8e23;">Unit</span>](<span style="color: #8b0000;">"generate pom for github to do security monitoring"</span>)
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">genPom</span> <span style="color: #00008b;">=</span> taskKey[<span style="color: #6b8e23;">Unit</span>](<span style="color: #8b0000;">"generate pom for github to do security monitoring"</span>)
 genPom := {
   <span style="color: #00008b;">val</span> <span style="color: #b8860b;">pomFile</span> <span style="color: #00008b;">=</span> makePom.value
   io.<span style="color: #6b8e23;">IO</span>.copyFile(pomFile, file(<span style="color: #8b0000;">"."</span>) / <span style="color: #8b0000;">".github"</span> / <span style="color: #8b0000;">"pom.xml"</span>)
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 Very simply and declarative task, right.
@@ -495,7 +450,7 @@ Very simply and declarative task, right.
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2020-06-07 Sun 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

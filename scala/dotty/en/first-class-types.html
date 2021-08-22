@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-16 Mon 09:21 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>"First Class" Types in Scala 3</title>
@@ -22,50 +22,26 @@
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -155,12 +131,10 @@ Let us compare side by side with Idris' examples.
 <p>
 In Idris, types can be input and output of a normal function:
 </p>
-<div class="org-src-container">
-<pre class="src src-haskell">isSingleton <span style="color: #6a5acd;">:</span> <span style="color: #36648b;">Bool</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Type</span>
+<pre class="code"><code>isSingleton <span style="color: #6a5acd;">:</span> <span style="color: #36648b;">Bool</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Type</span>
 <span style="color: #6a5acd;">isSingleton</span> <span style="color: #36648b;">True</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Nat</span>
 <span style="color: #6a5acd;">isSingleton</span> <span style="color: #36648b;">False</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">List</span> <span style="color: #36648b;">Nat</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 <code>True</code>, <code>False</code>, <code>Nat</code>, <code>List Nat</code> here are all types,
@@ -173,13 +147,11 @@ In Scala, types cannot be passed into function, but in Scala 3, there is a new f
 </span>.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">IsSingleton</span>[<span style="color: #6b8e23;">X</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">Boolean</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">X</span> <span style="color: #00008b;">match</span> {
+<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">IsSingleton</span>[<span style="color: #6b8e23;">X</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">Boolean</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">X</span> <span style="color: #00008b;">match</span> {
   <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">true</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Int</span>
   <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">false</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">List</span>[<span style="color: #6b8e23;">Int</span>]
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 Clearly <code>IsSingleton</code> is not a function in Scala, but it is kind of doing the similar thing that <code>isSingleton</code> does in
@@ -190,22 +162,18 @@ Idris.
 Notice that <code>true</code> and <code>false</code> here are not value, they are singleton types.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">singletonBool</span><span style="color: #00008b;">:</span> <span style="color: #6b8e23;">true</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">true</span>
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">singletonBool</span><span style="color: #00008b;">:</span> <span style="color: #6b8e23;">true</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">true</span>
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">singletonInt</span><span style="color: #00008b;">:</span> <span style="color: #6b8e23;">1</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">1</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 Next let us translate another Idris example into Scala 3:
 </p>
-<div class="org-src-container">
-<pre class="src src-haskell">sum <span style="color: #6a5acd;">:</span> (single <span style="color: #36648b;">:</span> <span style="color: #36648b;">Bool</span>) <span style="color: #b8860b;">-&gt;</span> isSingleton single <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Nat</span>
+<pre class="code"><code>sum <span style="color: #6a5acd;">:</span> (single <span style="color: #36648b;">:</span> <span style="color: #36648b;">Bool</span>) <span style="color: #b8860b;">-&gt;</span> isSingleton single <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Nat</span>
 <span style="color: #6a5acd;">sum</span> <span style="color: #36648b;">True</span> x <span style="color: #b8860b;">=</span> x
 <span style="color: #6a5acd;">sum</span> <span style="color: #36648b;">False</span> <span style="color: #36648b;">[]</span> <span style="color: #b8860b;">=</span> 0
 <span style="color: #6a5acd;">sum</span> <span style="color: #36648b;">False</span> (x <span style="color: #b8860b;">::</span> xs) <span style="color: #b8860b;">=</span> x <span style="color: #b8860b;">+</span> sum <span style="color: #36648b;">False</span> xs
-</pre>
-</div>
+</code></pre>
 
 <p>
 In the type signature, it is super cool that we can call a function <code>isSingleton</code> directly. This is
@@ -215,16 +183,14 @@ the exactly place where you can feel that types are first class and just like va
 <p>
 It is a bit verbose in Scala 3:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span class="linenr">1: </span><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">sum</span>(single<span style="color: #00008b;">:</span> <span style="color: #36648b;">Boolean</span>, x<span style="color: #00008b;">:</span> <span style="color: #36648b;">IsSingleton</span>[single.<span style="color: #00008b;">type</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span> <span style="color: #00008b;">=</span> (single, x) <span style="color: #00008b;">match</span> {
+<pre class="code"><code><span class="linenr">1: </span><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">sum</span>(single<span style="color: #00008b;">:</span> <span style="color: #36648b;">Boolean</span>, x<span style="color: #00008b;">:</span> <span style="color: #36648b;">IsSingleton</span>[single.<span style="color: #00008b;">type</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span> <span style="color: #00008b;">=</span> (single, x) <span style="color: #00008b;">match</span> {
 <span id="coderef-verbose1" class="coderef-off"><span class="linenr">2: </span>  <span style="color: #00008b;">case</span> (<span style="color: #6b8e23;">true</span>, x<span style="color: #00008b;">:</span> <span style="color: #36648b;">IsSingleton</span>[<span style="color: #6b8e23;">true</span>]) <span style="color: #00008b;">=&gt;</span>  x                <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (verbose1)</span>
 <span class="linenr">3: </span>  <span style="color: #00008b;">case</span> (<span style="color: #6b8e23;">false</span>, <span style="color: #6b8e23;">Nil</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">0</span>
 <span id="coderef-verbose2" class="coderef-off"><span class="linenr">4: </span>  <span style="color: #00008b;">case</span> (<span style="color: #6b8e23;">false</span>, ((x<span style="color: #00008b;">:</span><span style="color: #36648b;">Int</span>)::(xs<span style="color: #00008b;">:</span> <span style="color: #36648b;">IsSingleton</span>[<span style="color: #6b8e23;">false</span>]))) <span style="color: #00008b;">=&gt;</span> { <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (verbose2)</span>
 <span class="linenr">5: </span>    sum(<span style="color: #6b8e23;">false</span>, xs) + x
 <span class="linenr">6: </span>  } 
 <span class="linenr">7: </span>}
-</pre>
-</div>
+</code></pre>
 
 <p>
 By using <i>Matching Types</i> <code>IsSingleton</code>, we can compute the types of <code>x</code>, but we cannot feel
@@ -243,7 +209,7 @@ Apart from type level function, there are few places are kind of verbose in Scal
 <p>
 have to manually give compiler a hint that <code>x</code> has type <code>IsSingleton[true]</code>, otherwise compile error:
 </p>
-<pre class="example">
+<pre class="example" id="org9618e15">
 [E]      Found:    (x : DependentTypes2.this.IsSingleton[(single : Boolean)])
 [E]      Required: Int
 </pre>
@@ -272,26 +238,22 @@ Although a bit clumsy, it still works, everything computed at type level correct
 <p>
 I really hope you still remember <code>Vector</code>:
 </p>
-<div class="org-src-container">
-<pre class="src src-haskell"><span style="color: #00008b;">data</span> <span style="color: #36648b;">Nat</span>    <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Z</span>   <span style="color: #b8860b;">|</span> <span style="color: #36648b;">S</span> <span style="color: #36648b;">Nat</span> 
+<pre class="code"><code><span style="color: #00008b;">data</span> <span style="color: #36648b;">Nat</span>    <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Z</span>   <span style="color: #b8860b;">|</span> <span style="color: #36648b;">S</span> <span style="color: #36648b;">Nat</span> 
 <span style="color: #00008b;">data</span> <span style="color: #36648b;">Vect</span> <span style="color: #36648b;">:</span> <span style="color: #36648b;">Nat</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Type</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Type</span> <span style="color: #00008b;">where</span>
    <span style="color: #36648b;">Nil</span>  <span style="color: #36648b;">:</span> <span style="color: #36648b;">Vect</span> <span style="color: #36648b;">Z</span> a
    (<span style="color: #b8860b;">::</span>) <span style="color: #36648b;">:</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Vect</span> k a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Vect</span> (<span style="color: #36648b;">S</span> k) a
-</pre>
-</div>
+</code></pre>
 
 <p>
 Simply translate it to Scala 3:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">import</span> scala.compiletime.{<span style="color: #6b8e23;">S</span>}
-enum <span style="color: #6b8e23;">Vector</span>[<span style="color: #6b8e23;">Nat</span>, +<span style="color: #6b8e23;">A</span>] {
+<pre class="code"><code><span style="color: #00008b;">import</span> scala.compiletime.{<span style="color: #6b8e23;">S</span>}
+<span style="color: #00008b;">enum</span> <span style="color: #6b8e23;">Vector</span>[<span style="color: #6b8e23;">Nat</span>, +<span style="color: #6b8e23;">A</span>] {
   <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">Nil</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">0</span>, <span style="color: #6b8e23;">Nothing</span>]
   <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">Cons</span>[<span style="color: #6b8e23;">N</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">Int</span>, <span style="color: #6b8e23;">AA</span>](head<span style="color: #00008b;">:</span> <span style="color: #36648b;">AA</span>, tail<span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">N</span>, <span style="color: #6b8e23;">AA</span>]) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">S</span>[<span style="color: #6b8e23;">N</span>], <span style="color: #6b8e23;">AA</span>]
 }
-</pre>
-</div>
+</code></pre>
 <p>
 We don't really need to define <code>Nat</code> in Scala 3, there is singleton Int type we can
 use.
@@ -306,22 +268,18 @@ achieve in Idris since types can be passed into function.
 <p>
 Since length is <code>Nat</code>, we can simply define <code>+</code> function for <code>Nat</code>:
 </p>
-<div class="org-src-container">
-<pre class="src src-haskell">(<span style="color: #6a5acd;">+</span>) <span style="color: #36648b;">:</span> <span style="color: #36648b;">Nat</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Nat</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Nat</span>
+<pre class="code"><code>(<span style="color: #6a5acd;">+</span>) <span style="color: #36648b;">:</span> <span style="color: #36648b;">Nat</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Nat</span> <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Nat</span>
 (<span style="color: #6a5acd;">+</span>) <span style="color: #36648b;">Z</span>     y <span style="color: #b8860b;">=</span> y
 (<span style="color: #6a5acd;">+</span>) (<span style="color: #36648b;">S</span> k) y <span style="color: #b8860b;">=</span> <span style="color: #36648b;">S</span> (<span style="color: #b8860b;">+</span> k y)
-</pre>
-</div>
+</code></pre>
 
 <p>
 Next to combine two <code>Vect</code> and compute length at type level is just:
 </p>
-<div class="org-src-container">
-<pre class="src src-haskell">(<span style="color: #6a5acd;">++</span>) <span style="color: #36648b;">:</span> <span style="color: #36648b;">Vect</span> n a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Vect</span> m a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Vect</span> (n <span style="color: #b8860b;">+</span> m) a
+<pre class="code"><code>(<span style="color: #6a5acd;">++</span>) <span style="color: #36648b;">:</span> <span style="color: #36648b;">Vect</span> n a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Vect</span> m a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Vect</span> (n <span style="color: #b8860b;">+</span> m) a
 (<span style="color: #6a5acd;">++</span>) <span style="color: #36648b;">Nil</span>       ys <span style="color: #b8860b;">=</span> ys
 (<span style="color: #6a5acd;">++</span>) (x <span style="color: #b8860b;">::</span> xs) ys <span style="color: #b8860b;">=</span> x <span style="color: #b8860b;">::</span> xs <span style="color: #b8860b;">++</span> ys
-</pre>
-</div>
+</code></pre>
 
 <p>
 We just did it again, calling a function <code>(n + m)</code> in type signature.
@@ -330,14 +288,12 @@ We just did it again, calling a function <code>(n + m)</code> in type signature.
 <p>
 Ideally we should be able to translate in Scala 3:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">import</span> scala.compiletime.ops.int.{+}
+<pre class="code"><code><span style="color: #00008b;">import</span> scala.compiletime.ops.int.{+}
 <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">combine</span>[<span style="color: #6b8e23;">N</span> <span style="color: #00008b;">&lt;:</span><span style="color: #6b8e23;">Int</span>, <span style="color: #6b8e23;">M</span><span style="color: #00008b;">&lt;:</span><span style="color: #6b8e23;">Int</span>,<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">N</span>, <span style="color: #6b8e23;">A</span>], b<span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">M</span>, <span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">N</span> + <span style="color: #6b8e23;">M</span>, <span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span>
   (a, b) <span style="color: #00008b;">match</span>
     <span style="color: #00008b;">case</span> (<span style="color: #6b8e23;">Nil</span>, <span style="color: #b8860b;">b</span>) <span style="color: #00008b;">=&gt;</span> b
     <span style="color: #00008b;">case</span> <span style="color: #36648b;">Cons</span>(<span style="color: #b8860b;">head</span>, <span style="color: #b8860b;">tail</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Cons</span>(head, combine(tail, b))
-</pre>
-</div>
+</code></pre>
 
 <p>
 Type level operator <code>+</code> here is from <code>compiletime.ops</code>, it calculates singleton Int types at compile time.<label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
@@ -345,20 +301,18 @@ Type level operator <code>+</code> here is from <code>compiletime.ops</code>, it
 </span>
 For instance:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">val</span> <span style="color: #b8860b;">x</span><span style="color: #00008b;">:</span> <span style="color: #6b8e23;">1</span> + <span style="color: #6b8e23;">2</span> * <span style="color: #6b8e23;">3</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">7</span>
-</pre>
-</div>
+<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">x</span><span style="color: #00008b;">:</span> <span style="color: #6b8e23;">1</span> + <span style="color: #6b8e23;">2</span> * <span style="color: #6b8e23;">3</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">7</span>
+</code></pre>
 
 <p>
 But it is a crude real world&#x2026;
 </p>
-<pre class="example">
+<pre class="example" id="orgc9a1c5f">
 [E]      Found:    (b : DependentTypes2.this.Vector[M, A])
 [E]      Required: DependentTypes2.this.Vector[N + M, A]
 [E]      L61:     case (Nil, b) =&gt; b
 </pre>
-<pre class="example">
+<pre class="example" id="org12d40dc">
 [E]      Found:    DependentTypes2.this.Vector[scala.compiletime.S[Int + M], Any]
 [E]      Required: DependentTypes2.this.Vector[N + M, A]
 [E]      L62:     case Cons(head, tail) =&gt; Cons(head, combine(tail, b))
@@ -375,14 +329,12 @@ Also compiler cannot prove <code>N - 1 + M + 1</code> is  <code>N + M</code>.
 <p>
 I wouldn't suggest doing this on production, but we need to help Scala prove that the type is correct.
 </p>
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">combine</span>[<span style="color: #6b8e23;">N</span> <span style="color: #00008b;">&lt;:</span><span style="color: #6b8e23;">Int</span>, <span style="color: #6b8e23;">M</span><span style="color: #00008b;">&lt;:</span><span style="color: #6b8e23;">Int</span>,<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">N</span>, <span style="color: #6b8e23;">A</span>], b<span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">M</span>, <span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">N</span> + <span style="color: #6b8e23;">M</span>, <span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span>
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">combine</span>[<span style="color: #6b8e23;">N</span> <span style="color: #00008b;">&lt;:</span><span style="color: #6b8e23;">Int</span>, <span style="color: #6b8e23;">M</span><span style="color: #00008b;">&lt;:</span><span style="color: #6b8e23;">Int</span>,<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">N</span>, <span style="color: #6b8e23;">A</span>], b<span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">M</span>, <span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">N</span> + <span style="color: #6b8e23;">M</span>, <span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span>
   (a, b) <span style="color: #00008b;">match</span>
     <span style="color: #00008b;">case</span> (<span style="color: #6b8e23;">Nil</span>, <span style="color: #b8860b;">b</span>) <span style="color: #00008b;">=&gt;</span> b.asInstanceOf[<span style="color: #6b8e23;">Vector</span>[<span style="color: #6b8e23;">N</span>+<span style="color: #6b8e23;">M</span>, <span style="color: #6b8e23;">A</span>]]
     <span style="color: #00008b;">case</span> (<span style="color: #36648b;">Cons</span>(<span style="color: #b8860b;">head</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>, <span style="color: #b8860b;">tail</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">N</span>-1, <span style="color: #6b8e23;">A</span>]), <span style="color: #b8860b;">b</span>) <span style="color: #00008b;">=&gt;</span>
       (<span style="color: #6b8e23;">Cons</span>[<span style="color: #6b8e23;">N</span> <span style="color: #6b8e23;">-1</span> + <span style="color: #6b8e23;">M</span>, <span style="color: #6b8e23;">A</span>](head,  combine(tail, b))).asInstanceOf[<span style="color: #6b8e23;">Vector</span>[<span style="color: #6b8e23;">N</span>+<span style="color: #6b8e23;">M</span>, <span style="color: #6b8e23;">A</span>]]
-</pre>
-</div>
+</code></pre>
 
 <p>
 Overall I think it is great that Scala 3 provides <b>Match Types</b> and <code>compiletime.ops</code>,
@@ -418,7 +370,7 @@ which make it possible to compute types just like values without using any shape
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2020-07-17 Fri 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

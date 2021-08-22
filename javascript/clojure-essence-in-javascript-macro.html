@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-16 Mon 09:20 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>JavaScript玩转Clojure大法之 - Macro (1)</title>
 <meta name="generator" content="Org mode">
-<meta name="author" content="root">
+<meta name="author" content="unknown">
 <meta name="keywords" content="macro, javascript, clojure, lisp, sweetjs, meta programming">
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
@@ -16,50 +16,26 @@
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -116,16 +92,14 @@ macro可以说是lisp语言的独门绝技, lisp语言数据即代码,以及s-ex
 </p>
 
 
-<figure>
+<figure id="org7383b92">
 <img src="./images/bender-make-bender.gif" alt="bender-make-bender.gif">
 
 </figure>
 
-<div class="org-src-container">
-<pre class="src src-clojure">(macroexpand '(<span style="color: #00008b;">when-not</span> (= 1 3) (print <span style="color: #8b0000;">"damn"</span>)))
+<pre class="code"><code>(macroexpand '(<span style="color: #00008b;">when-not</span> (= 1 3) (print <span style="color: #8b0000;">"damn"</span>)))
 <span style="color: #8c8c8c; font-style: italic;">; </span><span style="color: #8c8c8c; font-style: italic;">=&gt; (if (= 1 3) nil (do (print "damn")))</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 看看Clojure的macro <code>when-not</code> 能扩展成什么? 神奇的变成了if.
@@ -207,19 +181,16 @@ mozilla还有论文呢: <a href="https://github.com/mozilla/sweet.js/blob/master
 <p>
 来看看rust的 rule macro
 </p>
-<div class="org-src-container">
-<pre class="src src-rust">macro_rules! foo {
+<pre class="code"><code>macro_rules! foo {
     (x =&gt; $e:expr) =&gt; (println!("got a ", $e));
 }
 foo!(x =&gt; 3); // =&gt; println!("got a ", 3)
-</pre>
-</div>
+</code></pre>
 
 <p>
 来看看 Sweet.js的 rule macro
 </p>
-<div class="org-src-container">
-<pre class="src src-js">macro foo {
+<pre class="code"><code>macro foo {
   {
     (x=&gt;$e:expr)
   } =&gt; {
@@ -227,8 +198,7 @@ foo!(x =&gt; 3); // =&gt; println!("got a ", 3)
   }
 }
 foo(x=&gt;3) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; console.log("got a ", 3)</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 简直是一模一样, 好吧, 我承认我的标题应该改成 <i>javascript玩转rust大法更为贴切</i>, 但是我们先来关心下这里面到底发生了什么?
@@ -259,19 +229,19 @@ foo(x=&gt;3) <span style="color: #8c8c8c; font-style: italic;">// </span><span s
 foo &bull; ( &bull; x &bull; = &bull; &gt; &bull; 3 &bull; )</li>
 <li>变token树: 括号里面是一棵树, 第一个是根, 后面的元素有括号的是子树, 没有的就是叶子了.</li>
 </ol>
-<pre class="example">
+<pre class="example" id="org2b5c6c8">
 (foo ('()' x = &gt; 3))
 </pre>
 <ol class="org-ol">
 <li><p>
 变term树: 
 </p>
-<pre class="example">
+<pre class="example" id="org857ec0d">
 (call:foo x = &gt; 3)
 </pre></li>
 <li>expand:</li>
 </ol>
-<pre class="example">
+<pre class="example" id="org544fa2f">
 (call:foo (call:console.log 'got a' , 3))
 </pre>
 
@@ -301,8 +271,7 @@ Allright, 当然这个例子好简单, 但是像 rule macro 只能做一些非�
 <p>
 让我们先来一 <del>发</del> 个例子
 </p>
-<div class="org-src-container">
-<pre class="src src-js">  macro m {
+<pre class="code"><code>  macro m {
     <span style="color: #00008b;">case</span> {ctx (x=&gt;$x)} =&gt; {
       console.log(<span style="color: #8b0000;">'haha iam javascript'</span>)
       <span style="color: #00008b;">return</span> #{
@@ -313,8 +282,7 @@ Allright, 当然这个例子好简单, 但是像 rule macro 只能做一些非�
   m(100) 
 <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; haha iam javascript (to console)</span>
 <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; console.log(100)</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 如果你已经忘了, 请 <a href="#orgfb2a9a7">电梯</a> 返回去对比一下到底有什么区别
@@ -324,8 +292,7 @@ Allright, 当然这个例子好简单, 但是像 rule macro 只能做一些非�
 <li>接下来都一样, 直到&#x2026; <code>#{}</code> 这个是什么?
 这里面的语法变成语法树, 当然语法树结构是数组, 每个元素还是一个token树.比如console.log(3)大概是这种结构</li>
 </ol>
-<div class="org-src-container">
-<pre class="src src-javascript">[
+<pre class="code"><code>[
     {token: {value: <span style="color: #8b0000;">'console'</span>}}
     {token: {value: <span style="color: #8b0000;">'.'</span>}},
     {token: {value: <span style="color: #8b0000;">'log'</span>}},
@@ -334,8 +301,7 @@ Allright, 当然这个例子好简单, 但是像 rule macro 只能做一些非�
          {token: {value: 3}}
      ]}
 ]
-</pre>
-</div>
+</code></pre>
 <ol class="org-ol">
 <li>最重要的, 现在里面可以写正常js了, 意味着你可以用js编程各种语法,然后拼到token树中</li>
 </ol>
@@ -352,36 +318,31 @@ Allright, 当然这个例子好简单, 但是像 rule macro 只能做一些非�
 <p>
 arity function指根据不同个数的参数, 有不同的函数body. 比如
 </p>
-<div class="org-src-container">
-<pre class="src src-clojure">(<span style="color: #00008b;">defn</span> <span style="color: #6a5acd;">add</span>
+<pre class="code"><code>(<span style="color: #00008b;">defn</span> <span style="color: #6a5acd;">add</span>
   ([x] (+ 0 x))
   ([x y] (+ x y)))
 (add 1)<span style="color: #8c8c8c; font-style: italic;">;=&gt;2</span>
 (add 1 2)<span style="color: #8c8c8c; font-style: italic;">;=&gt;3</span>
-</pre>
-</div>
+</code></pre>
 
 </blockquote></div>
 
 <p>
 所以类似的我期望的能在js里这样定义函数
 </p>
-<div class="org-src-container">
-<pre class="src src-js">defn add {
+<pre class="code"><code>defn add {
   (a){a}
   (a, b) {a+b}
 }
 add(1) <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; 1</span>
 add(1, 2) <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; 3</span>
-</pre>
-</div>
+</code></pre>
 
 <p>
 先把macro摆出来
 </p>
 
-<div class="org-src-container">
-<pre class="src src-js"><span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">var macro from http://jlongster.com/Sweet.js-Tutorial--2--Recursive-Macros-and-Custom-Pattern-Classes</span>
+<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">var macro from http://jlongster.com/Sweet.js-Tutorial--2--Recursive-Macros-and-Custom-Pattern-Classes</span>
 macro caseFunc {
     <span style="color: #00008b;">case</span> {_ ($args...) {$body... $last:expr}} =&gt;
     {
@@ -422,8 +383,7 @@ defn arity_function{
 <span style="color: #8c8c8c; font-style: italic;">    }</span>
 <span style="color: #8c8c8c; font-style: italic;">}</span>
 <span style="color: #8c8c8c; font-style: italic;">*/</span>
-</pre>
-</div>
+</code></pre>
 
 <div class="epigraph"><blockquote>
 <p>
@@ -448,8 +408,7 @@ WTF shen me gui
 </ul>
 
 
-<div class="org-src-container">
-<pre class="src src-js"><span class="linenr"> 1: </span>macro caseFunc {
+<pre class="code"><code><span class="linenr"> 1: </span>macro caseFunc {
 <span id="coderef-last" class="coderef-off"><span class="linenr"> 2: </span>  <span style="color: #00008b;">case</span> {_ ($args...) {$body... $last:expr}} =&gt;</span>
 <span class="linenr"> 3: </span>    {
 <span id="coderef-makevalue" class="coderef-off"><span class="linenr"> 4: </span>      letstx $len = [makeValue(#{$args...}.length , <span style="color: #6b8e23;">null</span>)];</span>
@@ -459,8 +418,7 @@ WTF shen me gui
 <span class="linenr"> 8: </span>      }
 <span class="linenr"> 9: </span>    }
 <span class="linenr">10: </span>}
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 </div>
@@ -492,13 +450,13 @@ mozilla还有论文呢: <a href="https://github.com/mozilla/sweet.js/blob/master
 </div></div>
 <div id="postamble" class="status">
 <footer>
-  <p>Author: root
+  <p>Author: unknown
     <a class="github-button" href="https://github.com/sponsors/jcouyang" data-icon="octicon-heart" aria-label="Sponsor @jcouyang on GitHub">Sponsor</a>
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2015-06-14 Sun 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

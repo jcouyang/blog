@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-16 Mon 09:21 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Write your AWS DevOps tool in Haskell for Great Good</title>
@@ -21,50 +21,26 @@
 <meta property="og:description" content="Why I rewrite all DevOps tools in Haskell, and you should too!" />
 <meta property="og:type" content="article" />
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -99,14 +75,14 @@ for the JavaScript code in this tag.
 <li><a href="#org66a4fd4">List <span class="underline">ALL FILES</span> in a bucket</a>
 <ul>
 <li><a href="#org9b8191a">AWS CLI</a></li>
-<li><a href="#orgc68c067">Haskell Amazonka</a></li>
+<li><a href="#org72d87c9">Haskell Amazonka</a></li>
 <li><a href="#orgf612558">Go SDK </a></li>
 </ul>
 </li>
 <li><a href="#orgd166ea9">Query a DynamoDB table</a>
 <ul>
 <li><a href="#orgf7f2eb7">AWS CLI</a></li>
-<li><a href="#org72d87c9">Haskell Amazonka</a></li>
+<li><a href="#orgba47330">Haskell Amazonka</a></li>
 <li><a href="#org0dd49f0">Go SDK</a></li>
 </ul>
 </li>
@@ -126,10 +102,8 @@ Let's just simply compare AWS CLI, Haskell Amazonka, and official Go SDK with th
 <a href="https://docs.aws.amazon.com/cli/latest/reference/s3/ls.html">https://docs.aws.amazon.com/cli/latest/reference/s3/ls.html</a> 
 </span></h3>
 <div class="outline-text-3" id="text-orgb9db3a9">
-<div class="org-src-container">
-<pre class="src src-sh">aws s3 ls s3://mybucket --recursive --page-size 100
-</pre>
-</div>
+<pre class="code"><code>aws s3 ls s3://mybucket --recursive --page-size 100
+</code></pre>
 </div>
 </div>
 
@@ -138,10 +112,8 @@ Let's just simply compare AWS CLI, Haskell Amazonka, and official Go SDK with th
 <a href="https://hackage.haskell.org/package/amazonka-s3-1.6.1/docs/Network-AWS-S3-ListObjects.htm">https://hackage.haskell.org/package/amazonka-s3-1.6.1/docs/Network-AWS-S3-ListObjects.htm</a> 
 </span></h3>
 <div class="outline-text-3" id="text-org38a914e">
-<div class="org-src-container">
-<pre class="src src-haskell">send <span style="color: #6a5acd;">$</span> listObjects <span style="color: #8b0000;">"mybucket"</span> <span style="color: #b8860b;">&amp;</span> loMaxKeys <span style="color: #b8860b;">~?</span> 100
-</pre>
-</div>
+<pre class="code"><code>send <span style="color: #6a5acd;">$</span> listObjects <span style="color: #8b0000;">"mybucket"</span> <span style="color: #b8860b;">&amp;</span> loMaxKeys <span style="color: #b8860b;">~?</span> 100
+</code></pre>
 
 <div class="epigraph"><blockquote>
 <p>
@@ -149,20 +121,16 @@ Of course the Haskell code is pure and lazy, so <code>send</code> just returns a
 we can create a function <code>awsRun</code> to execute the command:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-haskell"><span style="color: #6a5acd;">awsRun</span> <span style="color: #b8860b;">=</span> runResourceT <span style="color: #b8860b;">.</span> runAWS (newEnv <span style="color: #36648b;">Discover</span> <span style="color: #b8860b;">&amp;</span> envLogger <span style="color: #b8860b;">.~</span> newLogger <span style="color: #36648b;">Info</span> stdout) <span style="color: #b8860b;">.</span> within <span style="color: #36648b;">Sydney</span>
-</pre>
-</div>
+<pre class="code"><code><span style="color: #6a5acd;">awsRun</span> <span style="color: #b8860b;">=</span> runResourceT <span style="color: #b8860b;">.</span> runAWS (newEnv <span style="color: #36648b;">Discover</span> <span style="color: #b8860b;">&amp;</span> envLogger <span style="color: #b8860b;">.~</span> newLogger <span style="color: #36648b;">Info</span> stdout) <span style="color: #b8860b;">.</span> within <span style="color: #36648b;">Sydney</span>
+</code></pre>
 
 <p>
 It is similar to the step that Go SDK need to create a session first:
 </p>
-<div class="org-src-container">
-<pre class="src src-c"><span style="color: #6b8e23;">sess</span> := session.Must(session.NewSession(&amp;aws.Config{
-    <span style="color: #6b8e23;">Region</span>: aws.String(endpoints.ApSoutheast2RegionID),
+<pre class="code"><code><span style="color: #6b8e23;">sess</span> := session.Must(session.NewSession(&amp;aws.Config{
+    Region: aws.String(endpoints.ApSoutheast2RegionID),
 }))
-</pre>
-</div>
+</code></pre>
 
 </blockquote></div>
 </div>
@@ -173,8 +141,7 @@ It is similar to the step that Go SDK need to create a session first:
 <a href="https://docs.aws.amazon.com/sdk-for-go/api/service/s3/#S3.ListObjects">https://docs.aws.amazon.com/sdk-for-go/api/service/s3/#S3.ListObjects</a> 
 </span></h3>
 <div class="outline-text-3" id="text-org25f98e2">
-<div class="org-src-container">
-<pre class="src src-c"><span style="color: #6b8e23;">svc</span> := s3.New(session.New())
+<pre class="code"><code><span style="color: #6b8e23;">svc</span> := s3.New(session.New())
 input := &amp;s3.ListObjectsInput{
     Bucket:  aws.String(<span style="color: #8b0000;">"mybucket"</span>),
     MaxKeys: aws.Int64(100),
@@ -183,8 +150,7 @@ input := &amp;s3.ListObjectsInput{
 result, err := svc.ListObjects(input)
 <span style="color: #00008b;">if</span> err != nil {
  ...
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 </div>
@@ -214,13 +180,11 @@ Can't really do it&#x2026;if there are more than 1000 files 🤷‍♂
 </div>
 </div>
 
-<div id="outline-container-orgc68c067" class="outline-3">
-<h3 id="orgc68c067">Haskell Amazonka</h3>
-<div class="outline-text-3" id="text-orgc68c067">
-<div class="org-src-container">
-<pre class="src src-haskell">paginate <span style="color: #6a5acd;">$</span> listObjects <span style="color: #8b0000;">"mybucket"</span> <span style="color: #b8860b;">&amp;</span> loMaxKeys <span style="color: #b8860b;">~?</span> 100
-</pre>
-</div>
+<div id="outline-container-org72d87c9" class="outline-3">
+<h3 id="org72d87c9">Haskell Amazonka</h3>
+<div class="outline-text-3" id="text-org72d87c9">
+<pre class="code"><code>paginate <span style="color: #6a5acd;">$</span> listObjects <span style="color: #8b0000;">"mybucket"</span> <span style="color: #b8860b;">&amp;</span> loMaxKeys <span style="color: #b8860b;">~?</span> 100
+</code></pre>
 
 <p>
 Simply replace <code>send</code> with <code>paginate</code>, amazonka will automatically <b><b>pull</b></b> objects into a Conduit<label for="5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="5" class="margin-toggle"/><span class="sidenote">
@@ -235,10 +199,9 @@ Simply replace <code>send</code> with <code>paginate</code>, amazonka will autom
 <a href="https://docs.aws.amazon.com/sdk-for-go/api/service/s3/#S3.ListObjectsPagesWithContext">https://docs.aws.amazon.com/sdk-for-go/api/service/s3/#S3.ListObjectsPagesWithContext</a> 
 </span></h3>
 <div class="outline-text-3" id="text-orgf612558">
-<div class="org-src-container">
-<pre class="src src-c"><span style="color: #6b8e23;">objects</span> := []string{}
+<pre class="code"><code><span style="color: #6b8e23;">objects</span> := []string{}
 <span style="color: #6b8e23;">err</span> := svc.ListObjectsPagesWithContext(ctx, &amp;s3.ListObjectsInput{
-    <span style="color: #6b8e23;">Bucket</span>: aws.String(myBucket),
+    Bucket: aws.String(myBucket),
 }, func(<span style="color: #36648b;">p</span> *<span style="color: #b8860b;">s3</span>.ListObjectsOutput, <span style="color: #36648b;">lastPage</span> <span style="color: #b8860b;">bool</span>) bool {
     <span style="color: #00008b;">for</span> _, o := range p.Contents {
         objects = append(objects, aws.StringValue(o.Key))
@@ -250,8 +213,7 @@ Simply replace <code>send</code> with <code>paginate</code>, amazonka will autom
 }
 
 fmt.Println(<span style="color: #8b0000;">"Objects in bucket:"</span>, objects)
-</pre>
-</div>
+</code></pre>
 
 <p>
 Go SDK uses callback function to go over pages, it is less efficient then stream and more verbose.
@@ -269,37 +231,32 @@ Go SDK uses callback function to go over pages, it is less efficient then stream
 <a href="https://docs.aws.amazon.com/cli/latest/reference/dynamodb/query.html">https://docs.aws.amazon.com/cli/latest/reference/dynamodb/query.html</a> 
 </span></h3>
 <div class="outline-text-3" id="text-orgf7f2eb7">
-<div class="org-src-container">
-<pre class="src src-sh">aws dynamodb query <span style="color: #8b0000;">\</span>
+<pre class="code"><code>aws dynamodb query <span style="color: #8b0000;">\</span>
     --expression-attribute-values file://put-a-json-here <span style="color: #8b0000;">\</span>
     --key-condition-expression <span style="color: #8b0000;">"Artist = :v1"</span> <span style="color: #8b0000;">\</span>
     --projection-expression <span style="color: #8b0000;">"SongTitle"</span> <span style="color: #8b0000;">\</span>
     --table-name Music
-</pre>
+</code></pre>
 </div>
 </div>
-</div>
-<div id="outline-container-org72d87c9" class="outline-3">
-<h3 id="org72d87c9">Haskell Amazonka</h3>
-<div class="outline-text-3" id="text-org72d87c9">
-<div class="org-src-container">
-<pre class="src src-haskell">send <span style="color: #6a5acd;">$</span> query <span style="color: #8b0000;">"Music"</span>
+<div id="outline-container-orgba47330" class="outline-3">
+<h3 id="orgba47330">Haskell Amazonka</h3>
+<div class="outline-text-3" id="text-orgba47330">
+<pre class="code"><code>send <span style="color: #6a5acd;">$</span> query <span style="color: #8b0000;">"Music"</span>
   <span style="color: #b8860b;">&amp;</span> qExpressionAttributeValues <span style="color: #b8860b;">.~</span> HashMap.singleton <span style="color: #8b0000;">":v1"</span> (attributeValue <span style="color: #b8860b;">&amp;</span> avS <span style="color: #b8860b;">?~</span> <span style="color: #8b0000;">"No One You Know"</span>)
   <span style="color: #b8860b;">&amp;</span> qKeyConditionExpression <span style="color: #b8860b;">?~</span> <span style="color: #8b0000;">"Artist = :v1"</span>
   <span style="color: #b8860b;">&amp;</span> qProjectionExpression <span style="color: #b8860b;">?~</span> <span style="color: #8b0000;">"SongTitle"</span>
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 <div id="outline-container-org0dd49f0" class="outline-3">
 <h3 id="org0dd49f0">Go SDK</h3>
 <div class="outline-text-3" id="text-org0dd49f0">
-<div class="org-src-container">
-<pre class="src src-c"><span style="color: #6b8e23;">svc</span> := dynamodb.New(session.New())
+<pre class="code"><code><span style="color: #6b8e23;">svc</span> := dynamodb.New(session.New())
 input := &amp;dynamodb.QueryInput{
     ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
         <span style="color: #8b0000;">":v1"</span>: {
-            <span style="color: #6b8e23;">S</span>: aws.String(<span style="color: #8b0000;">"No One You Know"</span>),
+            S: aws.String(<span style="color: #8b0000;">"No One You Know"</span>),
         },
     },
     KeyConditionExpression: aws.String(<span style="color: #8b0000;">"Artist = :v1"</span>),
@@ -310,8 +267,7 @@ input := &amp;dynamodb.QueryInput{
 result, err := svc.Query(input)
 <span style="color: #00008b;">if</span> err != nil {
     ...
-</pre>
-</div>
+</code></pre>
 
 <p>
 You should get the idea by now.
@@ -371,7 +327,7 @@ I guess anyone even can't read Haskell at all can identify the Haskell version i
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2021-08-15 Sun 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

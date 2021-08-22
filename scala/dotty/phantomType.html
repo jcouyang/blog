@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-16 Mon 09:21 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scala 3 幻影类型</title>
@@ -22,50 +22,26 @@
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -123,8 +99,7 @@ Phantom Types 指并不是数据类型必要的类型. 其实在 <a href="./GADT
 但是这个可以随意加的额外的类型格外有用, 比如我们可以用 phantom types 来定义类型安全的 <code>Vector</code>:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala">enum <span style="color: #6b8e23;">Nat</span> {
+<pre class="code"><code><span style="color: #00008b;">enum</span> <span style="color: #6b8e23;">Nat</span> {
   <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">Zero</span>
   <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">Succ</span>[<span style="color: #6b8e23;">A</span>]() <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Nat</span>
 }
@@ -132,34 +107,29 @@ Phantom Types 指并不是数据类型必要的类型. 其实在 <a href="./GADT
 <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Nat2</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Succ</span>[<span style="color: #6b8e23;">Succ</span>[<span style="color: #6b8e23;">Zero</span>.<span style="color: #00008b;">type</span>]]
 <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Nat3</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Succ</span>[<span style="color: #6b8e23;">Succ</span>[<span style="color: #6b8e23;">Succ</span>[<span style="color: #6b8e23;">Zero</span>.<span style="color: #00008b;">type</span>]]]
 
-enum <span style="color: #6b8e23;">Vector</span>[+<span style="color: #6b8e23;">N</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">Nat</span>, +<span style="color: #6b8e23;">A</span>] {
+<span style="color: #00008b;">enum</span> <span style="color: #6b8e23;">Vector</span>[+<span style="color: #6b8e23;">N</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">Nat</span>, +<span style="color: #6b8e23;">A</span>] {
   <span style="color: #00008b;">case</span> <span style="color: #36648b;">Cons</span>(<span style="color: #b8860b;">head</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>, <span style="color: #b8860b;">tail</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">N</span>, <span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">Succ</span>[<span style="color: #6b8e23;">N</span>], <span style="color: #6b8e23;">A</span>]
   <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">Nil</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">Zero</span>.<span style="color: #00008b;">type</span>, <span style="color: #6b8e23;">Nothing</span>]
 }
 <span style="color: #00008b;">import</span> <span style="color: #6b8e23;">Vector</span>.<span style="color: #00008b;">_</span>
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">vector2</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">Nat2</span>, <span style="color: #6b8e23;">Int</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Cons</span>(<span style="color: #6b8e23;">1</span>, <span style="color: #6b8e23;">Cons</span>(<span style="color: #6b8e23;">2</span>, <span style="color: #6b8e23;">Nil</span>))
 <span style="color: #00008b;">val</span> <span style="color: #b8860b;">vector3</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">Nat3</span>, <span style="color: #6b8e23;">Int</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Cons</span>(<span style="color: #6b8e23;">1</span>, <span style="color: #6b8e23;">Cons</span>(<span style="color: #6b8e23;">2</span>, <span style="color: #6b8e23;">Cons</span>(<span style="color: #6b8e23;">3</span>, <span style="color: #6b8e23;">Nil</span>)))
-</pre>
-</div>
+</code></pre>
 
 <p>
 长度本身是运行时的值,但是通过phantom types我们把长度弄到了类型上, 这样编译器就能帮忙检查比如, head是不是安全:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scala"><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">typeSafeHead</span>[<span style="color: #6b8e23;">A</span>](vec<span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">Succ</span>[<span style="color: #6b8e23;">Nat</span>], <span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span><span style="color: #36648b;">A</span> <span style="color: #00008b;">=</span> vec <span style="color: #00008b;">match</span>
+<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">typeSafeHead</span>[<span style="color: #6b8e23;">A</span>](vec<span style="color: #00008b;">:</span> <span style="color: #36648b;">Vector</span>[<span style="color: #6b8e23;">Succ</span>[<span style="color: #6b8e23;">Nat</span>], <span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span><span style="color: #36648b;">A</span> <span style="color: #00008b;">=</span> vec <span style="color: #00008b;">match</span>
     <span style="color: #00008b;">case</span> <span style="color: #36648b;">Cons</span>(<span style="color: #b8860b;">head</span>, <span style="color: #00008b;">_</span>) <span style="color: #00008b;">=&gt;</span> head
-</pre>
-</div>
+</code></pre>
 
 <p>
 所以如果你想要拿 Nil 的 head, 编译时就会挂:
 </p>
-<div class="org-src-container">
-<pre class="src src-scala">typeSafeHead(<span style="color: #6b8e23;">Nil</span>)
-</pre>
-</div>
-<pre class="example">
+<pre class="code"><code>typeSafeHead(<span style="color: #6b8e23;">Nil</span>)
+</code></pre>
+<pre class="example" id="orgdf0402a">
 Found:    (Main.Vector.Nil : Main.Vector[(Main.Nat.Zero : Main.Nat), Nothing])
 Required: Main.Vector[Main.Nat.Succ[Main.Nat], Any]
 </pre>
@@ -176,7 +146,7 @@ Required: Main.Vector[Main.Nat.Succ[Main.Nat], Any]
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2020-03-31 Tue 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

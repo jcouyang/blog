@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-08-16 Mon 09:20 -->
+<!-- 2021-08-22 Sun 09:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rethinking React Dataflow</title>
 <meta name="generator" content="Org mode">
-<meta name="author" content="root">
+<meta name="author" content="unknown">
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -15,50 +15,26 @@
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -121,7 +97,7 @@ Redux 现在红的一塌糊涂，写这篇文章并不是专门来踢馆的，�
 </p>
 
 
-<figure>
+<figure id="org59c8864">
 <img src="https://raw.githubusercontent.com/jcouyang/react-most/master/docs/images/flow.dot.png" alt="flow.dot.png">
 
 </figure>
@@ -179,7 +155,7 @@ Redux 现在红的一塌糊涂，写这篇文章并不是专门来踢馆的，�
 </p>
 
 
-<figure>
+<figure id="org7db3899">
 <img src="https://raw.githubusercontent.com/jcouyang/clojure-flavored-javascript/master/book/images/Type_N_Search.png" alt="Type_N_Search.png">
 
 </figure>
@@ -191,8 +167,7 @@ Redux 现在红的一塌糊涂，写这篇文章并不是专门来踢馆的，�
 <p>
 使用 React 创建一个 Component
 </p>
-<div class="org-src-container">
-<pre class="src src-js"><span style="color: #00008b;">const</span> <span style="color: #b8860b;">TypeNsearch</span> = (props)=&gt;{
+<pre class="code"><code><span style="color: #00008b;">const</span> <span style="color: #b8860b;">TypeNsearch</span> = (props)=&gt;{
     <span style="color: #00008b;">let</span> {search} = props.actions
     <span style="color: #00008b;">return</span> &lt;div&gt;
         &lt;input onChange={e=&gt;search(e.target.value)}&gt;&lt;/input&gt;
@@ -205,8 +180,7 @@ Redux 现在红的一塌糊涂，写这篇文章并不是专门来踢馆的，�
         &lt;/ul&gt;
     &lt;/div&gt;
 }
-</pre>
-</div>
+</code></pre>
 
 <p>
 return 的地方就是 Virtual DOM 了，一个输入框 <code>input</code> ，底下是一堆 <code>li</code> 。当输入框内容发生改变，会调用 <code>search</code> 函数，该函数将输入框的值加入到一个叫 <i>Intent Stream</i> 的流中。
@@ -225,23 +199,19 @@ return 的地方就是 Virtual DOM 了，一个输入框 <code>input</code> ，�
 一旦把用户事件的值发送到 Intent Stream，响应事件的工作就算已经做完了。接下来实现第二步， 至少间隔 500ms 才发送 API 请求。这意味着我们可以开始构建数据流了，让数据流中的类型为 <code>search</code> 的值 debounce 500ms 就好。
 </p>
 
-<div class="org-src-container">
-<pre class="src src-js"><span style="color: #00008b;">function</span>(<span style="color: #b8860b;">intent$</span>){
+<pre class="code"><code><span style="color: #00008b;">function</span>(<span style="color: #b8860b;">intent$</span>){
   <span style="color: #00008b;">let</span> <span style="color: #b8860b;">updateSink$</span> = intent$.filter(i=&gt;i.type==<span style="color: #8b0000;">'search'</span>)
                        .debounce(500)
   ...
-</pre>
-</div>
+</code></pre>
 
 <p>
 <code>debounce</code> 会把一个流转换成一个值间的间隔至少在给定时间的流。
 </p>
-<div class="org-src-container">
-<pre class="src src-js">--&#20919;-&#20919;&#31505;--&#20919;&#31505;&#35805;--&gt;
+<pre class="code"><code>--&#20919;-&#20919;&#31505;--&#20919;&#31505;&#35805;--&gt;
 
 --------&#20919;&#31505;&#35805;--&gt;
-</pre>
-</div>
+</code></pre>
 </div>
 </div>
 
@@ -251,15 +221,13 @@ return 的地方就是 Virtual DOM 了，一个输入框 <code>input</code> ，�
 <p>
 接下来的事情就简单的，流上的值之间一定是间隔 500ms 以上，我们可以放心的直接通过这些值构造响应的 API 地址并发送请求。
 </p>
-<div class="org-src-container">
-<pre class="src src-js">...
+<pre class="code"><code>...
 .map(intent=&gt;intent.value)
 .filter(query=&gt;query.length &gt; 0)
 .map(query=&gt;GITHUB_SEARCH_API + query)
 .map(rest)
 ...
-</pre>
-</div>
+</code></pre>
 
 <p>
 rest 是一个 Isomophic 的 JavaScript Restful 客户端。在拼好地址后可以简单的利用 rest 来发送请求，得到一个 Promise。
@@ -274,20 +242,18 @@ rest 是一个 Isomophic 的 JavaScript Restful 客户端。在拼好地址后�
 精彩的地方来了，当我们获得一个 Promise 后，如何将 Promise 内的一个异步的结果在作为流输出呢？这时候就可以派上我们的 Monad， monadic 的连接 promise 和 Intent Stream。
 </p>
 
-<div class="org-src-container">
-<pre class="src src-js">.flatMap(request=&gt;most.fromPromise(
+<pre class="code"><code>.flatMap(request=&gt;most.fromPromise(
                          request.then(resp=&gt;({
                            type: <span style="color: #8b0000;">'dataUpdate'</span>,
                            value: resp.entity
                          }))))
-</pre>
-</div>
+</code></pre>
 
 <p>
  其中的 <code>request</code> 是上一步 rest 返回的 Promise，在简单的格式转换后，使用 <code>most.fromPromise</code> 将其也转换成流。
 当得到 API 的返回组成的流之后，使用 <code>flatMap</code> 连到 Intent Stream 上。下面是 <code>flatMap</code> 两个API 结果流的示意图，以防读者忘了上一节的 <code>flatMap</code> 例子。
 </p>
-<pre class="example">
+<pre class="example" id="org6ffde1a">
 intentStream --urlA---urlB---&gt;
 rest(urlA)   -------respA----&gt;
 rest(urlB)   ---------respB--&gt;
@@ -295,7 +261,7 @@ flatMap(rest)-------respA--respB---&gt;
 </pre>
 
 
-<figure>
+<figure id="org00642e5">
 <img src="https://github.com/jcouyang/clojure-flavored-javascript/raw/master/book/images/flatmap-stream.png" alt="flatmap-stream.png">
 
 </figure>
@@ -308,12 +274,10 @@ flatMap(rest)-------respA--respB---&gt;
 <p>
 在得到一个里面都是 API 返回值的流之后，可以简单的 model 话一下这条流的数据：
 </p>
-<div class="org-src-container">
-<pre class="src src-js">.filter(i=&gt;i.type==<span style="color: #8b0000;">'dataUpdate'</span>)
+<pre class="code"><code>.filter(i=&gt;i.type==<span style="color: #8b0000;">'dataUpdate'</span>)
 .map(data=&gt;JSON.parse(data.value).items)
 .map(items=&gt;items.slice(0,10))
-</pre>
-</div>
+</code></pre>
 
 <p>
 只取前 10 个结果作为例子。
@@ -322,12 +286,10 @@ flatMap(rest)-------respA--respB---&gt;
 <p>
 最后，把结果映射成为 state 到新 state 的映射函数：
 </p>
-<div class="org-src-container">
-<pre class="src src-js">.map(items=&gt;state=&gt;({results: items}))
-</pre>
-</div>
+<pre class="code"><code>.map(items=&gt;state=&gt;({results: items}))
+</code></pre>
 
-<pre class="example">
+<pre class="example" id="orgd97ad65">
 modleStream ---mA---mB---&gt;
 stateStream ---state=&gt;({results:mA})---state=&gt;({results:mB})---&gt;
 </pre>
@@ -345,13 +307,13 @@ stateStream ---state=&gt;({results:mA})---state=&gt;({results:mB})---&gt;
 </div>
 <div id="postamble" class="status">
 <footer>
-  <p>Author: root
+  <p>Author: unknown
     <a class="github-button" href="https://github.com/sponsors/jcouyang" data-icon="octicon-heart" aria-label="Sponsor @jcouyang on GitHub">Sponsor</a>
     <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2016-03-01 Tue 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="https://orgmode.org">Org</a> mode 9.3.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
