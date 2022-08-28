@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Dependent Types in Scala 3</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Jichao Ouyang">
-<meta name="description" content="You may no longer need Aux pattern"
->
-<meta name="keywords" content="Scala,Dotty,Scala 3,Dependent Tyeps,Shapeless,Aux Pattern,Context Functions">
+<meta name="author" content="Jichao Ouyang" />
+<meta name="description" content="You may no longer need Aux pattern" />
+<meta name="keywords" content="Scala,Dotty,Scala 3,Dependent Tyeps,Shapeless,Aux Pattern,Context Functions" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -21,28 +20,6 @@
 <meta property="og:description" content="You may no longer need Aux pattern" />
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -59,12 +36,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">Dependent Types in Scala 3</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#org3447e4f">Scala 2</a></li>
 <li><a href="#orge976b67">Scala 3</a>
@@ -119,25 +96,25 @@ basically a pattern to derive output type
 </span>:
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>] {
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Out</span>
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>(value<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Out</span>
+<pre class="code"><code><span style="color: #81A1C1;">trait</span> <span style="color: #81A1C1;">Second</span>[<span style="color: #81A1C1;">L</span> <span style="color: #81A1C1;">&lt;:</span> <span style="color: #81A1C1;">HList</span>] {
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">Out</span>
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">apply</span>(value<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">L</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Out</span>
 }
 
-<span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second</span> {
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Aux</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>, <span style="color: #6b8e23;">O</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Second</span>[<span style="color: #6b8e23;">L</span>] { <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Out</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">O</span> }
+<span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">Second</span> {
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">Aux</span>[<span style="color: #81A1C1;">L</span> <span style="color: #81A1C1;">&lt;:</span> <span style="color: #81A1C1;">HList</span>, <span style="color: #81A1C1;">O</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Second</span>[<span style="color: #81A1C1;">L</span>] { <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">Out</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">O</span> }
 
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>, <span style="color: #6b8e23;">R</span>](l<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)(<span style="color: #228b22;">implicit</span> inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Aux</span>[<span style="color: #6b8e23;">L</span>, <span style="color: #6b8e23;">R</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">R</span> <span style="color: #00008b;">=</span>
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">apply</span>[<span style="color: #81A1C1;">L</span> <span style="color: #81A1C1;">&lt;:</span> <span style="color: #81A1C1;">HList</span>, <span style="color: #81A1C1;">R</span>](l<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">L</span>)(<span style="color: #81A1C1;">implicit</span> inst<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Aux</span>[<span style="color: #81A1C1;">L</span>, <span style="color: #81A1C1;">R</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">R</span> <span style="color: #81A1C1;">=</span>
     inst(l)
 }
 
-<span style="color: #6b8e23;">Second</span>(<span style="color: #6b8e23;">1</span> :: <span style="color: #8b0000;">"2"</span> :: <span style="color: #6b8e23;">HNil</span>)
+<span style="color: #81A1C1;">Second</span>(<span style="color: #81A1C1;">1</span> :: <span style="color: #D08770;">"2"</span> :: <span style="color: #81A1C1;">HNil</span>)
 </code></pre>
 
 <p>
 will output:
 </p>
-<pre class="example" id="orgb28c423">
+<pre class="example" id="org88d1f9b">
 "2"
 </pre>
 
@@ -148,8 +125,8 @@ Here <code>Second.apply</code> is actually dependent type, since you can basical
 <p>
 e.g. when the input is another HList:
 </p>
-<pre class="code"><code><span style="color: #6b8e23;">Second</span>(<span style="color: #8b0000;">"1"</span> :: <span style="color: #6b8e23;">2</span> :: <span style="color: #6b8e23;">HNil</span>)
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; 2</span>
+<pre class="code"><code><span style="color: #81A1C1;">Second</span>(<span style="color: #D08770;">"1"</span> :: <span style="color: #81A1C1;">2</span> :: <span style="color: #81A1C1;">HNil</span>)
+<span style="color: #677691;">// </span><span style="color: #677691;">=&gt; 2</span>
 </code></pre>
 <p>
 Output type will become <code>Int</code>.
@@ -159,8 +136,8 @@ Output type will become <code>Int</code>.
 Actually with <i>dependent method</i>, this could be simplified as:
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second</span> {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>, <span style="color: #6b8e23;">R</span>](l<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)(<span style="color: #228b22;">implicit</span> inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">inst</span>.<span style="color: #6b8e23;">Out</span> <span style="color: #00008b;">=</span>
+<pre class="code"><code><span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">Second</span> {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">apply</span>[<span style="color: #81A1C1;">L</span> <span style="color: #81A1C1;">&lt;:</span> <span style="color: #81A1C1;">HList</span>, <span style="color: #81A1C1;">R</span>](l<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">L</span>)(<span style="color: #81A1C1;">implicit</span> inst<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Second</span>[<span style="color: #81A1C1;">L</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">inst</span>.<span style="color: #81A1C1;">Out</span> <span style="color: #81A1C1;">=</span>
     inst(l)
 }
 </code></pre>
@@ -180,8 +157,8 @@ In Scala 3 it is even better, not only dependent method, we can define <i>depend
 With dependent function, it looks like:
 </p>
 
-<pre class="code"><code><span class="linenr">1: </span><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second</span> {
-<span id="coderef-implicit-lambda" class="coderef-off"><span class="linenr">2: </span>  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>](value<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>) <span style="color: #00008b;">=</span> (inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>]) ?=&gt; inst(value) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;--</span></span>
+<pre class="code"><code><span class="linenr">1: </span><span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">Second</span> {
+<span id="coderef-implicit-lambda" class="coderef-off"><span class="linenr">2: </span>  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">apply</span>[<span style="color: #81A1C1;">L</span> <span style="color: #81A1C1;">&lt;:</span> <span style="color: #81A1C1;">HList</span>](value<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">L</span>) <span style="color: #81A1C1;">=</span> (inst<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Second</span>[<span style="color: #81A1C1;">L</span>]) ?=&gt; inst(value) <span style="color: #677691;">// </span><span style="color: #677691;">&lt;--</span></span>
 <span class="linenr">3: </span>}
 </code></pre>
 
@@ -194,8 +171,8 @@ With dependent function, it looks like:
 <p>
 If we add the type for the function it will be like:
 </p>
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>](value<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)<span style="color: #00008b;">:</span> (inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>]) ?=&gt; inst.<span style="color: #6b8e23;">Out</span> <span style="color: #00008b;">=</span>
- (inst<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>]) ?=&gt; inst(value)
+<pre class="code"><code><span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">apply</span>[<span style="color: #81A1C1;">L</span> <span style="color: #81A1C1;">&lt;:</span> <span style="color: #81A1C1;">HList</span>](value<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">L</span>)<span style="color: #81A1C1;">:</span> (inst<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Second</span>[<span style="color: #81A1C1;">L</span>]) ?=&gt; inst.<span style="color: #81A1C1;">Out</span> <span style="color: #81A1C1;">=</span>
+ (inst<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Second</span>[<span style="color: #81A1C1;">L</span>]) ?=&gt; inst(value)
 </code></pre>
 </div>
 
@@ -210,9 +187,9 @@ Ok, there is another problem though, so why do we need Aux pattern anymore if de
 If we need to implement a 2 dimensional <code>Second</code>, which means it will take the second element's second element.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second2D</span> {
-  <span style="color: #00008b;">import</span> <span style="color: #6b8e23;">Second</span>.<span style="color: #6b8e23;">Aux</span>
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>, <span style="color: #6b8e23;">R</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>, <span style="color: #6b8e23;">R2</span>](l<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)(<span style="color: #228b22;">implicit</span> inst1D<span style="color: #00008b;">:</span> <span style="color: #36648b;">Aux</span>[<span style="color: #6b8e23;">L</span>, <span style="color: #6b8e23;">R</span>], inst2D<span style="color: #00008b;">:</span> <span style="color: #36648b;">Aux</span>[<span style="color: #6b8e23;">R</span>, <span style="color: #6b8e23;">R2</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">R2</span> <span style="color: #00008b;">=</span>
+<pre class="code"><code><span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">Second2D</span> {
+  <span style="color: #81A1C1;">import</span> <span style="color: #81A1C1;">Second</span>.<span style="color: #81A1C1;">Aux</span>
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">apply</span>[<span style="color: #81A1C1;">L</span> <span style="color: #81A1C1;">&lt;:</span> <span style="color: #81A1C1;">HList</span>, <span style="color: #81A1C1;">R</span> <span style="color: #81A1C1;">&lt;:</span> <span style="color: #81A1C1;">HList</span>, <span style="color: #81A1C1;">R2</span>](l<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">L</span>)(<span style="color: #81A1C1;">implicit</span> inst1D<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Aux</span>[<span style="color: #81A1C1;">L</span>, <span style="color: #81A1C1;">R</span>], inst2D<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Aux</span>[<span style="color: #81A1C1;">R</span>, <span style="color: #81A1C1;">R2</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">R2</span> <span style="color: #81A1C1;">=</span>
     inst2D(inst1D(l))
 }
 </code></pre>
@@ -225,8 +202,8 @@ The <code>inst1D</code> depends on the input type <code>L</code>, <code>inst2D</
 <p>
 See what happen if we try to transform this to dependent method:
 </p>
-<pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Second2D</span> {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">L</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">HList</span>](l<span style="color: #00008b;">:</span> <span style="color: #36648b;">L</span>)(<span style="color: #228b22;">implicit</span> inst1D<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[<span style="color: #6b8e23;">L</span>], inst2D<span style="color: #00008b;">:</span> <span style="color: #36648b;">Second</span>[inst1D.<span style="color: #6b8e23;">Out</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">inst2D</span>.<span style="color: #6b8e23;">Out</span> <span style="color: #00008b;">=</span>
+<pre class="code"><code><span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">Second2D</span> {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">apply</span>[<span style="color: #81A1C1;">L</span> <span style="color: #81A1C1;">&lt;:</span> <span style="color: #81A1C1;">HList</span>](l<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">L</span>)(<span style="color: #81A1C1;">implicit</span> inst1D<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Second</span>[<span style="color: #81A1C1;">L</span>], inst2D<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Second</span>[inst1D.<span style="color: #81A1C1;">Out</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">inst2D</span>.<span style="color: #81A1C1;">Out</span> <span style="color: #81A1C1;">=</span>
     inst2D(inst1D(l))
 }
 </code></pre>
@@ -234,7 +211,7 @@ See what happen if we try to transform this to dependent method:
 <p>
 You got a compile error:
 </p>
-<pre class="example" id="org2acfbf2">
+<pre class="example" id="orgc780543">
 Type argument inst1D.Out does not conform to upper bound shapeless.HList 
 </pre>
 
@@ -258,15 +235,15 @@ Or clone the repo and <code>sbt test</code>: <a href="https://github.com/jcouyan
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 basically a pattern to derive output type
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://dotty.epfl.ch/docs/reference/new-types/dependent-function-types.html">https://dotty.epfl.ch/docs/reference/new-types/dependent-function-types.html</a>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://dotty.epfl.ch/docs/reference/contextual/context-bounds.html">https://dotty.epfl.ch/docs/reference/contextual/context-bounds.html</a>
 </p></div></div>
 
@@ -281,7 +258,7 @@ basically a pattern to derive output type
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2020-06-07 Sun 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

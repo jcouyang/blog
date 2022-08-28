@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Finch vs Http4s, which is FPer</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Jichao Ouyang">
-<meta name="description" content="This is purely personal overall comparation from Functional Programming point of view, which only consider composible, extensible, and joy of FP. Performance and eco system are out of the scope."
->
+<meta name="author" content="Jichao Ouyang" />
+<meta name="description" content="This is purely personal overall comparation from Functional Programming point of view, which only consider composible, extensible, and joy of FP. Performance and eco system are out of the scope." />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -16,28 +15,6 @@
 <link rel="stylesheet" href="/style/toc.css"/>
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -54,12 +31,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">Finch vs Http4s, which is FPer</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#orgffa5625">Finch</a>
 <ul>
@@ -111,10 +88,10 @@ Scale from 1 to 5:
 <p>
 finch takes full advantage of shapeless' product and coproduct to routes <b>Matcher</b>
 </p>
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span>) { <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>)} 
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApple</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span> :: path[<span style="color: #6b8e23;">Int</span>]) { (id<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;"</span>)}
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">getApples</span> <span style="color: #81A1C1;">=</span> get(<span style="color: #D08770;">"apple"</span>) { <span style="color: #81A1C1;">Ok</span>(<span style="color: #D08770;">"&#127822;&#127822;"</span>)} 
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">getApple</span> <span style="color: #81A1C1;">=</span> get(<span style="color: #D08770;">"apple"</span> :: path[<span style="color: #81A1C1;">Int</span>]) { (id<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Int</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Ok</span>(<span style="color: #D08770;">"&#127822;"</span>)}
 
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">routes</span> <span style="color: #00008b;">=</span> getApples :+: getApple
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">routes</span> <span style="color: #81A1C1;">=</span> getApples :+: getApple
 </code></pre>
 
 <p>
@@ -128,17 +105,17 @@ finch takes full advantage of shapeless' product and coproduct to routes <b>Matc
 <p>
 About <b>Middleware</b>, finch need to mix finagle filter to do the job. so it will end up very ugly and inconsistent from the routes above
 </p>
-<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">AuthFilter</span>(<span style="color: #228b22;">implicit</span> ttf<span style="color: #00008b;">:</span> <span style="color: #36648b;">ToTwitterFuture</span>[<span style="color: #6b8e23;">ProgramF</span>]) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">SimpleFilter</span>[<span style="color: #6b8e23;">Request</span>, <span style="color: #6b8e23;">Response</span>] {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>(req<span style="color: #00008b;">:</span> <span style="color: #36648b;">Request</span>, service<span style="color: #00008b;">:</span> <span style="color: #36648b;">Service</span>[<span style="color: #6b8e23;">Request</span>, <span style="color: #6b8e23;">Response</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Future</span>[<span style="color: #6b8e23;">Response</span>] <span style="color: #00008b;">=</span> {
-    (req.path, req.headerMap.get(<span style="color: #8b0000;">"TOKEN"</span>)) <span style="color: #00008b;">match</span> {
-      <span style="color: #00008b;">case</span> (<span style="color: #8b0000;">"/login"</span>, <span style="color: #00008b;">_</span>)        <span style="color: #00008b;">=&gt;</span> service(req)
-      <span style="color: #00008b;">case</span> (<span style="color: #b8860b;">url</span>, <span style="color: #36648b;">Some</span>(<span style="color: #b8860b;">token</span>)) <span style="color: #00008b;">=&gt;</span> ??? <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">fetch user info and pass to service</span>
+<pre class="code"><code><span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">AuthFilter</span>(<span style="color: #81A1C1;">implicit</span> ttf<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">ToTwitterFuture</span>[<span style="color: #81A1C1;">ProgramF</span>]) <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">SimpleFilter</span>[<span style="color: #81A1C1;">Request</span>, <span style="color: #81A1C1;">Response</span>] {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">apply</span>(req<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Request</span>, service<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Service</span>[<span style="color: #81A1C1;">Request</span>, <span style="color: #81A1C1;">Response</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Future</span>[<span style="color: #81A1C1;">Response</span>] <span style="color: #81A1C1;">=</span> {
+    (req.path, req.headerMap.get(<span style="color: #D08770;">"TOKEN"</span>)) <span style="color: #81A1C1;">match</span> {
+      <span style="color: #81A1C1;">case</span> (<span style="color: #D08770;">"/login"</span>, <span style="color: #81A1C1;">_</span>)        <span style="color: #81A1C1;">=&gt;</span> service(req)
+      <span style="color: #81A1C1;">case</span> (<span style="font-weight: bold;">url</span>, <span style="color: #81A1C1;">Some</span>(<span style="font-weight: bold;">token</span>)) <span style="color: #81A1C1;">=&gt;</span> ??? <span style="color: #677691;">// </span><span style="color: #677691;">fetch user info and pass to service</span>
 </code></pre>
 
 <p>
 and then compose filter and service
 </p>
-<pre class="code"><code><span style="color: #00008b;">new</span> <span style="color: #36648b;">AuthFilter</span> andThen routes.toServiceAs[<span style="color: #6b8e23;">Application</span>.<span style="color: #6b8e23;">Json</span>]
+<pre class="code"><code><span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">AuthFilter</span> andThen routes.toServiceAs[<span style="color: #81A1C1;">Application</span>.<span style="color: #81A1C1;">Json</span>]
 </code></pre>
 
 <p>
@@ -153,7 +130,7 @@ you may have notice that the finangle filter is more lower level verbose code an
 <p>
 finch has a lot of internal custom types, e.g. the magic happen behind the DSL above:
 </p>
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span>) { <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>)} 
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">getApples</span> <span style="color: #81A1C1;">=</span> get(<span style="color: #D08770;">"apple"</span>) { <span style="color: #81A1C1;">Ok</span>(<span style="color: #D08770;">"&#127822;&#127822;"</span>)} 
 </code></pre>
 <p>
 is:
@@ -188,7 +165,7 @@ For example my controller will actually return me a <a href="https://typelevel.o
 How can I get it to work with the router?
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span>) { <span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">Program</span>, <span style="color: #6b8e23;">Output</span>[<span style="color: #6b8e23;">String</span>]].pure(<span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>))} 
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">getApples</span> <span style="color: #81A1C1;">=</span> get(<span style="color: #D08770;">"apple"</span>) { <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">Program</span>, <span style="color: #81A1C1;">Output</span>[<span style="color: #81A1C1;">String</span>]].pure(<span style="color: #81A1C1;">Ok</span>(<span style="color: #D08770;">"&#127822;&#127822;"</span>))} 
 </code></pre>
 
 <p>
@@ -203,10 +180,10 @@ actually it only supports <code>IO[_]</code>, <code>Output[_]</code>, <code>Resp
 UPDATE: from <a href="https://github.com/finagle/finch/pull/1045">0.27.0</a> it supports custom converter to convert any user custom type to IO
 </p>
 
-<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">conv</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">ToEffect</span>[<span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">Program</span>, ?], <span style="color: #6b8e23;">IO</span>] {
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">Program</span>, <span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> ???
+<pre class="code"><code><span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">conv</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">ToEffect</span>[<span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">Program</span>, ?], <span style="color: #81A1C1;">IO</span>] {
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">apply</span>[<span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">Program</span>, <span style="color: #81A1C1;">A</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">IO</span>[<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=</span> ???
 }
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> get(<span style="color: #8b0000;">"apple"</span>) { <span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">Program</span>, <span style="color: #6b8e23;">Output</span>[<span style="color: #6b8e23;">String</span>]].pure(<span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>))} 
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">getApples</span> <span style="color: #81A1C1;">=</span> get(<span style="color: #D08770;">"apple"</span>) { <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">Program</span>, <span style="color: #81A1C1;">Output</span>[<span style="color: #81A1C1;">String</span>]].pure(<span style="color: #81A1C1;">Ok</span>(<span style="color: #D08770;">"&#127822;&#127822;"</span>))} 
 </code></pre>
 
 <p>
@@ -241,14 +218,14 @@ any knowledge about cats before using finch.
 <p>
 meanwhile, http4s takes advantage of cats to achieve path <b>Matcher</b>
 </p>
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">HttpRoutes</span>.of[<span style="color: #6b8e23;">IO</span>] {
-  <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">GET</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"apple"</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>)
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">getApples</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">HttpRoutes</span>.of[<span style="color: #81A1C1;">IO</span>] {
+  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">GET</span> <span style="color: #81A1C1;">-&gt;</span> <span style="color: #81A1C1;">Root</span> <span style="color: #81A1C1;">/</span> <span style="color: #D08770;">"apple"</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Ok</span>(<span style="color: #D08770;">"&#127822;&#127822;"</span>)
 }
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApple</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">HttpRoutes</span>.of[<span style="color: #6b8e23;">IO</span>] {
-  <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">GET</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"apple"</span> <span style="color: #6b8e23;">/</span> <span style="color: #36648b;">id</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;"</span>)
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">getApple</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">HttpRoutes</span>.of[<span style="color: #81A1C1;">IO</span>] {
+  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">GET</span> <span style="color: #81A1C1;">-&gt;</span> <span style="color: #81A1C1;">Root</span> <span style="color: #81A1C1;">/</span> <span style="color: #D08770;">"apple"</span> <span style="color: #81A1C1;">/</span> <span style="color: #81A1C1;">id</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Ok</span>(<span style="color: #D08770;">"&#127822;"</span>)
 }
 
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">routes</span> <span style="color: #00008b;">=</span> getApples &lt;+&gt; getApple
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">routes</span> <span style="color: #81A1C1;">=</span> getApples &lt;+&gt; getApple
 </code></pre>
 
 <p>
@@ -290,10 +267,10 @@ or compose a Kleisli of type <code>Kleisli[Option[F,?], Response[F], F[Response[
 <p>
 e.g. auth user before <code>getApple</code>
 </p>
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">auth</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span> { req<span style="color: #00008b;">:</span> <span style="color: #36648b;">Request</span>[<span style="color: #6b8e23;">IO</span>] <span style="color: #00008b;">=&gt;</span>
-  findUserInDatabase(req) <span style="color: #00008b;">match</span> {
-    <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">true</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">OptionT</span>(<span style="color: #6b8e23;">IO</span>(<span style="color: #6b8e23;">Some</span>(req)))
-    <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">false</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">OptionT</span>.fromOption[<span style="color: #6b8e23;">IO</span>](<span style="color: #6b8e23;">None</span>)
+<pre class="code"><code><span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">auth</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Kleisli</span> { req<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Request</span>[<span style="color: #81A1C1;">IO</span>] <span style="color: #81A1C1;">=&gt;</span>
+  findUserInDatabase(req) <span style="color: #81A1C1;">match</span> {
+    <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">true</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">OptionT</span>(<span style="color: #81A1C1;">IO</span>(<span style="color: #81A1C1;">Some</span>(req)))
+    <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">false</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">OptionT</span>.fromOption[<span style="color: #81A1C1;">IO</span>](<span style="color: #81A1C1;">None</span>)
   }
 }
 
@@ -313,18 +290,18 @@ be much simpler.
 For the same example as above in finch, that my controller will return a free program <code>Free[Program, IO[Response[IO]]]</code> instead of <code>IO[Response[IO]]</code>
 </p>
 
-<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">type alias for route that return free monad</span>
-<span style="color: #00008b;">type</span> <span style="color: #6b8e23;">FreeRoute</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span>
-  <span style="color: #6b8e23;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">ProgramF</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]]]]
+<pre class="code"><code><span style="color: #677691;">// </span><span style="color: #677691;">type alias for route that return free monad</span>
+<span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">FreeRoute</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]] <span style="color: #81A1C1;">=</span>
+  <span style="color: #81A1C1;">Kleisli</span>[<span style="color: #81A1C1;">OptionT</span>[<span style="color: #81A1C1;">F</span>, ?], <span style="color: #81A1C1;">Request</span>[<span style="color: #81A1C1;">F</span>], <span style="color: #81A1C1;">ProgramF</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">Response</span>[<span style="color: #81A1C1;">F</span>]]]]
 
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">custom dsl</span>
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">route</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]<span style="color: #00008b;">:</span> <span style="color: #36648b;">Monad</span>](
-  pf<span style="color: #00008b;">:</span> <span style="color: #36648b;">PartialFunction</span>[<span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">ProgramF</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]]]])<span style="color: #00008b;">:</span> <span style="color: #36648b;">FreeRoute</span>[<span style="color: #6b8e23;">F</span>] <span style="color: #00008b;">=</span>
-  <span style="color: #6b8e23;">Kleisli</span>(
-    (req<span style="color: #00008b;">:</span> <span style="color: #36648b;">Request</span>[<span style="color: #6b8e23;">F</span>]) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">OptionT</span>(implicitly[<span style="color: #6b8e23;">Monad</span>[<span style="color: #6b8e23;">F</span>]].pure(pf.lift(req))))
+<span style="color: #677691;">// </span><span style="color: #677691;">custom dsl</span>
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">route</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Monad</span>](
+  pf<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">PartialFunction</span>[<span style="color: #81A1C1;">Request</span>[<span style="color: #81A1C1;">F</span>], <span style="color: #81A1C1;">ProgramF</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">Response</span>[<span style="color: #81A1C1;">F</span>]]]])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">FreeRoute</span>[<span style="color: #81A1C1;">F</span>] <span style="color: #81A1C1;">=</span>
+  <span style="color: #81A1C1;">Kleisli</span>(
+    (req<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Request</span>[<span style="color: #81A1C1;">F</span>]) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">OptionT</span>(implicitly[<span style="color: #81A1C1;">Monad</span>[<span style="color: #81A1C1;">F</span>]].pure(pf.lift(req))))
 
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">getApples</span> <span style="color: #00008b;">=</span> route {
-  <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">GET</span> <span style="color: #36648b;">-&gt;</span> <span style="color: #6b8e23;">Root</span> <span style="color: #36648b;">/</span> <span style="color: #8b0000;">"apple"</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Ok</span>(<span style="color: #8b0000;">"&#127822;&#127822;"</span>).pure[<span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">Program</span>,?]]
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">getApples</span> <span style="color: #81A1C1;">=</span> route {
+  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">GET</span> <span style="color: #81A1C1;">-&gt;</span> <span style="color: #81A1C1;">Root</span> <span style="color: #81A1C1;">/</span> <span style="color: #D08770;">"apple"</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Ok</span>(<span style="color: #D08770;">"&#127822;&#127822;"</span>).pure[<span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">Program</span>,?]]
 }
 </code></pre>
 
@@ -336,9 +313,9 @@ since getApples is still Kleisli, all the methods such as <code>&lt;+&gt;</code>
 to hook it back to http4s route, simply map interpreter to <code>getApples</code>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">interp</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Program</span> ~&gt; <span style="color: #6b8e23;">IO</span> <span style="color: #00008b;">=</span> ???
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">interp</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Program</span> ~&gt; <span style="color: #81A1C1;">IO</span> <span style="color: #81A1C1;">=</span> ???
 
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">router</span> <span style="color: #00008b;">=</span> getApples flatMapF interp
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">router</span> <span style="color: #81A1C1;">=</span> getApples flatMapF interp
 </code></pre>
 
 <p>
@@ -375,9 +352,8 @@ for:
 </p>
 
 
-<figure id="org560456a">
-<object type="image/svg+xml" data="https://cdn.rawgit.com/tpolecat/cats-infographic/master/cats.svg" class="org-svg">
-Sorry, your browser does not support SVG.</object>
+<figure id="org2cf1875">
+<img src="https://cdn.rawgit.com/tpolecat/cats-infographic/master/cats.svg" alt="cats.svg" class="org-svg">
 
 </figure>
 
@@ -401,7 +377,7 @@ by just using Kleisli data type.
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2018-12-11 Tue 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

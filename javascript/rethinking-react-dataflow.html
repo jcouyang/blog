@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:31 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Rethinking React Dataflow</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="unknown">
+<meta name="author" content="unknown" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -14,28 +14,6 @@
 <link rel="stylesheet" href="/style/toc.css"/>
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -52,12 +30,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">Rethinking React Dataflow</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#org2838c74">Reactive</a></li>
 <li><a href="#orgb4deb1d">Monadic</a></li>
@@ -97,7 +75,7 @@ Redux 现在红的一塌糊涂，写这篇文章并不是专门来踢馆的，�
 </p>
 
 
-<figure id="org4306cba">
+<figure id="orga93e0dc">
 <img src="https://raw.githubusercontent.com/jcouyang/react-most/master/docs/images/flow.dot.png" alt="flow.dot.png">
 
 </figure>
@@ -155,7 +133,7 @@ Redux 现在红的一塌糊涂，写这篇文章并不是专门来踢馆的，�
 </p>
 
 
-<figure id="org3c1303b">
+<figure id="orgc1c2b93">
 <img src="https://raw.githubusercontent.com/jcouyang/clojure-flavored-javascript/master/book/images/Type_N_Search.png" alt="Type_N_Search.png">
 
 </figure>
@@ -167,14 +145,14 @@ Redux 现在红的一塌糊涂，写这篇文章并不是专门来踢馆的，�
 <p>
 使用 React 创建一个 Component
 </p>
-<pre class="code"><code><span style="color: #00008b;">const</span> <span style="color: #b8860b;">TypeNsearch</span> = (props)=&gt;{
-    <span style="color: #00008b;">let</span> {search} = props.actions
-    <span style="color: #00008b;">return</span> &lt;div&gt;
+<pre class="code"><code><span style="color: #81A1C1;">const</span> <span style="font-weight: bold;">TypeNsearch</span> = (props)=&gt;{
+    <span style="color: #81A1C1;">let</span> {search} = props.actions
+    <span style="color: #81A1C1;">return</span> &lt;div&gt;
         &lt;input onChange={e=&gt;search(e.target.value)}&gt;&lt;/input&gt;
         &lt;ul&gt;
         {
             props.results&amp;&amp;props.results.map(item=&gt;{
-                <span style="color: #00008b;">return</span> &lt;li key={item.id}&gt;&lt;a href={item.html_url}&gt;{item.full_name} ({item.stargazers_count})&lt;/a&gt;&lt;/li&gt;
+                <span style="color: #81A1C1;">return</span> &lt;li key={item.id}&gt;&lt;a href={item.html_url}&gt;{item.full_name} ({item.stargazers_count})&lt;/a&gt;&lt;/li&gt;
             })
         }
         &lt;/ul&gt;
@@ -199,8 +177,8 @@ return 的地方就是 Virtual DOM 了，一个输入框 <code>input</code> ，�
 一旦把用户事件的值发送到 Intent Stream，响应事件的工作就算已经做完了。接下来实现第二步， 至少间隔 500ms 才发送 API 请求。这意味着我们可以开始构建数据流了，让数据流中的类型为 <code>search</code> 的值 debounce 500ms 就好。
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">function</span>(<span style="color: #b8860b;">intent$</span>){
-  <span style="color: #00008b;">let</span> <span style="color: #b8860b;">updateSink$</span> = intent$.filter(i=&gt;i.type==<span style="color: #8b0000;">'search'</span>)
+<pre class="code"><code><span style="color: #81A1C1;">function</span>(<span style="font-weight: bold;">intent$</span>){
+  <span style="color: #81A1C1;">let</span> <span style="font-weight: bold;">updateSink$</span> = intent$.filter(i=&gt;i.type==<span style="color: #D08770;">'search'</span>)
                        .debounce(500)
   ...
 </code></pre>
@@ -244,7 +222,7 @@ rest 是一个 Isomophic 的 JavaScript Restful 客户端。在拼好地址后�
 
 <pre class="code"><code>.flatMap(request=&gt;most.fromPromise(
                          request.then(resp=&gt;({
-                           type: <span style="color: #8b0000;">'dataUpdate'</span>,
+                           type: <span style="color: #D08770;">'dataUpdate'</span>,
                            value: resp.entity
                          }))))
 </code></pre>
@@ -253,7 +231,7 @@ rest 是一个 Isomophic 的 JavaScript Restful 客户端。在拼好地址后�
  其中的 <code>request</code> 是上一步 rest 返回的 Promise，在简单的格式转换后，使用 <code>most.fromPromise</code> 将其也转换成流。
 当得到 API 的返回组成的流之后，使用 <code>flatMap</code> 连到 Intent Stream 上。下面是 <code>flatMap</code> 两个API 结果流的示意图，以防读者忘了上一节的 <code>flatMap</code> 例子。
 </p>
-<pre class="example" id="org6b36d76">
+<pre class="example" id="orgadced74">
 intentStream --urlA---urlB---&gt;
 rest(urlA)   -------respA----&gt;
 rest(urlB)   ---------respB--&gt;
@@ -261,7 +239,7 @@ flatMap(rest)-------respA--respB---&gt;
 </pre>
 
 
-<figure id="org2f0c01c">
+<figure id="org42e2eea">
 <img src="https://github.com/jcouyang/clojure-flavored-javascript/raw/master/book/images/flatmap-stream.png" alt="flatmap-stream.png">
 
 </figure>
@@ -274,7 +252,7 @@ flatMap(rest)-------respA--respB---&gt;
 <p>
 在得到一个里面都是 API 返回值的流之后，可以简单的 model 话一下这条流的数据：
 </p>
-<pre class="code"><code>.filter(i=&gt;i.type==<span style="color: #8b0000;">'dataUpdate'</span>)
+<pre class="code"><code>.filter(i=&gt;i.type==<span style="color: #D08770;">'dataUpdate'</span>)
 .map(data=&gt;JSON.parse(data.value).items)
 .map(items=&gt;items.slice(0,10))
 </code></pre>
@@ -289,7 +267,7 @@ flatMap(rest)-------respA--respB---&gt;
 <pre class="code"><code>.map(items=&gt;state=&gt;({results: items}))
 </code></pre>
 
-<pre class="example" id="orgcd59114">
+<pre class="example" id="org28c8545">
 modleStream ---mA---mB---&gt;
 stateStream ---state=&gt;({results:mA})---state=&gt;({results:mB})---&gt;
 </pre>
@@ -313,7 +291,7 @@ stateStream ---state=&gt;({results:mA})---state=&gt;({results:mB})---&gt;
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2016-03-01 Tue 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

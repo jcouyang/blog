@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:31 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>JavaScript玩转Clojure大法之Transducer</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Jichao Ouyang">
-<meta name="description" content="通过上一篇[[/javascript/clojure-core.async-essence-in-native-javascript.org][Clojure风格的JavaScript并发编程]]介绍了如何用JavaScript享受到Clojure在并发编程的优势. 我决定写一系列关于如何用JavaScript玩转Clojure大法的文章. 这回要用简单的JavaScript玩转另一个Clojure的全新的概念 -- Transducer."
->
-<meta name="keywords" content="transducer,reducer,clojure,clojurescript,mori,javascript,reducible,xform">
+<meta name="author" content="Jichao Ouyang" />
+<meta name="description" content="通过上一篇[[/javascript/clojure-core.async-essence-in-native-javascript.org][Clojure风格的JavaScript并发编程]]介绍了如何用JavaScript享受到Clojure在并发编程的优势. 我决定写一系列关于如何用JavaScript玩转Clojure大法的文章. 这回要用简单的JavaScript玩转另一个Clojure的全新的概念 -- Transducer." />
+<meta name="keywords" content="transducer,reducer,clojure,clojurescript,mori,javascript,reducible,xform" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -17,28 +16,6 @@
 <link rel="stylesheet" href="/style/toc.css"/>
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -55,12 +32,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">JavaScript玩转Clojure大法之Transducer</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#orgc781b12">Reducer</a>
 <ul>
@@ -165,7 +142,7 @@ reduce函数需要等待map返回新的coll后才能reduce, 那么可不可以�
 <p>
 假如我们有一个函数xf可以变换reducing函数(上例的sum是reducing函数)的形式, 比如
 </p>
-<pre class="example" id="orgd0ece62">
+<pre class="example" id="orgd05ddcc">
 xf(reduceFn) -&gt; anotherReduceFn
 </pre>
 
@@ -179,9 +156,9 @@ xf(reduceFn) -&gt; anotherReduceFn
 <p>
 map 函数的简单transform实现可以这样实现,如果你感兴趣的话
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">map</span>(<span style="color: #b8860b;">fn</span>){
-  <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">reduceFn</span>){
-    <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">result</span>, <span style="color: #b8860b;">input</span>){
+<pre class="code"><code><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">map</span>(<span style="font-weight: bold;">fn</span>){
+  <span style="color: #81A1C1;">return</span> <span style="color: #81A1C1;">function</span>(<span style="font-weight: bold;">reduceFn</span>){
+    <span style="color: #81A1C1;">return</span> <span style="color: #81A1C1;">function</span>(<span style="font-weight: bold;">result</span>, <span style="font-weight: bold;">input</span>){
       reduceFn(result, fn(input))
     }
   }
@@ -214,7 +191,7 @@ yeah, 现在只需要一步就reduce出来结果了, reduce应用 <code>map(inc)
 <p>
 那么需要进一步的抽象, 我把新的map函数叫做rmap好了
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">rmap</span>(<span style="color: #b8860b;">fn</span>, <span style="color: #b8860b;">coll</span>){
+<pre class="code"><code><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">rmap</span>(<span style="font-weight: bold;">fn</span>, <span style="font-weight: bold;">coll</span>){
   reducer(coll, map(fn))
 }
 </code></pre>
@@ -238,7 +215,7 @@ yeah, 现在只需要一步就reduce出来结果了, reduce应用 <code>map(inc)
 </p>
 
 
-<figure id="orgc2df052">
+<figure id="orgc9fba99">
 <img src="./images/came-out.gif" alt="came-out.gif">
 
 </figure>
@@ -254,7 +231,7 @@ yeah, 现在只需要一步就reduce出来结果了, reduce应用 <code>map(inc)
 <p>
 也就是reduce函数现在应该长这样, 我们暂且叫它 <code>rreduce</code>
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">rreduce</span>(<span style="color: #b8860b;">reduceFn</span>, <span style="color: #b8860b;">init</span>, <span style="color: #b8860b;">reducible</span>){
+<pre class="code"><code><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">rreduce</span>(<span style="font-weight: bold;">reduceFn</span>, <span style="font-weight: bold;">init</span>, <span style="font-weight: bold;">reducible</span>){
   reducible(reduceFn, init)
 }
 </code></pre>
@@ -266,9 +243,9 @@ yeah, 现在只需要一步就reduce出来结果了, reduce应用 <code>map(inc)
 <p>
 reducer接收coll和xf, 返回reducible函数. 这一切都是lazy的, 直到rreduce调用<a href="#coderef-coll" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-coll');" onmouseout="CodeHighlightOff(this, 'coderef-coll');">第coll行</a>才执行.
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">reducer</span>(<span style="color: #b8860b;">coll</span>, <span style="color: #b8860b;">xf</span>){
-  <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">reduceFn</span>, <span style="color: #b8860b;">init</span>){
-<span id="coderef-coll" class="coderef-off">    <span style="color: #00008b;">return</span> coll.reduce(xf(reduceFn), init) (coll)</span>
+<pre class="code"><code><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">reducer</span>(<span style="font-weight: bold;">coll</span>, <span style="font-weight: bold;">xf</span>){
+  <span style="color: #81A1C1;">return</span> <span style="color: #81A1C1;">function</span>(<span style="font-weight: bold;">reduceFn</span>, <span style="font-weight: bold;">init</span>){
+<span id="coderef-coll" class="coderef-off">    <span style="color: #81A1C1;">return</span> coll.reduce(xf(reduceFn), init) (coll)</span>
   }
 }
 </code></pre>
@@ -327,9 +304,9 @@ transduce接收一个transducer,一个reducing function, 一个初始值, 一个
 <p>
 可以用在任何地方
 </p>
-<pre class="code"><code>seq(xf data) <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">&#29983;&#25104;&#19968;&#20010;lazy&#30340;&#24207;&#21015;, &#21516;&#26102;lazy transform, &#27599;&#27425;&#21462;&#30340;&#26102;&#20505;data&#20250;&#34987;transform</span>
-into([], xf data) <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">&#25226; data transform&#21518;&#25918;&#21040;&#19968;&#20010;&#25968;&#32452;&#37324;</span>
-chan(1, xform) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&#24403;&#25968;&#25454;&#32463;&#36807;CSP&#30340;channel&#26102;&#34987;transform</span>
+<pre class="code"><code>seq(xf data) <span style="color: #677691;">//</span><span style="color: #677691;">&#29983;&#25104;&#19968;&#20010;lazy&#30340;&#24207;&#21015;, &#21516;&#26102;lazy transform, &#27599;&#27425;&#21462;&#30340;&#26102;&#20505;data&#20250;&#34987;transform</span>
+into([], xf data) <span style="color: #677691;">//</span><span style="color: #677691;">&#25226; data transform&#21518;&#25918;&#21040;&#19968;&#20010;&#25968;&#32452;&#37324;</span>
+chan(1, xform) <span style="color: #677691;">// </span><span style="color: #677691;">&#24403;&#25968;&#25454;&#32463;&#36807;CSP&#30340;channel&#26102;&#34987;transform</span>
 </code></pre>
 </div>
 </div>
@@ -349,7 +326,7 @@ chan(1, xform) <span style="color: #8c8c8c; font-style: italic;">// </span><span
 <p>
 比如一个柯里化的map可以
 </p>
-<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">mapinc</span> = map(inc)
+<pre class="code"><code><span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">mapinc</span> = map(inc)
 mapinc([1,2,3])
 </code></pre>
 
@@ -366,7 +343,7 @@ mapinc([1,2,3])
 但是tranceducer只是转换, 所以只接受reducing函数
 </p>
 <pre class="code"><code>reduce(mapinc(sum), 0, [1,2,3])
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; 9</span>
+<span style="color: #677691;">// </span><span style="color: #677691;">=&gt; 9</span>
 </code></pre>
 </div>
 </div>
@@ -381,16 +358,16 @@ mapinc([1,2,3])
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 Clojure的作者
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 我是故意吧reduce的参数顺序写"反"的, 原来underscore是先消费collection的. 至于为什么要反过来
 可以参考<a href="https://blog.oyanglul.us/javascript/functional-javascript.html#sec-3-2">这个解释</a>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 clojurescript作者把clojurescript的一些数据结构和函数编译成javascript, 这样就可以用普通js使用
 clojure中的数据结构和函数. document严重过时, 建议看导入的<a href="https://github.com/swannodette/mori/blob/master/src/mori.cljs">源代码</a>, 以及clojure的文档, 接口和clojure基本一致.
 </p></div></div>
@@ -406,7 +383,7 @@ clojure中的数据结构和函数. document严重过时, 建议看导入的<a h
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2015-05-16 Sat 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Applied Evolutionary Design</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Jichao Ouyang">
-<meta name="description" content="Chapter 1 - The Story"
->
-<meta name="keywords" content="Scala,Monolith,Microservices,Evolutionary Design,Design Pattern,Eventualy Consistency">
+<meta name="author" content="Jichao Ouyang" />
+<meta name="description" content="Chapter 1 - The Story" />
+<meta name="keywords" content="Scala,Monolith,Microservices,Evolutionary Design,Design Pattern,Eventualy Consistency" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -21,28 +20,6 @@
 <meta property="og:description" content="Chapter 1 - The Story" />
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/patterns-and-practices/applied-evolutionary-design/images/barista-retry.png" property="og:image">
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -59,13 +36,13 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">Applied Evolutionary Design</h1>
-<p class="subtitle">Chapter 1 - The Story</p>
-</header><nav id="table-of-contents">
+<p class="subtitle" role="doc-subtitle">Chapter 1 - The Story</p>
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#orgfe7906a">Drowsy Cafe</a></li>
 <li><a href="#org96c5fc8">Drowsy Cafe 2.0</a></li>
@@ -148,7 +125,7 @@ Somehow they are all connected because of our story. So if we model these actors
 </p>
 
 
-<figure id="org49a0eb2">
+<figure id="orgc259e24">
 <img src="./images/schema-v1.png" alt="schema-v1.png">
 
 </figure>
@@ -180,33 +157,33 @@ I've tried in <a href="http://ammonite.io/#Ammonite-REPL">amm</a>, the code real
 </span>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">DrawsyCafeService</span> {
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">ProductId</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Int</span>
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">OrderId</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Int</span>
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">UserId</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Int</span>
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">CreditCard</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Int</span>
+<pre class="code"><code><span style="color: #81A1C1;">trait</span> <span style="color: #81A1C1;">DrawsyCafeService</span> {
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">ProductId</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Int</span>
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">OrderId</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Int</span>
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">UserId</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Int</span>
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">CreditCard</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Int</span>
 
-  <span style="color: #00008b;">object</span> <span style="color: #6b8e23;">TransactionStatus</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Enumeration</span> {
-    <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Type</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Value</span>
-    <span style="color: #00008b;">val</span> <span style="color: #b8860b;">Success</span>, <span style="color: #b8860b;">Failed</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Value</span>
+  <span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">TransactionStatus</span> <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">Enumeration</span> {
+    <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">Type</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Value</span>
+    <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">Success</span>, <span style="font-weight: bold;">Failed</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Value</span>
   }
-  <span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Transaction</span>(
-    id<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>,
-    status<span style="color: #00008b;">:</span> <span style="color: #36648b;">TransactionStatus</span>.<span style="color: #6b8e23;">Type</span>
+  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">Transaction</span>(
+    id<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Int</span>,
+    status<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">TransactionStatus</span>.<span style="color: #81A1C1;">Type</span>
   )
-  <span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Product</span>(
-    id<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>,
-    name<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>
+  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">Product</span>(
+    id<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Int</span>,
+    name<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>
   )
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">order</span>(customer<span style="color: #00008b;">:</span> <span style="color: #36648b;">UserId</span>, product<span style="color: #00008b;">:</span> <span style="color: #36648b;">ProductId</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">OrderId</span>]
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">pay</span>(order<span style="color: #00008b;">:</span> <span style="color: #36648b;">OrderId</span>, creditCard<span style="color: #00008b;">:</span> <span style="color: #36648b;">CreditCard</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Transaction</span>]
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">brew</span>(product<span style="color: #00008b;">:</span> <span style="color: #36648b;">ProductId</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Product</span>]
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">canIHaveALatte</span>(user<span style="color: #00008b;">:</span> <span style="color: #36648b;">UserId</span>, card<span style="color: #00008b;">:</span> <span style="color: #36648b;">CreditCard</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Product</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
-    orderId <span style="color: #00008b;">&lt;-</span> order(customer <span style="color: #00008b;">=</span> user, product <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">1</span>)
-    transaction <span style="color: #00008b;">&lt;-</span> pay(orderId, creditCard <span style="color: #00008b;">=</span> card)
-    coffee <span style="color: #00008b;">&lt;-</span> <span style="color: #00008b;">if</span> (transaction.status == <span style="color: #6b8e23;">TransactionStatus</span>.<span style="color: #6b8e23;">Success</span>)
-      brew(product <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">1</span>) <span style="color: #00008b;">else</span> <span style="color: #6b8e23;">IO</span>.raiseError(<span style="color: #00008b;">new</span> <span style="color: #36648b;">Exception</span>(<span style="color: #8b0000;">"payment failed please retry"</span>))
-  } <span style="color: #00008b;">yield</span> coffee
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">order</span>(customer<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">UserId</span>, product<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">ProductId</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">IO</span>[<span style="color: #81A1C1;">OrderId</span>]
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">pay</span>(order<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">OrderId</span>, creditCard<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">CreditCard</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">IO</span>[<span style="color: #81A1C1;">Transaction</span>]
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">brew</span>(product<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">ProductId</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">IO</span>[<span style="color: #81A1C1;">Product</span>]
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">canIHaveALatte</span>(user<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">UserId</span>, card<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">CreditCard</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">IO</span>[<span style="color: #81A1C1;">Product</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">for</span> {
+    orderId <span style="color: #81A1C1;">&lt;-</span> order(customer <span style="color: #81A1C1;">=</span> user, product <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">1</span>)
+    transaction <span style="color: #81A1C1;">&lt;-</span> pay(orderId, creditCard <span style="color: #81A1C1;">=</span> card)
+    coffee <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">if</span> (transaction.status == <span style="color: #81A1C1;">TransactionStatus</span>.<span style="color: #81A1C1;">Success</span>)
+      brew(product <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">1</span>) <span style="color: #81A1C1;">else</span> <span style="color: #81A1C1;">IO</span>.raiseError(<span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Exception</span>(<span style="color: #D08770;">"payment failed please retry"</span>))
+  } <span style="color: #81A1C1;">yield</span> coffee
 }
 </code></pre>
 
@@ -240,7 +217,7 @@ When <b>Guy</b> <i>Sleepy</i> swipe an credit card on pos terminal<br>
 </blockquote></div>
 
 
-<figure id="org896955d">
+<figure id="orga1d15f2">
 <img src="./images/creditcard-rejected.png" alt="creditcard-rejected.png">
 
 </figure>
@@ -258,7 +235,7 @@ When <b>Guy</b> <i>Sleepy</i> order one <b>product</b> <i>Latte</i><br>
 </blockquote></div>
 
 
-<figure id="orgc288fef">
+<figure id="orgf1b6a56">
 <img src="./images/order-rejected.png" alt="order-rejected.png">
 
 </figure>
@@ -273,13 +250,13 @@ When all these story is done, <i>Drowsy Cafe</i> can open their service
 to the market.
 </p>
 
-<pre class="example" id="org6ec7968">
+<pre class="example" id="orgc6f86e2">
 1. As a sleepy guy, I should able to order a latte from /Drowsy Cafe/
 </pre>
-<pre class="example" id="org863dfb3">
+<pre class="example" id="org9bc5482">
 2. As a sleepy guy, I should able to pay for the latte with my master credit card
 </pre>
-<pre class="example" id="org809d3ca">
+<pre class="example" id="org9a950b5">
 3. As a sleepy guy, I should able to get my latte 2 mins after the credit card transaction is done.
 </pre>
 
@@ -320,7 +297,7 @@ As business grow, service need to evolve as well, so they hire another one, now 
 </p>
 
 
-<figure id="org66d6abc">
+<figure id="org33cd1b9">
 <img src="./images/barista.png" alt="barista.png">
 
 </figure>
@@ -333,8 +310,8 @@ Now the <i>Drowsy Cafe</i> become something like microservices, it evolves into 
 <li>A service just take care of taking order, process payment</li>
 <li>A Service just take care of brewing coffee</li>
 </ol>
-<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">This now become a remote call to another service</span>
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">brew</span>(product<span style="color: #00008b;">:</span> <span style="color: #36648b;">ProductId</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">IO</span>[<span style="color: #6b8e23;">Product</span>]
+<pre class="code"><code><span style="color: #677691;">// </span><span style="color: #677691;">This now become a remote call to another service</span>
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">brew</span>(product<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">ProductId</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">IO</span>[<span style="color: #81A1C1;">Product</span>]
 </code></pre>
 
 <p>
@@ -364,7 +341,7 @@ or the barista is offline:
 </p>
 
 
-<figure id="org55b65f7">
+<figure id="orgfc5dfad">
 <img src="./images/barista-retry.png" alt="barista-retry.png">
 
 </figure>
@@ -450,15 +427,15 @@ Next Chapter, we will go though the detail of how to apply <i>One Way Messaging<
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 I've tried in <a href="http://ammonite.io/#Ammonite-REPL">amm</a>, the code really compiles.
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 Martin already summarized <a href="https://martinfowler.com/articles/microservice-trade-offs.html">Microservice Trade-Offs</a>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 This is so call <a href="https://martinfowler.com/articles/microservice-trade-offs.html#consistency"><i>Eventually Consistency</i></a>
 </p></div></div>
 
@@ -473,7 +450,7 @@ This is so call <a href="https://martinfowler.com/articles/microservice-trade-of
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2020-01-03 Fri 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

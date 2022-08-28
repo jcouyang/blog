@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Implicit, to be or not to be</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="unknown">
-<meta name="description" content="隐式转换是什么鬼"
->
+<meta name="author" content="unknown" />
+<meta name="description" content="隐式转换是什么鬼" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -16,28 +15,6 @@
 <link rel="stylesheet" href="/style/toc.css"/>
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -54,12 +31,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">Implicit, to be or not to be</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#org874ff7f">隐式转换是什么鬼</a></li>
 <li><a href="#orge95a2f5">隐式转换接受者</a>
@@ -83,7 +60,7 @@
 <p>
 有时候，一加一等于 11，比如 JavaScript
 </p>
-<pre class="code"><code>1+<span style="color: #8b0000;">"1"</span>
+<pre class="code"><code>1+<span style="color: #D08770;">"1"</span>
 </code></pre>
 
 <p>
@@ -102,7 +79,7 @@
 奇怪的是 scala 是强类型语言，1+"1" 编译器居然也是过的
 </p>
 
-<pre class="code"><code><span style="color: #6b8e23;">1</span> + <span style="color: #8b0000;">"1"</span>
+<pre class="code"><code><span style="color: #81A1C1;">1</span> + <span style="color: #D08770;">"1"</span>
 </code></pre>
 
 <pre class="example">
@@ -122,8 +99,8 @@
 <p>
 如果你用的IntelliJ，光标在 <code>+</code> 号上，按 <code>cmd</code> + <code>b</code> ，就会跳转到这样一坨代码：
 </p>
-<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #228b22;">final</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">any2stringadd</span>[<span style="color: #6b8e23;">A</span>](<span style="color: #228b22;">private</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">self</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">AnyVal</span> {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">+</span>(other<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">String</span>.valueOf(self) + other
+<pre class="code"><code><span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">final</span> <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">any2stringadd</span>[<span style="color: #81A1C1;">A</span>](<span style="color: #81A1C1;">private</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">self</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>) <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">AnyVal</span> {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">+</span>(other<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">String</span>.valueOf(self) + other
 }
 </code></pre>
 
@@ -142,16 +119,16 @@
 <p>
 隐式转换接收对象的类型还可以轻松弄一些语法糖DSL，比如 Map
 </p>
-<pre class="code"><code><span style="color: #6b8e23;">Map</span>(<span style="color: #6b8e23;">1</span> -&gt; <span style="color: #8b0000;">"one"</span>, <span style="color: #6b8e23;">2</span> -&gt; <span style="color: #8b0000;">"two"</span>, <span style="color: #6b8e23;">3</span> -&gt; <span style="color: #8b0000;">"three"</span>)
+<pre class="code"><code><span style="color: #81A1C1;">Map</span>(<span style="color: #81A1C1;">1</span> -&gt; <span style="color: #D08770;">"one"</span>, <span style="color: #81A1C1;">2</span> -&gt; <span style="color: #D08770;">"two"</span>, <span style="color: #81A1C1;">3</span> -&gt; <span style="color: #D08770;">"three"</span>)
 </code></pre>
 
 <p>
 1 -&gt; "one" 其实是 tuple <code>(1, 2)</code> ，隐式转换帮我们实现这个箭头DSL
 </p>
 
-<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #228b22;">final</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">ArrowAssoc</span>[<span style="color: #6b8e23;">A</span>](<span style="color: #228b22;">private</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">self</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">AnyVal</span> {
-   <span style="color: #00008b;">@inline</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">-&gt;</span> [<span style="color: #6b8e23;">B</span>](y<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Tuple2</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Tuple2</span>(self, y)
-   <span style="color: #00008b;">def</span> &#8594;[<span style="color: #6b8e23;">B</span>](y<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Tuple2</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> -&gt;(y)
+<pre class="code"><code><span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">final</span> <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">ArrowAssoc</span>[<span style="color: #81A1C1;">A</span>](<span style="color: #81A1C1;">private</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">self</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>) <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">AnyVal</span> {
+   <span style="color: #81A1C1;">@inline</span> <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">-&gt;</span> [<span style="color: #81A1C1;">B</span>](y<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">B</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Tuple2</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Tuple2</span>(self, y)
+   <span style="color: #81A1C1;">def</span> &#8594;[<span style="color: #81A1C1;">B</span>](y<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">B</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Tuple2</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span> -&gt;(y)
  }
 </code></pre>
 
@@ -175,22 +152,22 @@
 </span>：
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">PreferredPrompt</span>(<span style="color: #00008b;">val</span> <span style="color: #b8860b;">preference</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)
-<span style="color: #00008b;">class</span> <span style="color: #36648b;">PreferredDrink</span>(<span style="color: #00008b;">val</span> <span style="color: #b8860b;">preference</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)
+<pre class="code"><code><span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">PreferredPrompt</span>(<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">preference</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>)
+<span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">PreferredDrink</span>(<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">preference</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>)
 
-<span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Greeter</span> {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">greet</span>(name<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)(<span style="color: #228b22;">implicit</span> prompt<span style="color: #00008b;">:</span> <span style="color: #36648b;">PreferredPrompt</span>,
-    drink<span style="color: #00008b;">:</span> <span style="color: #36648b;">PreferredDrink</span>) {
+<span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">Greeter</span> {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">greet</span>(name<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>)(<span style="color: #81A1C1;">implicit</span> prompt<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">PreferredPrompt</span>,
+    drink<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">PreferredDrink</span>) {
 
-    println(<span style="color: #8b0000;">"Welcome, "</span>+ name +<span style="color: #8b0000;">". The system is ready."</span>)
-    print(<span style="color: #8b0000;">"But while you work, "</span>)
-    println(<span style="color: #8b0000;">"why not enjoy a cup of "</span>+ drink.preference +<span style="color: #8b0000;">"?"</span>)
+    println(<span style="color: #D08770;">"Welcome, "</span>+ name +<span style="color: #D08770;">". The system is ready."</span>)
+    print(<span style="color: #D08770;">"But while you work, "</span>)
+    println(<span style="color: #D08770;">"why not enjoy a cup of "</span>+ drink.preference +<span style="color: #D08770;">"?"</span>)
     println(prompt.preference)
   }
 }
-<span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">prompt</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">PreferredPrompt</span>(<span style="color: #8b0000;">"Yes, master&gt; "</span>)
-<span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">drink</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">PreferredDrink</span>(<span style="color: #8b0000;">"tea"</span>)
-<span style="color: #6b8e23;">Greeter</span>.greet(<span style="color: #8b0000;">"Joe"</span>)
+<span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">prompt</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">PreferredPrompt</span>(<span style="color: #D08770;">"Yes, master&gt; "</span>)
+<span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">drink</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">PreferredDrink</span>(<span style="color: #D08770;">"tea"</span>)
+<span style="color: #81A1C1;">Greeter</span>.greet(<span style="color: #D08770;">"Joe"</span>)
 </code></pre>
 
 <pre class="example">
@@ -214,14 +191,14 @@ Yes, master&gt;
 </span>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">A</span>] {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">show</span>(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>
+<pre class="code"><code><span style="color: #81A1C1;">trait</span> <span style="color: #81A1C1;">Show</span>[<span style="color: #81A1C1;">A</span>] {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">show</span>(f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>
 }
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)(<span style="color: #228b22;">implicit</span> s<span style="color: #00008b;">:</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=</span> println(s.show(a))
-<span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">stringShow</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">String</span>] {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">show</span>(s<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">=</span> s
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">log</span>[<span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>)(<span style="color: #81A1C1;">implicit</span> s<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Show</span>[<span style="color: #81A1C1;">A</span>]) <span style="color: #81A1C1;">=</span> println(s.show(a))
+<span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">stringShow</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Show</span>[<span style="color: #81A1C1;">String</span>] {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">show</span>(s<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>) <span style="color: #81A1C1;">=</span> s
 }
-log(<span style="color: #8b0000;">"a string"</span>)
+log(<span style="color: #D08770;">"a string"</span>)
 </code></pre>
 
 <pre class="example">
@@ -245,20 +222,20 @@ Some(Some(hello))
 <p>
 要继续实现别的类型的 Show 实例，只需要继续添加隐式转换，例如 Option 的 Show 实例
 </p>
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">A</span>] {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">show</span>(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>
+<pre class="code"><code><span style="color: #81A1C1;">trait</span> <span style="color: #81A1C1;">Show</span>[<span style="color: #81A1C1;">A</span>] {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">show</span>(f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>
 }
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)(<span style="color: #228b22;">implicit</span> s<span style="color: #00008b;">:</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=</span> println(s.show(a))
-<span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">stringShow</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">String</span>] {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">show</span>(s<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">=</span> s
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">log</span>[<span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>)(<span style="color: #81A1C1;">implicit</span> s<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Show</span>[<span style="color: #81A1C1;">A</span>]) <span style="color: #81A1C1;">=</span> println(s.show(a))
+<span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">stringShow</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Show</span>[<span style="color: #81A1C1;">String</span>] {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">show</span>(s<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>) <span style="color: #81A1C1;">=</span> s
 }
-<span style="color: #228b22;">implicit</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">optionShow</span>[<span style="color: #6b8e23;">A</span>](<span style="color: #228b22;">implicit</span> sa<span style="color: #00008b;">:</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">A</span>]] {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">show</span>(oa<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span> <span style="color: #00008b;">=</span> oa <span style="color: #00008b;">match</span> {
-    <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">None</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #8b0000;">"None"</span>
-    <span style="color: #00008b;">case</span> <span style="color: #36648b;">Some</span>(<span style="color: #b8860b;">a</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #8b0000;">"Some("</span>+ sa.show(a) + <span style="color: #8b0000;">")"</span>
+<span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">optionShow</span>[<span style="color: #81A1C1;">A</span>](<span style="color: #81A1C1;">implicit</span> sa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Show</span>[<span style="color: #81A1C1;">A</span>]) <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Show</span>[<span style="color: #81A1C1;">Option</span>[<span style="color: #81A1C1;">A</span>]] {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">show</span>(oa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Option</span>[<span style="color: #81A1C1;">A</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span> <span style="color: #81A1C1;">=</span> oa <span style="color: #81A1C1;">match</span> {
+    <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">None</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #D08770;">"None"</span>
+    <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Some</span>(<span style="font-weight: bold;">a</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #D08770;">"Some("</span>+ sa.show(a) + <span style="color: #D08770;">")"</span>
   }
 }
-log(<span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">Option</span>(<span style="color: #8b0000;">"hello"</span>)))
+log(<span style="color: #81A1C1;">Option</span>(<span style="color: #81A1C1;">Option</span>(<span style="color: #D08770;">"hello"</span>)))
 </code></pre>
 
 <pre class="example">
@@ -276,7 +253,7 @@ Some(Some(hello))
 <p>
 另一种签名也同样适用
 </p>
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">log</span>[<span style="color: #6b8e23;">A</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Show</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">=</span> println(implicitly[<span style="color: #6b8e23;">Show</span>[<span style="color: #6b8e23;">A</span>]].show(a))
+<pre class="code"><code><span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">log</span>[<span style="color: #81A1C1;">A</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Show</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>) <span style="color: #81A1C1;">=</span> println(implicitly[<span style="color: #81A1C1;">Show</span>[<span style="color: #81A1C1;">A</span>]].show(a))
 </code></pre>
 <ul class="org-ul">
 <li><code>A:Show</code> 约束 <code>A</code> 是 <code>Show</code> 的一个实例</li>
@@ -286,7 +263,7 @@ Some(Some(hello))
 <p>
 这是更类似于 Haskell 的签名
 </p>
-<pre class="code"><code>log<span style="color: #b8860b;">::</span>(<span style="color: #36648b;">Show</span> a) <span style="color: #b8860b;">=&gt;</span> a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">String</span>
+<pre class="code"><code>log<span style="font-weight: bold;">::</span>(<span style="color: #81A1C1;">Show</span> a) <span style="font-weight: bold;">=&gt;</span> a <span style="font-weight: bold;">-&gt;</span> <span style="color: #81A1C1;">String</span>
 </code></pre>
 
 <p>
@@ -321,11 +298,11 @@ Some(Some(hello))
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="http://www.artima.com/pins1ed/implicit-conversions-and-parameters.html#21.5">http://www.artima.com/pins1ed/implicit-conversions-and-parameters.html#21.5</a>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="http://typelevel.org/cats/typeclasses.html">http://typelevel.org/cats/typeclasses.html</a>
 </p></div></div>
 
@@ -340,7 +317,7 @@ Some(Some(hello))
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2016-06-09 Thu 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

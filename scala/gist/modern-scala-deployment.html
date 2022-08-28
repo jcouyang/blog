@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>如何部署 Scala 代码</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="欧阳继超">
-<meta name="description" content="到底应该打成肥 jar 包还是 docker? 打包工具为何如此难用?Scala部署到底怎么最简单高效?"
->
-<meta name="keywords" content="Scala,Coursier,Assembly,Jar,Docker,Kubernetes,K8s">
+<meta name="author" content="欧阳继超" />
+<meta name="description" content="到底应该打成肥 jar 包还是 docker? 打包工具为何如此难用?Scala部署到底怎么最简单高效?" />
+<meta name="keywords" content="Scala,Coursier,Assembly,Jar,Docker,Kubernetes,K8s" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -21,28 +20,6 @@
 <meta property="og:description" content="Cats need Caffeine!" />
 <meta property="og:type" content="article" />
 <meta content="https://upload.wikimedia.org/wikipedia/commons/7/7e/Imperial_Encyclopaedia_-_Animal_Kingdom_-_pic009_-_%E9%9B%8E%E9%B3%A9%E5%9C%96.svg" property="og:image">
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -59,12 +36,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">如何部署 Scala 代码</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#orgd6411d8">两年多前</a></li>
 <li><a href="#orgc09933f">一年前</a></li>
@@ -95,8 +72,8 @@
 </span>
 </p>
 <pre class="code"><code>assemblyMergeStrategy in assembly := {
-  <span style="color: #00008b;">case</span> <span style="color: #36648b;">PathList</span>(<span style="color: #8b0000;">"META-INF"</span>, <span style="color: #b8860b;">xs</span> <span style="color: #00008b;">@</span> <span style="color: #00008b;">_</span><span style="color: #36648b;">*</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">MergeStrategy</span>.discard
-  <span style="color: #00008b;">case</span> <span style="color: #b8860b;">x</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">MergeStrategy</span>.first
+  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">PathList</span>(<span style="color: #D08770;">"META-INF"</span>, <span style="font-weight: bold;">xs</span> <span style="color: #81A1C1;">@</span> <span style="color: #81A1C1;">_</span><span style="color: #81A1C1;">*</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">MergeStrategy</span>.discard
+  <span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">x</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">MergeStrategy</span>.first
 }
 </code></pre>
 
@@ -192,7 +169,7 @@ Coursier 相对 native packager 有更多的好处
 如果跑测试要运行这个jar包只需要
 </p>
 
-<pre class="example" id="orgdd42e4c">
+<pre class="example" id="orgaa3bdf9">
 coursier launch com.abc:heheda_2.12:1.0
 </pre>
 
@@ -212,7 +189,7 @@ coursier launch com.abc:heheda_2.12:1.0
 </span>
 </p>
 
-<pre class="example" id="orgcfd939c">
+<pre class="example" id="org0d7533e">
 FROM openjdk:8u222-slim
 
 ARG VERSION
@@ -239,7 +216,7 @@ RUN coursier --help
 在给应打包docker时
 </p>
 
-<pre class="example" id="orgbcba028">
+<pre class="example" id="orgbc2d140">
 FROM mycoursier
 ARG version
 
@@ -252,7 +229,7 @@ CMD ./heheda
 如果你的包在私有registry
 </p>
 
-<pre class="example" id="org02a3335">
+<pre class="example" id="org9be2b9b">
 FROM mycoursier
 ARG version
 ARG csuser
@@ -269,15 +246,15 @@ CMD ./heheda
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 这对于新人来说是何等的 <del>卧槽</del> 黑人问号???
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 真正部署前根本不需要docker image, 而大部分时间 CI 只跑 Pull Request 的测试而不会部署
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 这完全可以扔 docker hub 上, 但是我懒
 </p></div></div>
 
@@ -292,7 +269,7 @@ CMD ./heheda
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2020-03-22 Sun 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

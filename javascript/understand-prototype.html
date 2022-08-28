@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>理解JavaScript的原型链和继承</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="unknown">
-<meta name="description" content="这是一篇JavaScript的“基础”阅读，解释最黑暗的的JavaScript原型链和继承"
->
-<meta name="keywords" content="javascript, prototype, __proto__, constructor">
+<meta name="author" content="unknown" />
+<meta name="description" content="这是一篇JavaScript的“基础”阅读，解释最黑暗的的JavaScript原型链和继承" />
+<meta name="keywords" content="javascript, prototype, __proto__, constructor" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -17,28 +16,6 @@
 <link rel="stylesheet" href="/style/toc.css"/>
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -55,12 +32,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">理解JavaScript的原型链和继承</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#org702498e">instanceof 引发的问题</a></li>
 <li><a href="#orgd7b3186">prototype属性是原型链吗？</a></li>
@@ -89,7 +66,7 @@ instanceof 运算符可以用来判断某个构造函数的prototype属性是否
 <p>
 来个题
 </p>
-<pre class="code"><code>Function <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">Object</span>;
+<pre class="code"><code>Function <span style="color: #81A1C1;">instanceof</span> <span style="color: #81A1C1;">Object</span>;
 </code></pre>
 
 <p>
@@ -113,27 +90,27 @@ instanceof 运算符可以用来判断Object的 <i>prototype属性</i> 是否存
 <p>
 JS是基于原型链面向对象语言，也就是说所有对象都是以对象为模板创建实例的。如果是其他oo语言的背景比如Java或Ruby，都习惯于创建一个class模板，class创建object实例。比如ruby：
 </p>
-<pre class="code"><code>  <span style="color: #00008b;">class</span> <span style="color: #36648b;">A</span>
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">initialize</span> name
-      <span style="color: #b8860b;">@name</span> = name
-    <span style="color: #00008b;">end</span>
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">to_s</span>
-      <span style="color: #b8860b;">@name</span>
-    <span style="color: #00008b;">end</span>
-  <span style="color: #00008b;">end</span>
-<span style="color: #228b22;">puts</span> <span style="color: #36648b;">A</span>.new(<span style="color: #8b0000;">'hehe'</span>) <span style="color: #8c8c8c; font-style: italic;"># </span><span style="color: #8c8c8c; font-style: italic;">=&gt; hehe</span>
+<pre class="code"><code>  <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">A</span>
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">initialize</span> name
+      <span style="font-weight: bold;">@name</span> = name
+    <span style="color: #81A1C1;">end</span>
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">to_s</span>
+      <span style="font-weight: bold;">@name</span>
+    <span style="color: #81A1C1;">end</span>
+  <span style="color: #81A1C1;">end</span>
+<span style="color: #81A1C1;">puts</span> <span style="color: #81A1C1;">A</span>.new(<span style="color: #D08770;">'hehe'</span>) <span style="color: #677691;"># </span><span style="color: #677691;">=&gt; hehe</span>
 </code></pre>
 <p>
 这里的类A就是所有 <code>A.new</code> 创建出来的实例的模板而已。而对于原型链语言JS来说，同意的事情要这样做
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">A</span>(<span style="color: #b8860b;">name</span>){
-  <span style="color: #6b8e23;">this</span>.name = name
+<pre class="code"><code><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">A</span>(<span style="font-weight: bold;">name</span>){
+  <span style="color: #81A1C1;">this</span>.name = name
 }
-A.<span style="color: #6b8e23;">prototype</span>.toString = <span style="color: #00008b;">function</span>(){
-  <span style="color: #00008b;">return</span> <span style="color: #6b8e23;">this</span>.name
+A.<span style="color: #81A1C1;">prototype</span>.toString = <span style="color: #81A1C1;">function</span>(){
+  <span style="color: #81A1C1;">return</span> <span style="color: #81A1C1;">this</span>.name
 }
-<span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span> = <span style="color: #00008b;">new</span> <span style="color: #36648b;">A</span>(<span style="color: #8b0000;">'hehe'</span>)
-console.log(<span style="color: #8b0000;">'object name is:'</span> + <span style="color: #00008b;">new</span> <span style="color: #36648b;">A</span> (<span style="color: #8b0000;">'hehe'</span>)) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; object name is: hehe</span>
+<span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">a</span> = <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">A</span>(<span style="color: #D08770;">'hehe'</span>)
+console.log(<span style="color: #D08770;">'object name is:'</span> + <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">A</span> (<span style="color: #D08770;">'hehe'</span>)) <span style="color: #677691;">// </span><span style="color: #677691;">=&gt; object name is: hehe</span>
 </code></pre>
 
 <ol class="org-ol">
@@ -153,10 +130,10 @@ console.log(<span style="color: #8b0000;">'object name is:'</span> + <span style
 这里只是意思，但是如果真的改变 <code>__proto__</code> 是非常低效的 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto</a>
 </span>：
 </p>
-<pre class="code"><code><span class="linenr">1: </span><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">var a = new A('hehe') =&gt;</span>
-<span class="linenr">2: </span><span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span> = <span style="color: #00008b;">new</span> <span style="color: #36648b;">Object</span>();
-<span class="linenr">3: </span>a.__proto__ = A.<span style="color: #6b8e23;">prototype</span>; (proto)
-<span class="linenr">4: </span>A.call(a, <span style="color: #8b0000;">'hehe'</span>);
+<pre class="code"><code><span class="linenr">1: </span><span style="color: #677691;">// </span><span style="color: #677691;">var a = new A('hehe') =&gt;</span>
+<span class="linenr">2: </span><span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">a</span> = <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Object</span>();
+<span class="linenr">3: </span>a.__proto__ = A.<span style="color: #81A1C1;">prototype</span>; (proto)
+<span class="linenr">4: </span>A.call(a, <span style="color: #D08770;">'hehe'</span>);
 </code></pre>
 
 <p>
@@ -182,9 +159,9 @@ console.log(<span style="color: #8b0000;">'object name is:'</span> + <span style
 JS对象能使用它原型链对象的所有方法，比如所有的对象的原型链（的原型链的原型链的原型链&#x2026;）都最终会指向Object(或null)。因此，所有的对象都能使用Object.prototype上的方法，比如我之前覆盖掉的 <code>toString</code> 本身就是Object.prototype上的方法，如果没有覆盖，它是可以拿到所有Object上的方法的：
 </p>
 
-<pre class="code"><code>a.toString === A.<span style="color: #6b8e23;">prototype</span>.toString <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">true</span>
-a.toLocalString === Object.<span style="color: #6b8e23;">prototype</span>.toLocalString <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">true</span>
-a.__proto__ === A.<span style="color: #6b8e23;">prototype</span> <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">true</span>
+<pre class="code"><code>a.toString === A.<span style="color: #81A1C1;">prototype</span>.toString <span style="color: #677691;">// </span><span style="color: #677691;">true</span>
+a.toLocalString === Object.<span style="color: #81A1C1;">prototype</span>.toLocalString <span style="color: #677691;">// </span><span style="color: #677691;">true</span>
+a.__proto__ === A.<span style="color: #81A1C1;">prototype</span> <span style="color: #677691;">// </span><span style="color: #677691;">true</span>
 </code></pre>
 
 <p>
@@ -199,34 +176,34 @@ instanceof 运算符可以用来判断Object的 <i>prototype属性</i> 是否存
 <p>
 所以instanceof其实就是
 </p>
-<pre class="code"><code>Function.__proto__ === Object.<span style="color: #6b8e23;">prototype</span>
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">false</span>
+<pre class="code"><code>Function.__proto__ === Object.<span style="color: #81A1C1;">prototype</span>
+<span style="color: #677691;">// </span><span style="color: #677691;">false</span>
 </code></pre>
 <p>
 擦，假设失败了呢，让我们来看看为什么不对，Function.__proto__到底指哪去了
 </p>
-<pre class="code"><code>Function.__proto__ === Function.<span style="color: #6b8e23;">prototype</span>
-<span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">true</span>
+<pre class="code"><code>Function.__proto__ === Function.<span style="color: #81A1C1;">prototype</span>
+<span style="color: #677691;">//</span><span style="color: #677691;">true</span>
 </code></pre>
 <p>
 原来指向自己的prototype了呢，那就意味着&#x2026;
 </p>
-<pre class="code"><code>Function <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">Function</span>
-<span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">true</span>
+<pre class="code"><code>Function <span style="color: #81A1C1;">instanceof</span> <span style="color: #81A1C1;">Function</span>
+<span style="color: #677691;">//</span><span style="color: #677691;">true</span>
 </code></pre>
 <p>
 yes，然而 Function instanceof Object似乎也能解释了
 </p>
-<pre class="code"><code>Function.__proto__ === Function.<span style="color: #6b8e23;">prototype</span>
-Function.__proto__.__proto__ === Object.<span style="color: #6b8e23;">prototype</span>
+<pre class="code"><code>Function.__proto__ === Function.<span style="color: #81A1C1;">prototype</span>
+Function.__proto__.__proto__ === Object.<span style="color: #81A1C1;">prototype</span>
 </code></pre>
 
 <p>
 所以如果我们让
 </p>
-<pre class="code"><code>Function.__proto__.__proto__ = <span style="color: #6b8e23;">null</span>
-Function <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">Object</span>
-<span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">false</span>
+<pre class="code"><code>Function.__proto__.__proto__ = <span style="color: #81A1C1;">null</span>
+Function <span style="color: #81A1C1;">instanceof</span> <span style="color: #81A1C1;">Object</span>
+<span style="color: #677691;">//</span><span style="color: #677691;">false</span>
 </code></pre>
 
 <p>
@@ -253,10 +230,10 @@ Object instanceof Function
 <p>
 难道可以互相链吗？这意味着
 </p>
-<pre class="code"><code>Object.__proto__ === Function.<span style="color: #6b8e23;">prototype</span>
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">true</span>
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&#20294;&#26159;Firefox&#21462;&#19981;&#21040;Object.__proto__, &#30475;&#26469;&#20570;&#20102;&#20445;&#25252;&#65292;&#24517;&#39035;&#35201;&#29992;</span>
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">Object.getPrototypeOf(Object) === Function.prototype</span>
+<pre class="code"><code>Object.__proto__ === Function.<span style="color: #81A1C1;">prototype</span>
+<span style="color: #677691;">// </span><span style="color: #677691;">true</span>
+<span style="color: #677691;">// </span><span style="color: #677691;">&#20294;&#26159;Firefox&#21462;&#19981;&#21040;Object.__proto__, &#30475;&#26469;&#20570;&#20102;&#20445;&#25252;&#65292;&#24517;&#39035;&#35201;&#29992;</span>
+<span style="color: #677691;">// </span><span style="color: #677691;">Object.getPrototypeOf(Object) === Function.prototype</span>
 </code></pre>
 
 <p>
@@ -264,7 +241,7 @@ Object instanceof Function
 </p>
 
 
-<figure id="org7037151">
+<figure id="org949852c">
 <img src="https://www.evernote.com/l/ABerZUl8ytRL1KHVx1JSFhIgl6a-dZwdZBMB/image.png" alt="image.png">
 
 </figure>
@@ -295,7 +272,7 @@ Object instanceof Function
 </p>
 
 
-<figure id="orgf5465e6">
+<figure id="orgc5f17f9">
 <img src="https://www.evernote.com/l/ABextuBjPu5MiqwpfrE1NUlZ28bhdc42qawB/image.png" alt="image.png">
 
 </figure>
@@ -304,11 +281,11 @@ Object instanceof Function
 话说 <code>A</code> 里面这个constructor是个什么鬼,我们来玩它一下
 </p>
 
-<pre class="code"><code>a.constructor === A.<span style="color: #6b8e23;">prototype</span>.constructor
-A.<span style="color: #6b8e23;">prototype</span>.constructor === A
-A.<span style="color: #6b8e23;">prototype</span>.constructor = <span style="color: #6b8e23;">null</span>
-a.constructor <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; null</span>
-a <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">A</span> <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">true</span>
+<pre class="code"><code>a.constructor === A.<span style="color: #81A1C1;">prototype</span>.constructor
+A.<span style="color: #81A1C1;">prototype</span>.constructor === A
+A.<span style="color: #81A1C1;">prototype</span>.constructor = <span style="color: #81A1C1;">null</span>
+a.constructor <span style="color: #677691;">// </span><span style="color: #677691;">=&gt; null</span>
+a <span style="color: #81A1C1;">instanceof</span> <span style="color: #81A1C1;">A</span> <span style="color: #677691;">// </span><span style="color: #677691;">true</span>
 </code></pre>
 
 <p>
@@ -364,18 +341,18 @@ a <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">
 <p>
 下面这个是babel 从es6 class 
 </p>
-<pre class="code"><code><span style="color: #00008b;">class</span> A{
+<pre class="code"><code><span style="color: #81A1C1;">class</span> A{
   constructor(name) {
-    <span style="color: #6b8e23;">this</span>.name= name
+    <span style="color: #81A1C1;">this</span>.name= name
   }
   toString() {
-    <span style="color: #00008b;">return</span> <span style="color: #6b8e23;">this</span>.name
+    <span style="color: #81A1C1;">return</span> <span style="color: #81A1C1;">this</span>.name
   }
 }
 
-<span style="color: #00008b;">class</span> B <span style="color: #00008b;">extends</span> A {
+<span style="color: #81A1C1;">class</span> B <span style="color: #81A1C1;">extends</span> A {
   toString(){
-    <span style="color: #00008b;">return</span> <span style="color: #6b8e23;">this</span>.name + <span style="color: #8b0000;">'b'</span>
+    <span style="color: #81A1C1;">return</span> <span style="color: #81A1C1;">this</span>.name + <span style="color: #D08770;">'b'</span>
   }
 }
 </code></pre>
@@ -383,49 +360,49 @@ a <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">
 <p>
 编译出来的ES5继承
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">_inherits</span>(<span style="color: #b8860b;">subClass</span>, <span style="color: #b8860b;">superClass</span>) { 
-    <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&#23494;</span>
+<pre class="code"><code><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">_inherits</span>(<span style="font-weight: bold;">subClass</span>, <span style="font-weight: bold;">superClass</span>) { 
+    <span style="color: #677691;">// </span><span style="color: #677691;">&#23494;</span>
 }
 
-<span style="color: #00008b;">var</span> <span style="color: #b8860b;">A</span> = (<span style="color: #00008b;">function</span> () {
-    <span style="color: #00008b;">function</span> <span style="color: #6a5acd;">A</span>(<span style="color: #b8860b;">name</span>) {
-        <span style="color: #6b8e23;">this</span>.name = name;
+<span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">A</span> = (<span style="color: #81A1C1;">function</span> () {
+    <span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">A</span>(<span style="font-weight: bold;">name</span>) {
+        <span style="color: #81A1C1;">this</span>.name = name;
     }
 
-    A.<span style="color: #6b8e23;">prototype</span>.toString = <span style="color: #00008b;">function</span> toString() {
-        <span style="color: #00008b;">return</span> <span style="color: #6b8e23;">this</span>.name;
+    A.<span style="color: #81A1C1;">prototype</span>.toString = <span style="color: #81A1C1;">function</span> toString() {
+        <span style="color: #81A1C1;">return</span> <span style="color: #81A1C1;">this</span>.name;
     };
 
-    <span style="color: #00008b;">return</span> A;
+    <span style="color: #81A1C1;">return</span> A;
 })();
 
-<span style="color: #00008b;">var</span> <span style="color: #b8860b;">B</span> = (<span style="color: #00008b;">function</span> (<span style="color: #b8860b;">_A</span>) {
-    <span style="color: #00008b;">function</span> <span style="color: #6a5acd;">B</span>() {
-        <span style="color: #00008b;">if</span> (_A != <span style="color: #6b8e23;">null</span>) {
-            _A.apply(<span style="color: #6b8e23;">this</span>, <span style="color: #6b8e23;">arguments</span>);
+<span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">B</span> = (<span style="color: #81A1C1;">function</span> (<span style="font-weight: bold;">_A</span>) {
+    <span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">B</span>() {
+        <span style="color: #81A1C1;">if</span> (_A != <span style="color: #81A1C1;">null</span>) {
+            _A.apply(<span style="color: #81A1C1;">this</span>, <span style="color: #81A1C1;">arguments</span>);
         }
     }
 
     _inherits(B, _A);
 
-    B.<span style="color: #6b8e23;">prototype</span>.toString = <span style="color: #00008b;">function</span> toString() {
-        <span style="color: #00008b;">return</span> <span style="color: #6b8e23;">this</span>.name + <span style="color: #8b0000;">'b'</span>;
+    B.<span style="color: #81A1C1;">prototype</span>.toString = <span style="color: #81A1C1;">function</span> toString() {
+        <span style="color: #81A1C1;">return</span> <span style="color: #81A1C1;">this</span>.name + <span style="color: #D08770;">'b'</span>;
     };
 
-    <span style="color: #00008b;">return</span> B;
+    <span style="color: #81A1C1;">return</span> B;
 })(A);
 </code></pre>
 
 <p>
 其他地方都不用看了，inherits 函数用到了之前学到的所有玩意，要求实现要满足下列所有的cases,就当是课后练习了：
 </p>
-<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span>= <span style="color: #00008b;">new</span> <span style="color: #36648b;">A</span>(<span style="color: #8b0000;">'A'</span>);
-<span style="color: #00008b;">var</span> <span style="color: #b8860b;">b</span>= <span style="color: #00008b;">new</span> <span style="color: #36648b;">B</span>(<span style="color: #8b0000;">'B'</span>);
+<pre class="code"><code><span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">a</span>= <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">A</span>(<span style="color: #D08770;">'A'</span>);
+<span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">b</span>= <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">B</span>(<span style="color: #D08770;">'B'</span>);
 a.constructor === A &amp;&amp;
 b.constructor === B &amp;&amp;
-a <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">A</span> &amp;&amp;
-b <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">A</span> &amp;&amp;
-b <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">B</span>
+a <span style="color: #81A1C1;">instanceof</span> <span style="color: #81A1C1;">A</span> &amp;&amp;
+b <span style="color: #81A1C1;">instanceof</span> <span style="color: #81A1C1;">A</span> &amp;&amp;
+b <span style="color: #81A1C1;">instanceof</span> <span style="color: #81A1C1;">B</span>
 </code></pre>
 </div>
 </div>
@@ -433,15 +410,15 @@ b <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/instanceof">https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/instanceof</a>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 这里只是意思，但是如果真的改变 <code>__proto__</code> 是非常低效的 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto</a>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="http://www.ecma-international.org/ecma-262/6.0/#sec-additional-properties-of-the-object.prototype-object">http://www.ecma-international.org/ecma-262/6.0/#sec-additional-properties-of-the-object.prototype-object</a>
 </p></div></div>
 
@@ -456,7 +433,7 @@ b <span style="color: #00008b;">instanceof</span> <span style="color: #36648b;">
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2015-07-03 Fri 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

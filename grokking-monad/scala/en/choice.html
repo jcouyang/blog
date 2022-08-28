@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Applied Category Theory in Scala</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="unknown">
-<meta name="description" content="Typeclass Choice"
->
+<meta name="author" content="unknown" />
+<meta name="description" content="Typeclass Choice" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -20,28 +19,6 @@
 <meta property="og:description" content="Typeclass Choice" />
 <meta property="og:type" content="article" />
 <meta content="https://static-2.gumroad.com/res/gumroad/1806288866681/asset_previews/dd7001d38dd3151e4f02f72579258e2f/retina/don_27t_20wish_20for_20it.work_20for_20it..png" property="og:image">
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -58,13 +35,13 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">Applied Category Theory in Scala</h1>
-<p class="subtitle">Choice</p>
-</header><nav id="table-of-contents">
+<p class="subtitle" role="doc-subtitle">Choice</p>
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#applied-category-theory-in-scala---choice">Choice</a>
 <ul>
@@ -111,8 +88,8 @@ This is exactly <code>Choice</code> <i>typeclass</i> for, replacing <code>=&gt;<
 will get a <code>Choice</code>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Choice</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>, <span style="color: #00008b;">_</span>]] {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">choice</span>(fac<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">C</span>], fbc<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">Either</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>], <span style="color: #6b8e23;">C</span>]
+<pre class="code"><code><span style="color: #81A1C1;">trait</span> <span style="color: #81A1C1;">Choice</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>, <span style="color: #81A1C1;">_</span>]] {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">choice</span>(fac<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">C</span>], fbc<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">B</span>, <span style="color: #81A1C1;">C</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">Either</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>], <span style="color: #81A1C1;">C</span>]
 }
 </code></pre>
 </div>
@@ -138,8 +115,8 @@ Take Http4s for example:
 http4s defined routes using <code>Kleisli</code>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">HttpRoutes</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]]
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">routes</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">HttpRoutes</span>[<span style="color: #6b8e23;">F</span>] <span style="color: #00008b;">=</span> ???
+<pre class="code"><code><span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">HttpRoutes</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Kleisli</span>[<span style="color: #81A1C1;">OptionT</span>[<span style="color: #81A1C1;">F</span>, ?], <span style="color: #81A1C1;">Request</span>[<span style="color: #81A1C1;">F</span>], <span style="color: #81A1C1;">Response</span>[<span style="color: #81A1C1;">F</span>]]
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">routes</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]]<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">HttpRoutes</span>[<span style="color: #81A1C1;">F</span>] <span style="color: #81A1C1;">=</span> ???
 </code></pre>
 
 <p>
@@ -170,13 +147,13 @@ So the return type of <code>middleware</code> will be like
 if we define middleware like
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Middleware</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Either</span>[<span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Request</span>[<span style="color: #6b8e23;">F</span>]]]
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">passThrough</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Kleisli</span>[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>.ask[<span style="color: #6b8e23;">OptionT</span>[<span style="color: #6b8e23;">F</span>, ?], <span style="color: #6b8e23;">Response</span>[<span style="color: #6b8e23;">F</span>]]
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">middleware</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">Middleware</span>[<span style="color: #6b8e23;">F</span>] <span style="color: #00008b;">=</span> ???
+<pre class="code"><code><span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">Middleware</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Kleisli</span>[<span style="color: #81A1C1;">OptionT</span>[<span style="color: #81A1C1;">F</span>, ?], <span style="color: #81A1C1;">Request</span>[<span style="color: #81A1C1;">F</span>], <span style="color: #81A1C1;">Either</span>[<span style="color: #81A1C1;">Response</span>[<span style="color: #81A1C1;">F</span>], <span style="color: #81A1C1;">Request</span>[<span style="color: #81A1C1;">F</span>]]]
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">passThrough</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Kleisli</span>[<span style="color: #81A1C1;">OptionT</span>[<span style="color: #81A1C1;">F</span>, ?], <span style="color: #81A1C1;">Response</span>[<span style="color: #81A1C1;">F</span>], <span style="color: #81A1C1;">Response</span>[<span style="color: #81A1C1;">F</span>]] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Kleisli</span>.ask[<span style="color: #81A1C1;">OptionT</span>[<span style="color: #81A1C1;">F</span>, ?], <span style="color: #81A1C1;">Response</span>[<span style="color: #81A1C1;">F</span>]]
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">middleware</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]]<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Middleware</span>[<span style="color: #81A1C1;">F</span>] <span style="color: #81A1C1;">=</span> ???
 </code></pre>
 
 
-<figure id="org55e381f">
+<figure id="orgc8d66f7">
 <img src="https://user-images.githubusercontent.com/1235045/61630772-ea415700-accb-11e9-9b4b-5abffa0d5bf4.png" alt="61630772-ea415700-accb-11e9-9b4b-5abffa0d5bf4.png">
 
 </figure>
@@ -201,7 +178,7 @@ has instance of <code>Choice</code>
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2019-07-23 Tue 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

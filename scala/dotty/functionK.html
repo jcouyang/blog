@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Scala 3 原生 FunctionK</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="欧阳继超">
-<meta name="description" content="你可能不再需要 Cats"
->
-<meta name="keywords" content="Scala,Dotty,Haskell,Scala 3,FunctionK,Rank N Types,Rank 2 Types,Polymorphic function types">
+<meta name="author" content="欧阳继超" />
+<meta name="description" content="你可能不再需要 Cats" />
+<meta name="keywords" content="Scala,Dotty,Haskell,Scala 3,FunctionK,Rank N Types,Rank 2 Types,Polymorphic function types" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -21,28 +20,6 @@
 <meta property="og:description" content="你可能不再需要 Cats" />
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -59,12 +36,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">Scala 3 原生 FunctionK</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#org3df80e1">Scala 2</a></li>
 <li><a href="#org8fb046b">Scala 3</a></li>
@@ -105,8 +82,8 @@
 比如:
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">import</span> cats.~&gt;
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">tupledOptionToList</span>[<span style="color: #6b8e23;">B</span>,<span style="color: #6b8e23;">C</span>](a<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">B</span>], <span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">C</span>]), fnk<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span> ~&gt; <span style="color: #6b8e23;">List</span>)<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">List</span>[<span style="color: #6b8e23;">B</span>], <span style="color: #6b8e23;">List</span>[<span style="color: #6b8e23;">C</span>])  
+<pre class="code"><code><span style="color: #81A1C1;">import</span> cats.~&gt;
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">tupledOptionToList</span>[<span style="color: #81A1C1;">B</span>,<span style="color: #81A1C1;">C</span>](a<span style="color: #81A1C1;">:</span> (<span style="color: #81A1C1;">Option</span>[<span style="color: #81A1C1;">B</span>], <span style="color: #81A1C1;">Option</span>[<span style="color: #81A1C1;">C</span>]), fnk<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Option</span> ~&gt; <span style="color: #81A1C1;">List</span>)<span style="color: #81A1C1;">:</span> (<span style="color: #81A1C1;">List</span>[<span style="color: #81A1C1;">B</span>], <span style="color: #81A1C1;">List</span>[<span style="color: #81A1C1;">C</span>])  
 </code></pre>
 
 <p>
@@ -122,22 +99,22 @@
 在 Dotty 中, 已经实现了 Rank N Types, 叫 <a href="https://dotty.epfl.ch/blog/2019/06/11/16th-dotty-milestone-release.html#polymorphic-function-types">Polymorphic function types</a>, 就可以很轻松的定义出 <code>~&gt;</code>:
 </p>
 
-<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">kind * -&gt; *</span>
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">FunctionK (* -&gt; *) -&gt; (* -&gt; *)</span>
+<pre class="code"><code><span style="color: #677691;">// </span><span style="color: #677691;">kind * -&gt; *</span>
+<span style="color: #677691;">// </span><span style="color: #677691;">FunctionK (* -&gt; *) -&gt; (* -&gt; *)</span>
 
-<span style="color: #00008b;">type</span> ~&gt;[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>],<span style="color: #6b8e23;">G</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">G</span>[<span style="color: #6b8e23;">A</span>]
+<span style="color: #81A1C1;">type</span> ~&gt;[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>],<span style="color: #81A1C1;">G</span>[<span style="color: #81A1C1;">_</span>]] <span style="color: #81A1C1;">=</span> [<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">G</span>[<span style="color: #81A1C1;">A</span>]
 
-<span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Main</span> {
-  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">rank 2 type (forall a. Option a -&gt; List a)</span>
-  <span style="color: #00008b;">val</span> <span style="color: #b8860b;">optionToList</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span> ~&gt; <span style="color: #6b8e23;">List</span> <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> (a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=&gt;</span> a.toList
+<span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">Main</span> {
+  <span style="color: #677691;">// </span><span style="color: #677691;">rank 2 type (forall a. Option a -&gt; List a)</span>
+  <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">optionToList</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Option</span> ~&gt; <span style="color: #81A1C1;">List</span> <span style="color: #81A1C1;">=</span> [<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=&gt;</span> (a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Option</span>[<span style="color: #81A1C1;">A</span>]) <span style="color: #81A1C1;">=&gt;</span> a.toList
   
-  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">forall b c. (Option b, Option c) -&gt; (forall a. Option a -&gt; List a) -&gt; (List b, List c)</span>
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">tupledOptionToList</span>[<span style="color: #6b8e23;">B</span>,<span style="color: #6b8e23;">C</span>](a<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">B</span>], <span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">C</span>]), fnk<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span> ~&gt; <span style="color: #6b8e23;">List</span>)<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">List</span>[<span style="color: #6b8e23;">B</span>], <span style="color: #6b8e23;">List</span>[<span style="color: #6b8e23;">C</span>]) <span style="color: #00008b;">=</span>
+  <span style="color: #677691;">// </span><span style="color: #677691;">forall b c. (Option b, Option c) -&gt; (forall a. Option a -&gt; List a) -&gt; (List b, List c)</span>
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">tupledOptionToList</span>[<span style="color: #81A1C1;">B</span>,<span style="color: #81A1C1;">C</span>](a<span style="color: #81A1C1;">:</span> (<span style="color: #81A1C1;">Option</span>[<span style="color: #81A1C1;">B</span>], <span style="color: #81A1C1;">Option</span>[<span style="color: #81A1C1;">C</span>]), fnk<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Option</span> ~&gt; <span style="color: #81A1C1;">List</span>)<span style="color: #81A1C1;">:</span> (<span style="color: #81A1C1;">List</span>[<span style="color: #81A1C1;">B</span>], <span style="color: #81A1C1;">List</span>[<span style="color: #81A1C1;">C</span>]) <span style="color: #81A1C1;">=</span>
       (fnk(a._1), fnk(a._2))
   
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">main</span>(args<span style="color: #00008b;">:</span> <span style="color: #36648b;">Array</span>[<span style="color: #6b8e23;">String</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Unit</span> <span style="color: #00008b;">=</span> {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">main</span>(args<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Array</span>[<span style="color: #81A1C1;">String</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Unit</span> <span style="color: #81A1C1;">=</span> {
     println(
-      tupledOptionToList((<span style="color: #6b8e23;">Some</span>(<span style="color: #6b8e23;">1</span>), <span style="color: #6b8e23;">Some</span>(<span style="color: #8b0000;">"2"</span>)), optionToList)
+      tupledOptionToList((<span style="color: #81A1C1;">Some</span>(<span style="color: #81A1C1;">1</span>), <span style="color: #81A1C1;">Some</span>(<span style="color: #D08770;">"2"</span>)), optionToList)
     )
   }
 }
@@ -156,7 +133,7 @@
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 当 FunctionK[F, G] 的 F 和 G 都是 Functor 时, FunctionK 是 F ~&gt; G 的自然变换.
 </p></div></div>
 
@@ -171,7 +148,7 @@
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2020-03-22 Sun 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

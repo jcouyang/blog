@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>范畴论完全装逼手册 / Grokking Monad</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="欧阳继超">
-<meta name="description" content="卷三 搞基猫呢"
->
+<meta name="author" content="欧阳继超" />
+<meta name="description" content="卷三 搞基猫呢" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -16,28 +15,6 @@
 <link rel="stylesheet" href="/style/toc.css"/>
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -54,12 +31,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">范畴论完全装逼手册 / Grokking Monad</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#org9d9ec5e">第三部分:<ruby>搞基猫呢<rt>Advanced Monads</rt></ruby></a>
 <ul>
@@ -122,15 +99,15 @@ RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。�
 一旦把三个 monad 合体，意味着可以在同一个 monad 使用三个 monad 的方法，比如，可以同时使用 Reader 的 ask, State 的 get, put, 和 Writer 的 tell
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">readWriteState</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
-  e <span style="color: #b8860b;">&lt;-</span> ask
-  a <span style="color: #b8860b;">&lt;-</span> get
-  <span style="color: #00008b;">let</span> res <span style="color: #b8860b;">=</span> a <span style="color: #b8860b;">+</span> e
+<pre class="code"><code><span style="font-weight: bold;">readWriteState</span> <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">do</span>
+  e <span style="font-weight: bold;">&lt;-</span> ask
+  a <span style="font-weight: bold;">&lt;-</span> get
+  <span style="color: #81A1C1;">let</span> res <span style="font-weight: bold;">=</span> a <span style="font-weight: bold;">+</span> e
   put res
   tell [res]
   return res
-<span style="color: #6a5acd;">runRWS</span> readWriteState 1 2
-<span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">(3 3 [3])</span>
+<span style="font-weight: bold;">runRWS</span> readWriteState 1 2
+<span style="color: #677691;">-- </span><span style="color: #677691;">(3 3 [3])</span>
 </code></pre>
 
 <p>
@@ -162,13 +139,13 @@ RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。�
 让我来通过简单的 ReaderT 来解释到底什么是 T 吧, 首先跟 Reader 一样我们有个 runReaderT
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">ReaderT</span> e m a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">ReaderT</span> { runReaderT <span style="color: #b8860b;">::</span> e <span style="color: #b8860b;">-&gt;</span> m a }
+<pre class="code"><code><span style="color: #81A1C1;">newtype</span> <span style="color: #81A1C1;">ReaderT</span> e m a <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">ReaderT</span> { runReaderT <span style="font-weight: bold;">::</span> e <span style="font-weight: bold;">-&gt;</span> m a }
 </code></pre>
 
 <p>
 比较一下 Reader 的定义
 </p>
-<pre class="code"><code><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Reader</span> e a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Reader</span> { runReader <span style="color: #b8860b;">::</span> (e <span style="color: #b8860b;">-&gt;</span> a) }
+<pre class="code"><code><span style="color: #81A1C1;">newtype</span> <span style="color: #81A1C1;">Reader</span> e a <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">Reader</span> { runReader <span style="font-weight: bold;">::</span> (e <span style="font-weight: bold;">-&gt;</span> a) }
 </code></pre>
 
 <p>
@@ -176,15 +153,15 @@ RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。�
 </p>
 
 
-<figure id="orgad48587">
+<figure id="orgca1b81a">
 <img src="images/p3-ReaderT.png" alt="p3-ReaderT.png">
 
 </figure>
 
-<pre class="code"><code><span style="color: #00008b;">instance</span> (<span style="color: #36648b;">Monad</span> m) <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> (<span style="color: #36648b;">ReaderT</span> e m) <span style="color: #00008b;">where</span>
-    return   <span style="color: #b8860b;">=</span> lift <span style="color: #b8860b;">.</span> return
-    r <span style="color: #b8860b;">&gt;&gt;=</span> k  <span style="color: #b8860b;">=</span> <span style="color: #36648b;">ReaderT</span> <span style="color: #b8860b;">$</span> <span style="color: #b8860b;">\</span> e <span style="color: #b8860b;">-&gt;</span> <span style="color: #00008b;">do</span>
-        a <span style="color: #b8860b;">&lt;-</span> runReaderT r e
+<pre class="code"><code><span style="color: #81A1C1;">instance</span> (<span style="color: #81A1C1;">Monad</span> m) <span style="font-weight: bold;">=&gt;</span> <span style="color: #81A1C1;">Monad</span> (<span style="color: #81A1C1;">ReaderT</span> e m) <span style="color: #81A1C1;">where</span>
+    return   <span style="font-weight: bold;">=</span> lift <span style="font-weight: bold;">.</span> return
+    r <span style="font-weight: bold;">&gt;&gt;=</span> k  <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">ReaderT</span> <span style="font-weight: bold;">$</span> <span style="font-weight: bold;">\</span> e <span style="font-weight: bold;">-&gt;</span> <span style="color: #81A1C1;">do</span>
+        a <span style="font-weight: bold;">&lt;-</span> runReaderT r e
         runReaderT (k a) e
 </code></pre>
 
@@ -197,12 +174,12 @@ RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。�
 问题是, 这里的 <code>return</code> 里面的 <code>lift</code> 是哪来的?
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">instance</span> <span style="color: #36648b;">MonadTrans</span> (<span style="color: #36648b;">ReaderT</span> e) <span style="color: #00008b;">where</span>
-  lift m <span style="color: #b8860b;">=</span> <span style="color: #36648b;">ReaderT</span> (const m)
+<pre class="code"><code><span style="color: #81A1C1;">instance</span> <span style="color: #81A1C1;">MonadTrans</span> (<span style="color: #81A1C1;">ReaderT</span> e) <span style="color: #81A1C1;">where</span>
+  lift m <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">ReaderT</span> (const m)
 </code></pre>
 
 
-<figure id="org10b6b8a">
+<figure id="orgf1c9e85">
 <img src="images/p3-MonadTrans-ReaderT-e-m.png" alt="p3-MonadTrans-ReaderT-e-m.png">
 
 </figure>
@@ -223,16 +200,16 @@ RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。�
 有了 ReaderT, 搭配 Id Monad 就很容易创建出来 Reader Monad
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #36648b;">Reader</span> r a<span style="color: #b8860b;">=</span> <span style="color: #36648b;">ReaderT</span> r <span style="color: #36648b;">Identity</span> a
+<pre class="code"><code><span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">Reader</span> r a<span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">ReaderT</span> r <span style="color: #81A1C1;">Identity</span> a
 </code></pre>
 
 <p>
 越过 Id read 到 Id 内部, 完了再用 Id 包回来, 不就是 Reader 了么
 </p>
 
-<pre class="code"><code><span style="color: #36648b;">ReaderT</span> { runReaderT <span style="color: #b8860b;">::</span> r <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Identity</span> a }
-<span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">Identity a is a</span>
-<span style="color: #36648b;">ReaderT</span> { runReaderT <span style="color: #b8860b;">::</span> r <span style="color: #b8860b;">-&gt;</span> a }
+<pre class="code"><code><span style="color: #81A1C1;">ReaderT</span> { runReaderT <span style="font-weight: bold;">::</span> r <span style="font-weight: bold;">-&gt;</span> <span style="color: #81A1C1;">Identity</span> a }
+<span style="color: #677691;">-- </span><span style="color: #677691;">Identity a is a</span>
+<span style="color: #81A1C1;">ReaderT</span> { runReaderT <span style="font-weight: bold;">::</span> r <span style="font-weight: bold;">-&gt;</span> a }
 </code></pre>
 </div>
 </div>
@@ -245,13 +222,13 @@ RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。�
 这个 typeclass 提供 <code>&lt;|&gt;</code> 函数, 表示要么计算左边, 要么计算右边
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">class</span> <span style="color: #36648b;">Applicative</span> f <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Alternative</span> f <span style="color: #00008b;">where</span>
-    empty <span style="color: #b8860b;">::</span> f a
-    (<span style="color: #b8860b;">&lt;|&gt;</span>) <span style="color: #b8860b;">::</span> f a <span style="color: #b8860b;">-&gt;</span> f a <span style="color: #b8860b;">-&gt;</span> f a
+<pre class="code"><code><span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">Applicative</span> f <span style="font-weight: bold;">=&gt;</span> <span style="color: #81A1C1;">Alternative</span> f <span style="color: #81A1C1;">where</span>
+    empty <span style="font-weight: bold;">::</span> f a
+    (<span style="font-weight: bold;">&lt;|&gt;</span>) <span style="font-weight: bold;">::</span> f a <span style="font-weight: bold;">-&gt;</span> f a <span style="font-weight: bold;">-&gt;</span> f a
 </code></pre>
 
 
-<figure id="orgc2688a4">
+<figure id="orgb629789">
 <img src="images/p3-Alternative.png" alt="p3-Alternative.png">
 
 </figure>
@@ -263,10 +240,10 @@ RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。�
 <p>
 比如:
 </p>
-<pre class="code"><code><span style="color: #36648b;">Just</span> 1 <span style="color: #b8860b;">&lt;|&gt;</span> <span style="color: #36648b;">Just</span> 2 <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">Just 1</span>
-<span style="color: #36648b;">Just</span> 1 <span style="color: #b8860b;">&lt;|&gt;</span> <span style="color: #36648b;">Nothing</span> <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">Just 1</span>
-<span style="color: #36648b;">Nothing</span> <span style="color: #6a5acd;">&lt;|&gt;</span> <span style="color: #36648b;">Just</span> 1 <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">Just 1</span>
-<span style="color: #36648b;">Nothing</span> <span style="color: #6a5acd;">&lt;|&gt;</span> <span style="color: #36648b;">Nothing</span> <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">Nothing</span>
+<pre class="code"><code><span style="color: #81A1C1;">Just</span> 1 <span style="font-weight: bold;">&lt;|&gt;</span> <span style="color: #81A1C1;">Just</span> 2 <span style="color: #677691;">-- </span><span style="color: #677691;">Just 1</span>
+<span style="color: #81A1C1;">Just</span> 1 <span style="font-weight: bold;">&lt;|&gt;</span> <span style="color: #81A1C1;">Nothing</span> <span style="color: #677691;">-- </span><span style="color: #677691;">Just 1</span>
+<span style="color: #81A1C1;">Nothing</span> <span style="font-weight: bold;">&lt;|&gt;</span> <span style="color: #81A1C1;">Just</span> 1 <span style="color: #677691;">-- </span><span style="color: #677691;">Just 1</span>
+<span style="color: #81A1C1;">Nothing</span> <span style="font-weight: bold;">&lt;|&gt;</span> <span style="color: #81A1C1;">Nothing</span> <span style="color: #677691;">-- </span><span style="color: #677691;">Nothing</span>
 </code></pre>
 </div>
 </div>
@@ -278,11 +255,11 @@ RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。�
 这跟 Alternative 是一毛一样的, 只是限制的更细, 必须是 Monad才行
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">class</span> (<span style="color: #36648b;">Alternative</span> m, <span style="color: #36648b;">Monad</span> m) <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">MonadPlus</span> m <span style="color: #00008b;">where</span>
-   mzero <span style="color: #b8860b;">::</span> m a
-   mzero <span style="color: #b8860b;">=</span> empty
-   mplus <span style="color: #b8860b;">::</span> m a <span style="color: #b8860b;">-&gt;</span> m a <span style="color: #b8860b;">-&gt;</span> m a
-   mplus <span style="color: #b8860b;">=</span> (<span style="color: #b8860b;">&lt;|&gt;</span>)
+<pre class="code"><code><span style="color: #81A1C1;">class</span> (<span style="color: #81A1C1;">Alternative</span> m, <span style="color: #81A1C1;">Monad</span> m) <span style="font-weight: bold;">=&gt;</span> <span style="color: #81A1C1;">MonadPlus</span> m <span style="color: #81A1C1;">where</span>
+   mzero <span style="font-weight: bold;">::</span> m a
+   mzero <span style="font-weight: bold;">=</span> empty
+   mplus <span style="font-weight: bold;">::</span> m a <span style="font-weight: bold;">-&gt;</span> m a <span style="font-weight: bold;">-&gt;</span> m a
+   mplus <span style="font-weight: bold;">=</span> (<span style="font-weight: bold;">&lt;|&gt;</span>)
 </code></pre>
 
 <p>
@@ -298,12 +275,12 @@ RWS 是缩写 Reader Writer State monad, 所以明显是三个monad的合体。�
 ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 immutable 的, 而是 "immutable" 的在原地做修改. 改完之后 runST 又然他回到了 immutable 的 Haskell 世界.
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">sumST</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Num</span> a <span style="color: #b8860b;">=&gt;</span> [a] <span style="color: #b8860b;">-&gt;</span> a
-<span style="color: #6a5acd;">sumST</span> xs <span style="color: #b8860b;">=</span> runST <span style="color: #b8860b;">$</span> <span style="color: #00008b;">do</span>           <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">do &#21518;&#38754;&#30340;&#20107;&#24773;&#20250;&#26159;&#19981;&#38169;&#30340;&#20869;&#23384;&#25805;&#20316;, runST &#21487;&#20197;&#25226;&#23427;&#25289;&#20250;&#32431;&#30340;&#19990;&#30028;</span>
-    n <span style="color: #b8860b;">&lt;-</span> newSTRef 0             <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">&#22312;&#20869;&#23384;&#20013;&#21019;&#24314;&#19968;&#22359;&#24182;&#25351;&#21040; STRef</span>
-    forM_ xs <span style="color: #b8860b;">$</span> <span style="color: #b8860b;">\</span>x <span style="color: #b8860b;">-&gt;</span> <span style="color: #00008b;">do</span>         <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">&#36825;&#36319;&#21629;&#20196;&#24335;&#30340;for&#24490;&#29615;&#25913;&#20889;&#21464;&#37327;&#26159;&#19968;&#27611;&#19968;&#26679;&#30340;</span>
-        modifySTRef n (<span style="color: #b8860b;">+</span>x)
-    readSTRef n                 <span style="color: #8c8c8c; font-style: italic;">-- </span><span style="color: #8c8c8c; font-style: italic;">&#36820;&#22238;&#25913;&#23436;&#20043;&#21518;&#30340; n &#30340;&#20540;</span>
+<pre class="code"><code><span style="font-weight: bold;">sumST</span> <span style="font-weight: bold;">::</span> <span style="color: #81A1C1;">Num</span> a <span style="font-weight: bold;">=&gt;</span> [a] <span style="font-weight: bold;">-&gt;</span> a
+<span style="font-weight: bold;">sumST</span> xs <span style="font-weight: bold;">=</span> runST <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">do</span>           <span style="color: #677691;">-- </span><span style="color: #677691;">do &#21518;&#38754;&#30340;&#20107;&#24773;&#20250;&#26159;&#19981;&#38169;&#30340;&#20869;&#23384;&#25805;&#20316;, runST &#21487;&#20197;&#25226;&#23427;&#25289;&#20250;&#32431;&#30340;&#19990;&#30028;</span>
+    n <span style="font-weight: bold;">&lt;-</span> newSTRef 0             <span style="color: #677691;">-- </span><span style="color: #677691;">&#22312;&#20869;&#23384;&#20013;&#21019;&#24314;&#19968;&#22359;&#24182;&#25351;&#21040; STRef</span>
+    forM_ xs <span style="font-weight: bold;">$</span> <span style="font-weight: bold;">\</span>x <span style="font-weight: bold;">-&gt;</span> <span style="color: #81A1C1;">do</span>         <span style="color: #677691;">-- </span><span style="color: #677691;">&#36825;&#36319;&#21629;&#20196;&#24335;&#30340;for&#24490;&#29615;&#25913;&#20889;&#21464;&#37327;&#26159;&#19968;&#27611;&#19968;&#26679;&#30340;</span>
+        modifySTRef n (<span style="font-weight: bold;">+</span>x)
+    readSTRef n                 <span style="color: #677691;">-- </span><span style="color: #677691;">&#36820;&#22238;&#25913;&#23436;&#20043;&#21518;&#30340; n &#30340;&#20540;</span>
 </code></pre>
 </div>
 </div>
@@ -328,12 +305,12 @@ ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 im
 先看 Free 什么定义:
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">data</span> <span style="color: #36648b;">Free</span> f a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Roll</span> (f (<span style="color: #36648b;">Free</span> f a)) <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Return</span> a
+<pre class="code"><code><span style="color: #81A1C1;">data</span> <span style="color: #81A1C1;">Free</span> f a <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">Roll</span> (f (<span style="color: #81A1C1;">Free</span> f a)) <span style="font-weight: bold;">|</span> <span style="color: #81A1C1;">Return</span> a
 </code></pre>
 
-<pre class="code"><code>seal <span style="color: #00008b;">trait</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>]
-<span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Roll</span>[<span style="color: #6b8e23;">S</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">S</span>[<span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">S</span>,<span style="color: #6b8e23;">A</span>]]) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">A</span>]
-<span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Return</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">A</span>]
+<pre class="code"><code>seal <span style="color: #81A1C1;">trait</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>], <span style="color: #81A1C1;">A</span>]
+<span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">Roll</span>[<span style="color: #81A1C1;">S</span>[<span style="color: #81A1C1;">_</span>], <span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">S</span>[<span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>,<span style="color: #81A1C1;">A</span>]]) <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, <span style="color: #81A1C1;">A</span>]
+<span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">Return</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>], <span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>) <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, <span style="color: #81A1C1;">A</span>]
 </code></pre>
 
 <p>
@@ -349,19 +326,19 @@ ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 im
 顺序的 effect 的, 所以:
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Functor</span> f <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">Monad</span> (<span style="color: #36648b;">Free</span> f) <span style="color: #00008b;">where</span>
-  return a        <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Return</span> a
-  <span style="color: #36648b;">Return</span> a <span style="color: #b8860b;">&gt;&gt;=</span> fn <span style="color: #b8860b;">=</span> fn a
-  <span style="color: #36648b;">Roll</span> ffa <span style="color: #b8860b;">&gt;&gt;=</span> fn <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Roll</span> <span style="color: #b8860b;">$</span> fmap (<span style="color: #b8860b;">&gt;&gt;=</span> fn) ffa
+<pre class="code"><code><span style="color: #81A1C1;">instance</span> <span style="color: #81A1C1;">Functor</span> f <span style="font-weight: bold;">=&gt;</span> <span style="color: #81A1C1;">Monad</span> (<span style="color: #81A1C1;">Free</span> f) <span style="color: #81A1C1;">where</span>
+  return a        <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">Return</span> a
+  <span style="color: #81A1C1;">Return</span> a <span style="font-weight: bold;">&gt;&gt;=</span> fn <span style="font-weight: bold;">=</span> fn a
+  <span style="color: #81A1C1;">Roll</span> ffa <span style="font-weight: bold;">&gt;&gt;=</span> fn <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">Roll</span> <span style="font-weight: bold;">$</span> fmap (<span style="font-weight: bold;">&gt;&gt;=</span> fn) ffa
 </code></pre>
 
-<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">monadForFree</span>[<span style="color: #6b8e23;">S</span>[<span style="color: #00008b;">_</span>]](<span style="color: #228b22;">implicit</span> <span style="color: #6b8e23;">F</span><span style="color: #00008b;">:</span><span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">S</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">S</span>, ?]] <span style="color: #00008b;">=</span>
-  <span style="color: #00008b;">new</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">S</span>, ?]] {
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">pure</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Return</span>(a)
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">A</span>])(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> fa.flatMap(a<span style="color: #00008b;">=&gt;</span><span style="color: #6b8e23;">Return</span>(f(a)))
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">flatMap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">A</span>])(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">B</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> a <span style="color: #00008b;">match</span> {
-      <span style="color: #00008b;">case</span> <span style="color: #36648b;">Return</span>(<span style="color: #b8860b;">a</span>) <span style="color: #00008b;">=&gt;</span> f(a)
-      <span style="color: #00008b;">case</span> <span style="color: #36648b;">Roll</span>(<span style="color: #b8860b;">a</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Roll</span>(<span style="color: #6b8e23;">F</span>.map(a)(<span style="color: #00008b;">_</span>.flatMap(f)))
+<pre class="code"><code><span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">monadForFree</span>[<span style="color: #81A1C1;">S</span>[<span style="color: #81A1C1;">_</span>]](<span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">F</span><span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">S</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Monad</span>[<span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, ?]] <span style="color: #81A1C1;">=</span>
+  <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Monad</span>[<span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, ?]] {
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">pure</span>[<span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, <span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Return</span>(a)
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">map</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](fa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, <span style="color: #81A1C1;">A</span>])(f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, <span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span> fa.flatMap(a<span style="color: #81A1C1;">=&gt;</span><span style="color: #81A1C1;">Return</span>(f(a)))
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">flatMap</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, <span style="color: #81A1C1;">A</span>])(f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, <span style="color: #81A1C1;">B</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, <span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span> a <span style="color: #81A1C1;">match</span> {
+      <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Return</span>(<span style="font-weight: bold;">a</span>) <span style="color: #81A1C1;">=&gt;</span> f(a)
+      <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Roll</span>(<span style="font-weight: bold;">a</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Roll</span>(<span style="color: #81A1C1;">F</span>.map(a)(<span style="color: #81A1C1;">_</span>.flatMap(f)))
     }
   }
 </code></pre>
@@ -373,143 +350,143 @@ ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 im
 比如, 如果你有一个 program 有三种副作用 Eff1, Eff2, Eff3
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">data</span> <span style="color: #36648b;">Eff</span> a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Eff1</span> a <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Eff2</span> a <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Eff3</span> a
-<span style="color: #6a5acd;">program</span> <span style="color: #b8860b;">=</span> <span style="color: #00008b;">do</span>
- a <span style="color: #b8860b;">&lt;-</span> liftF <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff1</span> 1
- b <span style="color: #b8860b;">&lt;-</span> liftF <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff2</span> 2
- c <span style="color: #b8860b;">&lt;-</span> liftF <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff3</span> 3
- return a <span style="color: #b8860b;">+</span> b <span style="color: #b8860b;">+</span> c
+<pre class="code"><code><span style="color: #81A1C1;">data</span> <span style="color: #81A1C1;">Eff</span> a <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">Eff1</span> a <span style="font-weight: bold;">|</span> <span style="color: #81A1C1;">Eff2</span> a <span style="font-weight: bold;">|</span> <span style="color: #81A1C1;">Eff3</span> a
+<span style="font-weight: bold;">program</span> <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">do</span>
+ a <span style="font-weight: bold;">&lt;-</span> liftF <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff1</span> 1
+ b <span style="font-weight: bold;">&lt;-</span> liftF <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff2</span> 2
+ c <span style="font-weight: bold;">&lt;-</span> liftF <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff3</span> 3
+ return a <span style="font-weight: bold;">+</span> b <span style="font-weight: bold;">+</span> c
 </code></pre>
-<pre class="code"><code><span style="color: #228b22;">sealed</span> <span style="color: #00008b;">trait</span> <span style="color: #36648b;">Eff</span>[<span style="color: #6b8e23;">A</span>] {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">eff1</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Eff</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Free</span>.liftF[<span style="color: #6b8e23;">Eff</span>, <span style="color: #6b8e23;">A</span>](<span style="color: #6b8e23;">Eff1</span>(a))
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">eff2</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Eff</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Free</span>.liftF[<span style="color: #6b8e23;">Eff</span>, <span style="color: #6b8e23;">A</span>](<span style="color: #6b8e23;">Eff2</span>(a))
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">eff3</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Eff</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Free</span>.liftF[<span style="color: #6b8e23;">Eff</span>, <span style="color: #6b8e23;">A</span>](<span style="color: #6b8e23;">Eff3</span>(a))
+<pre class="code"><code><span style="color: #81A1C1;">sealed</span> <span style="color: #81A1C1;">trait</span> <span style="color: #81A1C1;">Eff</span>[<span style="color: #81A1C1;">A</span>] {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">eff1</span>[<span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Eff</span>[<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Free</span>.liftF[<span style="color: #81A1C1;">Eff</span>, <span style="color: #81A1C1;">A</span>](<span style="color: #81A1C1;">Eff1</span>(a))
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">eff2</span>[<span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Eff</span>[<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Free</span>.liftF[<span style="color: #81A1C1;">Eff</span>, <span style="color: #81A1C1;">A</span>](<span style="color: #81A1C1;">Eff2</span>(a))
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">eff3</span>[<span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Eff</span>[<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Free</span>.liftF[<span style="color: #81A1C1;">Eff</span>, <span style="color: #81A1C1;">A</span>](<span style="color: #81A1C1;">Eff3</span>(a))
 }
-<span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Eff1</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Eff</span>[<span style="color: #6b8e23;">A</span>]
-<span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Eff2</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Eff</span>[<span style="color: #6b8e23;">A</span>]
-<span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Eff3</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Eff</span>[<span style="color: #6b8e23;">A</span>]
+<span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">Eff1</span>[<span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>) <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">Eff</span>[<span style="color: #81A1C1;">A</span>]
+<span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">Eff2</span>[<span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>) <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">Eff</span>[<span style="color: #81A1C1;">A</span>]
+<span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">Eff3</span>[<span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>) <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">Eff</span>[<span style="color: #81A1C1;">A</span>]
 
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
-  a <span style="color: #00008b;">&lt;-</span> eff1(<span style="color: #6b8e23;">1</span>)
-  b <span style="color: #00008b;">&lt;-</span> eff2(<span style="color: #6b8e23;">2</span>)
-  c <span style="color: #00008b;">&lt;-</span> eff3(<span style="color: #6b8e23;">3</span>)
-} <span style="color: #00008b;">yield</span> a + b + c
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">program</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">for</span> {
+  a <span style="color: #81A1C1;">&lt;-</span> eff1(<span style="color: #81A1C1;">1</span>)
+  b <span style="color: #81A1C1;">&lt;-</span> eff2(<span style="color: #81A1C1;">2</span>)
+  c <span style="color: #81A1C1;">&lt;-</span> eff3(<span style="color: #81A1C1;">3</span>)
+} <span style="color: #81A1C1;">yield</span> a + b + c
 </code></pre>
 
 <p>
 如果我们把 program 展开, 每一步 <code>&gt;&gt;=</code> 大概是这样:
 </p>
 
-<pre class="code"><code>liftF <span style="color: #6a5acd;">$</span> <span style="color: #36648b;">Eff1</span> 1
+<pre class="code"><code>liftF <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff1</span> 1
 </code></pre>
 
 <p>
 展开既是:
 </p>
 
-<pre class="code"><code><span style="color: #36648b;">Roll</span> (<span style="color: #36648b;">Eff1</span> (<span style="color: #36648b;">Return</span> 1))
+<pre class="code"><code><span style="color: #81A1C1;">Roll</span> (<span style="color: #81A1C1;">Eff1</span> (<span style="color: #81A1C1;">Return</span> 1))
 </code></pre>
 
 <p>
 代入到 program 即:
 </p>
-<pre class="code"><code><span style="color: #6a5acd;">program</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Roll</span> (<span style="color: #36648b;">Eff1</span> (<span style="color: #36648b;">Return</span> 1)) <span style="color: #b8860b;">&gt;&gt;=</span> <span style="color: #b8860b;">\</span>a <span style="color: #b8860b;">-&gt;</span> <span style="color: #00008b;">do</span>
-   b <span style="color: #b8860b;">&lt;-</span> liftF <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff2</span> 2
-   c <span style="color: #b8860b;">&lt;-</span> liftF <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff3</span> 3
-   return a <span style="color: #b8860b;">+</span> b <span style="color: #b8860b;">+</span> c
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">Roll</span> (<span style="color: #81A1C1;">Eff1</span> (<span style="color: #81A1C1;">Return</span> 1)) <span style="font-weight: bold;">&gt;&gt;=</span> <span style="font-weight: bold;">\</span>a <span style="font-weight: bold;">-&gt;</span> <span style="color: #81A1C1;">do</span>
+   b <span style="font-weight: bold;">&lt;-</span> liftF <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff2</span> 2
+   c <span style="font-weight: bold;">&lt;-</span> liftF <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff3</span> 3
+   return a <span style="font-weight: bold;">+</span> b <span style="font-weight: bold;">+</span> c
 </code></pre>
 
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Roll</span>(<span style="color: #6b8e23;">Eff1</span>(<span style="color: #6b8e23;">Return</span>(<span style="color: #6b8e23;">1</span>))).flatMap(a<span style="color: #00008b;">=&gt;</span>
-  <span style="color: #00008b;">for</span> {
-    b <span style="color: #00008b;">&lt;-</span> eff2(<span style="color: #6b8e23;">2</span>)
-    c <span style="color: #00008b;">&lt;-</span> eff3(<span style="color: #6b8e23;">3</span>)
-  } <span style="color: #00008b;">yield</span> a + b + c
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">program</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Roll</span>(<span style="color: #81A1C1;">Eff1</span>(<span style="color: #81A1C1;">Return</span>(<span style="color: #81A1C1;">1</span>))).flatMap(a<span style="color: #81A1C1;">=&gt;</span>
+  <span style="color: #81A1C1;">for</span> {
+    b <span style="color: #81A1C1;">&lt;-</span> eff2(<span style="color: #81A1C1;">2</span>)
+    c <span style="color: #81A1C1;">&lt;-</span> eff3(<span style="color: #81A1C1;">3</span>)
+  } <span style="color: #81A1C1;">yield</span> a + b + c
 )
 </code></pre>
 <p>
 用 Free 的 <code>&gt;&gt;=</code> 公式 <code>Roll ffa &gt;&gt;= fn = Roll $ fmap (&gt;&gt;= fn) ffa</code> 去展开上面就得到:
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">program</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Roll</span> <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff1</span> (<span style="color: #36648b;">Return</span> 1 <span style="color: #b8860b;">&gt;&gt;=</span> fn1)) <span style="color: #00008b;">where</span>
-  fn1 <span style="color: #b8860b;">=</span> <span style="color: #b8860b;">\</span>a <span style="color: #b8860b;">-&gt;</span> <span style="color: #00008b;">do</span>
-   b <span style="color: #b8860b;">&lt;-</span> liftF <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff2</span> 2
-   c <span style="color: #b8860b;">&lt;-</span> liftF <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff3</span> 3
-   return a <span style="color: #b8860b;">+</span> b <span style="color: #b8860b;">+</span> c
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">Roll</span> <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff1</span> (<span style="color: #81A1C1;">Return</span> 1 <span style="font-weight: bold;">&gt;&gt;=</span> fn1)) <span style="color: #81A1C1;">where</span>
+  fn1 <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">\</span>a <span style="font-weight: bold;">-&gt;</span> <span style="color: #81A1C1;">do</span>
+   b <span style="font-weight: bold;">&lt;-</span> liftF <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff2</span> 2
+   c <span style="font-weight: bold;">&lt;-</span> liftF <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff3</span> 3
+   return a <span style="font-weight: bold;">+</span> b <span style="font-weight: bold;">+</span> c
 </code></pre>
 
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">fn1</span> <span style="color: #00008b;">=</span> (a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span>
-    <span style="color: #00008b;">for</span> {
-      b <span style="color: #00008b;">&lt;-</span> eff2(<span style="color: #6b8e23;">2</span>)
-      c <span style="color: #00008b;">&lt;-</span> eff3(<span style="color: #6b8e23;">3</span>)
-    } <span style="color: #00008b;">yield</span> a + b + c
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">fn1</span> <span style="color: #81A1C1;">=</span> (a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Int</span>) <span style="color: #81A1C1;">=&gt;</span>
+    <span style="color: #81A1C1;">for</span> {
+      b <span style="color: #81A1C1;">&lt;-</span> eff2(<span style="color: #81A1C1;">2</span>)
+      c <span style="color: #81A1C1;">&lt;-</span> eff3(<span style="color: #81A1C1;">3</span>)
+    } <span style="color: #81A1C1;">yield</span> a + b + c
 
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Roll</span>(<span style="color: #6b8e23;">Eff1</span>(<span style="color: #6b8e23;">Return</span>(<span style="color: #6b8e23;">1</span>).flatMap(fn1)))
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">program</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Roll</span>(<span style="color: #81A1C1;">Eff1</span>(<span style="color: #81A1C1;">Return</span>(<span style="color: #81A1C1;">1</span>).flatMap(fn1)))
 </code></pre>
 <p>
 <code>Return 1 &gt;&gt;= fn1</code> 我们都知道怎么展开:
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">program</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Roll</span> <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff1</span> (fn1 1) <span style="color: #00008b;">where</span>
-  fn1 <span style="color: #b8860b;">=</span> <span style="color: #b8860b;">\</span>a <span style="color: #b8860b;">-&gt;</span> <span style="color: #00008b;">do</span>
-   b <span style="color: #b8860b;">&lt;-</span> liftF <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff2</span> 2
-   c <span style="color: #b8860b;">&lt;-</span> liftF <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff3</span> 3
-   return a <span style="color: #b8860b;">+</span> b <span style="color: #b8860b;">+</span> c
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">Roll</span> <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff1</span> (fn1 1) <span style="color: #81A1C1;">where</span>
+  fn1 <span style="font-weight: bold;">=</span> <span style="font-weight: bold;">\</span>a <span style="font-weight: bold;">-&gt;</span> <span style="color: #81A1C1;">do</span>
+   b <span style="font-weight: bold;">&lt;-</span> liftF <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff2</span> 2
+   c <span style="font-weight: bold;">&lt;-</span> liftF <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff3</span> 3
+   return a <span style="font-weight: bold;">+</span> b <span style="font-weight: bold;">+</span> c
 </code></pre>
 
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">fn1</span> <span style="color: #00008b;">=</span> (a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span>
-    <span style="color: #00008b;">for</span> {
-      b <span style="color: #00008b;">&lt;-</span> eff2(<span style="color: #6b8e23;">2</span>)
-      c <span style="color: #00008b;">&lt;-</span> eff3(<span style="color: #6b8e23;">3</span>)
-    } <span style="color: #00008b;">yield</span> a + b + c
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">fn1</span> <span style="color: #81A1C1;">=</span> (a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Int</span>) <span style="color: #81A1C1;">=&gt;</span>
+    <span style="color: #81A1C1;">for</span> {
+      b <span style="color: #81A1C1;">&lt;-</span> eff2(<span style="color: #81A1C1;">2</span>)
+      c <span style="color: #81A1C1;">&lt;-</span> eff3(<span style="color: #81A1C1;">3</span>)
+    } <span style="color: #81A1C1;">yield</span> a + b + c
 
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Roll</span>(<span style="color: #6b8e23;">Eff1</span>(fn1(<span style="color: #6b8e23;">1</span>)))
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">program</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Roll</span>(<span style="color: #81A1C1;">Eff1</span>(fn1(<span style="color: #81A1C1;">1</span>)))
 </code></pre>
 
 <p>
 展开 <code>fn1</code>
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">program</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Roll</span> <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff1</span> <span style="color: #00008b;">do</span>
-   b <span style="color: #b8860b;">&lt;-</span> liftF <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff2</span> 2
-   c <span style="color: #b8860b;">&lt;-</span> liftF <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff3</span> 3
-   return 1 <span style="color: #b8860b;">+</span> b <span style="color: #b8860b;">+</span> c
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">Roll</span> <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff1</span> <span style="color: #81A1C1;">do</span>
+   b <span style="font-weight: bold;">&lt;-</span> liftF <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff2</span> 2
+   c <span style="font-weight: bold;">&lt;-</span> liftF <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff3</span> 3
+   return 1 <span style="font-weight: bold;">+</span> b <span style="font-weight: bold;">+</span> c
 </code></pre>
 
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Roll</span>(<span style="color: #6b8e23;">Eff1</span>(<span style="color: #00008b;">for</span> {
-      b <span style="color: #00008b;">&lt;-</span> eff2(<span style="color: #6b8e23;">2</span>)
-      c <span style="color: #00008b;">&lt;-</span> eff3(<span style="color: #6b8e23;">3</span>)
-    } <span style="color: #00008b;">yield</span> <span style="color: #6b8e23;">1</span> + b + c))
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">program</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Roll</span>(<span style="color: #81A1C1;">Eff1</span>(<span style="color: #81A1C1;">for</span> {
+      b <span style="color: #81A1C1;">&lt;-</span> eff2(<span style="color: #81A1C1;">2</span>)
+      c <span style="color: #81A1C1;">&lt;-</span> eff3(<span style="color: #81A1C1;">3</span>)
+    } <span style="color: #81A1C1;">yield</span> <span style="color: #81A1C1;">1</span> + b + c))
 </code></pre>
 
 <p>
 同样的步骤展开 Eff2
 </p>
-<pre class="code"><code><span style="color: #6a5acd;">program</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Roll</span> <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff1</span> <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Roll</span> <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff2</span> <span style="color: #00008b;">do</span>
-   c <span style="color: #b8860b;">&lt;-</span> liftF <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff3</span> 3
-   return 1 <span style="color: #b8860b;">+</span> 2 <span style="color: #b8860b;">+</span> c
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">Roll</span> <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff1</span> <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Roll</span> <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff2</span> <span style="color: #81A1C1;">do</span>
+   c <span style="font-weight: bold;">&lt;-</span> liftF <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff3</span> 3
+   return 1 <span style="font-weight: bold;">+</span> 2 <span style="font-weight: bold;">+</span> c
 </code></pre>
 
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Roll</span>(<span style="color: #6b8e23;">Eff1</span>(<span style="color: #6b8e23;">Roll</span>(<span style="color: #6b8e23;">Eff2</span>(<span style="color: #00008b;">for</span> {
-      c <span style="color: #00008b;">&lt;-</span> eff3(<span style="color: #6b8e23;">3</span>)
-    } <span style="color: #00008b;">yield</span> <span style="color: #6b8e23;">1</span> + <span style="color: #6b8e23;">2</span> + c))))
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">program</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Roll</span>(<span style="color: #81A1C1;">Eff1</span>(<span style="color: #81A1C1;">Roll</span>(<span style="color: #81A1C1;">Eff2</span>(<span style="color: #81A1C1;">for</span> {
+      c <span style="color: #81A1C1;">&lt;-</span> eff3(<span style="color: #81A1C1;">3</span>)
+    } <span style="color: #81A1C1;">yield</span> <span style="color: #81A1C1;">1</span> + <span style="color: #81A1C1;">2</span> + c))))
 </code></pre>
 
 <p>
 和 Eff3
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">program</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Roll</span> <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff1</span> <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Roll</span> <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff2</span> <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Roll</span> <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff3</span> <span style="color: #00008b;">do</span>
-   return 1 <span style="color: #b8860b;">+</span> 2 <span style="color: #b8860b;">+</span> 3
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">Roll</span> <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff1</span> <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Roll</span> <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff2</span> <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Roll</span> <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff3</span> <span style="color: #81A1C1;">do</span>
+   return 1 <span style="font-weight: bold;">+</span> 2 <span style="font-weight: bold;">+</span> 3
 </code></pre>
 
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Roll</span>(<span style="color: #6b8e23;">Eff1</span>(<span style="color: #6b8e23;">Roll</span>(<span style="color: #6b8e23;">Eff2</span>(<span style="color: #6b8e23;">Roll</span>(<span style="color: #6b8e23;">Eff3</span>(<span style="color: #6b8e23;">Return</span>(<span style="color: #6b8e23;">1</span> + <span style="color: #6b8e23;">2</span> + <span style="color: #6b8e23;">3</span>)))))))
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">program</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Roll</span>(<span style="color: #81A1C1;">Eff1</span>(<span style="color: #81A1C1;">Roll</span>(<span style="color: #81A1C1;">Eff2</span>(<span style="color: #81A1C1;">Roll</span>(<span style="color: #81A1C1;">Eff3</span>(<span style="color: #81A1C1;">Return</span>(<span style="color: #81A1C1;">1</span> + <span style="color: #81A1C1;">2</span> + <span style="color: #81A1C1;">3</span>)))))))
 </code></pre>
 
 <p>
 最后的 program 是不是很像 List 的 Cons 和 Nil 呢?
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">program</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Roll</span> <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff1</span> <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Roll</span> <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff2</span> <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Roll</span> <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Eff3</span> <span style="color: #b8860b;">$</span> <span style="color: #36648b;">Return</span> 1 <span style="color: #b8860b;">+</span> 2 <span style="color: #b8860b;">+</span> 3
+<pre class="code"><code><span style="font-weight: bold;">program</span> <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">Roll</span> <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff1</span> <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Roll</span> <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff2</span> <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Roll</span> <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Eff3</span> <span style="font-weight: bold;">$</span> <span style="color: #81A1C1;">Return</span> 1 <span style="font-weight: bold;">+</span> 2 <span style="font-weight: bold;">+</span> 3
 </code></pre>
 
 
@@ -526,26 +503,26 @@ ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 im
 希望你还依然记得第一部分的米田 <del>共</del> 引理
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">data</span> <span style="color: #36648b;">CoYoneda</span> f a <span style="color: #b8860b;">=</span> forall b<span style="color: #b8860b;">.</span> <span style="color: #36648b;">CoYoneda</span> (b <span style="color: #b8860b;">-&gt;</span> a) (f b)
+<pre class="code"><code><span style="color: #81A1C1;">data</span> <span style="color: #81A1C1;">CoYoneda</span> f a <span style="font-weight: bold;">=</span> forall b<span style="font-weight: bold;">.</span> <span style="color: #81A1C1;">CoYoneda</span> (b <span style="font-weight: bold;">-&gt;</span> a) (f b)
 </code></pre>
 
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>] {
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">P</span>
-  <span style="color: #00008b;">val</span> <span style="color: #b8860b;">fi</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">P</span>]
-  <span style="color: #00008b;">val</span> <span style="color: #b8860b;">ks</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">P</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">A</span>
+<pre class="code"><code><span style="color: #81A1C1;">trait</span> <span style="color: #81A1C1;">CoYoneda</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>], <span style="color: #81A1C1;">A</span>] {
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">P</span>
+  <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">fi</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">P</span>]
+  <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">ks</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">P</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">A</span>
 }
-<span style="color: #00008b;">object</span> <span style="color: #6b8e23;">CoYoneda</span>{
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Aux</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">A</span>] { <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">P</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">B</span> }
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">A</span>)(fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Aux</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">A</span>] {
-    <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">P</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">B</span>
-    <span style="color: #00008b;">val</span> <span style="color: #b8860b;">fi</span> <span style="color: #00008b;">=</span> fa
-    <span style="color: #00008b;">val</span> <span style="color: #b8860b;">ks</span> <span style="color: #00008b;">=</span> f
+<span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">CoYoneda</span>{
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">Aux</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>], <span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">CoYoneda</span>[<span style="color: #81A1C1;">F</span>, <span style="color: #81A1C1;">A</span>] { <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">P</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">B</span> }
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">apply</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>], <span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">B</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">A</span>)(fa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">B</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Aux</span>[<span style="color: #81A1C1;">F</span>, <span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">CoYoneda</span>[<span style="color: #81A1C1;">F</span>, <span style="color: #81A1C1;">A</span>] {
+    <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">P</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">B</span>
+    <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">fi</span> <span style="color: #81A1C1;">=</span> fa
+    <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">ks</span> <span style="color: #81A1C1;">=</span> f
   }
 }
 </code></pre>
 
 
-<figure id="org28d22c5">
+<figure id="org8ea35fc">
 <img src="images/p3-CoYoneda.png" alt="p3-CoYoneda.png">
 
 </figure>
@@ -554,15 +531,15 @@ ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 im
 事实上很简单可以把任何 <code>f</code> 变成 <code>CoYoneda f</code>
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">phi</span> <span style="color: #b8860b;">::</span> f a <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">CoYoneda</span> f a
-<span style="color: #6a5acd;">phi</span> fa <span style="color: #b8860b;">=</span> <span style="color: #36648b;">CoYoneda</span> id fa
+<pre class="code"><code><span style="font-weight: bold;">phi</span> <span style="font-weight: bold;">::</span> f a <span style="font-weight: bold;">-&gt;</span> <span style="color: #81A1C1;">CoYoneda</span> f a
+<span style="font-weight: bold;">phi</span> fa <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">CoYoneda</span> id fa
 </code></pre>
 
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">phi</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>](fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Aux</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> apply(identity)(fa)
+<pre class="code"><code><span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">phi</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>], <span style="color: #81A1C1;">A</span>](fa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Aux</span>[<span style="color: #81A1C1;">F</span>, <span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=</span> apply(identity)(fa)
 </code></pre>
 
 
-<figure id="org6b9ff06">
+<figure id="org9b7a0df">
 <img src="images/p3-CoYoneda-phi.png" alt="p3-CoYoneda-phi.png">
 
 </figure>
@@ -575,15 +552,15 @@ ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 im
 当 <code>f</code> 是 <code>Functor</code> 时, 又可以把 <code>CoYoneda</code> 变成 <code>f</code>
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">psi</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Functor</span> f <span style="color: #b8860b;">=&gt;</span> <span style="color: #36648b;">CoYoneda</span> f a <span style="color: #b8860b;">-&gt;</span> f a
-<span style="color: #6a5acd;">psi</span> (<span style="color: #36648b;">CoYoneda</span> g fa) <span style="color: #b8860b;">=</span> fmap g fa
+<pre class="code"><code><span style="font-weight: bold;">psi</span> <span style="font-weight: bold;">::</span> <span style="color: #81A1C1;">Functor</span> f <span style="font-weight: bold;">=&gt;</span> <span style="color: #81A1C1;">CoYoneda</span> f a <span style="font-weight: bold;">-&gt;</span> f a
+<span style="font-weight: bold;">psi</span> (<span style="color: #81A1C1;">CoYoneda</span> g fa) <span style="font-weight: bold;">=</span> fmap g fa
 </code></pre>
 
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">psi</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]<span style="color: #00008b;">:</span><span style="color: #36648b;">Functor</span>, <span style="color: #6b8e23;">A</span>](fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">F</span>].map(fa.fi)(fa.ki)
+<pre class="code"><code><span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">psi</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]<span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">Functor</span>, <span style="color: #81A1C1;">A</span>](fa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">CoYoneda</span>[<span style="color: #81A1C1;">F</span>, <span style="color: #81A1C1;">A</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">F</span>].map(fa.fi)(fa.ki)
 </code></pre>
 
 
-<figure id="org65d417a">
+<figure id="orgd34f73c">
 <img src="images/p3-CoYoneda-psi.png" alt="p3-CoYoneda-psi.png">
 
 </figure>
@@ -593,16 +570,16 @@ ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 im
 我们不就免费得到一个 <code>Functor</code>?
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">instance</span> <span style="color: #36648b;">Functor</span> (<span style="color: #36648b;">Coyoneda</span> f) <span style="color: #00008b;">where</span>
-  fmap f (<span style="color: #36648b;">Coyoneda</span> g fb) <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Coyoneda</span> (f <span style="color: #b8860b;">.</span> g) fb
+<pre class="code"><code><span style="color: #81A1C1;">instance</span> <span style="color: #81A1C1;">Functor</span> (<span style="color: #81A1C1;">Coyoneda</span> f) <span style="color: #81A1C1;">where</span>
+  fmap f (<span style="color: #81A1C1;">Coyoneda</span> g fb) <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">Coyoneda</span> (f <span style="font-weight: bold;">.</span> g) fb
 </code></pre>
 
-<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">freeFunctorForCoyoneda</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span>
-  <span style="color: #00008b;">new</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #00008b;">_</span>]] {
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>](cfa<span style="color: #00008b;">:</span> <span style="color: #36648b;">Aux</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">C</span>])(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Aux</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">B</span>] {
-      <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">P</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">C</span>
-      <span style="color: #00008b;">val</span> <span style="color: #b8860b;">fi</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">C</span>] <span style="color: #00008b;">=</span> cfa.fi
-      <span style="color: #00008b;">val</span> <span style="color: #b8860b;">ki</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">C</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span> <span style="color: #00008b;">=</span> f compose cfa.ki
+<pre class="code"><code><span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">freeFunctorForCoyoneda</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]]<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">CoYoneda</span>[<span style="color: #81A1C1;">F</span>, <span style="color: #81A1C1;">_</span>]] <span style="color: #81A1C1;">=</span>
+  <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">CoYoneda</span>[<span style="color: #81A1C1;">F</span>, <span style="color: #81A1C1;">_</span>]] {
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">map</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>, <span style="color: #81A1C1;">C</span>](cfa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Aux</span>[<span style="color: #81A1C1;">F</span>, <span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">C</span>])(f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Aux</span>[<span style="color: #81A1C1;">F</span>, <span style="color: #81A1C1;">B</span>, <span style="color: #81A1C1;">C</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">CoYoneda</span>[<span style="color: #81A1C1;">F</span>, <span style="color: #81A1C1;">B</span>] {
+      <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">P</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">C</span>
+      <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">fi</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">C</span>] <span style="color: #81A1C1;">=</span> cfa.fi
+      <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">ki</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">C</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span> <span style="color: #81A1C1;">=</span> f compose cfa.ki
     }
   }
 </code></pre>
@@ -615,15 +592,15 @@ ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 im
 比如我们的 <code>Eff</code> 就可以直接通过 <code>phi</code> 变成 <code>CoYoneda Eff</code>, 从而得到免费的 Functor
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">data</span> <span style="color: #36648b;">Eff</span> a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Eff1</span> a <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Eff2</span> a <span style="color: #b8860b;">|</span> <span style="color: #36648b;">Eff3</span> a
-<span style="color: #6a5acd;">program</span> <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Roll</span> (phi (<span style="color: #36648b;">Eff1</span> (<span style="color: #36648b;">Roll</span> (phi (<span style="color: #36648b;">Eff2</span> (<span style="color: #36648b;">Return</span> <span style="color: #36648b;">Int</span>))))))
+<pre class="code"><code><span style="color: #81A1C1;">data</span> <span style="color: #81A1C1;">Eff</span> a <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">Eff1</span> a <span style="font-weight: bold;">|</span> <span style="color: #81A1C1;">Eff2</span> a <span style="font-weight: bold;">|</span> <span style="color: #81A1C1;">Eff3</span> a
+<span style="font-weight: bold;">program</span> <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">Roll</span> (phi (<span style="color: #81A1C1;">Eff1</span> (<span style="color: #81A1C1;">Roll</span> (phi (<span style="color: #81A1C1;">Eff2</span> (<span style="color: #81A1C1;">Return</span> <span style="color: #81A1C1;">Int</span>))))))
 </code></pre>
 
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Roll</span>(phi(<span style="color: #6b8e23;">Eff1</span>(<span style="color: #6b8e23;">Roll</span>((phi(<span style="color: #6b8e23;">Eff2</span>(<span style="color: #6b8e23;">Roll</span>(phi(<span style="color: #6b8e23;">Eff3</span>(<span style="color: #6b8e23;">Return</span>(<span style="color: #6b8e23;">1</span> + <span style="color: #6b8e23;">2</span> + <span style="color: #6b8e23;">3</span>)))))))))))
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">program</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Roll</span>(phi(<span style="color: #81A1C1;">Eff1</span>(<span style="color: #81A1C1;">Roll</span>((phi(<span style="color: #81A1C1;">Eff2</span>(<span style="color: #81A1C1;">Roll</span>(phi(<span style="color: #81A1C1;">Eff3</span>(<span style="color: #81A1C1;">Return</span>(<span style="color: #81A1C1;">1</span> + <span style="color: #81A1C1;">2</span> + <span style="color: #81A1C1;">3</span>)))))))))))
 </code></pre>
 
 
-<figure id="orgd9b9a5e">
+<figure id="org7186d45">
 <img src="images/p3-Free.png" alt="p3-Free.png">
 
 </figure>
@@ -638,14 +615,14 @@ ST Monad 跟 State Monad 的功能有些像, 不过更厉害的是, 他不是 im
 Interpreter 去一层层拨开 这个 free program.
 </p>
 
-<pre class="code"><code><span style="color: #6a5acd;">foldMap</span> <span style="color: #b8860b;">::</span> <span style="color: #36648b;">Monad</span> m <span style="color: #b8860b;">=&gt;</span> (<span style="color: #00008b;">forall</span> x <span style="color: #b8860b;">.</span> f x <span style="color: #b8860b;">-&gt;</span> m x) <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Free</span> f a <span style="color: #b8860b;">-&gt;</span> m a
-<span style="color: #6a5acd;">foldMap</span> <span style="color: #00008b;">_</span> (<span style="color: #36648b;">Return</span> a)  <span style="color: #b8860b;">=</span> return a
-<span style="color: #6a5acd;">foldMap</span> f (<span style="color: #36648b;">Roll</span> a) <span style="color: #b8860b;">=</span> f a <span style="color: #b8860b;">&gt;&gt;=</span> foldMap f
+<pre class="code"><code><span style="font-weight: bold;">foldMap</span> <span style="font-weight: bold;">::</span> <span style="color: #81A1C1;">Monad</span> m <span style="font-weight: bold;">=&gt;</span> (<span style="color: #81A1C1;">forall</span> x <span style="font-weight: bold;">.</span> f x <span style="font-weight: bold;">-&gt;</span> m x) <span style="font-weight: bold;">-&gt;</span> <span style="color: #81A1C1;">Free</span> f a <span style="font-weight: bold;">-&gt;</span> m a
+<span style="font-weight: bold;">foldMap</span> <span style="color: #81A1C1;">_</span> (<span style="color: #81A1C1;">Return</span> a)  <span style="font-weight: bold;">=</span> return a
+<span style="font-weight: bold;">foldMap</span> f (<span style="color: #81A1C1;">Roll</span> a) <span style="font-weight: bold;">=</span> f a <span style="font-weight: bold;">&gt;&gt;=</span> foldMap f
 </code></pre>
 
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">foldMap</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">M</span>[<span style="color: #00008b;">_</span>]<span style="color: #00008b;">:</span> <span style="color: #36648b;">Monad</span>, <span style="color: #6b8e23;">A</span>](free<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">A</span>])(fk<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span> ~&gt; <span style="color: #6b8e23;">M</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">M</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> free <span style="color: #00008b;">match</span> {
-  <span style="color: #00008b;">case</span> <span style="color: #36648b;">Return</span>(<span style="color: #b8860b;">a</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Monad</span>[<span style="color: #6b8e23;">M</span>].pure(a)
-  <span style="color: #00008b;">case</span> <span style="color: #36648b;">Roll</span>(<span style="color: #b8860b;">a</span>) <span style="color: #00008b;">=&gt;</span> fk(a).flatMap(foldMap(<span style="color: #00008b;">_</span>)(fk))
+<pre class="code"><code><span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">foldMap</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>], <span style="color: #81A1C1;">M</span>[<span style="color: #81A1C1;">_</span>]<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Monad</span>, <span style="color: #81A1C1;">A</span>](free<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">F</span>, <span style="color: #81A1C1;">A</span>])(fk<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span> ~&gt; <span style="color: #81A1C1;">M</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">M</span>[<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=</span> free <span style="color: #81A1C1;">match</span> {
+  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Return</span>(<span style="font-weight: bold;">a</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Monad</span>[<span style="color: #81A1C1;">M</span>].pure(a)
+  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Roll</span>(<span style="font-weight: bold;">a</span>) <span style="color: #81A1C1;">=&gt;</span> fk(a).flatMap(foldMap(<span style="color: #81A1C1;">_</span>)(fk))
 }
 </code></pre>
 </div>
@@ -671,7 +648,7 @@ Interpreter 去一层层拨开 这个 free program.
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2018-07-28 Sat 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

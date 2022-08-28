@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Grokking Monad in Scala - Free</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="unknown">
-<meta name="description" content="Kind and Free Monad"
->
+<meta name="author" content="unknown" />
+<meta name="description" content="Kind and Free Monad" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -20,28 +19,6 @@
 <meta property="og:description" content="Free Monad" />
 <meta property="og:type" content="article" />
 <meta content="https://static-2.gumroad.com/res/gumroad/1806288866681/asset_previews/dd7001d38dd3151e4f02f72579258e2f/retina/don_27t_20wish_20for_20it.work_20for_20it..png" property="og:image">
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -58,12 +35,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">Grokking Monad in Scala - Free</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#org201698a">Kind</a>
 <ul>
@@ -105,12 +82,12 @@ you can actually run <code>sbt "testOnly *Kind"</code> and <code>sbt "testOnly *
 <div id="outline-container-org201698a" class="outline-2">
 <h2 id="org201698a">Kind</h2>
 <div class="outline-text-2" id="text-org201698a">
-<pre class="code"><code><span style="color: #00008b;">package</span> <span style="color: #8b0000;">free</span>
-<span style="color: #00008b;">import</span> monad.<span style="color: #00008b;">_</span>
-<span style="color: #00008b;">import</span> cats.<span style="color: #00008b;">_</span>
-<span style="color: #00008b;">import</span> org.scalatest.<span style="color: #00008b;">_</span>
+<pre class="code"><code><span style="color: #81A1C1;">package</span> <span style="color: #D08770;">free</span>
+<span style="color: #81A1C1;">import</span> monad.<span style="color: #81A1C1;">_</span>
+<span style="color: #81A1C1;">import</span> cats.<span style="color: #81A1C1;">_</span>
+<span style="color: #81A1C1;">import</span> org.scalatest.<span style="color: #81A1C1;">_</span>
 
-<span style="color: #00008b;">class</span> <span style="color: #36648b;">`4-1-Kind`</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">AsyncFlatSpec</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">Matchers</span> {
+<span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">`4-1-Kind`</span> <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">AsyncFlatSpec</span> <span style="color: #81A1C1;">with</span> <span style="color: #81A1C1;">Matchers</span> {
 </code></pre>
 
 <p>
@@ -142,9 +119,9 @@ to define a FuntionK in cats, we can simply use fish arrow <code>~&gt;</code>
 e.g. a FuntionK from <code>List</code> to <code>Option</code>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">import</span> cats.~&gt;
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">first</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> (<span style="color: #6b8e23;">List</span> ~&gt; <span style="color: #6b8e23;">Option</span>) {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">A</span>](l<span style="color: #00008b;">:</span><span style="color: #36648b;">List</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> l.headOption
+<pre class="code"><code><span style="color: #81A1C1;">import</span> cats.~&gt;
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">first</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">new</span> (<span style="color: #81A1C1;">List</span> ~&gt; <span style="color: #81A1C1;">Option</span>) {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">apply</span>[<span style="color: #81A1C1;">A</span>](l<span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">List</span>[<span style="color: #81A1C1;">A</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Option</span>[<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=</span> l.headOption
 }
 </code></pre>
 </div>
@@ -163,16 +140,16 @@ you'll notice that we've include a compiler plugin <code>kind-projector</code><l
 it provides us pretty syntactic suger for such case
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">first</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Lambda</span>[<span style="color: #6b8e23;">List</span> ~&gt; <span style="color: #6b8e23;">Option</span>](<span style="color: #00008b;">_</span>.headOption)
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">first</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Lambda</span>[<span style="color: #81A1C1;">List</span> ~&gt; <span style="color: #81A1C1;">Option</span>](<span style="color: #81A1C1;">_</span>.headOption)
 </code></pre>
 
 <p>
 which will be expanded to exactly the same code as what we defined before.
 </p>
 
-<pre class="code"><code>behavior of <span style="color: #8b0000;">"FunctionK"</span>
-it should <span style="color: #8b0000;">"create a FunctionK from Box[_] to Sphere[_]"</span> in {
-  <span style="color: #6b8e23;">Printable</span>.format(<span style="color: #6b8e23;">Sphere</span>(<span style="color: #8b0000;">"hill"</span>)) shouldBe <span style="color: #8b0000;">"</span><span style="color: #6b8e23;">\"</span><span style="color: #8b0000;">hill</span><span style="color: #6b8e23;">\"</span><span style="color: #8b0000;">"</span>
+<pre class="code"><code>behavior of <span style="color: #D08770;">"FunctionK"</span>
+it should <span style="color: #D08770;">"create a FunctionK from Box[_] to Sphere[_]"</span> in {
+  <span style="color: #81A1C1;">Printable</span>.format(<span style="color: #81A1C1;">Sphere</span>(<span style="color: #D08770;">"hill"</span>)) shouldBe <span style="color: #D08770;">"</span><span style="color: #81A1C1;">\"</span><span style="color: #D08770;">hill</span><span style="color: #81A1C1;">\"</span><span style="color: #D08770;">"</span>
 }
 </code></pre>
 </div>
@@ -186,30 +163,30 @@ But why this is useful than function, the <code>fnk</code> in <code>spherePrinta
 simple function and it should behave still the same.
 </p>
 
-<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">spherePrintable</span>[<span style="color: #6b8e23;">A</span>](<span style="color: #228b22;">implicit</span> p<span style="color: #00008b;">:</span> <span style="color: #36648b;">Printable</span>[<span style="color: #6b8e23;">Box</span>[<span style="color: #6b8e23;">A</span>]],
-                                fn<span style="color: #00008b;">:</span> <span style="color: #36648b;">Sphere</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Box</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Printable</span>[<span style="color: #6b8e23;">Sphere</span>[<span style="color: #6b8e23;">A</span>]] <span style="color: #00008b;">=</span> ???
+<pre class="code"><code><span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">spherePrintable</span>[<span style="color: #81A1C1;">A</span>](<span style="color: #81A1C1;">implicit</span> p<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Printable</span>[<span style="color: #81A1C1;">Box</span>[<span style="color: #81A1C1;">A</span>]],
+                                fn<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Sphere</span>[<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Box</span>[<span style="color: #81A1C1;">A</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Printable</span>[<span style="color: #81A1C1;">Sphere</span>[<span style="color: #81A1C1;">A</span>]] <span style="color: #81A1C1;">=</span> ???
 </code></pre>
 
 <p>
 let's create another function that use <code>Sphere ~&gt; Box</code>, to make tuple of sphere <code>(Sphere[String], Sphere[Int])</code> printable
 </p>
 
-<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">tuplePrintable</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>](
-      <span style="color: #228b22;">implicit</span> p<span style="color: #00008b;">:</span> <span style="color: #36648b;">Printable</span>[<span style="color: #6b8e23;">Box</span>[<span style="color: #6b8e23;">String</span>]],
-      fn<span style="color: #00008b;">:</span> <span style="color: #36648b;">Sphere</span>[<span style="color: #6b8e23;">C</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Box</span>[<span style="color: #6b8e23;">C</span>]))<span style="color: #00008b;">:</span> <span style="color: #36648b;">Printable</span>[(<span style="color: #6b8e23;">Sphere</span>[<span style="color: #6b8e23;">A</span>], <span style="color: #6b8e23;">Sphere</span>[<span style="color: #6b8e23;">B</span>])] <span style="color: #00008b;">=</span> {
-    <span style="color: #00008b;">val</span> <span style="color: #b8860b;">tupleOfSphereToBox</span> <span style="color: #00008b;">=</span> (tupleOfSphere<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">Sphere</span>[<span style="color: #6b8e23;">A</span>], <span style="color: #6b8e23;">Sphere</span>[<span style="color: #6b8e23;">B</span>])) <span style="color: #00008b;">=&gt;</span> {
-      <span style="color: #00008b;">val</span> <span style="color: #b8860b;">box1</span> <span style="color: #00008b;">=</span> fn(tupleOfSphere._1)
-      <span style="color: #00008b;">val</span> <span style="color: #b8860b;">box2</span> <span style="color: #00008b;">=</span> fn(tupleOfSphere._2)
-      <span style="color: #6b8e23;">Box</span>(s<span style="color: #8b0000;">"(</span><span style="color: #b8860b;">${box1.value}</span><span style="color: #8b0000;">, </span><span style="color: #b8860b;">${box2.value}</span><span style="color: #8b0000;">)"</span>)
+<pre class="code"><code><span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">tuplePrintable</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>, <span style="color: #81A1C1;">C</span>](
+      <span style="color: #81A1C1;">implicit</span> p<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Printable</span>[<span style="color: #81A1C1;">Box</span>[<span style="color: #81A1C1;">String</span>]],
+      fn<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Sphere</span>[<span style="color: #81A1C1;">C</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Box</span>[<span style="color: #81A1C1;">C</span>]))<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Printable</span>[(<span style="color: #81A1C1;">Sphere</span>[<span style="color: #81A1C1;">A</span>], <span style="color: #81A1C1;">Sphere</span>[<span style="color: #81A1C1;">B</span>])] <span style="color: #81A1C1;">=</span> {
+    <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">tupleOfSphereToBox</span> <span style="color: #81A1C1;">=</span> (tupleOfSphere<span style="color: #81A1C1;">:</span> (<span style="color: #81A1C1;">Sphere</span>[<span style="color: #81A1C1;">A</span>], <span style="color: #81A1C1;">Sphere</span>[<span style="color: #81A1C1;">B</span>])) <span style="color: #81A1C1;">=&gt;</span> {
+      <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">box1</span> <span style="color: #81A1C1;">=</span> fn(tupleOfSphere._1)
+      <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">box2</span> <span style="color: #81A1C1;">=</span> fn(tupleOfSphere._2)
+      <span style="color: #81A1C1;">Box</span>(s<span style="color: #D08770;">"(</span><span style="font-weight: bold;">${box1.value}</span><span style="color: #D08770;">, </span><span style="font-weight: bold;">${box2.value}</span><span style="color: #D08770;">)"</span>)
     }
-    <span style="color: #6b8e23;">Contravariant</span>[<span style="color: #6b8e23;">Printable</span>].contramap(p)(tupleOfSphereToBox)
+    <span style="color: #81A1C1;">Contravariant</span>[<span style="color: #81A1C1;">Printable</span>].contramap(p)(tupleOfSphereToBox)
   }
 </code></pre>
 
 <p>
 you will get some compile error as such
 </p>
-<pre class="example" id="org125e949">
+<pre class="example" id="org9c59c29">
 [error] /Users/jichao.ouyang/Develop/scala-dojo/src/main/scala/Free.scala:21:35: type mismatch;
 [error]  found   : free.Sphere[A]
 [error]  required: free.Sphere[C]
@@ -235,9 +212,9 @@ This is <i>Rank 1 Type</i>, because all types A, B, C are fixed in the same rank
 To make such code compile, you'll need to make <code>fn</code> as <code>Rank 2 Type</code>, which means <code>fn</code> will not be fixed in the first rank of <code>tuplePrintable</code> polymorphism, it's type polymorphism will be in another rank totally independent from the <code>tuplePrintable</code>
 </p>
 
-<pre class="code"><code>behavior of <span style="color: #8b0000;">"Rank N Type"</span>
-it should <span style="color: #8b0000;">"able to print a tuple of Sphere"</span> in {
-  <span style="color: #6b8e23;">Printable</span>.format((<span style="color: #6b8e23;">Sphere</span>(<span style="color: #8b0000;">"hill"</span>), <span style="color: #6b8e23;">Sphere</span>(<span style="color: #6b8e23;">1</span>))) shouldBe <span style="color: #8b0000;">"</span><span style="color: #6b8e23;">\"</span><span style="color: #8b0000;">(hill, 1)</span><span style="color: #6b8e23;">\"</span><span style="color: #8b0000;">"</span>
+<pre class="code"><code>behavior of <span style="color: #D08770;">"Rank N Type"</span>
+it should <span style="color: #D08770;">"able to print a tuple of Sphere"</span> in {
+  <span style="color: #81A1C1;">Printable</span>.format((<span style="color: #81A1C1;">Sphere</span>(<span style="color: #D08770;">"hill"</span>), <span style="color: #81A1C1;">Sphere</span>(<span style="color: #81A1C1;">1</span>))) shouldBe <span style="color: #D08770;">"</span><span style="color: #81A1C1;">\"</span><span style="color: #D08770;">(hill, 1)</span><span style="color: #81A1C1;">\"</span><span style="color: #D08770;">"</span>
 }
 </code></pre>
 </div>
@@ -265,13 +242,13 @@ applying FunctionK before or after a Functor <code>map</code> makes no differenc
 hence <code>fnk(fa.map(f))</code> is exactly the same as <code>fnk(fa).map(f)</code>
 </p>
 
-<pre class="code"><code><span style="color: #8b0000;">"Natural Transformation"</span> should <span style="color: #8b0000;">"satisfy law"</span> in {
-  <span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">functorBox</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">Box</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">Box</span>] {
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">Box</span>[<span style="color: #6b8e23;">A</span>])(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>) <span style="color: #00008b;">=</span>
-      <span style="color: #6b8e23;">Box</span>(f(fa.value))
+<pre class="code"><code><span style="color: #D08770;">"Natural Transformation"</span> should <span style="color: #D08770;">"satisfy law"</span> in {
+  <span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">functorBox</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">Box</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">Box</span>] {
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">map</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](fa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Box</span>[<span style="color: #81A1C1;">A</span>])(f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>) <span style="color: #81A1C1;">=</span>
+      <span style="color: #81A1C1;">Box</span>(f(fa.value))
   }
-  <span style="color: #00008b;">import</span> cats.syntax.functor.<span style="color: #00008b;">_</span>
-  <span style="color: #6b8e23;">Sphere</span>.sphereToBox(<span style="color: #6b8e23;">Sphere</span>(<span style="color: #6b8e23;">100</span>).map(<span style="color: #00008b;">_</span> + <span style="color: #6b8e23;">1</span>)) shouldBe <span style="color: #6b8e23;">Sphere</span>.sphereToBox(<span style="color: #6b8e23;">Sphere</span>(<span style="color: #6b8e23;">100</span>)).map(<span style="color: #00008b;">_</span> + <span style="color: #6b8e23;">1</span>)
+  <span style="color: #81A1C1;">import</span> cats.syntax.functor.<span style="color: #81A1C1;">_</span>
+  <span style="color: #81A1C1;">Sphere</span>.sphereToBox(<span style="color: #81A1C1;">Sphere</span>(<span style="color: #81A1C1;">100</span>).map(<span style="color: #81A1C1;">_</span> + <span style="color: #81A1C1;">1</span>)) shouldBe <span style="color: #81A1C1;">Sphere</span>.sphereToBox(<span style="color: #81A1C1;">Sphere</span>(<span style="color: #81A1C1;">100</span>)).map(<span style="color: #81A1C1;">_</span> + <span style="color: #81A1C1;">1</span>)
 }
 </code></pre>
 
@@ -284,11 +261,11 @@ hence <code>fnk(fa.map(f))</code> is exactly the same as <code>fnk(fa).map(f)</c
 <div id="outline-container-org7efcaaa" class="outline-2">
 <h2 id="org7efcaaa">Free</h2>
 <div class="outline-text-2" id="text-org7efcaaa">
-<pre class="code"><code><span style="color: #00008b;">package</span> <span style="color: #8b0000;">free</span>
-<span style="color: #00008b;">import</span> org.scalatest.<span style="color: #00008b;">_</span>
-<span style="color: #00008b;">import</span> cats.<span style="color: #00008b;">_</span>
-<span style="color: #00008b;">import</span> cats.effect.<span style="color: #6b8e23;">IO</span>
-<span style="color: #00008b;">class</span> <span style="color: #36648b;">`4-2-Free`</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">AsyncFlatSpec</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">Matchers</span> {
+<pre class="code"><code><span style="color: #81A1C1;">package</span> <span style="color: #D08770;">free</span>
+<span style="color: #81A1C1;">import</span> org.scalatest.<span style="color: #81A1C1;">_</span>
+<span style="color: #81A1C1;">import</span> cats.<span style="color: #81A1C1;">_</span>
+<span style="color: #81A1C1;">import</span> cats.effect.<span style="color: #81A1C1;">IO</span>
+<span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">`4-2-Free`</span> <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">AsyncFlatSpec</span> <span style="color: #81A1C1;">with</span> <span style="color: #81A1C1;">Matchers</span> {
 </code></pre>
 
 <p>
@@ -304,9 +281,9 @@ A Free Structure is basically very similar to <code>Cons</code> and <code>Nil</c
 <code>List</code>, we call such similarity <i>Isomorphic</i>
 </p>
 
-<pre class="code"><code>seal <span style="color: #00008b;">trait</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>]
-<span style="color: #228b22;">final</span> <span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Pure</span>[<span style="color: #6b8e23;">S</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">A</span>]
-<span style="color: #228b22;">final</span> <span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Suspend</span>[<span style="color: #6b8e23;">S</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">S</span>[<span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">S</span>,<span style="color: #6b8e23;">A</span>]]) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">A</span>]
+<pre class="code"><code>seal <span style="color: #81A1C1;">trait</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>[<span style="color: #81A1C1;">_</span>], <span style="color: #81A1C1;">A</span>]
+<span style="color: #81A1C1;">final</span> <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">Pure</span>[<span style="color: #81A1C1;">S</span>[<span style="color: #81A1C1;">_</span>], <span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>) <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, <span style="color: #81A1C1;">A</span>]
+<span style="color: #81A1C1;">final</span> <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">Suspend</span>[<span style="color: #81A1C1;">S</span>[<span style="color: #81A1C1;">_</span>], <span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">S</span>[<span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>,<span style="color: #81A1C1;">A</span>]]) <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, <span style="color: #81A1C1;">A</span>]
 </code></pre>
 
 <p>
@@ -317,13 +294,13 @@ to <code>Cons</code> means there is something else left behind.
 <p>
 To make it a Monad, which could be something like
 </p>
-<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">catsFreeMonadForFree</span>[<span style="color: #6b8e23;">S</span>[<span style="color: #00008b;">_</span>]](<span style="color: #228b22;">implicit</span> <span style="color: #6b8e23;">F</span><span style="color: #00008b;">:</span><span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">S</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">S</span>, ?]] <span style="color: #00008b;">=</span>
-  <span style="color: #00008b;">new</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">S</span>, ?]] {
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">pure</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Pure</span>(a)
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">A</span>])(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> fa.flatMap(a<span style="color: #00008b;">=&gt;</span><span style="color: #6b8e23;">Pure</span>(f(a)))
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">flatMap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">A</span>])(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">B</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">S</span>, <span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> a <span style="color: #00008b;">match</span> {
-      <span style="color: #00008b;">case</span> <span style="color: #36648b;">Pure</span>(<span style="color: #b8860b;">a</span>) <span style="color: #00008b;">=&gt;</span> f(a)
-      <span style="color: #00008b;">case</span> <span style="color: #36648b;">Suspend</span>(<span style="color: #b8860b;">a</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Suspend</span>(<span style="color: #6b8e23;">F</span>.map(a)(next<span style="color: #00008b;">=&gt;</span>next.flatMap(f)))
+<pre class="code"><code><span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">catsFreeMonadForFree</span>[<span style="color: #81A1C1;">S</span>[<span style="color: #81A1C1;">_</span>]](<span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">F</span><span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">S</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Monad</span>[<span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, ?]] <span style="color: #81A1C1;">=</span>
+  <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Monad</span>[<span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, ?]] {
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">pure</span>[<span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, <span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Pure</span>(a)
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">map</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](fa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, <span style="color: #81A1C1;">A</span>])(f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, <span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span> fa.flatMap(a<span style="color: #81A1C1;">=&gt;</span><span style="color: #81A1C1;">Pure</span>(f(a)))
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">flatMap</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, <span style="color: #81A1C1;">A</span>])(f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, <span style="color: #81A1C1;">B</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">S</span>, <span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span> a <span style="color: #81A1C1;">match</span> {
+      <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Pure</span>(<span style="font-weight: bold;">a</span>) <span style="color: #81A1C1;">=&gt;</span> f(a)
+      <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Suspend</span>(<span style="font-weight: bold;">a</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Suspend</span>(<span style="color: #81A1C1;">F</span>.map(a)(next<span style="color: #81A1C1;">=&gt;</span>next.flatMap(f)))
     }
   }
 </code></pre>
@@ -366,15 +343,15 @@ can simply add <code>B</code> into the type parameter of <code>CoYoneda</code> a
 which we could simply represent it as scala case class:
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](fb<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>], f<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">A</span>)
+<pre class="code"><code><span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">CoYoneda</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>], <span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](fb<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">B</span>], f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">B</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">A</span>)
 </code></pre>
 
 <p>
 And define a functor over CoYoneda is very straightforward:
 </p>
-<pre class="code"><code><span style="color: #228b22;">implicit</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">functorForCoyoneda</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>, ?, <span style="color: #6b8e23;">B</span>]] {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">C</span>](fa<span style="color: #00008b;">:</span><span style="color: #36648b;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>])(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span><span style="color: #00008b;">=&gt;</span><span style="color: #6b8e23;">C</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">C</span>, <span style="color: #6b8e23;">B</span>] {
-    <span style="color: #6b8e23;">CoYoneda</span>(fa.fb, (f compose fa.f)) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">(f compose fa.f) has type B =&gt; C</span>
+<pre class="code"><code><span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">functorForCoyoneda</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">CoYoneda</span>[<span style="color: #81A1C1;">F</span>, ?, <span style="color: #81A1C1;">B</span>]] {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">map</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">C</span>](fa<span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">CoYoneda</span>[<span style="color: #81A1C1;">F</span>, <span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>])(f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span><span style="color: #81A1C1;">=&gt;</span><span style="color: #81A1C1;">C</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">CoYoneda</span>[<span style="color: #81A1C1;">F</span>, <span style="color: #81A1C1;">C</span>, <span style="color: #81A1C1;">B</span>] {
+    <span style="color: #81A1C1;">CoYoneda</span>(fa.fb, (f compose fa.f)) <span style="color: #677691;">// </span><span style="color: #677691;">(f compose fa.f) has type B =&gt; C</span>
   }
 }
 </code></pre>
@@ -398,15 +375,15 @@ The trick is to use the magical <code>identity</code> function <code>A=&gt;A</co
 , and eventually, <code>F[_]</code> become a Functor because any <code>CoYoneda</code> is Functor.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">lift</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>](fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span><span style="color: #36648b;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span>
-  <span style="color: #6b8e23;">CoYoneda</span>(fa, identity<span style="color: #00008b;">:</span><span style="color: #36648b;">A</span><span style="color: #00008b;">=&gt;</span><span style="color: #6b8e23;">A</span>)
+<pre class="code"><code><span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">lift</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>], <span style="color: #81A1C1;">A</span>](fa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>])<span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">CoYoneda</span>[<span style="color: #81A1C1;">F</span>, <span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=</span>
+  <span style="color: #81A1C1;">CoYoneda</span>(fa, identity<span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">A</span><span style="color: #81A1C1;">=&gt;</span><span style="color: #81A1C1;">A</span>)
 </code></pre>
 
 <p>
 To construct a Free Monad, we can use the CoYoneda Trick to lift any <code>F[_]</code>, and put the CoYoneda to Free.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">liftF</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>](value<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Suspend</span>(lift(value))
+<pre class="code"><code><span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">liftF</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>], <span style="color: #81A1C1;">A</span>](value<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">F</span>, <span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Suspend</span>(lift(value))
 </code></pre>
 </div>
 </div>
@@ -433,18 +410,18 @@ Imagine we have a document database to query, it's easy to abstract 3 method on 
 <li><code>delete(key: String)</code></li>
 </ul>
 
-<pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Database</span> {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">get</span>(key<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span> <span style="color: #00008b;">=</span> {
-    println(<span style="color: #8b0000;">"querying database"</span>)
-    s<span style="color: #8b0000;">"value for key </span><span style="color: #b8860b;">$key</span><span style="color: #8b0000;">"</span>
+<pre class="code"><code><span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">Database</span> {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">get</span>(key<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span> <span style="color: #81A1C1;">=</span> {
+    println(<span style="color: #D08770;">"querying database"</span>)
+    s<span style="color: #D08770;">"value for key </span><span style="font-weight: bold;">$key</span><span style="color: #D08770;">"</span>
   }
 
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">put</span>(key<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, value<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">=</span>{
-    println(s<span style="color: #8b0000;">"saving </span><span style="color: #b8860b;">$key</span><span style="color: #8b0000;"> to database"</span>)
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">put</span>(key<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>, value<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>) <span style="color: #81A1C1;">=</span>{
+    println(s<span style="color: #D08770;">"saving </span><span style="font-weight: bold;">$key</span><span style="color: #D08770;"> to database"</span>)
   }
 
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">delete</span>(key<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">=</span> {
-    println(s<span style="color: #8b0000;">"deleteing </span><span style="color: #b8860b;">$key</span><span style="color: #8b0000;">"</span>)
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">delete</span>(key<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>) <span style="color: #81A1C1;">=</span> {
+    println(s<span style="color: #D08770;">"deleteing </span><span style="font-weight: bold;">$key</span><span style="color: #D08770;">"</span>)
   }
 }
 </code></pre>
@@ -457,8 +434,8 @@ All of these actions are actually effects, because they will potentially cause s
 While testing those methods could be a nightmare as well, you have to either setup a real database or mock these methods' implementation
 </p>
 
-<pre class="code"><code>behavior of <span style="color: #8b0000;">"program"</span>
-it should <span style="color: #8b0000;">"hard to unit test get put delete"</span> in {
+<pre class="code"><code>behavior of <span style="color: #D08770;">"program"</span>
+it should <span style="color: #D08770;">"hard to unit test get put delete"</span> in {
   program() shouldBe (())
 }
 </code></pre>
@@ -479,10 +456,10 @@ It's hard to test because:
 To make your program more declarative and testable, we can describe all database interactions using ADT
 </p>
 
-<pre class="code"><code><span style="color: #228b22;">sealed</span> <span style="color: #00008b;">trait</span> <span style="color: #36648b;">DbEff</span>[<span style="color: #6b8e23;">A</span>]
-<span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Put</span>(key<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, value<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">DbEff</span>[<span style="color: #6b8e23;">Unit</span>]
-<span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Get</span>(key<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">DbEff</span>[<span style="color: #6b8e23;">String</span>]
-<span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Delete</span>(key<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">DbEff</span>[<span style="color: #6b8e23;">Unit</span>]
+<pre class="code"><code><span style="color: #81A1C1;">sealed</span> <span style="color: #81A1C1;">trait</span> <span style="color: #81A1C1;">DbEff</span>[<span style="color: #81A1C1;">A</span>]
+<span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">Put</span>(key<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>, value<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>) <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">DbEff</span>[<span style="color: #81A1C1;">Unit</span>]
+<span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">Get</span>(key<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>) <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">DbEff</span>[<span style="color: #81A1C1;">String</span>]
+<span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">Delete</span>(key<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>) <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">DbEff</span>[<span style="color: #81A1C1;">Unit</span>]
 </code></pre>
 
 <p>
@@ -504,10 +481,10 @@ here we're using cats free implementation, which already have CoYoneda embedded 
 </span> we've introduced in <a href="#org26f7fc5">CoYoneda Lemma (Trick)</a>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">DbEff</span> {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">get</span>(key<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">DbEff</span>, <span style="color: #6b8e23;">String</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Free</span>.liftF[<span style="color: #6b8e23;">DbEff</span>, <span style="color: #6b8e23;">String</span>](<span style="color: #6b8e23;">Get</span>(key))
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">put</span>(key<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, v<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">DbEff</span>, <span style="color: #6b8e23;">Unit</span>] <span style="color: #00008b;">=</span> ???
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">delete</span>(key<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Free</span>[<span style="color: #6b8e23;">DbEff</span>, <span style="color: #6b8e23;">Unit</span>] <span style="color: #00008b;">=</span> ???
+<pre class="code"><code><span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">DbEff</span> {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">get</span>(key<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">DbEff</span>, <span style="color: #81A1C1;">String</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Free</span>.liftF[<span style="color: #81A1C1;">DbEff</span>, <span style="color: #81A1C1;">String</span>](<span style="color: #81A1C1;">Get</span>(key))
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">put</span>(key<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>, v<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">DbEff</span>, <span style="color: #81A1C1;">Unit</span>] <span style="color: #81A1C1;">=</span> ???
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">delete</span>(key<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Free</span>[<span style="color: #81A1C1;">DbEff</span>, <span style="color: #81A1C1;">Unit</span>] <span style="color: #81A1C1;">=</span> ???
 }
 </code></pre>
 
@@ -519,15 +496,15 @@ here we're using cats free implementation, which already have CoYoneda embedded 
 to lift your <code>program</code> defined before to free, the simplest trick is to change all <code>=</code> to <code>&lt;-</code> and remove <code>val</code>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">program</span> {                         <span style="color: #00008b;">object</span> <span style="color: #6b8e23;">freeProgram</span> {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>() <span style="color: #00008b;">=</span> {                          <span style="color: #00008b;">val</span> <span style="color: #b8860b;">oldKey</span> <span style="color: #00008b;">=</span> <span style="color: #8b0000;">"123"</span>
-    <span style="color: #00008b;">val</span> <span style="color: #b8860b;">oldKey</span> <span style="color: #00008b;">=</span> <span style="color: #8b0000;">"123"</span>                     <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>() <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
-    <span style="color: #00008b;">val</span> <span style="color: #b8860b;">oldVal</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Database</span>.get(oldKey)        oldVal <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">DbEff</span>.get(oldKey)
-    <span style="color: #00008b;">val</span> <span style="color: #b8860b;">newVal</span> <span style="color: #00008b;">=</span> s<span style="color: #8b0000;">"this is new: </span><span style="color: #b8860b;">$oldVal</span><span style="color: #8b0000;">"</span>     newVal <span style="color: #00008b;">=</span> s<span style="color: #8b0000;">"this is new: </span><span style="color: #b8860b;">$oldVal</span><span style="color: #8b0000;">"</span>
-    <span style="color: #00008b;">val</span> <span style="color: #b8860b;">newKey</span> <span style="color: #00008b;">=</span> oldKey.reverse              newKey <span style="color: #00008b;">=</span> oldKey.reverse
-    <span style="color: #6b8e23;">Database</span>.put(newKey, newVal)             <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">DbEff</span>.put(newKey, newVal)
-    <span style="color: #6b8e23;">Database</span>.delete(oldKey)                  <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">DbEff</span>.delete(oldKey)
-  }                                        } <span style="color: #00008b;">yield</span> ()
+<pre class="code"><code><span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">program</span> {                         <span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">freeProgram</span> {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">apply</span>() <span style="color: #81A1C1;">=</span> {                          <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">oldKey</span> <span style="color: #81A1C1;">=</span> <span style="color: #D08770;">"123"</span>
+    <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">oldKey</span> <span style="color: #81A1C1;">=</span> <span style="color: #D08770;">"123"</span>                     <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">apply</span>() <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">for</span> {
+    <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">oldVal</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Database</span>.get(oldKey)        oldVal <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">DbEff</span>.get(oldKey)
+    <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">newVal</span> <span style="color: #81A1C1;">=</span> s<span style="color: #D08770;">"this is new: </span><span style="font-weight: bold;">$oldVal</span><span style="color: #D08770;">"</span>     newVal <span style="color: #81A1C1;">=</span> s<span style="color: #D08770;">"this is new: </span><span style="font-weight: bold;">$oldVal</span><span style="color: #D08770;">"</span>
+    <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">newKey</span> <span style="color: #81A1C1;">=</span> oldKey.reverse              newKey <span style="color: #81A1C1;">=</span> oldKey.reverse
+    <span style="color: #81A1C1;">Database</span>.put(newKey, newVal)             <span style="color: #81A1C1;">_</span> <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">DbEff</span>.put(newKey, newVal)
+    <span style="color: #81A1C1;">Database</span>.delete(oldKey)                  <span style="color: #81A1C1;">_</span> <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">DbEff</span>.delete(oldKey)
+  }                                        } <span style="color: #81A1C1;">yield</span> ()
 }                                        }
 </code></pre>
 
@@ -547,12 +524,12 @@ remember the <code>Lambda</code> trick from <a href="#org4a1d7f2">Kind Projector
 </span>
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">DbEffInterp</span> {
-  <span style="color: #00008b;">val</span> <span style="color: #b8860b;">fake</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Lambda</span>[<span style="color: #6b8e23;">DbEff</span> ~&gt; <span style="color: #6b8e23;">IO</span>](<span style="color: #00008b;">_</span> <span style="color: #00008b;">match</span> {
-    <span style="color: #00008b;">case</span> <span style="color: #36648b;">Get</span>(<span style="color: #8b0000;">"123"</span>)    <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(s<span style="color: #8b0000;">"value for key 123"</span>)
-    <span style="color: #00008b;">case</span> <span style="color: #36648b;">Put</span>(<span style="color: #8b0000;">"321"</span>, <span style="color: #b8860b;">v</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(println(s<span style="color: #8b0000;">"saving 123 to database"</span>))
-    <span style="color: #00008b;">case</span> <span style="color: #36648b;">Delete</span>(<span style="color: #8b0000;">"123"</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(println(s<span style="color: #8b0000;">"deleteing 123"</span>))
-    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">a</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(fail(s<span style="color: #8b0000;">"unexpecting interaction: </span><span style="color: #b8860b;">$a</span><span style="color: #8b0000;">"</span>))
+<pre class="code"><code><span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">DbEffInterp</span> {
+  <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">fake</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Lambda</span>[<span style="color: #81A1C1;">DbEff</span> ~&gt; <span style="color: #81A1C1;">IO</span>](<span style="color: #81A1C1;">_</span> <span style="color: #81A1C1;">match</span> {
+    <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Get</span>(<span style="color: #D08770;">"123"</span>)    <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">IO</span>(s<span style="color: #D08770;">"value for key 123"</span>)
+    <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Put</span>(<span style="color: #D08770;">"321"</span>, <span style="font-weight: bold;">v</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">IO</span>(println(s<span style="color: #D08770;">"saving 123 to database"</span>))
+    <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Delete</span>(<span style="color: #D08770;">"123"</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">IO</span>(println(s<span style="color: #D08770;">"deleteing 123"</span>))
+    <span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">a</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">IO</span>(fail(s<span style="color: #D08770;">"unexpecting interaction: </span><span style="font-weight: bold;">$a</span><span style="color: #D08770;">"</span>))
   })
 }
 </code></pre>
@@ -561,9 +538,9 @@ remember the <code>Lambda</code> trick from <a href="#org4a1d7f2">Kind Projector
 So, if you <code>foldMap</code> your program over the interpreter
 </p>
 
-<pre class="code"><code>behavior of <span style="color: #8b0000;">"free program"</span>
-it should <span style="color: #8b0000;">"run on fake interpreter to verify your program logic"</span> in {
-  (freeProgram() foldMap <span style="color: #6b8e23;">DbEffInterp</span>.fake) unsafeRunSync () shouldBe (())
+<pre class="code"><code>behavior of <span style="color: #D08770;">"free program"</span>
+it should <span style="color: #D08770;">"run on fake interpreter to verify your program logic"</span> in {
+  (freeProgram() foldMap <span style="color: #81A1C1;">DbEffInterp</span>.fake) unsafeRunSync () shouldBe (())
 }
 </code></pre>
 
@@ -571,7 +548,7 @@ it should <span style="color: #8b0000;">"run on fake interpreter to verify your 
 A nice message will tell you when <code>sbt "testOnly *Free"</code>
 </p>
 
-<pre class="example" id="orga0f4070">
+<pre class="example" id="orgb9c8587">
 [info] - should run on fake interpreter to verify your program logic *** FAILED ***
 [info]   unexpecting interaction: Delete(321) (4-2-free.scala:17)
 </pre>
@@ -590,30 +567,30 @@ You'll know what to fix, seems we have some business bug in <code>freeProgram</c
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://github.com/non/kind-projector">https://github.com/non/kind-projector</a>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 hope you still remember what "rank" is from 4-1-kind
 </p>
 
 <pre class="code"><code>}
 </code></pre></div></div>
 
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 it's totally fine if you didn't follow, you don't actually need to understand how Free is implemented to use it.
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4" role="doc-backlink">4</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 Free Monad from cats already embedded CoYoneda trick in it's implementation, namely <code>Flatmaped</code>.
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5">5</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5" role="doc-backlink">5</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 here we're using cats free implementation, which already have CoYoneda embedded in <code>Free</code> implementation, so we don't need to <code>lift</code> the value to <code>CoYoneda</code> our self.
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.6" class="footnum" href="#fnr.6">6</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.6" class="footnum" href="#fnr.6" role="doc-backlink">6</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 remember the <code>Lambda</code> trick from <a href="#org4a1d7f2">Kind Projector</a> ?
 </p></div></div>
 
@@ -628,7 +605,7 @@ remember the <code>Lambda</code> trick from <a href="#org4a1d7f2">Kind Projector
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2018-11-19 Mon 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

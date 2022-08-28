@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:31 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>自制语言初试 - 入lang</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="unknown">
-<meta name="keywords" content="macro, javascript, clojure, lisp, sweetjs, meta programming">
+<meta name="author" content="unknown" />
+<meta name="keywords" content="macro, javascript, clojure, lisp, sweetjs, meta programming" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -15,28 +15,6 @@
 <link rel="stylesheet" href="/style/toc.css"/>
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -53,12 +31,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">自制语言初试 - 入lang</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#orgd31dde2">Rationale(为毛要整一门语言)</a>
 <ul>
@@ -96,7 +74,7 @@
 <h2 id="orgd31dde2">Rationale(为毛要整一门语言)</h2>
 <div class="outline-text-2" id="text-orgd31dde2">
 
-<figure id="orgf4225b4">
+<figure id="orga658ce3">
 <img src="./images/tv-giving-me-reason-to-live.gif" alt="tv-giving-me-reason-to-live.gif">
 
 </figure>
@@ -189,7 +167,7 @@ Hacker News 上的讨论 <a href="https://news.ycombinator.com/item?id=9749286">
 Clojure有一个很cool的macro, <code>#{}</code>, 匿名函数的macro, cool的地方是它可以用 <code>%1</code>, <code>%2</code>
 代表第几个参数. 特别方便比如是在用map的时候
 </p>
-<pre class="code"><code>(map #(<span style="color: #b8860b;">%</span>+3) [1,2,3,4])
+<pre class="code"><code>(map #(<span style="font-weight: bold;">%</span>+3) [1,2,3,4])
 </code></pre>
 
 <p>
@@ -218,29 +196,29 @@ Clojure有一个很cool的macro, <code>#{}</code>, 匿名函数的macro, cool的
 </ol>
 
 <pre class="code"><code>macro fn {
-<span style="color: #00008b;">case</span> {
+<span style="color: #81A1C1;">case</span> {
   $ctx
   ($body:expr)
 }=&gt;{
-  <span style="color: #00008b;">function</span> <span style="color: #6a5acd;">replace_args</span>(<span style="color: #b8860b;">stxs</span>){
-    <span style="color: #00008b;">return</span> stxs.map(<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">x</span>){
-      <span style="color: #00008b;">if</span>(x.token.inner) {x.token.inner = replace_args(x.token.inner); <span style="color: #00008b;">return</span> x}
-      <span style="color: #00008b;">if</span>(x.token.type==parser.Token.Identifier &amp;&amp; x.token.value.match(<span style="color: #8b0000;">/^\$(\d?)$/</span>)){
-        <span style="color: #00008b;">var</span> <span style="color: #b8860b;">num</span> = x.token.value.match(<span style="color: #8b0000;">/^\$(\d?)$/</span>).pop()
-        <span style="color: #00008b;">if</span>(!num) num=1;
-        <span style="color: #00008b;">return</span> makeIdent(<span style="color: #8b0000;">'arguments['</span>+(num-1)+<span style="color: #8b0000;">']'</span>,#{$body});
+  <span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">replace_args</span>(<span style="font-weight: bold;">stxs</span>){
+    <span style="color: #81A1C1;">return</span> stxs.map(<span style="color: #81A1C1;">function</span>(<span style="font-weight: bold;">x</span>){
+      <span style="color: #81A1C1;">if</span>(x.token.inner) {x.token.inner = replace_args(x.token.inner); <span style="color: #81A1C1;">return</span> x}
+      <span style="color: #81A1C1;">if</span>(x.token.type==parser.Token.Identifier &amp;&amp; x.token.value.match(<span style="color: #D08770;">/^\$(\d?)$/</span>)){
+        <span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">num</span> = x.token.value.match(<span style="color: #D08770;">/^\$(\d?)$/</span>).pop()
+        <span style="color: #81A1C1;">if</span>(!num) num=1;
+        <span style="color: #81A1C1;">return</span> makeIdent(<span style="color: #D08770;">'arguments['</span>+(num-1)+<span style="color: #D08770;">']'</span>,#{$body});
       }
-      <span style="color: #00008b;">return</span> x;
+      <span style="color: #81A1C1;">return</span> x;
     })
   }
-  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">body</span> = replace_args(#{$body})
+  <span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">body</span> = replace_args(#{$body})
   letstx $new_body = body
-  <span style="color: #00008b;">return</span> #{
-    (<span style="color: #00008b;">function</span>(){<span style="color: #00008b;">return</span> $new_body})}
+  <span style="color: #81A1C1;">return</span> #{
+    (<span style="color: #81A1C1;">function</span>(){<span style="color: #81A1C1;">return</span> $new_body})}
 }
 }
 
-<span style="color: #00008b;">export</span> fn;
+<span style="color: #81A1C1;">export</span> fn;
 </code></pre>
 
 <p>
@@ -290,19 +268,19 @@ let 怎么就难了&#x2026;
 <p>
 我们都知道js var是function scope, 也就是说可以
 </p>
-<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span> =1;
-<span style="color: #00008b;">for</span>(<span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span>=0;a&lt;3;a++){
-  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">b</span> = a+1
+<pre class="code"><code><span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">a</span> =1;
+<span style="color: #81A1C1;">for</span>(<span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">a</span>=0;a&lt;3;a++){
+  <span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">b</span> = a+1
 }
-console.log(a, b)<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; 3,3</span>
+console.log(a, b)<span style="color: #677691;">// </span><span style="color: #677691;">=&gt; 3,3</span>
 </code></pre>
 
 <p>
 所有的var会被hoist到函数的顶部, 相当于
 </p>
-<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">a</span>,<span style="color: #b8860b;">b</span>;
+<pre class="code"><code><span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">a</span>,<span style="font-weight: bold;">b</span>;
 a=1
-  <span style="color: #00008b;">for</span>(a=0;a&lt;3;a++){
+  <span style="color: #81A1C1;">for</span>(a=0;a&lt;3;a++){
     b = a+1
   }
 </code></pre>
@@ -315,14 +293,14 @@ a=1
 我喜欢能有这样一个东西
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">let</span>(a=1,b=2){a+b} === 3
+<pre class="code"><code><span style="color: #81A1C1;">let</span>(a=1,b=2){a+b} === 3
 </code></pre>
 
 <p>
 由于js只有function scope, 所以应该要扩展成
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span>(<span style="color: #b8860b;">a</span>,<span style="color: #b8860b;">b</span>){
-  <span style="color: #00008b;">return</span> a+b
+<pre class="code"><code><span style="color: #81A1C1;">function</span>(<span style="font-weight: bold;">a</span>,<span style="font-weight: bold;">b</span>){
+  <span style="color: #81A1C1;">return</span> a+b
 }(1,2)
 </code></pre>
 
@@ -330,11 +308,11 @@ a=1
 <p>
 用macro实现这个再简单不过了
 </p>
-<pre class="code"><code>macro <span style="color: #00008b;">let</span> {
+<pre class="code"><code>macro <span style="color: #81A1C1;">let</span> {
   rule { ($($key:ident=$val:expr) (,)...){$body:expr...$last:expr} } =&gt;{
-    (<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">$key</span>(,)...){
+    (<span style="color: #81A1C1;">function</span>(<span style="font-weight: bold;">$key</span>(,)...){
       $body...
-        <span style="color: #00008b;">return</span> $last
+        <span style="color: #81A1C1;">return</span> $last
     })($val(,)...)
   }
 }
@@ -387,17 +365,17 @@ so easy, <del>block scope binding</del>
 phewww&#x2026;&#x2026;分解完好像覆盖了所有情况了, 现在用macro实现就太简单了
 </p>
 <pre class="code"><code>macro destruct {
-  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">1</span>
+  <span style="color: #677691;">// </span><span style="color: #677691;">1</span>
   rule {[]=$val:expr} =&gt; {}
-  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">2</span>
+  <span style="color: #677691;">// </span><span style="color: #677691;">2</span>
   rule {$id:ident=$val:expr} =&gt; {$id=($val)}
-  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">3</span>
+  <span style="color: #677691;">// </span><span style="color: #677691;">3</span>
   rule {[$id:ident]=$val:expr} =&gt; { $id=($val[0]) }
-  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">6</span>
+  <span style="color: #677691;">// </span><span style="color: #677691;">6</span>
   rule { [,$last:ident]=$val:expr}=&gt;{$last=($val[0])}
-  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">5</span>
+  <span style="color: #677691;">// </span><span style="color: #677691;">5</span>
   rule {[, $id:ident $tail...]=$val:expr}=&gt; {destruct $id=($val.shift()), destruct [$tail...]=$val.slice(1)}
-  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">4</span>
+  <span style="color: #677691;">// </span><span style="color: #677691;">4</span>
   rule {[$id:ident $tail...]=$val:expr} =&gt; {destruct $id=($val.shift()), destruct [$tail...]=$val.slice(1)}
 }
 </code></pre>
@@ -411,9 +389,9 @@ phewww&#x2026;&#x2026;分解完好像覆盖了所有情况了, 现在用macro实
 <p>
 好吧, 不就是再多一层递归么, 拨开便好了
 </p>
-<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">&#22836;&#37096;&#23884;&#22871;, &#25320;&#24320;</span>
+<pre class="code"><code><span style="color: #677691;">//</span><span style="color: #677691;">&#22836;&#37096;&#23884;&#22871;, &#25320;&#24320;</span>
 rule {[[$id:ident]]=$val:expr} =&gt; { destruct [$id]=($val[0]) }
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&#23614;&#37096;&#23884;&#22871;, &#25320;&#24320;&#25320;&#24320;</span>
+<span style="color: #677691;">// </span><span style="color: #677691;">&#23614;&#37096;&#23884;&#22871;, &#25320;&#24320;&#25320;&#24320;</span>
 rule { [,[$last:ident]]=$val:expr}=&gt;{destruct [$last]=($val[0])}
 </code></pre>
 
@@ -429,8 +407,8 @@ destructure object 的过程也非常类似, 我就懒得实现了
 looprecur其实就是let的尾递归, 很容易变成循环
 </p>
 <pre class="code"><code>loop(a=1,b=18){
-  <span style="color: #00008b;">if</span> (a &gt; b)
-    <span style="color: #00008b;">return</span> a
+  <span style="color: #81A1C1;">if</span> (a &gt; b)
+    <span style="color: #81A1C1;">return</span> a
   recur (a++,b--)
 }
 </code></pre>
@@ -443,9 +421,9 @@ looprecur其实就是let的尾递归, 很容易变成循环
 好了, 我们期待的当然是直接优化成循环了
 </p>
 <pre class="code"><code>(fucntion (a,b) {
-  <span style="color: #00008b;">while</span>(<span style="color: #6b8e23;">true</span>){
-    <span style="color: #00008b;">if</span>(a&gt;b)
-      <span style="color: #00008b;">return</span> a
+  <span style="color: #81A1C1;">while</span>(<span style="color: #81A1C1;">true</span>){
+    <span style="color: #81A1C1;">if</span>(a&gt;b)
+      <span style="color: #81A1C1;">return</span> a
     a++;
     b--;
   }
@@ -457,8 +435,8 @@ let都实现了, 实现这也太容易了
 </p>
 <pre class="code"><code>macro loop {
   rule {($params...){$body... recur($binding:expr(,)...)}} =&gt; {
-    <span style="color: #00008b;">let</span>($params...){
-      <span style="color: #00008b;">while</span> (<span style="color: #6b8e23;">true</span>) {
+    <span style="color: #81A1C1;">let</span>($params...){
+      <span style="color: #81A1C1;">while</span> (<span style="color: #81A1C1;">true</span>) {
         $body...;
           $binding(;)...
       }
@@ -486,7 +464,7 @@ let都实现了, 实现这也太容易了
 </p>
 
 
-<figure id="org6f947a1">
+<figure id="org5dad7d7">
 <img src="./images/maybe.gif" alt="maybe.gif">
 
 </figure>
@@ -518,9 +496,9 @@ let都实现了, 实现这也太容易了
 
 <pre class="code"><code>macro (?) {
   rule infix {$left:expr | $right... } =&gt; {
-    (<span style="color: #00008b;">function</span>(){
-      <span style="color: #00008b;">if</span>(<span style="color: #00008b;">typeof</span> $left!==<span style="color: #8b0000;">'undefined'</span> &amp;&amp; $left!==<span style="color: #6b8e23;">null</span>){
-        <span style="color: #00008b;">return</span> $left $right...
+    (<span style="color: #81A1C1;">function</span>(){
+      <span style="color: #81A1C1;">if</span>(<span style="color: #81A1C1;">typeof</span> $left!==<span style="color: #D08770;">'undefined'</span> &amp;&amp; $left!==<span style="color: #81A1C1;">null</span>){
+        <span style="color: #81A1C1;">return</span> $left $right...
       }
     })()
   }
@@ -532,11 +510,11 @@ let都实现了, 实现这也太容易了
 case macro
 </p>
 <pre class="code"><code>macro (?) {
-  <span style="color: #00008b;">case</span> infix {$left:expr |$name $right... } =&gt; {
-    <span style="color: #00008b;">return</span> #{
-      (<span style="color: #00008b;">function</span>(){
-        <span style="color: #00008b;">if</span>(<span style="color: #00008b;">typeof</span> $left!==<span style="color: #8b0000;">'undefined'</span> &amp;&amp; $left!==<span style="color: #6b8e23;">null</span>){
-          <span style="color: #00008b;">return</span> $left $right...
+  <span style="color: #81A1C1;">case</span> infix {$left:expr |$name $right... } =&gt; {
+    <span style="color: #81A1C1;">return</span> #{
+      (<span style="color: #81A1C1;">function</span>(){
+        <span style="color: #81A1C1;">if</span>(<span style="color: #81A1C1;">typeof</span> $left!==<span style="color: #D08770;">'undefined'</span> &amp;&amp; $left!==<span style="color: #81A1C1;">null</span>){
+          <span style="color: #81A1C1;">return</span> $left $right...
         }
       })()  
     }
@@ -555,7 +533,7 @@ case macro
 <h3 id="org69718a4">在哪里才能买到呢</h3>
 <div class="outline-text-3" id="text-org69718a4">
 
-<figure id="org5b1a949">
+<figure id="orgc16e290">
 <img src="./images/shut-up-and-take-my-money.gif" alt="shut-up-and-take-my-money.gif">
 
 </figure>
@@ -593,7 +571,7 @@ case macro
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2015-06-22 Mon 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

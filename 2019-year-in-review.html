@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:31 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>2019 Year in Review</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Jichao Ouyang">
-<meta name="description" content="Highlights about what happened last year."
->
-<meta name="keywords" content="Scala,Free,Monad,MTL,ReaderT,Kleisli,Grokking Monad,Zhuyu,Jujiu,Luci">
+<meta name="author" content="Jichao Ouyang" />
+<meta name="description" content="Highlights about what happened last year." />
+<meta name="keywords" content="Scala,Free,Monad,MTL,ReaderT,Kleisli,Grokking Monad,Zhuyu,Jujiu,Luci" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -21,28 +20,6 @@
 <meta property="og:description" content="2019 Year in Review" />
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/images/Screenshot_2020-01-01%20jcouyang%20-%20Overview.png" property="og:image">
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -59,12 +36,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">2019 Year in Review</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#org0d5918f">3 Layer Scala Cake</a></li>
 <li><a href="#org162a9df">Grokking Monad</a></li>
@@ -82,7 +59,7 @@ I've 2210 commits over the whole year.
 </p>
 
 
-<figure id="orgabbba9e">
+<figure id="org87130cf">
 <img src="./images/Screenshot_2020-01-01%20jcouyang%20-%20Overview.png" alt="Screenshot_2020-01-01%20jcouyang%20-%20Overview.png">
 
 </figure>
@@ -105,7 +82,7 @@ I also published the <a href="https://github.com/jcouyang/luci">luci</a> lib to 
 <h2 id="org162a9df"><a href="https://gumroad.com/l/grokking-monad">Grokking Monad</a></h2>
 <div class="outline-text-2" id="text-org162a9df">
 
-<figure id="org4173d9d">
+<figure id="org3f545f6">
 <img src="./images/Screenshot_2020-01-01%20Gumroad%20-%20Analytics.png" alt="Screenshot_2020-01-01%20Gumroad%20-%20Analytics.png">
 
 </figure>
@@ -135,21 +112,21 @@ By Scala subtyping system, we can save a lot of contramaping.
 <p>
 If you want to flatmap different input type of Kleisli before:
 </p>
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
-  k1 <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>((a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A1</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">List</span>(<span style="color: #6b8e23;">1</span>)).local(identity[<span style="color: #6b8e23;">A1</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">A2</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">A3</span>])
-  k2 <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>((a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A2</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">List</span>(<span style="color: #8b0000;">"2"</span>)).local(identity[<span style="color: #6b8e23;">A1</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">A2</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">A3</span>])
-  k3 <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>((a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A3</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">List</span>(<span style="color: #6b8e23;">true</span>)).local(identity[<span style="color: #6b8e23;">A1</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">A2</span> <span style="color: #00008b;">with</span> <span style="color: #36648b;">A3</span>])
-} <span style="color: #00008b;">yield</span> (k1, k2, k3)
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">program</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">for</span> {
+  k1 <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">Kleisli</span>((a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A1</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">List</span>(<span style="color: #81A1C1;">1</span>)).local(identity[<span style="color: #81A1C1;">A1</span> <span style="color: #81A1C1;">with</span> <span style="color: #81A1C1;">A2</span> <span style="color: #81A1C1;">with</span> <span style="color: #81A1C1;">A3</span>])
+  k2 <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">Kleisli</span>((a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A2</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">List</span>(<span style="color: #D08770;">"2"</span>)).local(identity[<span style="color: #81A1C1;">A1</span> <span style="color: #81A1C1;">with</span> <span style="color: #81A1C1;">A2</span> <span style="color: #81A1C1;">with</span> <span style="color: #81A1C1;">A3</span>])
+  k3 <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">Kleisli</span>((a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A3</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">List</span>(<span style="color: #81A1C1;">true</span>)).local(identity[<span style="color: #81A1C1;">A1</span> <span style="color: #81A1C1;">with</span> <span style="color: #81A1C1;">A2</span> <span style="color: #81A1C1;">with</span> <span style="color: #81A1C1;">A3</span>])
+} <span style="color: #81A1C1;">yield</span> (k1, k2, k3)
 </code></pre>
 
 <p>
 after cats 2.0 you can just:
 </p>
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
-  k1 <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>((a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A1</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">List</span>(<span style="color: #6b8e23;">1</span>))
-  k2 <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>((a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A2</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">List</span>(<span style="color: #8b0000;">"2"</span>))
-  k3 <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>((a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A3</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">List</span>(<span style="color: #6b8e23;">true</span>))
-} <span style="color: #00008b;">yield</span> (k1, k2, k3)
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">program</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">for</span> {
+  k1 <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">Kleisli</span>((a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A1</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">List</span>(<span style="color: #81A1C1;">1</span>))
+  k2 <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">Kleisli</span>((a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A2</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">List</span>(<span style="color: #D08770;">"2"</span>))
+  k3 <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">Kleisli</span>((a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A3</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">List</span>(<span style="color: #81A1C1;">true</span>))
+} <span style="color: #81A1C1;">yield</span> (k1, k2, k3)
 </code></pre>
 
 <p>
@@ -169,12 +146,12 @@ published for our team - Zhuyu.
 <p>
 With the power of Kleisli, now all kind of effect is composable:
 </p>
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
- <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> effects.<span style="color: #6b8e23;">Http4s</span>(<span style="color: #00008b;">_</span>.status(<span style="color: #6b8e23;">GET</span>(uri<span style="color: #8b0000;">"https://blog.oyanglul.us"</span>)))
- <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> effects.<span style="color: #6b8e23;">S3</span>(<span style="color: #00008b;">_</span>.putObject(<span style="color: #8b0000;">"example-bucket"</span>, <span style="color: #8b0000;">"filename"</span>, <span style="color: #8b0000;">"content"</span>))
- <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> effects.<span style="color: #6b8e23;">Doobie</span>(sql<span style="color: #8b0000;">"select 250"</span>.query[<span style="color: #6b8e23;">Int</span>].unique)
-} <span style="color: #00008b;">yield</span>()
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">Kleisli[IO, HasHttp4s with HasS3 with HasDoobie, Unit]</span>
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">program</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">for</span> {
+ <span style="color: #81A1C1;">_</span> <span style="color: #81A1C1;">&lt;-</span> effects.<span style="color: #81A1C1;">Http4s</span>(<span style="color: #81A1C1;">_</span>.status(<span style="color: #81A1C1;">GET</span>(uri<span style="color: #D08770;">"https://blog.oyanglul.us"</span>)))
+ <span style="color: #81A1C1;">_</span> <span style="color: #81A1C1;">&lt;-</span> effects.<span style="color: #81A1C1;">S3</span>(<span style="color: #81A1C1;">_</span>.putObject(<span style="color: #D08770;">"example-bucket"</span>, <span style="color: #D08770;">"filename"</span>, <span style="color: #D08770;">"content"</span>))
+ <span style="color: #81A1C1;">_</span> <span style="color: #81A1C1;">&lt;-</span> effects.<span style="color: #81A1C1;">Doobie</span>(sql<span style="color: #D08770;">"select 250"</span>.query[<span style="color: #81A1C1;">Int</span>].unique)
+} <span style="color: #81A1C1;">yield</span>()
+<span style="color: #677691;">// </span><span style="color: #677691;">Kleisli[IO, HasHttp4s with HasS3 with HasDoobie, Unit]</span>
 </code></pre>
 
 <p>
@@ -189,7 +166,7 @@ if it didn't compile.
 If you need a worker that consume SQS, just
 </p>
 
-<pre class="example" id="orgbe6f23a">
+<pre class="example" id="orgc1c83db">
 sbt new jcouyang/zhuyu.g8
 </pre>
 
@@ -207,21 +184,21 @@ Since zhuyu needs to find out the position of a type in coproduct type,
 I also made change to <a href="https://github.com/milessabin/shapeless">shapeless</a> so we can find out the index of
 a specific type in coproduct
 </p>
-<pre class="code"><code>  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">S</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">String</span>; <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">I</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Int</span>; <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">D</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Double</span>; <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">C</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Char</span>
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">SIDC</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">S</span> :+: <span style="color: #6b8e23;">I</span> :+: <span style="color: #6b8e23;">D</span> :+: <span style="color: #6b8e23;">C</span> :+: <span style="color: #6b8e23;">CNil</span>
+<pre class="code"><code>  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">S</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">String</span>; <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">I</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Int</span>; <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">D</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Double</span>; <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">C</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Char</span>
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">SIDC</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">S</span> :+: <span style="color: #81A1C1;">I</span> :+: <span style="color: #81A1C1;">D</span> :+: <span style="color: #81A1C1;">C</span> :+: <span style="color: #81A1C1;">CNil</span>
 
   {
-    <span style="color: #00008b;">val</span> <span style="color: #b8860b;">r1</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">IndexOf</span>[<span style="color: #6b8e23;">SIDC</span>, <span style="color: #6b8e23;">S</span>].value
-    assertTypedEquals(<span style="color: #6b8e23;">0</span>, r1)
+    <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">r1</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">IndexOf</span>[<span style="color: #81A1C1;">SIDC</span>, <span style="color: #81A1C1;">S</span>].value
+    assertTypedEquals(<span style="color: #81A1C1;">0</span>, r1)
 
-    <span style="color: #00008b;">val</span> <span style="color: #b8860b;">r2</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Nat</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">IndexOf</span>[<span style="color: #6b8e23;">SIDC</span>, <span style="color: #6b8e23;">I</span>].apply()
-    assertTypedEquals(<span style="color: #6b8e23;">Nat</span>._1, r2)
+    <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">r2</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Nat</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">IndexOf</span>[<span style="color: #81A1C1;">SIDC</span>, <span style="color: #81A1C1;">I</span>].apply()
+    assertTypedEquals(<span style="color: #81A1C1;">Nat</span>._1, r2)
 
-    <span style="color: #00008b;">val</span> <span style="color: #b8860b;">r3</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Coproduct</span>[<span style="color: #6b8e23;">SIDC</span>](<span style="color: #6b8e23;">1</span>).indexOf[<span style="color: #6b8e23;">D</span>]
-    assertTypedEquals(<span style="color: #6b8e23;">Nat</span>._2, r3)
+    <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">r3</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Coproduct</span>[<span style="color: #81A1C1;">SIDC</span>](<span style="color: #81A1C1;">1</span>).indexOf[<span style="color: #81A1C1;">D</span>]
+    assertTypedEquals(<span style="color: #81A1C1;">Nat</span>._2, r3)
 
-    <span style="color: #00008b;">val</span> <span style="color: #b8860b;">r4</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">IndexOf</span>[<span style="color: #6b8e23;">SIDC</span>, <span style="color: #6b8e23;">C</span>].value
-    assertTypedEquals(<span style="color: #6b8e23;">3</span>, r4)
+    <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">r4</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">IndexOf</span>[<span style="color: #81A1C1;">SIDC</span>, <span style="color: #81A1C1;">C</span>].value
+    assertTypedEquals(<span style="color: #81A1C1;">3</span>, r4)
   }
 }
 </code></pre>
@@ -298,7 +275,7 @@ and it's easy to <a href="https://github.com/jcouyang/jujiu#extensible">add Redd
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2020-01-01 Wed 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

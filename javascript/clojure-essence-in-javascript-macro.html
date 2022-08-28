@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:31 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>JavaScript玩转Clojure大法之 - Macro (1)</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="unknown">
-<meta name="keywords" content="macro, javascript, clojure, lisp, sweetjs, meta programming">
+<meta name="author" content="unknown" />
+<meta name="keywords" content="macro, javascript, clojure, lisp, sweetjs, meta programming" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -15,28 +15,6 @@
 <link rel="stylesheet" href="/style/toc.css"/>
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -53,12 +31,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">JavaScript玩转Clojure大法之 - Macro (1)</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#org79caf1e">Macro</a></li>
 <li><a href="#orga350a99">Sweet.js</a>
@@ -92,13 +70,13 @@ macro可以说是lisp语言的独门绝技, lisp语言数据即代码,以及s-ex
 </p>
 
 
-<figure id="orgc51cf01">
+<figure id="org855fe99">
 <img src="./images/bender-make-bender.gif" alt="bender-make-bender.gif">
 
 </figure>
 
-<pre class="code"><code>(macroexpand '(<span style="color: #00008b;">when-not</span> (= 1 3) (print <span style="color: #8b0000;">"damn"</span>)))
-<span style="color: #8c8c8c; font-style: italic;">; </span><span style="color: #8c8c8c; font-style: italic;">=&gt; (if (= 1 3) nil (do (print "damn")))</span>
+<pre class="code"><code>(macroexpand '(<span style="color: #81A1C1;">when-not</span> (= 1 3) (print <span style="color: #D08770;">"damn"</span>)))
+<span style="color: #677691;">; </span><span style="color: #677691;">=&gt; (if (= 1 3) nil (do (print "damn")))</span>
 </code></pre>
 
 <p>
@@ -194,10 +172,10 @@ foo!(x =&gt; 3); // =&gt; println!("got a ", 3)
   {
     (x=&gt;$e:expr)
   } =&gt; {
-    console.log(<span style="color: #8b0000;">'got a '</span>, $e)
+    console.log(<span style="color: #D08770;">'got a '</span>, $e)
   }
 }
-foo(x=&gt;3) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; console.log("got a ", 3)</span>
+foo(x=&gt;3) <span style="color: #677691;">// </span><span style="color: #677691;">=&gt; console.log("got a ", 3)</span>
 </code></pre>
 
 <p>
@@ -229,19 +207,19 @@ foo(x=&gt;3) <span style="color: #8c8c8c; font-style: italic;">// </span><span s
 foo &bull; ( &bull; x &bull; = &bull; &gt; &bull; 3 &bull; )</li>
 <li>变token树: 括号里面是一棵树, 第一个是根, 后面的元素有括号的是子树, 没有的就是叶子了.</li>
 </ol>
-<pre class="example" id="org2d400fc">
+<pre class="example" id="orga7fc016">
 (foo ('()' x = &gt; 3))
 </pre>
 <ol class="org-ol">
 <li><p>
 变term树: 
 </p>
-<pre class="example" id="org7281e82">
+<pre class="example" id="orga51508a">
 (call:foo x = &gt; 3)
 </pre></li>
 <li>expand:</li>
 </ol>
-<pre class="example" id="orgdb69cf8">
+<pre class="example" id="org6e8b5cf">
 (call:foo (call:console.log 'got a' , 3))
 </pre>
 
@@ -272,16 +250,16 @@ Allright, 当然这个例子好简单, 但是像 rule macro 只能做一些非�
 让我们先来一 <del>发</del> 个例子
 </p>
 <pre class="code"><code>  macro m {
-    <span style="color: #00008b;">case</span> {ctx (x=&gt;$x)} =&gt; {
-      console.log(<span style="color: #8b0000;">'haha iam javascript'</span>)
-      <span style="color: #00008b;">return</span> #{
+    <span style="color: #81A1C1;">case</span> {ctx (x=&gt;$x)} =&gt; {
+      console.log(<span style="color: #D08770;">'haha iam javascript'</span>)
+      <span style="color: #81A1C1;">return</span> #{
        console.log($x) 
       }
     }
   }
   m(100) 
-<span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; haha iam javascript (to console)</span>
-<span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; console.log(100)</span>
+<span style="color: #677691;">//</span><span style="color: #677691;">=&gt; haha iam javascript (to console)</span>
+<span style="color: #677691;">//</span><span style="color: #677691;">=&gt; console.log(100)</span>
 </code></pre>
 
 <p>
@@ -293,10 +271,10 @@ Allright, 当然这个例子好简单, 但是像 rule macro 只能做一些非�
 这里面的语法变成语法树, 当然语法树结构是数组, 每个元素还是一个token树.比如console.log(3)大概是这种结构</li>
 </ol>
 <pre class="code"><code>[
-    {token: {value: <span style="color: #8b0000;">'console'</span>}}
-    {token: {value: <span style="color: #8b0000;">'.'</span>}},
-    {token: {value: <span style="color: #8b0000;">'log'</span>}},
-    {token: {value: <span style="color: #8b0000;">'()'</span>},
+    {token: {value: <span style="color: #D08770;">'console'</span>}}
+    {token: {value: <span style="color: #D08770;">'.'</span>}},
+    {token: {value: <span style="color: #D08770;">'log'</span>}},
+    {token: {value: <span style="color: #D08770;">'()'</span>},
      inner:[
          {token: {value: 3}}
      ]}
@@ -318,11 +296,11 @@ Allright, 当然这个例子好简单, 但是像 rule macro 只能做一些非�
 <p>
 arity function指根据不同个数的参数, 有不同的函数body. 比如
 </p>
-<pre class="code"><code>(<span style="color: #00008b;">defn</span> <span style="color: #6a5acd;">add</span>
+<pre class="code"><code>(<span style="color: #81A1C1;">defn</span> <span style="font-weight: bold;">add</span>
   ([x] (+ 0 x))
   ([x y] (+ x y)))
-(add 1)<span style="color: #8c8c8c; font-style: italic;">;=&gt;2</span>
-(add 1 2)<span style="color: #8c8c8c; font-style: italic;">;=&gt;3</span>
+(add 1)<span style="color: #677691;">;=&gt;2</span>
+(add 1 2)<span style="color: #677691;">;=&gt;3</span>
 </code></pre>
 
 </blockquote></div>
@@ -334,30 +312,30 @@ arity function指根据不同个数的参数, 有不同的函数body. 比如
   (a){a}
   (a, b) {a+b}
 }
-add(1) <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; 1</span>
-add(1, 2) <span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">=&gt; 3</span>
+add(1) <span style="color: #677691;">//</span><span style="color: #677691;">=&gt; 1</span>
+add(1, 2) <span style="color: #677691;">//</span><span style="color: #677691;">=&gt; 3</span>
 </code></pre>
 
 <p>
 先把macro摆出来
 </p>
 
-<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">//</span><span style="color: #8c8c8c; font-style: italic;">var macro from http://jlongster.com/Sweet.js-Tutorial--2--Recursive-Macros-and-Custom-Pattern-Classes</span>
+<pre class="code"><code><span style="color: #677691;">//</span><span style="color: #677691;">var macro from http://jlongster.com/Sweet.js-Tutorial--2--Recursive-Macros-and-Custom-Pattern-Classes</span>
 macro caseFunc {
-    <span style="color: #00008b;">case</span> {_ ($args...) {$body... $last:expr}} =&gt;
+    <span style="color: #81A1C1;">case</span> {_ ($args...) {$body... $last:expr}} =&gt;
     {
-      letstx $len = [makeValue(#{$args...}.length , <span style="color: #6b8e23;">null</span>)];
-      <span style="color: #00008b;">return</span> #{
-      <span style="color: #00008b;">case</span> $len:
-        <span style="color: #00008b;">return</span> (<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">$args</span>...){<span style="color: #b8860b;">$body</span>... <span style="color: #00008b;">return</span> <span style="color: #b8860b;">$last</span>}).<span style="color: #b8860b;">apply</span>(<span style="color: #6b8e23;">this</span>, <span style="color: #6b8e23;">arguments</span>)
+      letstx $len = [makeValue(#{$args...}.length , <span style="color: #81A1C1;">null</span>)];
+      <span style="color: #81A1C1;">return</span> #{
+      <span style="color: #81A1C1;">case</span> $len:
+        <span style="color: #81A1C1;">return</span> (<span style="color: #81A1C1;">function</span>(<span style="font-weight: bold;">$args</span>...){<span style="font-weight: bold;">$body</span>... <span style="color: #81A1C1;">return</span> <span style="font-weight: bold;">$last</span>}).<span style="font-weight: bold;">apply</span>(<span style="color: #81A1C1;">this</span>, <span style="color: #81A1C1;">arguments</span>)
       }
     }
 }
 
 macro defn{
   rule { $name { $(($args (,) ...){$body ...})...} } =&gt; {
-    <span style="color: #00008b;">function</span> <span style="color: #6a5acd;">$name</span> (){
-      <span style="color: #00008b;">switch</span>(<span style="color: #6b8e23;">arguments</span>.length){
+    <span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">$name</span> (){
+      <span style="color: #81A1C1;">switch</span>(<span style="color: #81A1C1;">arguments</span>.length){
         $(caseFunc ($args...) {$body...};
          )...
       }
@@ -368,21 +346,21 @@ defn arity_function{
   (a){a}
   (a, b) {a + b}
 }
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt;</span>
-<span style="color: #8c8c8c; font-style: italic;">/*</span>
-<span style="color: #8c8c8c; font-style: italic;">function arity_function() {</span>
-<span style="color: #8c8c8c; font-style: italic;">    switch (arguments.length) {</span>
-<span style="color: #8c8c8c; font-style: italic;">    case 1:</span>
-<span style="color: #8c8c8c; font-style: italic;">        return function (a) {</span>
-<span style="color: #8c8c8c; font-style: italic;">            return a;</span>
-<span style="color: #8c8c8c; font-style: italic;">        }.apply(this, arguments);</span>
-<span style="color: #8c8c8c; font-style: italic;">    case 2:</span>
-<span style="color: #8c8c8c; font-style: italic;">        return function (a, b) {</span>
-<span style="color: #8c8c8c; font-style: italic;">            return a + b;</span>
-<span style="color: #8c8c8c; font-style: italic;">        }.apply(this, arguments);</span>
-<span style="color: #8c8c8c; font-style: italic;">    }</span>
-<span style="color: #8c8c8c; font-style: italic;">}</span>
-<span style="color: #8c8c8c; font-style: italic;">*/</span>
+<span style="color: #677691;">// </span><span style="color: #677691;">=&gt;</span>
+<span style="color: #677691;">/*</span>
+<span style="color: #677691;">function arity_function() {</span>
+<span style="color: #677691;">    switch (arguments.length) {</span>
+<span style="color: #677691;">    case 1:</span>
+<span style="color: #677691;">        return function (a) {</span>
+<span style="color: #677691;">            return a;</span>
+<span style="color: #677691;">        }.apply(this, arguments);</span>
+<span style="color: #677691;">    case 2:</span>
+<span style="color: #677691;">        return function (a, b) {</span>
+<span style="color: #677691;">            return a + b;</span>
+<span style="color: #677691;">        }.apply(this, arguments);</span>
+<span style="color: #677691;">    }</span>
+<span style="color: #677691;">}</span>
+<span style="color: #677691;">*/</span>
 </code></pre>
 
 <div class="epigraph"><blockquote>
@@ -409,12 +387,12 @@ WTF shen me gui
 
 
 <pre class="code"><code><span class="linenr"> 1: </span>macro caseFunc {
-<span id="coderef-last" class="coderef-off"><span class="linenr"> 2: </span>  <span style="color: #00008b;">case</span> {_ ($args...) {$body... $last:expr}} =&gt;</span>
+<span id="coderef-last" class="coderef-off"><span class="linenr"> 2: </span>  <span style="color: #81A1C1;">case</span> {_ ($args...) {$body... $last:expr}} =&gt;</span>
 <span class="linenr"> 3: </span>    {
-<span id="coderef-makevalue" class="coderef-off"><span class="linenr"> 4: </span>      letstx $len = [makeValue(#{$args...}.length , <span style="color: #6b8e23;">null</span>)];</span>
-<span class="linenr"> 5: </span>      <span style="color: #00008b;">return</span> #{
-<span id="coderef-len" class="coderef-off"><span class="linenr"> 6: </span>        <span style="color: #00008b;">case</span> $len:</span>
-<span class="linenr"> 7: </span>        <span style="color: #00008b;">return</span> (<span style="color: #00008b;">function</span>(<span style="color: #b8860b;">$args</span>...){<span style="color: #b8860b;">$body</span>... <span style="color: #00008b;">return</span> <span style="color: #b8860b;">$last</span>}).<span style="color: #b8860b;">apply</span>(<span style="color: #6b8e23;">this</span>, <span style="color: #6b8e23;">arguments</span>)
+<span id="coderef-makevalue" class="coderef-off"><span class="linenr"> 4: </span>      letstx $len = [makeValue(#{$args...}.length , <span style="color: #81A1C1;">null</span>)];</span>
+<span class="linenr"> 5: </span>      <span style="color: #81A1C1;">return</span> #{
+<span id="coderef-len" class="coderef-off"><span class="linenr"> 6: </span>        <span style="color: #81A1C1;">case</span> $len:</span>
+<span class="linenr"> 7: </span>        <span style="color: #81A1C1;">return</span> (<span style="color: #81A1C1;">function</span>(<span style="font-weight: bold;">$args</span>...){<span style="font-weight: bold;">$body</span>... <span style="color: #81A1C1;">return</span> <span style="font-weight: bold;">$last</span>}).<span style="font-weight: bold;">apply</span>(<span style="color: #81A1C1;">this</span>, <span style="color: #81A1C1;">arguments</span>)
 <span class="linenr"> 8: </span>      }
 <span class="linenr"> 9: </span>    }
 <span class="linenr">10: </span>}
@@ -441,7 +419,7 @@ lexer和reader转换成类似lisp token树, 虽然坎坷了一些, 但是还是�
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 mozilla还有论文呢: <a href="https://github.com/mozilla/sweet.js/blob/master/doc/paper/sweetjs.pdf">https://github.com/mozilla/sweet.js/blob/master/doc/paper/sweetjs.pdf</a>
 </p></div></div>
 
@@ -456,7 +434,7 @@ mozilla还有论文呢: <a href="https://github.com/mozilla/sweet.js/blob/master
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2015-06-14 Sun 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

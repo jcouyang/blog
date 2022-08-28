@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Scala 3 通用代数类型 (GADT)</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="欧阳继超">
-<meta name="description" content="你可能不再需要 Cats"
->
-<meta name="keywords" content="Scala,Dotty,Haskell,Scala 3,Phantom Types">
+<meta name="author" content="欧阳继超" />
+<meta name="description" content="你可能不再需要 Cats" />
+<meta name="keywords" content="Scala,Dotty,Haskell,Scala 3,Phantom Types" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -21,28 +20,6 @@
 <meta property="og:description" content="你可能不再需要 Cats" />
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -59,7 +36,7 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">Scala 3 通用代数类型 (GADT)</h1>
 </header><p>
@@ -87,7 +64,7 @@
 我们都知道 <ruby>ADT<rt>Algebraic Datatypes</rt></ruby> 指的是 Coproduct 类型, 也就是由多个构造函数返回一种类型, 比如:
 </p>
 
-<pre class="example" id="orgc5bc524">
+<pre class="example" id="orga773264">
 enum List[+A]:
   case Nil
   case Cons(head: A, tail: List[A])
@@ -106,13 +83,13 @@ enum List[+A]:
 <p>
 然我们来定义一个类型更安全的 List, 叫 <code>SafeList</code>
 </p>
-<pre class="code"><code><span class="linenr">1: </span><span style="color: #00008b;">enum</span> <span style="color: #6b8e23;">Size</span><span style="color: #00008b;">:</span>
-<span class="linenr">2: </span>  <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">Empty</span>
-<span class="linenr">3: </span>  <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">NonEmpty</span>
+<pre class="code"><code><span class="linenr">1: </span><span style="color: #81A1C1;">enum</span> <span style="color: #81A1C1;">Size</span><span style="color: #81A1C1;">:</span>
+<span class="linenr">2: </span>  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Empty</span>
+<span class="linenr">3: </span>  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">NonEmpty</span>
 <span class="linenr">4: </span>
-<span class="linenr">5: </span><span style="color: #00008b;">enum</span> <span style="color: #6b8e23;">SafeList</span>[+<span style="color: #6b8e23;">A</span>, +<span style="color: #6b8e23;">S</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">Size</span>]<span style="color: #00008b;">:</span>
-<span id="coderef-Nil" class="coderef-off"><span class="linenr">6: </span>  <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">Nil</span> <span style="color: #00008b;">extends</span> <span style="color: #36648b;">SafeList</span>[<span style="color: #6b8e23;">Nothing</span>, <span style="color: #6b8e23;">Size</span>.<span style="color: #6b8e23;">Empty</span>.<span style="color: #00008b;">type</span>] <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span></span>
-<span class="linenr">7: </span>  <span style="color: #00008b;">case</span> <span style="color: #36648b;">Cons</span>(<span style="color: #b8860b;">head</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>, <span style="color: #b8860b;">tail</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">SafeList</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">Size</span>]) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">SafeList</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">Size</span>.<span style="color: #6b8e23;">NonEmpty</span>.<span style="color: #00008b;">type</span>]
+<span class="linenr">5: </span><span style="color: #81A1C1;">enum</span> <span style="color: #81A1C1;">SafeList</span>[+<span style="color: #81A1C1;">A</span>, +<span style="color: #81A1C1;">S</span> <span style="color: #81A1C1;">&lt;:</span> <span style="color: #81A1C1;">Size</span>]<span style="color: #81A1C1;">:</span>
+<span id="coderef-Nil" class="coderef-off"><span class="linenr">6: </span>  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Nil</span> <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">SafeList</span>[<span style="color: #81A1C1;">Nothing</span>, <span style="color: #81A1C1;">Size</span>.<span style="color: #81A1C1;">Empty</span>.<span style="color: #81A1C1;">type</span>] <span style="color: #677691;">// </span><span style="color: #677691;">&lt;-</span></span>
+<span class="linenr">7: </span>  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Cons</span>(<span style="font-weight: bold;">head</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>, <span style="font-weight: bold;">tail</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">SafeList</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">Size</span>]) <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">SafeList</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">Size</span>.<span style="color: #81A1C1;">NonEmpty</span>.<span style="color: #81A1C1;">type</span>]
 </code></pre>
 
 <p>
@@ -124,10 +101,10 @@ enum List[+A]:
 同样的我们把 Cons 的返回类型写死成 <code>SafeList[A, Size.NonEmpty.type]</code> 表示它不空.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">import</span> <span style="color: #6b8e23;">SafeList</span>.<span style="color: #00008b;">_</span>
+<pre class="code"><code><span style="color: #81A1C1;">import</span> <span style="color: #81A1C1;">SafeList</span>.<span style="color: #81A1C1;">_</span>
 
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">safeHead</span>[<span style="color: #6b8e23;">A</span>](list<span style="color: #00008b;">:</span> <span style="color: #36648b;">SafeList</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">Size</span>.<span style="color: #6b8e23;">NonEmpty</span>.<span style="color: #00008b;">type</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=</span> list <span style="color: #00008b;">match</span>
-  <span style="color: #00008b;">case</span> <span style="color: #36648b;">SafeList.Cons</span>(<span style="color: #b8860b;">head</span>, <span style="color: #b8860b;">tail</span>) <span style="color: #00008b;">=&gt;</span> head
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">safeHead</span>[<span style="color: #81A1C1;">A</span>](list<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">SafeList</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">Size</span>.<span style="color: #81A1C1;">NonEmpty</span>.<span style="color: #81A1C1;">type</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=</span> list <span style="color: #81A1C1;">match</span>
+  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">SafeList.Cons</span>(<span style="font-weight: bold;">head</span>, <span style="font-weight: bold;">tail</span>) <span style="color: #81A1C1;">=&gt;</span> head
 </code></pre>
 
 <p>
@@ -138,10 +115,10 @@ enum List[+A]:
 所以如果你传个 Nil 进去, 编译器就不乐意了.
 </p>
 
-<pre class="code"><code>safeHead(<span style="color: #6b8e23;">Nil</span>)
+<pre class="code"><code>safeHead(<span style="color: #81A1C1;">Nil</span>)
 </code></pre>
 
-<pre class="example" id="org5dcd72c">
+<pre class="example" id="orgbf52033">
 Found:    (Main.SafeList.Nil : Main.SafeList[Nothing, (Main.Size.Empty : Main.Size)])
 Required: Main.SafeList[Any, (Main.Size.NonEmpty : Main.Size)]
 </pre>
@@ -153,7 +130,7 @@ Required: Main.SafeList[Any, (Main.Size.NonEmpty : Main.Size)]
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://dotty.epfl.ch/docs/reference/enums/adts.html">https://dotty.epfl.ch/docs/reference/enums/adts.html</a>
 </p></div></div>
 
@@ -168,7 +145,7 @@ Required: Main.SafeList[Any, (Main.Size.NonEmpty : Main.Size)]
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2020-03-30 Mon 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

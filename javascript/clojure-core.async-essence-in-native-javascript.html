@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Clojure 风格的 JavaScript 并发编程</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Jichao Ouyang">
-<meta name="description" content="用原生 javascript es6 实现类似clojure core.async 风格的异步任务, 拜拜 callback hell"
->
-<meta name="keywords" content="javascript, es6, clojure, clojurescript, core.async, ecmascript6, golang, go, callback hell">
+<meta name="author" content="Jichao Ouyang" />
+<meta name="description" content="用原生 javascript es6 实现类似clojure core.async 风格的异步任务, 拜拜 callback hell" />
+<meta name="keywords" content="javascript, es6, clojure, clojurescript, core.async, ecmascript6, golang, go, callback hell" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -17,28 +16,6 @@
 <link rel="stylesheet" href="/style/toc.css"/>
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -55,12 +32,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">Clojure 风格的 JavaScript 并发编程</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#org0354ed6">TL;DR SLIDES</a></li>
 <li><a href="#org33ce530">Communicating Sequential Processes</a>
@@ -130,7 +107,7 @@ CSP的阵营, 叫做 Core.async.
 </p>
 
 
-<figure id="org91fa8ef">
+<figure id="org33c9dbe">
 <img src="./images/typing.gif" alt="typing.gif">
 
 </figure>
@@ -162,7 +139,7 @@ CSP的阵营, 叫做 Core.async.
 </p>
 
 
-<figure id="orgba2f37e">
+<figure id="org69f4594">
 <img src="./images/octo-leela.gif" alt="octo-leela.gif">
 
 </figure>
@@ -172,7 +149,7 @@ CSP的阵营, 叫做 Core.async.
 </p>
 
 
-<figure id="orgd16ad42">
+<figure id="orgf732d5b">
 <img src="https://www.evernote.com/shard/s23/sh/a65f9743-792e-4f57-8108-ede856b3f464/725cdaf31754164ac80e82f1cbf6f5d6/deep/0/Csp.png" alt="Csp.png">
 
 </figure>
@@ -215,33 +192,33 @@ Event loop 模式非常简单, 浏览器运行javascript就是从 event loop 里
 </ul>
 
 
-<figure id="org3f81810">
+<figure id="org1e2913a">
 <img src="https://www.evernote.com/shard/s23/sh/609488c9-b816-425e-9031-f0a2b1ac72f8/a3b5af41e63435d2b3fef4bff653b790/deep/0/Csp.png" alt="Csp.png">
 
 </figure>
 
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">a</span>(){
-  console.log(<span style="color: #8b0000;">'a'</span>);
+<pre class="code"><code><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">a</span>(){
+  console.log(<span style="color: #D08770;">'a'</span>);
 }
-<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">b</span>(){
-  console.log(<span style="color: #8b0000;">'b'</span>);
+<span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">b</span>(){
+  console.log(<span style="color: #D08770;">'b'</span>);
 }
-<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">timeout</span>(){
-  console.log(<span style="color: #8b0000;">'timeout'</span>);
+<span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">timeout</span>(){
+  console.log(<span style="color: #D08770;">'timeout'</span>);
 }
 setTimeout(timeout,0);
 a();
 b();
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; "a"</span>
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; "b"</span>
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; "timeout"</span>
+<span style="color: #677691;">// </span><span style="color: #677691;">=&gt; "a"</span>
+<span style="color: #677691;">// </span><span style="color: #677691;">=&gt; "b"</span>
+<span style="color: #677691;">// </span><span style="color: #677691;">=&gt; "timeout"</span>
 </code></pre>
 
 <p>
 所以这样一行代码的消息队列应该是这样的(处理顺序从左至右)
 </p>
 
-<!-- This HTML table template is generated by emacs 27.2 -->
+<!-- This HTML table template is generated by emacs 28.1 -->
 <table border="1">
   <tr>
     <td align="left" valign="top">
@@ -276,7 +253,7 @@ js把判断老婆同不同意的函数挂到了event loop队列中, 就继续执
 </p>
 
 
-<figure id="org9e5d56b">
+<figure id="orgc3fd672">
 <img src="https://seajones.co.uk/content/images/2014/12/callback-hell.png" alt="callback-hell.png">
 
 </figure>
@@ -315,7 +292,7 @@ CSP 的概念非常简单, 想象一下 event loop
 </ol>
 
 
-<figure id="orgd8d2b9e">
+<figure id="orgd383aff">
 <img src="https://www.evernote.com/shard/s23/sh/8c5eadb4-678b-4aec-b7df-ca03ffc36da5/775db9fd0da008539b45b924d30c1c50/deep/0/Csp.png" alt="Csp.png">
 
 </figure>
@@ -328,30 +305,30 @@ CSP 的概念非常简单, 想象一下 event loop
 等等, 还是刚才发短信的例子, 我们来用CSP实现一遍
 </p>
 
-<pre class="code"><code>(<span style="color: #00008b;">def</span> <span style="color: #b8860b;">working</span> (chan))
-(<span style="color: #00008b;">def</span> <span style="color: #b8860b;">texting</span> (chan))
+<pre class="code"><code>(<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">working</span> (chan))
+(<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">texting</span> (chan))
 
-(<span style="color: #00008b;">defn</span> <span style="color: #6a5acd;">boss-yelling</span> []
+(<span style="color: #81A1C1;">defn</span> <span style="font-weight: bold;">boss-yelling</span> []
   (go-loop [no 1]
     (&lt;! (timeout 1000))
-    (&gt;! working (str <span style="color: #8b0000;">"bose say: work "</span> no))
-    (<span style="color: #00008b;">recur</span> (+ no 1))))
+    (&gt;! working (str <span style="color: #D08770;">"bose say: work "</span> no))
+    (<span style="color: #81A1C1;">recur</span> (+ no 1))))
 
-<span id="coderef-wife" class="coderef-off">(<span style="color: #00008b;">defn</span> <span style="color: #6a5acd;">wife-texting</span> []</span>
+<span id="coderef-wife" class="coderef-off">(<span style="color: #81A1C1;">defn</span> <span style="font-weight: bold;">wife-texting</span> []</span>
   (go-loop []
     (&lt;! (timeout 4000))
-    (&gt;! texting <span style="color: #8b0000;">"wife say: come home!"</span>)
-    (<span style="color: #00008b;">recur</span>)))
+    (&gt;! texting <span style="color: #D08770;">"wife say: come home!"</span>)
+    (<span style="color: #81A1C1;">recur</span>)))
 
-<span id="coderef-reading" class="coderef-off">(<span style="color: #00008b;">defn</span> <span style="color: #6a5acd;">reading-text</span> []</span>
+<span id="coderef-reading" class="coderef-off">(<span style="color: #81A1C1;">defn</span> <span style="font-weight: bold;">reading-text</span> []</span>
   (go-loop []
-    (println (&lt;! texting) <span style="color: #8b0000;">"me: ignore"</span>)
-    (<span style="color: #00008b;">recur</span>)))
+    (println (&lt;! texting) <span style="color: #D08770;">"me: ignore"</span>)
+    (<span style="color: #81A1C1;">recur</span>)))
 
-(<span style="color: #00008b;">defn</span> <span style="color: #6a5acd;">work</span> []
+(<span style="color: #81A1C1;">defn</span> <span style="font-weight: bold;">work</span> []
   (go-loop []
-    (println (&lt;! working) <span style="color: #8b0000;">" me: working"</span>)
-    (<span style="color: #00008b;">recur</span>)))
+    (println (&lt;! working) <span style="color: #D08770;">" me: working"</span>)
+    (<span style="color: #81A1C1;">recur</span>)))
 
 (boss-yelling)
 (wife-texting)
@@ -407,7 +384,7 @@ Chrome有一个 feature toggle 可以打开部分 es6 功能.  打开 <code>chro
 </p>
 
 
-<figure id="org8ac821f">
+<figure id="org65e69d4">
 <img src="./images/bender-generator.gif" alt="bender-generator.gif">
 
 </figure>
@@ -428,24 +405,24 @@ goroutines 其实就是一个状态机, generator为输入
 <li>如果该步的返回值状态为 park, <a href="#coderef-parking" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-parking');" onmouseout="CodeHighlightOff(this, 'coderef-parking');">那么就是什么也不做, 过一会再来进入状态机尝试</a></li>
 <li>如果为 continue, <a href="#coderef-continue" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-continue');" onmouseout="CodeHighlightOff(this, 'coderef-continue');">这接着generator下一步, 继续循环</a></li>
 </ul>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">go_</span>(<span style="color: #b8860b;">machine</span>, <span style="color: #b8860b;">step</span>) {
-  <span style="color: #00008b;">while</span>(!step.done) {
-    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">arr</span>   = step.value(),
+<pre class="code"><code><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">go_</span>(<span style="font-weight: bold;">machine</span>, <span style="font-weight: bold;">step</span>) {
+  <span style="color: #81A1C1;">while</span>(!step.done) {
+    <span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">arr</span>   = step.value(),
         state = arr[0],
         value = arr[1];
-    <span style="color: #00008b;">switch</span> (state) {
-      <span style="color: #00008b;">case</span> <span style="color: #8b0000;">"park"</span>:
-<span id="coderef-parking" class="coderef-off">        setTimeout(<span style="color: #00008b;">function</span>() { go_(machine, step); },0);</span>
-        <span style="color: #00008b;">return</span>;
-      <span style="color: #00008b;">case</span> <span style="color: #8b0000;">"continue"</span>:
+    <span style="color: #81A1C1;">switch</span> (state) {
+      <span style="color: #81A1C1;">case</span> <span style="color: #D08770;">"park"</span>:
+<span id="coderef-parking" class="coderef-off">        setTimeout(<span style="color: #81A1C1;">function</span>() { go_(machine, step); },0);</span>
+        <span style="color: #81A1C1;">return</span>;
+      <span style="color: #81A1C1;">case</span> <span style="color: #D08770;">"continue"</span>:
 <span id="coderef-continue" class="coderef-off">        step = machine.next(value);</span>
-        <span style="color: #00008b;">break</span>;
+        <span style="color: #81A1C1;">break</span>;
     }
   }
 }
 
-<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">go</span>(<span style="color: #b8860b;">machine</span>) {
-<span id="coderef-generator" class="coderef-off">  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">gen</span> = machine();</span>
+<span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">go</span>(<span style="font-weight: bold;">machine</span>) {
+<span id="coderef-generator" class="coderef-off">  <span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">gen</span> = machine();</span>
   go_(gen, gen.next());
 }
 </code></pre>
@@ -460,9 +437,9 @@ goroutines 其实就是一个状态机, generator为输入
 只需要在 <code>go_</code> 中加入一个 timeout 的 <code>case</code> 就好了
 </p>
 <pre class="code"><code>...
-  <span style="color: #00008b;">case</span> <span style="color: #8b0000;">'timeout'</span>:
-    setTimeout(<span style="color: #00008b;">function</span>(){ go_(machine, machine.next());}, value);
-    <span style="color: #00008b;">return</span>;
+  <span style="color: #81A1C1;">case</span> <span style="color: #D08770;">'timeout'</span>:
+    setTimeout(<span style="color: #81A1C1;">function</span>(){ go_(machine, machine.next());}, value);
+    <span style="color: #81A1C1;">return</span>;
 ...
 </code></pre>
 <p>
@@ -472,10 +449,10 @@ goroutines 其实就是一个状态机, generator为输入
 <p>
 另外还需要一个返回 timeout channel 的函数
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">timeout</span>(<span style="color: #b8860b;">interval</span>){
-  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">chan</span> = [interval];
-  chan.name = <span style="color: #8b0000;">'timeout'</span>;
-  <span style="color: #00008b;">return</span> chan;
+<pre class="code"><code><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">timeout</span>(<span style="font-weight: bold;">interval</span>){
+  <span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">chan</span> = [interval];
+  chan.name = <span style="color: #D08770;">'timeout'</span>;
+  <span style="color: #81A1C1;">return</span> chan;
 }
 </code></pre>
 </div>
@@ -493,15 +470,15 @@ goroutines 其实就是一个状态机, generator为输入
 <li>如果是 timeout channel, 状态置成 timeout</li>
 </ul>
 
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">take</span>(<span style="color: #b8860b;">chan</span>) {
-  <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>() {
-    <span style="color: #00008b;">if</span>(chan.name === <span style="color: #8b0000;">'timeout'</span>){
-      <span style="color: #00008b;">return</span> [<span style="color: #8b0000;">'timeout'</span>, chan.pop()];
-    }<span style="color: #00008b;">else</span> <span style="color: #00008b;">if</span>(chan.length === 0) {
-      <span style="color: #00008b;">return</span> [<span style="color: #8b0000;">"park"</span>, <span style="color: #6b8e23;">null</span>];
-    } <span style="color: #00008b;">else</span> {
-      <span style="color: #00008b;">var</span> <span style="color: #b8860b;">val</span> = chan.pop();
-      <span style="color: #00008b;">return</span> [<span style="color: #8b0000;">"continue"</span>, val];
+<pre class="code"><code><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">take</span>(<span style="font-weight: bold;">chan</span>) {
+  <span style="color: #81A1C1;">return</span> <span style="color: #81A1C1;">function</span>() {
+    <span style="color: #81A1C1;">if</span>(chan.name === <span style="color: #D08770;">'timeout'</span>){
+      <span style="color: #81A1C1;">return</span> [<span style="color: #D08770;">'timeout'</span>, chan.pop()];
+    }<span style="color: #81A1C1;">else</span> <span style="color: #81A1C1;">if</span>(chan.length === 0) {
+      <span style="color: #81A1C1;">return</span> [<span style="color: #D08770;">"park"</span>, <span style="color: #81A1C1;">null</span>];
+    } <span style="color: #81A1C1;">else</span> {
+      <span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">val</span> = chan.pop();
+      <span style="color: #81A1C1;">return</span> [<span style="color: #D08770;">"continue"</span>, val];
     }
   };
 }
@@ -520,13 +497,13 @@ goroutines 其实就是一个状态机, generator为输入
 <li>如果 channel 非空, parking</li>
 </ul>
 
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">put</span>(<span style="color: #b8860b;">chan</span>, <span style="color: #b8860b;">val</span>) {
-  <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>() {
-    <span style="color: #00008b;">if</span>(chan.length === 0) {
+<pre class="code"><code><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">put</span>(<span style="font-weight: bold;">chan</span>, <span style="font-weight: bold;">val</span>) {
+  <span style="color: #81A1C1;">return</span> <span style="color: #81A1C1;">function</span>() {
+    <span style="color: #81A1C1;">if</span>(chan.length === 0) {
       chan.unshift(val);
-      <span style="color: #00008b;">return</span> [<span style="color: #8b0000;">"continue"</span>, <span style="color: #6b8e23;">null</span>];
-    } <span style="color: #00008b;">else</span> {
-      <span style="color: #00008b;">return</span> [<span style="color: #8b0000;">"park"</span>, <span style="color: #6b8e23;">null</span>];
+      <span style="color: #81A1C1;">return</span> [<span style="color: #D08770;">"continue"</span>, <span style="color: #81A1C1;">null</span>];
+    } <span style="color: #81A1C1;">else</span> {
+      <span style="color: #81A1C1;">return</span> [<span style="color: #D08770;">"park"</span>, <span style="color: #81A1C1;">null</span>];
     }
   };
 }
@@ -540,38 +517,38 @@ goroutines 其实就是一个状态机, generator为输入
 <p>
 现在可以原原本本的将之前的clojure的例子翻译成JavaScript了
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">boss_yelling</span>(){
-  go(<span style="color: #00008b;">function</span>*(){
-    <span style="color: #00008b;">for</span>(<span style="color: #00008b;">var</span> <span style="color: #b8860b;">i</span>=0;;i++){
-      <span style="color: #00008b;">yield</span> take(timeout(1000));
-      <span style="color: #00008b;">yield</span> put(work, <span style="color: #8b0000;">"boss say: work "</span>+i);
+<pre class="code"><code><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">boss_yelling</span>(){
+  go(<span style="color: #81A1C1;">function</span>*(){
+    <span style="color: #81A1C1;">for</span>(<span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">i</span>=0;;i++){
+      <span style="color: #81A1C1;">yield</span> take(timeout(1000));
+      <span style="color: #81A1C1;">yield</span> put(work, <span style="color: #D08770;">"boss say: work "</span>+i);
     }
   });
 }
 
-<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">wife_texting</span>(){
-  go(<span style="color: #00008b;">function</span>*(){
-    <span style="color: #00008b;">for</span>(;;){
-      <span style="color: #00008b;">yield</span> take(timeout(4000));
-      <span style="color: #00008b;">yield</span> put(text, <span style="color: #8b0000;">"wife say: come home"</span>);
+<span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">wife_texting</span>(){
+  go(<span style="color: #81A1C1;">function</span>*(){
+    <span style="color: #81A1C1;">for</span>(;;){
+      <span style="color: #81A1C1;">yield</span> take(timeout(4000));
+      <span style="color: #81A1C1;">yield</span> put(text, <span style="color: #D08770;">"wife say: come home"</span>);
     }
   });
 }
 
-<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">working</span>(){
-  go(<span style="color: #00008b;">function</span>*(){
-    <span style="color: #00008b;">for</span>(;;){
-      <span style="color: #00008b;">var</span> <span style="color: #b8860b;">task</span> = <span style="color: #00008b;">yield</span> take(work);
-      console.log(task, <span style="color: #8b0000;">"me working"</span>);
+<span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">working</span>(){
+  go(<span style="color: #81A1C1;">function</span>*(){
+    <span style="color: #81A1C1;">for</span>(;;){
+      <span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">task</span> = <span style="color: #81A1C1;">yield</span> take(work);
+      console.log(task, <span style="color: #D08770;">"me working"</span>);
     }
   });
 }
 
-<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">texting</span>(){
-  go(<span style="color: #00008b;">function</span>*(){
-    <span style="color: #00008b;">for</span>(;;){
-      <span style="color: #00008b;">var</span> <span style="color: #b8860b;">read</span> = <span style="color: #00008b;">yield</span> take(text);
-      console.log(read, <span style="color: #8b0000;">"me ignoring"</span>);
+<span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">texting</span>(){
+  go(<span style="color: #81A1C1;">function</span>*(){
+    <span style="color: #81A1C1;">for</span>(;;){
+      <span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">read</span> = <span style="color: #81A1C1;">yield</span> take(text);
+      console.log(read, <span style="color: #D08770;">"me ignoring"</span>);
     }
   });
 }
@@ -592,11 +569,11 @@ texting();
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 里面的go的实现来自 <a href="https://swannodette.github.io/2013/08/24/es6-generators-and-csp/">https://swannodette.github.io/2013/08/24/es6-generators-and-csp/</a>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 Chrome有一个 feature toggle 可以打开部分 es6 功能.  打开 <code>chrome://flags/#enable-javascript-harmony</code> 设置为 <code>true</code>
 </p></div></div>
 
@@ -611,7 +588,7 @@ Chrome有一个 feature toggle 可以打开部分 es6 功能.  打开 <code>chro
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2015-04-28 Tue 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

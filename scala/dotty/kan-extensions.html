@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Scala 3 Kan Extensions</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="欧阳继超">
-<meta name="description" content="你可能不再需要 Cats"
->
-<meta name="keywords" content="Scala,Dotty,Haskell,Scala 3,FunctionK,Rank N Types,Rank 2 Types,Polymorphic function types,Kan Extensions,Free Functor">
+<meta name="author" content="欧阳继超" />
+<meta name="description" content="你可能不再需要 Cats" />
+<meta name="keywords" content="Scala,Dotty,Haskell,Scala 3,FunctionK,Rank N Types,Rank 2 Types,Polymorphic function types,Kan Extensions,Free Functor" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -21,28 +20,6 @@
 <meta property="og:description" content="你可能不再需要 Cats" />
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -59,12 +36,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">Scala 3 Kan Extensions</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#org34cb61c">左看</a></li>
 <li><a href="#org8948dcd">右看</a></li>
@@ -123,24 +100,24 @@ The notion of Kan extensions subsumes all the other fundamental concepts of cate
 <p>
 Haskell 的定义用了 GADT
 </p>
-<pre class="code"><code><span style="color: #00008b;">data</span> <span style="color: #36648b;">Lan</span> g h a <span style="color: #00008b;">where</span>
-  <span style="color: #36648b;">Lan</span> <span style="color: #b8860b;">::</span> (g b <span style="color: #b8860b;">-&gt;</span> a) <span style="color: #b8860b;">-&gt;</span> h b <span style="color: #b8860b;">-&gt;</span> <span style="color: #36648b;">Lan</span> g h a
+<pre class="code"><code><span style="color: #81A1C1;">data</span> <span style="color: #81A1C1;">Lan</span> g h a <span style="color: #81A1C1;">where</span>
+  <span style="color: #81A1C1;">Lan</span> <span style="font-weight: bold;">::</span> (g b <span style="font-weight: bold;">-&gt;</span> a) <span style="font-weight: bold;">-&gt;</span> h b <span style="font-weight: bold;">-&gt;</span> <span style="color: #81A1C1;">Lan</span> g h a
 </code></pre>
 
 <p>
 对阿，我们才学过 <a href="./gadt.html">GADT</a>, 用 enum 就好了：
 </p>
-<pre class="code"><code><span style="color: #00008b;">enum</span> <span style="color: #6b8e23;">Lan</span>[<span style="color: #6b8e23;">G</span>[?], <span style="color: #6b8e23;">H</span>[?], <span style="color: #6b8e23;">A</span>] {
- <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">LeftKan</span>[<span style="color: #6b8e23;">G</span>[?], <span style="color: #6b8e23;">H</span>[?], <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">G</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">A</span>), v<span style="color: #00008b;">:</span> <span style="color: #36648b;">H</span>[<span style="color: #6b8e23;">B</span>]) <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Lan</span>[<span style="color: #6b8e23;">G</span>, <span style="color: #6b8e23;">H</span>, <span style="color: #6b8e23;">A</span>]
+<pre class="code"><code><span style="color: #81A1C1;">enum</span> <span style="color: #81A1C1;">Lan</span>[<span style="color: #81A1C1;">G</span>[?], <span style="color: #81A1C1;">H</span>[?], <span style="color: #81A1C1;">A</span>] {
+ <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">LeftKan</span>[<span style="color: #81A1C1;">G</span>[?], <span style="color: #81A1C1;">H</span>[?], <span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](f<span style="color: #81A1C1;">:</span> (<span style="color: #81A1C1;">G</span>[<span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">A</span>), v<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">H</span>[<span style="color: #81A1C1;">B</span>]) <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">Lan</span>[<span style="color: #81A1C1;">G</span>, <span style="color: #81A1C1;">H</span>, <span style="color: #81A1C1;">A</span>]
 }
 </code></pre>
 
 <p>
 看起来不是很复杂，重要的是 Lan 可以得到一个 <ruby>免费函子<rt>Free Functor</rt></ruby>:
 </p>
-<pre class="code"><code><span style="color: #00008b;">given</span> [<span style="color: #6b8e23;">G</span>[?],<span style="color: #6b8e23;">H</span>[?]] <span style="color: #00008b;">as</span> <span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">Lan</span>[<span style="color: #6b8e23;">G</span>, <span style="color: #6b8e23;">H</span>, *]] {
-  <span style="color: #00008b;">def</span> [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](r<span style="color: #00008b;">:</span> <span style="color: #36648b;">Lan</span>[<span style="color: #6b8e23;">G</span>, <span style="color: #6b8e23;">H</span>, <span style="color: #6b8e23;">A</span>]).map(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span><span style="color: #36648b;">Lan</span>[<span style="color: #6b8e23;">G</span>,<span style="color: #6b8e23;">H</span>,<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> r <span style="color: #00008b;">match</span> {
-    <span style="color: #00008b;">case</span> <span style="color: #36648b;">Lan.LeftKan</span>(<span style="color: #b8860b;">g</span>, <span style="color: #b8860b;">v</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Lan</span>.<span style="color: #6b8e23;">LeftKan</span>(f compose g, v)
+<pre class="code"><code><span style="color: #81A1C1;">given</span> [<span style="color: #81A1C1;">G</span>[?],<span style="color: #81A1C1;">H</span>[?]] <span style="color: #81A1C1;">as</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">Lan</span>[<span style="color: #81A1C1;">G</span>, <span style="color: #81A1C1;">H</span>, *]] {
+  <span style="color: #81A1C1;">def</span> [<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](r<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Lan</span>[<span style="color: #81A1C1;">G</span>, <span style="color: #81A1C1;">H</span>, <span style="color: #81A1C1;">A</span>]).map(f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>)<span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">Lan</span>[<span style="color: #81A1C1;">G</span>,<span style="color: #81A1C1;">H</span>,<span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span> r <span style="color: #81A1C1;">match</span> {
+    <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Lan.LeftKan</span>(<span style="font-weight: bold;">g</span>, <span style="font-weight: bold;">v</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Lan</span>.<span style="color: #81A1C1;">LeftKan</span>(f compose g, v)
   }
 }
 </code></pre>
@@ -149,7 +126,7 @@ Haskell 的定义用了 GADT
 这怎么这么眼熟，难道这不就是用来实现 Free Monad 的 <a href="file:////Documents/blog/org/grokking-monad/part3..html">Coyoneda</a>? 果然可以引出所有概念。
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">CoYoneda</span>[<span style="color: #6b8e23;">F</span>[?], <span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Lan</span>[<span style="color: #6b8e23;">Id</span>, <span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">A</span>]
+<pre class="code"><code><span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">CoYoneda</span>[<span style="color: #81A1C1;">F</span>[?], <span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Lan</span>[<span style="color: #81A1C1;">Id</span>, <span style="color: #81A1C1;">F</span>, <span style="color: #81A1C1;">A</span>]
 </code></pre>
 
 <p>
@@ -169,39 +146,39 @@ Haskell 的定义用了 GADT
 <div id="outline-container-org8948dcd" class="outline-2">
 <h2 id="org8948dcd">右看</h2>
 <div class="outline-text-2" id="text-org8948dcd">
-<pre class="code"><code><span style="color: #00008b;">newtype</span> <span style="color: #36648b;">Ran</span> g h a <span style="color: #b8860b;">=</span> <span style="color: #36648b;">Ran</span> { runRan <span style="color: #b8860b;">::</span> <span style="color: #00008b;">forall</span> b<span style="color: #b8860b;">.</span> (a <span style="color: #b8860b;">-&gt;</span> g b) <span style="color: #b8860b;">-&gt;</span> h b }
+<pre class="code"><code><span style="color: #81A1C1;">newtype</span> <span style="color: #81A1C1;">Ran</span> g h a <span style="font-weight: bold;">=</span> <span style="color: #81A1C1;">Ran</span> { runRan <span style="font-weight: bold;">::</span> <span style="color: #81A1C1;">forall</span> b<span style="font-weight: bold;">.</span> (a <span style="font-weight: bold;">-&gt;</span> g b) <span style="font-weight: bold;">-&gt;</span> h b }
 </code></pre>
 
 <p>
 从 Haskell 翻译过来也容易，我们不是才学的 <a href="./rank-N-type.html">Rank N Types</a> 么？ <code>forall b. (a -&gt; gb)</code> 很好表示：
 </p>
-<pre class="code"><code><span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Ran</span>[<span style="color: #6b8e23;">G</span>[?], <span style="color: #6b8e23;">H</span>[?], <span style="color: #6b8e23;">A</span>](run<span style="color: #00008b;">:</span> [<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=&gt;</span> (<span style="color: #6b8e23;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">G</span>[<span style="color: #6b8e23;">B</span>]) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">H</span>[<span style="color: #6b8e23;">B</span>])
+<pre class="code"><code><span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">Ran</span>[<span style="color: #81A1C1;">G</span>[?], <span style="color: #81A1C1;">H</span>[?], <span style="color: #81A1C1;">A</span>](run<span style="color: #81A1C1;">:</span> [<span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=&gt;</span> (<span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">G</span>[<span style="color: #81A1C1;">B</span>]) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">H</span>[<span style="color: #81A1C1;">B</span>])
 </code></pre>
 
 <p>
 这也有个 <ruby>免费函子<rt>Free Functor</rt></ruby>:
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">given</span> [<span style="color: #6b8e23;">G</span>[?],<span style="color: #6b8e23;">H</span>[?]] <span style="color: #00008b;">as</span> <span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">Ran</span>[<span style="color: #6b8e23;">G</span>, <span style="color: #6b8e23;">H</span>, *]] {
-  <span style="color: #00008b;">def</span> [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](r<span style="color: #00008b;">:</span> <span style="color: #36648b;">Ran</span>[<span style="color: #6b8e23;">G</span>, <span style="color: #6b8e23;">H</span>, <span style="color: #6b8e23;">A</span>]).map(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span><span style="color: #36648b;">Ran</span>[<span style="color: #6b8e23;">G</span>,<span style="color: #6b8e23;">H</span>,<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span>
-    <span style="color: #6b8e23;">Ran</span>([<span style="color: #6b8e23;">C</span>] <span style="color: #00008b;">=&gt;</span> (k<span style="color: #00008b;">:</span><span style="color: #36648b;">B</span><span style="color: #00008b;">=&gt;</span><span style="color: #6b8e23;">G</span>[<span style="color: #6b8e23;">C</span>]) <span style="color: #00008b;">=&gt;</span> r.run(k.compose(f)))
+<pre class="code"><code><span style="color: #81A1C1;">given</span> [<span style="color: #81A1C1;">G</span>[?],<span style="color: #81A1C1;">H</span>[?]] <span style="color: #81A1C1;">as</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">Ran</span>[<span style="color: #81A1C1;">G</span>, <span style="color: #81A1C1;">H</span>, *]] {
+  <span style="color: #81A1C1;">def</span> [<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](r<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Ran</span>[<span style="color: #81A1C1;">G</span>, <span style="color: #81A1C1;">H</span>, <span style="color: #81A1C1;">A</span>]).map(f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>)<span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">Ran</span>[<span style="color: #81A1C1;">G</span>,<span style="color: #81A1C1;">H</span>,<span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span>
+    <span style="color: #81A1C1;">Ran</span>([<span style="color: #81A1C1;">C</span>] <span style="color: #81A1C1;">=&gt;</span> (k<span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">B</span><span style="color: #81A1C1;">=&gt;</span><span style="color: #81A1C1;">G</span>[<span style="color: #81A1C1;">C</span>]) <span style="color: #81A1C1;">=&gt;</span> r.run(k.compose(f)))
 }
 </code></pre>
 
 <p>
 不用想也知道那么这个应该可以推出 Yoneda 吧：
 </p>
-<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">Yoneda</span>[<span style="color: #6b8e23;">F</span>[?], <span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Ran</span>[<span style="color: #6b8e23;">Id</span>, <span style="color: #6b8e23;">F</span>, <span style="color: #6b8e23;">A</span>]
+<pre class="code"><code><span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">Yoneda</span>[<span style="color: #81A1C1;">F</span>[?], <span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Ran</span>[<span style="color: #81A1C1;">Id</span>, <span style="color: #81A1C1;">F</span>, <span style="color: #81A1C1;">A</span>]
 </code></pre>
 
 <p>
 不仅有免费的函子，更有免费的单子，当 H 也是 G 的时候:
 </p>
-<pre class="code"><code><span style="color: #00008b;">given</span> [<span style="color: #6b8e23;">G</span>[?]](<span style="color: #00008b;">using</span> <span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">Ran</span>[<span style="color: #6b8e23;">G</span>, <span style="color: #6b8e23;">G</span>, *]]) <span style="color: #00008b;">as</span> <span style="color: #6b8e23;">Monad</span>[<span style="color: #6b8e23;">Ran</span>[<span style="color: #6b8e23;">G</span>, <span style="color: #6b8e23;">G</span>, *]] {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">pure</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Ran</span>[<span style="color: #6b8e23;">G</span>, <span style="color: #6b8e23;">G</span>, <span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Ran</span>([<span style="color: #6b8e23;">C</span>]<span style="color: #00008b;">=&gt;</span>(k<span style="color: #00008b;">:</span><span style="color: #36648b;">A</span><span style="color: #00008b;">=&gt;</span><span style="color: #6b8e23;">G</span>[<span style="color: #6b8e23;">C</span>]) <span style="color: #00008b;">=&gt;</span> k(a))
-  <span style="color: #00008b;">def</span> [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](r<span style="color: #00008b;">:</span> <span style="color: #36648b;">Ran</span>[<span style="color: #6b8e23;">G</span>, <span style="color: #6b8e23;">G</span>, <span style="color: #6b8e23;">A</span>]).map(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span><span style="color: #36648b;">Ran</span>[<span style="color: #6b8e23;">G</span>,<span style="color: #6b8e23;">G</span>,<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> r.map(f)
-  <span style="color: #00008b;">def</span> [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](ran<span style="color: #00008b;">:</span> <span style="color: #36648b;">Ran</span>[<span style="color: #6b8e23;">G</span>, <span style="color: #6b8e23;">G</span>, <span style="color: #6b8e23;">A</span>]) &gt;&gt;= (f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Ran</span>[<span style="color: #6b8e23;">G</span>,<span style="color: #6b8e23;">G</span>,<span style="color: #6b8e23;">B</span>])<span style="color: #00008b;">:</span><span style="color: #36648b;">Ran</span>[<span style="color: #6b8e23;">G</span>,<span style="color: #6b8e23;">G</span>,<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span>
-    <span style="color: #6b8e23;">Ran</span>([<span style="color: #6b8e23;">C</span>] <span style="color: #00008b;">=&gt;</span> (k<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">G</span>[<span style="color: #6b8e23;">C</span>]) <span style="color: #00008b;">=&gt;</span> ran.run((a)<span style="color: #00008b;">=&gt;</span> f(a).run(k)))
+<pre class="code"><code><span style="color: #81A1C1;">given</span> [<span style="color: #81A1C1;">G</span>[?]](<span style="color: #81A1C1;">using</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">Ran</span>[<span style="color: #81A1C1;">G</span>, <span style="color: #81A1C1;">G</span>, *]]) <span style="color: #81A1C1;">as</span> <span style="color: #81A1C1;">Monad</span>[<span style="color: #81A1C1;">Ran</span>[<span style="color: #81A1C1;">G</span>, <span style="color: #81A1C1;">G</span>, *]] {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">pure</span>[<span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Ran</span>[<span style="color: #81A1C1;">G</span>, <span style="color: #81A1C1;">G</span>, <span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Ran</span>([<span style="color: #81A1C1;">C</span>]<span style="color: #81A1C1;">=&gt;</span>(k<span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">A</span><span style="color: #81A1C1;">=&gt;</span><span style="color: #81A1C1;">G</span>[<span style="color: #81A1C1;">C</span>]) <span style="color: #81A1C1;">=&gt;</span> k(a))
+  <span style="color: #81A1C1;">def</span> [<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](r<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Ran</span>[<span style="color: #81A1C1;">G</span>, <span style="color: #81A1C1;">G</span>, <span style="color: #81A1C1;">A</span>]).map(f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>)<span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">Ran</span>[<span style="color: #81A1C1;">G</span>,<span style="color: #81A1C1;">G</span>,<span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span> r.map(f)
+  <span style="color: #81A1C1;">def</span> [<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](ran<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Ran</span>[<span style="color: #81A1C1;">G</span>, <span style="color: #81A1C1;">G</span>, <span style="color: #81A1C1;">A</span>]) &gt;&gt;= (f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Ran</span>[<span style="color: #81A1C1;">G</span>,<span style="color: #81A1C1;">G</span>,<span style="color: #81A1C1;">B</span>])<span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">Ran</span>[<span style="color: #81A1C1;">G</span>,<span style="color: #81A1C1;">G</span>,<span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span>
+    <span style="color: #81A1C1;">Ran</span>([<span style="color: #81A1C1;">C</span>] <span style="color: #81A1C1;">=&gt;</span> (k<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">B</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">G</span>[<span style="color: #81A1C1;">C</span>]) <span style="color: #81A1C1;">=&gt;</span> ran.run((a)<span style="color: #81A1C1;">=&gt;</span> f(a).run(k)))
 }
 </code></pre>
 
@@ -230,19 +207,19 @@ Haskell 的定义用了 GADT
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://dotty.epfl.ch/docs/reference/changed-features/wildcards.html">https://dotty.epfl.ch/docs/reference/changed-features/wildcards.html</a>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://dotty.epfl.ch/docs/reference/contextual/givens.html">https://dotty.epfl.ch/docs/reference/contextual/givens.html</a>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://dotty.epfl.ch/docs/reference/contextual/using-clauses.html">https://dotty.epfl.ch/docs/reference/contextual/using-clauses.html</a>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4" role="doc-backlink">4</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="http://comonad.com/reader/2008/kan-extensions/">http://comonad.com/reader/2008/kan-extensions/</a>
 </p></div></div>
 
@@ -257,7 +234,7 @@ Haskell 的定义用了 GADT
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2020-04-07 Tue 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

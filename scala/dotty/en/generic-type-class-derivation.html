@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Generic Type Class Derivation in Scala 3</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Jichao Ouyang">
-<meta name="description" content="Let's try something more practical this time: redesigning a Category Theory library for Scala 3."
->
-<meta name="keywords" content="typeclasses,type classes,scala 3,dotty,meow,cats">
+<meta name="author" content="Jichao Ouyang" />
+<meta name="description" content="Let's try something more practical this time: redesigning a Category Theory library for Scala 3." />
+<meta name="keywords" content="typeclasses,type classes,scala 3,dotty,meow,cats" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -21,28 +20,6 @@
 <meta property="og:description" content="Let's try something more practical this time: redesigning a Category Theory library for Scala 3." />
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -59,12 +36,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">Generic Type Class Derivation in Scala 3</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#orgdd850b4">Kind 0 Type Class Derivation</a>
 <ul>
@@ -104,10 +81,10 @@ Source code 👉 <a href="https://github.com/jcouyang/meow">https://github.com/j
 From the previous article <a href="./type-classes.html">Type Classes</a>, we know that it should be very straightforward to implement a <code>Functor</code> instance, e.g. for <code>Option</code>.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">given</span> <span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">Option</span>] <span style="color: #00008b;">with</span>
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fmap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> (oa<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=&gt;</span> oa <span style="color: #00008b;">match</span>
-    <span style="color: #00008b;">case</span> <span style="color: #36648b;">Some</span>(<span style="color: #b8860b;">a</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Some</span>(f(a))
-    <span style="color: #00008b;">case</span> <span style="color: #6b8e23;">None</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">None</span>
+<pre class="code"><code><span style="color: #81A1C1;">given</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">Option</span>] <span style="color: #81A1C1;">with</span>
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">fmap</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Option</span>[<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Option</span>[<span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span> (oa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Option</span>[<span style="color: #81A1C1;">A</span>]) <span style="color: #81A1C1;">=&gt;</span> oa <span style="color: #81A1C1;">match</span>
+    <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Some</span>(<span style="font-weight: bold;">a</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Some</span>(f(a))
+    <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">None</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">None</span>
 </code></pre>
 
 <p>
@@ -117,9 +94,9 @@ However, there are so many data types to implement, and there is too much boiler
 <p>
 Let's say we have a new ADT <code>Tree</code>:
 </p>
-<pre class="code"><code><span style="color: #00008b;">enum</span> <span style="color: #6b8e23;">Tree</span>[<span style="color: #6b8e23;">T</span>] {
-  <span style="color: #00008b;">case</span> <span style="color: #36648b;">Branch</span>(<span style="color: #b8860b;">left</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Tree</span>[<span style="color: #6b8e23;">T</span>], <span style="color: #b8860b;">right</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Tree</span>[<span style="color: #6b8e23;">T</span>])
-  <span style="color: #00008b;">case</span> <span style="color: #36648b;">Leaf</span>(<span style="color: #b8860b;">elem</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">T</span>)
+<pre class="code"><code><span style="color: #81A1C1;">enum</span> <span style="color: #81A1C1;">Tree</span>[<span style="color: #81A1C1;">T</span>] {
+  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Branch</span>(<span style="font-weight: bold;">left</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Tree</span>[<span style="color: #81A1C1;">T</span>], <span style="font-weight: bold;">right</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Tree</span>[<span style="color: #81A1C1;">T</span>])
+  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Leaf</span>(<span style="font-weight: bold;">elem</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">T</span>)
 }
 </code></pre>
 
@@ -137,9 +114,9 @@ Example in Kittens<label for="1" class="margin-toggle sidenote-number"></label><
 <a href="https://github.com/typelevel/kittens#derive-functor">https://github.com/typelevel/kittens#derive-functor</a>
 </span>:
 </p>
-<pre class="code"><code><span style="color: #00008b;">import</span> cats.derived.<span style="color: #00008b;">_</span>
-<span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">showTree</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">Tree</span>] <span style="color: #00008b;">=</span> semiauto.show
-<span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">functorTree</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">Tree</span>] <span style="color: #00008b;">=</span> semiauto.functor
+<pre class="code"><code><span style="color: #81A1C1;">import</span> cats.derived.<span style="color: #81A1C1;">_</span>
+<span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">showTree</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Show</span>[<span style="color: #81A1C1;">Tree</span>] <span style="color: #81A1C1;">=</span> semiauto.show
+<span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">functorTree</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">Tree</span>] <span style="color: #81A1C1;">=</span> semiauto.functor
 </code></pre>
 
 <p>
@@ -166,9 +143,9 @@ To create a generic type class derivation natively in Scala 3, the steps are pre
 <p>
 For the impatient, the final result of generic <code>Show</code> derivation in Scala 3 will look like:
 </p>
-<pre class="code"><code><span style="color: #00008b;">enum</span> <span style="color: #6b8e23;">Tree</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">derives</span> <span style="color: #6b8e23;">Show</span> {
-  <span style="color: #00008b;">case</span> <span style="color: #36648b;">Branch</span>(<span style="color: #b8860b;">left</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Tree</span>[<span style="color: #6b8e23;">T</span>], <span style="color: #b8860b;">right</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Tree</span>[<span style="color: #6b8e23;">T</span>])
-  <span style="color: #00008b;">case</span> <span style="color: #36648b;">Leaf</span>(<span style="color: #b8860b;">elem</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">T</span>)
+<pre class="code"><code><span style="color: #81A1C1;">enum</span> <span style="color: #81A1C1;">Tree</span>[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">derives</span> <span style="color: #81A1C1;">Show</span> {
+  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Branch</span>(<span style="font-weight: bold;">left</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Tree</span>[<span style="color: #81A1C1;">T</span>], <span style="font-weight: bold;">right</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Tree</span>[<span style="color: #81A1C1;">T</span>])
+  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">Leaf</span>(<span style="font-weight: bold;">elem</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">T</span>)
 }
 
 </code></pre>
@@ -189,45 +166,45 @@ Scala 3 is able to derive the generic representation of data types as <code>Mirr
 <p>
 In our example, to derive the generic representation of <code>Tree</code>, we can simply define a <code>derived</code> function:
 </p>
-<pre class="code"><code><span style="color: #00008b;">inline</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">derived</span>[<span style="color: #6b8e23;">T</span>](<span style="color: #00008b;">using</span> m<span style="color: #00008b;">:</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">Of</span>[<span style="color: #6b8e23;">T</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=</span>
-  <span style="color: #00008b;">inline</span> m <span style="color: #00008b;">match</span>
-    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">s</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">SumOf</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=&gt;</span> ???
-    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">p</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">ProductOf</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=&gt;</span> ???
+<pre class="code"><code><span style="color: #81A1C1;">inline</span> <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">derived</span>[<span style="color: #81A1C1;">T</span>](<span style="color: #81A1C1;">using</span> m<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">Of</span>[<span style="color: #81A1C1;">T</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Show</span>[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">=</span>
+  <span style="color: #81A1C1;">inline</span> m <span style="color: #81A1C1;">match</span>
+    <span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">s</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">SumOf</span>[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">=&gt;</span> ???
+    <span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">p</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">ProductOf</span>[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">=&gt;</span> ???
 </code></pre>
 
 <p>
 By <code>using m: Mirror.Of[T]</code>, the compiler will automatically derive the <code>Mirror.Of[T]</code> type from <code>T</code>, which will look like:
 </p>
-<pre class="code"><code><span style="color: #00008b;">new</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">Sum</span><span style="color: #00008b;">:</span>
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredType</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Tree</span>
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredElemTypes</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=</span> (<span style="color: #6b8e23;">Branch</span>[<span style="color: #6b8e23;">T</span>], <span style="color: #6b8e23;">Leaf</span>[<span style="color: #6b8e23;">T</span>])
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredMonoType</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Tree</span>[<span style="color: #00008b;">_</span>]
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredLabel</span> <span style="color: #00008b;">=</span> <span style="color: #8b0000;">"Tree"</span>
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredElemLabels</span> <span style="color: #00008b;">=</span> (<span style="color: #8b0000;">"Branch"</span>, <span style="color: #8b0000;">"Leaf"</span>)
+<pre class="code"><code><span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">Sum</span><span style="color: #81A1C1;">:</span>
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredType</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Tree</span>
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredElemTypes</span>[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">=</span> (<span style="color: #81A1C1;">Branch</span>[<span style="color: #81A1C1;">T</span>], <span style="color: #81A1C1;">Leaf</span>[<span style="color: #81A1C1;">T</span>])
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredMonoType</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Tree</span>[<span style="color: #81A1C1;">_</span>]
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredLabel</span> <span style="color: #81A1C1;">=</span> <span style="color: #D08770;">"Tree"</span>
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredElemLabels</span> <span style="color: #81A1C1;">=</span> (<span style="color: #D08770;">"Branch"</span>, <span style="color: #D08770;">"Leaf"</span>)
 
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">ordinal</span>(x<span style="color: #00008b;">:</span> <span style="color: #36648b;">MirroredMonoType</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span> <span style="color: #00008b;">=</span> x <span style="color: #00008b;">match</span>
-    <span style="color: #00008b;">case</span> <span style="color: #00008b;">_:</span> <span style="color: #36648b;">Branch</span>[<span style="color: #00008b;">_</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">0</span>
-    <span style="color: #00008b;">case</span> <span style="color: #00008b;">_:</span> <span style="color: #36648b;">Leaf</span>[<span style="color: #00008b;">_</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">1</span>
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">ordinal</span>(x<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">MirroredMonoType</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Int</span> <span style="color: #81A1C1;">=</span> x <span style="color: #81A1C1;">match</span>
+    <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">_:</span> <span style="color: #81A1C1;">Branch</span>[<span style="color: #81A1C1;">_</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">0</span>
+    <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">_:</span> <span style="color: #81A1C1;">Leaf</span>[<span style="color: #81A1C1;">_</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">1</span>
 
-<span style="color: #00008b;">new</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">Product</span><span style="color: #00008b;">:</span>
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredType</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Branch</span>
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredElemTypes</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=</span> (<span style="color: #6b8e23;">Tree</span>[<span style="color: #6b8e23;">T</span>], <span style="color: #6b8e23;">Tree</span>[<span style="color: #6b8e23;">T</span>])
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredMonoType</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Branch</span>[<span style="color: #00008b;">_</span>]
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredLabel</span> <span style="color: #00008b;">=</span> <span style="color: #8b0000;">"Branch"</span>
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredElemLabels</span> <span style="color: #00008b;">=</span> (<span style="color: #8b0000;">"left"</span>, <span style="color: #8b0000;">"right"</span>)
+<span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">Product</span><span style="color: #81A1C1;">:</span>
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredType</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Branch</span>
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredElemTypes</span>[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">=</span> (<span style="color: #81A1C1;">Tree</span>[<span style="color: #81A1C1;">T</span>], <span style="color: #81A1C1;">Tree</span>[<span style="color: #81A1C1;">T</span>])
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredMonoType</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Branch</span>[<span style="color: #81A1C1;">_</span>]
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredLabel</span> <span style="color: #81A1C1;">=</span> <span style="color: #D08770;">"Branch"</span>
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredElemLabels</span> <span style="color: #81A1C1;">=</span> (<span style="color: #D08770;">"left"</span>, <span style="color: #D08770;">"right"</span>)
 
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fromProduct</span>(p<span style="color: #00008b;">:</span> <span style="color: #36648b;">Product</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">MirroredMonoType</span> <span style="color: #00008b;">=</span>
-    <span style="color: #00008b;">new</span> <span style="color: #36648b;">Branch</span>(...)
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">fromProduct</span>(p<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Product</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">MirroredMonoType</span> <span style="color: #81A1C1;">=</span>
+    <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Branch</span>(...)
 
-<span style="color: #00008b;">new</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">Product</span><span style="color: #00008b;">:</span>
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredType</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Leaf</span>
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredElemTypes</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Tuple1</span>[<span style="color: #6b8e23;">T</span>]
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredMonoType</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Leaf</span>[<span style="color: #00008b;">_</span>]
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredLabel</span> <span style="color: #00008b;">=</span> <span style="color: #8b0000;">"Leaf"</span>
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredElemLabels</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Tuple1</span>[<span style="color: #8b0000;">"elem"</span>]
+<span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">Product</span><span style="color: #81A1C1;">:</span>
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredType</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Leaf</span>
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredElemTypes</span>[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Tuple1</span>[<span style="color: #81A1C1;">T</span>]
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredMonoType</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Leaf</span>[<span style="color: #81A1C1;">_</span>]
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredLabel</span> <span style="color: #81A1C1;">=</span> <span style="color: #D08770;">"Leaf"</span>
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredElemLabels</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Tuple1</span>[<span style="color: #D08770;">"elem"</span>]
 
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fromProduct</span>(p<span style="color: #00008b;">:</span> <span style="color: #36648b;">Product</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">MirroredMonoType</span> <span style="color: #00008b;">=</span>
-    <span style="color: #00008b;">new</span> <span style="color: #36648b;">Leaf</span>(...)
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">fromProduct</span>(p<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Product</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">MirroredMonoType</span> <span style="color: #81A1C1;">=</span>
+    <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Leaf</span>(...)
 </code></pre>
 <p>
 You don't have to memorize them all, we will get to each of these types shortly.
@@ -259,17 +236,17 @@ Let's start with the simplest type, if our data type is a <code>Leaf</code>, how
 <p>
 There is a singleton type <code>MirroredLabel = "Leaf"</code> we can use to show, and for whose <code>elem</code>, we can recursively derive <code>Show</code> instances for <code>MirroredElemTypes</code>
 </p>
-<pre class="code"><code><span style="color: #00008b;">inline</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">summonAsList</span>[<span style="color: #6b8e23;">T</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">Tuple</span>, <span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span> <span style="color: #36648b;">List</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">Any</span>]] <span style="color: #00008b;">=</span>
-  <span style="color: #00008b;">inline</span> erasedValue[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">match</span>
-    <span style="color: #00008b;">case</span> <span style="color: #00008b;">_:</span> <span style="color: #36648b;">EmptyTuple</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Nil</span>
-    <span style="color: #00008b;">case</span> <span style="color: #00008b;">_:</span> (t *: ts) <span style="color: #00008b;">=&gt;</span> summonInline[<span style="color: #6b8e23;">F</span>[t]].asInstanceOf[<span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">Any</span>]] :: summonAsList[ts, <span style="color: #6b8e23;">F</span>]
+<pre class="code"><code><span style="color: #81A1C1;">inline</span> <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">summonAsList</span>[<span style="color: #81A1C1;">T</span> <span style="color: #81A1C1;">&lt;:</span> <span style="color: #81A1C1;">Tuple</span>, <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]]<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">List</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">Any</span>]] <span style="color: #81A1C1;">=</span>
+  <span style="color: #81A1C1;">inline</span> erasedValue[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">match</span>
+    <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">_:</span> <span style="color: #81A1C1;">EmptyTuple</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Nil</span>
+    <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">_:</span> (t *: ts) <span style="color: #81A1C1;">=&gt;</span> summonInline[<span style="color: #81A1C1;">F</span>[t]].asInstanceOf[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">Any</span>]] :: summonAsList[ts, <span style="color: #81A1C1;">F</span>]
 
-<span style="color: #00008b;">inline</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">derived</span>[<span style="color: #6b8e23;">T</span>](<span style="color: #00008b;">using</span> m<span style="color: #00008b;">:</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">Of</span>[<span style="color: #6b8e23;">T</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=</span>
-  <span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">name</span> <span style="color: #00008b;">=</span> constValue[m.<span style="color: #6b8e23;">MirroredLabel</span>]
-  <span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">elemsShowInstances</span> <span style="color: #00008b;">=</span> summonAsList[m.<span style="color: #6b8e23;">MirroredElemTypes</span>, <span style="color: #6b8e23;">Show</span>]
-  <span style="color: #00008b;">inline</span> m <span style="color: #00008b;">match</span>
-    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">s</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">SumOf</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=&gt;</span> ???
-    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">p</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">ProductOf</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=&gt;</span> ???
+<span style="color: #81A1C1;">inline</span> <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">derived</span>[<span style="color: #81A1C1;">T</span>](<span style="color: #81A1C1;">using</span> m<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">Of</span>[<span style="color: #81A1C1;">T</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Show</span>[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">=</span>
+  <span style="color: #81A1C1;">lazy</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">name</span> <span style="color: #81A1C1;">=</span> constValue[m.<span style="color: #81A1C1;">MirroredLabel</span>]
+  <span style="color: #81A1C1;">lazy</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">elemsShowInstances</span> <span style="color: #81A1C1;">=</span> summonAsList[m.<span style="color: #81A1C1;">MirroredElemTypes</span>, <span style="color: #81A1C1;">Show</span>]
+  <span style="color: #81A1C1;">inline</span> m <span style="color: #81A1C1;">match</span>
+    <span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">s</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">SumOf</span>[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">=&gt;</span> ???
+    <span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">p</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">ProductOf</span>[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">=&gt;</span> ???
 </code></pre>
 
 <ul class="org-ul">
@@ -280,17 +257,17 @@ There is a singleton type <code>MirroredLabel = "Leaf"</code> we can use to show
 <p>
 Now we know the <code>name</code> of current type <code>Leaf</code>, and <code>elemsShowInstances</code> of <code>Leaf</code>'s elements, let's try to fill the <code>???</code> with the actual implementation of <code>Show[Product]</code>
 </p>
-<pre class="code"><code><span style="color: #00008b;">inline</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">derived</span>[<span style="color: #6b8e23;">T</span>](<span style="color: #00008b;">using</span> m<span style="color: #00008b;">:</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">Of</span>[<span style="color: #6b8e23;">T</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=</span>
-  <span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">name</span> <span style="color: #00008b;">=</span> constValue[m.<span style="color: #6b8e23;">MirroredLabel</span>]
-  <span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">elemsShowInstances</span> <span style="color: #00008b;">=</span> summonAsList[m.<span style="color: #6b8e23;">MirroredElemTypes</span>, <span style="color: #6b8e23;">Show</span>]
-  <span style="color: #00008b;">inline</span> m <span style="color: #00008b;">match</span>
-    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">s</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">SumOf</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=&gt;</span> ???
-<span id="coderef-ProductOf" class="coderef-off">    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">p</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">ProductOf</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">T</span>]<span style="color: #00008b;">:</span>          <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (ProductOf)</span>
-      <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">show</span>(a<span style="color: #00008b;">:</span> <span style="color: #36648b;">T</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span> <span style="color: #00008b;">=</span>
-        <span style="color: #00008b;">val</span> <span style="color: #b8860b;">elems</span> <span style="color: #00008b;">=</span> elemsShowInstances.iterator
-<span id="coderef-asInstanceOf" class="coderef-off">          .zip(a.asInstanceOf[<span style="color: #6b8e23;">Product</span>].prodIterator)     <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (asInstanceOf)</span>
-          .map { <span style="color: #00008b;">_</span>.show(<span style="color: #00008b;">_</span>) }
-        s<span style="color: #8b0000;">"</span><span style="color: #b8860b;">${name}</span><span style="color: #8b0000;">(${elems.mkString("</span>, <span style="color: #8b0000;">")})"</span>
+<pre class="code"><code><span style="color: #81A1C1;">inline</span> <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">derived</span>[<span style="color: #81A1C1;">T</span>](<span style="color: #81A1C1;">using</span> m<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">Of</span>[<span style="color: #81A1C1;">T</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Show</span>[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">=</span>
+  <span style="color: #81A1C1;">lazy</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">name</span> <span style="color: #81A1C1;">=</span> constValue[m.<span style="color: #81A1C1;">MirroredLabel</span>]
+  <span style="color: #81A1C1;">lazy</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">elemsShowInstances</span> <span style="color: #81A1C1;">=</span> summonAsList[m.<span style="color: #81A1C1;">MirroredElemTypes</span>, <span style="color: #81A1C1;">Show</span>]
+  <span style="color: #81A1C1;">inline</span> m <span style="color: #81A1C1;">match</span>
+    <span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">s</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">SumOf</span>[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">=&gt;</span> ???
+<span id="coderef-ProductOf" class="coderef-off">    <span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">p</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">ProductOf</span>[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Show</span>[<span style="color: #81A1C1;">T</span>]<span style="color: #81A1C1;">:</span>          <span style="color: #677691;">// </span><span style="color: #677691;">&lt;-</span> (ProductOf)</span>
+      <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">show</span>(a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">T</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span> <span style="color: #81A1C1;">=</span>
+        <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">elems</span> <span style="color: #81A1C1;">=</span> elemsShowInstances.iterator
+<span id="coderef-asInstanceOf" class="coderef-off">          .zip(a.asInstanceOf[<span style="color: #81A1C1;">Product</span>].prodIterator)     <span style="color: #677691;">// </span><span style="color: #677691;">&lt;-</span> (asInstanceOf)</span>
+          .map { <span style="color: #81A1C1;">_</span>.show(<span style="color: #81A1C1;">_</span>) }
+        s<span style="color: #D08770;">"</span><span style="font-weight: bold;">${name}</span><span style="color: #D08770;">(${elems.mkString("</span>, <span style="color: #D08770;">")})"</span>
 </code></pre>
 <p>
 <a href="#coderef-asInstanceOf" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-asInstanceOf');" onmouseout="CodeHighlightOff(this, 'coderef-asInstanceOf');"><code>a.asInstanceOf[Product]</code></a> looks really dangerous, but it's actually safe here, because we know that
@@ -300,7 +277,7 @@ Now we know the <code>name</code> of current type <code>Leaf</code>, and <code>e
 <p>
 The implementation should be capable to derive <code>Show</code> for any type that has a <code>Mirror.Product</code> instance. Let's give it a try:
 </p>
-<pre class="code"><code>assertEquals(show(<span style="color: #6b8e23;">Leaf</span>(<span style="color: #8b0000;">"leaf"</span>)), <span style="color: #8b0000;">"""Leaf("leaf")"""</span>)
+<pre class="code"><code>assertEquals(show(<span style="color: #81A1C1;">Leaf</span>(<span style="color: #D08770;">"leaf"</span>)), <span style="color: #D08770;">"""Leaf("leaf")"""</span>)
 </code></pre>
 
 
@@ -311,16 +288,16 @@ But that doesn't work yet, because even we know how to show <code>Product</code>
 <p>
 <code>Coproduct</code> type has one more concept <code>ordinal</code>, if you have pay attention in the <code>Mirror.Sum</code> instance of <code>Tree</code>:
 </p>
-<pre class="code"><code><span style="color: #00008b;">new</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">Sum</span><span style="color: #00008b;">:</span>
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredType</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Tree</span>
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredElemTypes</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=</span> (<span style="color: #6b8e23;">Branch</span>[<span style="color: #6b8e23;">T</span>], <span style="color: #6b8e23;">Leaf</span>[<span style="color: #6b8e23;">T</span>])
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredMonoType</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Tree</span>[<span style="color: #00008b;">_</span>]
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredLabel</span> <span style="color: #00008b;">=</span> <span style="color: #8b0000;">"Tree"</span>
-  <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredElemLabels</span> <span style="color: #00008b;">=</span> (<span style="color: #8b0000;">"Branch"</span>, <span style="color: #8b0000;">"Leaf"</span>)
+<pre class="code"><code><span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">Sum</span><span style="color: #81A1C1;">:</span>
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredType</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Tree</span>
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredElemTypes</span>[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">=</span> (<span style="color: #81A1C1;">Branch</span>[<span style="color: #81A1C1;">T</span>], <span style="color: #81A1C1;">Leaf</span>[<span style="color: #81A1C1;">T</span>])
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredMonoType</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Tree</span>[<span style="color: #81A1C1;">_</span>]
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredLabel</span> <span style="color: #81A1C1;">=</span> <span style="color: #D08770;">"Tree"</span>
+  <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredElemLabels</span> <span style="color: #81A1C1;">=</span> (<span style="color: #D08770;">"Branch"</span>, <span style="color: #D08770;">"Leaf"</span>)
 
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">ordinal</span>(x<span style="color: #00008b;">:</span> <span style="color: #36648b;">MirroredMonoType</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span> <span style="color: #00008b;">=</span> x <span style="color: #00008b;">match</span>
-    <span style="color: #00008b;">case</span> <span style="color: #00008b;">_:</span> <span style="color: #36648b;">Branch</span>[<span style="color: #00008b;">_</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">0</span>
-    <span style="color: #00008b;">case</span> <span style="color: #00008b;">_:</span> <span style="color: #36648b;">Leaf</span>[<span style="color: #00008b;">_</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">1</span>
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">ordinal</span>(x<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">MirroredMonoType</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Int</span> <span style="color: #81A1C1;">=</span> x <span style="color: #81A1C1;">match</span>
+    <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">_:</span> <span style="color: #81A1C1;">Branch</span>[<span style="color: #81A1C1;">_</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">0</span>
+    <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">_:</span> <span style="color: #81A1C1;">Leaf</span>[<span style="color: #81A1C1;">_</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">1</span>
 </code></pre>
 
 <p>
@@ -330,27 +307,27 @@ That is, when <code>Tree</code> is constructed from <code>Branch</code>, the ord
 <p>
 By simply checking the <a href="#coderef-Ordinal" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-Ordinal');" onmouseout="CodeHighlightOff(this, 'coderef-Ordinal');">ordinal</a> of <code>T</code>, we can show <code>T</code> properly:
 </p>
-<pre class="code"><code><span style="color: #00008b;">inline</span> <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">derived</span>[<span style="color: #6b8e23;">T</span>](<span style="color: #00008b;">using</span> m<span style="color: #00008b;">:</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">Of</span>[<span style="color: #6b8e23;">T</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=</span>
-  <span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">name</span> <span style="color: #00008b;">=</span> constValue[m.<span style="color: #6b8e23;">MirroredLabel</span>]
-  <span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">elemsShowInstances</span> <span style="color: #00008b;">=</span> summonAsList[m.<span style="color: #6b8e23;">MirroredElemTypes</span>, <span style="color: #6b8e23;">Show</span>]
-  <span style="color: #00008b;">inline</span> m <span style="color: #00008b;">match</span>
-    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">s</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">SumOf</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">T</span>]<span style="color: #00008b;">:</span>
-      <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">show</span>(a<span style="color: #00008b;">:</span> <span style="color: #36648b;">T</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span> <span style="color: #00008b;">=</span>
-<span id="coderef-Ordinal" class="coderef-off">        <span style="color: #00008b;">val</span> <span style="color: #b8860b;">ord</span> <span style="color: #00008b;">=</span> s.ordinal(a)   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;-</span> (Ordinal)</span>
-        s<span style="color: #8b0000;">"</span><span style="color: #b8860b;">${insts(ord).asInstanceOf[Show[T]].show(a)}</span><span style="color: #8b0000;">: </span><span style="color: #b8860b;">${name}</span><span style="color: #8b0000;">"</span>
-    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">p</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Mirror</span>.<span style="color: #6b8e23;">ProductOf</span>[<span style="color: #6b8e23;">T</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Show</span>[<span style="color: #6b8e23;">T</span>]<span style="color: #00008b;">:</span>          
-      <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">show</span>(a<span style="color: #00008b;">:</span> <span style="color: #36648b;">T</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span> <span style="color: #00008b;">=</span>
-        <span style="color: #00008b;">val</span> <span style="color: #b8860b;">elems</span> <span style="color: #00008b;">=</span> elemsShowInstances.iterator
-          .zip(a.asInstanceOf[<span style="color: #6b8e23;">Product</span>].prodIterator)
-          .map { <span style="color: #00008b;">_</span>.show(<span style="color: #00008b;">_</span>) }
-        s<span style="color: #8b0000;">"</span><span style="color: #b8860b;">${name}</span><span style="color: #8b0000;">(${elems.mkString("</span>, <span style="color: #8b0000;">")})"</span>
+<pre class="code"><code><span style="color: #81A1C1;">inline</span> <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">derived</span>[<span style="color: #81A1C1;">T</span>](<span style="color: #81A1C1;">using</span> m<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">Of</span>[<span style="color: #81A1C1;">T</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Show</span>[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">=</span>
+  <span style="color: #81A1C1;">lazy</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">name</span> <span style="color: #81A1C1;">=</span> constValue[m.<span style="color: #81A1C1;">MirroredLabel</span>]
+  <span style="color: #81A1C1;">lazy</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">elemsShowInstances</span> <span style="color: #81A1C1;">=</span> summonAsList[m.<span style="color: #81A1C1;">MirroredElemTypes</span>, <span style="color: #81A1C1;">Show</span>]
+  <span style="color: #81A1C1;">inline</span> m <span style="color: #81A1C1;">match</span>
+    <span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">s</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">SumOf</span>[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Show</span>[<span style="color: #81A1C1;">T</span>]<span style="color: #81A1C1;">:</span>
+      <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">show</span>(a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">T</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span> <span style="color: #81A1C1;">=</span>
+<span id="coderef-Ordinal" class="coderef-off">        <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">ord</span> <span style="color: #81A1C1;">=</span> s.ordinal(a)   <span style="color: #677691;">// </span><span style="color: #677691;">&lt;-</span> (Ordinal)</span>
+        s<span style="color: #D08770;">"</span><span style="font-weight: bold;">${insts(ord).asInstanceOf[Show[T]].show(a)}</span><span style="color: #D08770;">: </span><span style="font-weight: bold;">${name}</span><span style="color: #D08770;">"</span>
+    <span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">p</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">ProductOf</span>[<span style="color: #81A1C1;">T</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Show</span>[<span style="color: #81A1C1;">T</span>]<span style="color: #81A1C1;">:</span>          
+      <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">show</span>(a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">T</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span> <span style="color: #81A1C1;">=</span>
+        <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">elems</span> <span style="color: #81A1C1;">=</span> elemsShowInstances.iterator
+          .zip(a.asInstanceOf[<span style="color: #81A1C1;">Product</span>].prodIterator)
+          .map { <span style="color: #81A1C1;">_</span>.show(<span style="color: #81A1C1;">_</span>) }
+        s<span style="color: #D08770;">"</span><span style="font-weight: bold;">${name}</span><span style="color: #D08770;">(${elems.mkString("</span>, <span style="color: #D08770;">")})"</span>
 </code></pre>
 
 <p>
 Finally, let's verify that works as expected:
 </p>
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">aTree</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Tree</span>[<span style="color: #6b8e23;">String</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Branch</span>(<span style="color: #6b8e23;">Leaf</span>(<span style="color: #8b0000;">"l0"</span>), <span style="color: #6b8e23;">Branch</span>(<span style="color: #6b8e23;">Leaf</span>(<span style="color: #8b0000;">"l1"</span>), <span style="color: #6b8e23;">Leaf</span>(<span style="color: #8b0000;">"r1"</span>)))
-assertEquals(show(aTree), <span style="color: #8b0000;">"""Branch(Leaf("l0"): Tree, Branch(Leaf("l1"): Tree, Leaf("r1"): Tree): Tree): Tree"""</span>)
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">aTree</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Tree</span>[<span style="color: #81A1C1;">String</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Branch</span>(<span style="color: #81A1C1;">Leaf</span>(<span style="color: #D08770;">"l0"</span>), <span style="color: #81A1C1;">Branch</span>(<span style="color: #81A1C1;">Leaf</span>(<span style="color: #D08770;">"l1"</span>), <span style="color: #81A1C1;">Leaf</span>(<span style="color: #D08770;">"r1"</span>)))
+assertEquals(show(aTree), <span style="color: #D08770;">"""Branch(Leaf("l0"): Tree, Branch(Leaf("l1"): Tree, Leaf("r1"): Tree): Tree): Tree"""</span>)
 </code></pre>
 </div>
 </div>
@@ -375,25 +352,25 @@ Type lambda: <a href="https://dotty.epfl.ch/docs/reference/new-types/type-lambda
 But, the structure of creating a generic <code>Functor</code> instance is pretty much the same as <code>Show</code>, except we need a
 special trick of <code>Mirror</code> for Kind 1 type.
 </p>
-<pre class="code"><code><span style="color: #00008b;">inline</span> <span style="color: #00008b;">given</span> genFunctor[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]](<span style="color: #00008b;">using</span> m<span style="color: #00008b;">:</span> <span style="color: #36648b;">K1</span>[<span style="color: #6b8e23;">F</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">F</span>] <span style="color: #00008b;">=</span>
-  <span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">functors</span> <span style="color: #00008b;">=</span> summonKindAsList[<span style="color: #6b8e23;">LiftP</span>[<span style="color: #6b8e23;">Functor</span>, m.<span style="color: #6b8e23;">MirroredElemTypes</span>], <span style="color: #6b8e23;">Functor</span>]
-  <span style="color: #00008b;">inline</span> m <span style="color: #00008b;">match</span>
-    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">s</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">K1Sum</span>[<span style="color: #6b8e23;">F</span>] <span style="color: #00008b;">=&gt;</span> ???
-    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">p</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">K1Product</span>[<span style="color: #6b8e23;">F</span>] <span style="color: #00008b;">=&gt;</span> ???
+<pre class="code"><code><span style="color: #81A1C1;">inline</span> <span style="color: #81A1C1;">given</span> genFunctor[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]](<span style="color: #81A1C1;">using</span> m<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">K1</span>[<span style="color: #81A1C1;">F</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">F</span>] <span style="color: #81A1C1;">=</span>
+  <span style="color: #81A1C1;">lazy</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">functors</span> <span style="color: #81A1C1;">=</span> summonKindAsList[<span style="color: #81A1C1;">LiftP</span>[<span style="color: #81A1C1;">Functor</span>, m.<span style="color: #81A1C1;">MirroredElemTypes</span>], <span style="color: #81A1C1;">Functor</span>]
+  <span style="color: #81A1C1;">inline</span> m <span style="color: #81A1C1;">match</span>
+    <span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">s</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">K1Sum</span>[<span style="color: #81A1C1;">F</span>] <span style="color: #81A1C1;">=&gt;</span> ???
+    <span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">p</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">K1Product</span>[<span style="color: #81A1C1;">F</span>] <span style="color: #81A1C1;">=&gt;</span> ???
 </code></pre>
 
 <p>
 Where <code>K1</code> is simply a alias of <code>Mirror</code>
 </p>
-<pre class="code"><code><span style="color: #00008b;">type</span> <span style="color: #6b8e23;">K1</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Mirror</span> { <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredType</span>[<span style="color: #6b8e23;">X</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">X</span>] ; <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredElemTypes</span>[<span style="color: #00008b;">_</span>] <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">Tuple</span> }
-<span style="color: #00008b;">type</span> <span style="color: #6b8e23;">K1Sum</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Mirror</span>.<span style="color: #6b8e23;">Sum</span> { <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredType</span>[<span style="color: #6b8e23;">X</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">X</span>] ; <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredElemTypes</span>[<span style="color: #00008b;">_</span>] <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">Tuple</span> }
-<span style="color: #00008b;">type</span> <span style="color: #6b8e23;">K1Product</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Mirror</span>.<span style="color: #6b8e23;">Product</span> { <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredType</span>[<span style="color: #6b8e23;">X</span>] <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">X</span>] ; <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredElemTypes</span>[<span style="color: #00008b;">_</span>] <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">Tuple</span> }
+<pre class="code"><code><span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">K1</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Mirror</span> { <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredType</span>[<span style="color: #81A1C1;">X</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">X</span>] ; <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredElemTypes</span>[<span style="color: #81A1C1;">_</span>] <span style="color: #81A1C1;">&lt;:</span> <span style="color: #81A1C1;">Tuple</span> }
+<span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">K1Sum</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">Sum</span> { <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredType</span>[<span style="color: #81A1C1;">X</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">X</span>] ; <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredElemTypes</span>[<span style="color: #81A1C1;">_</span>] <span style="color: #81A1C1;">&lt;:</span> <span style="color: #81A1C1;">Tuple</span> }
+<span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">K1Product</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Mirror</span>.<span style="color: #81A1C1;">Product</span> { <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredType</span>[<span style="color: #81A1C1;">X</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">X</span>] ; <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredElemTypes</span>[<span style="color: #81A1C1;">_</span>] <span style="color: #81A1C1;">&lt;:</span> <span style="color: #81A1C1;">Tuple</span> }
 </code></pre>
 
 <p>
 Which is just a little trick(I borrowed from <a href="https://github.com/typelevel/shapeless-3/blob/3ce37126f24e6ebb463d3ca7667ad3a6370bb14a/modules/deriving/src/main/scala/shapeless3/deriving/kinds.scala#L154">shapeless source code</a>) to basically add [_] to original K0 Mirror.
 </p>
-<pre class="code"><code><span style="color: #6b8e23;">Mirror</span> { <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredType</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">T</span>; <span style="color: #00008b;">type</span> <span style="color: #6b8e23;">MirroredElemTypes</span> <span style="color: #00008b;">&lt;:</span> <span style="color: #6b8e23;">Tuple</span> }
+<pre class="code"><code><span style="color: #81A1C1;">Mirror</span> { <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredType</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">T</span>; <span style="color: #81A1C1;">type</span> <span style="color: #81A1C1;">MirroredElemTypes</span> <span style="color: #81A1C1;">&lt;:</span> <span style="color: #81A1C1;">Tuple</span> }
 </code></pre>
 
 <p>
@@ -409,15 +386,15 @@ I will just leave the implementation of these <code>???</code> as an exercise, f
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://github.com/typelevel/kittens#derive-functor">https://github.com/typelevel/kittens#derive-functor</a>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://dotty.epfl.ch/docs/reference/contextual/derivation.html#types-supporting-derives-clauses">https://dotty.epfl.ch/docs/reference/contextual/derivation.html#types-supporting-derives-clauses</a> 
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 Type lambda: <a href="https://dotty.epfl.ch/docs/reference/new-types/type-lambdas.html">https://dotty.epfl.ch/docs/reference/new-types/type-lambdas.html</a> 
 </p></div></div>
 
@@ -432,7 +409,7 @@ Type lambda: <a href="https://dotty.epfl.ch/docs/reference/new-types/type-lambda
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2021-08-14 Sat 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

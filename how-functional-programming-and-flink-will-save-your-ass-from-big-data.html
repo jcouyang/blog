@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>使用 Flink 解救多线程 Scala 应用</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="unknown">
+<meta name="author" content="unknown" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -14,28 +14,6 @@
 <link rel="stylesheet" href="/style/toc.css"/>
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -52,12 +30,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">使用 Flink 解救多线程 Scala 应用</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#org12d6f67">问题</a></li>
 <li><a href="#orgbf9a1b1">Scala</a></li>
@@ -99,14 +77,14 @@ pecentile XX <a href="https://en.wikipedia.org/wiki/Percentile">https://en.wikip
 <li>结果写入某个数据存储</li>
 </ol>
 
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">datasources</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">CollectorService</span>.datasources
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">singleProcess</span>(datasource) <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
-  traces <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">ZipkinService</span>.getTraces(source)
-  metrics <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">MetricService</span>.calculateMetrics(traces, source)
-  <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">CollectorService</span>.writeMetrics(metrics, source)
-} <span style="color: #00008b;">yield</span> ()
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">datasources</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">CollectorService</span>.datasources
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">singleProcess</span>(datasource) <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">for</span> {
+  traces <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">ZipkinService</span>.getTraces(source)
+  metrics <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">MetricService</span>.calculateMetrics(traces, source)
+  <span style="color: #81A1C1;">_</span> <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">CollectorService</span>.writeMetrics(metrics, source)
+} <span style="color: #81A1C1;">yield</span> ()
 
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span> <span style="color: #00008b;">=</span> datasources.map(<span style="color: #00008b;">_</span> map singleProcess)
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">program</span> <span style="color: #81A1C1;">=</span> datasources.map(<span style="color: #81A1C1;">_</span> map singleProcess)
 </code></pre>
 
 <p>
@@ -143,25 +121,25 @@ Free Monad, 免费获得自定义数据类型的 Monad, 好将副作用与业务
 将一天的数据 map 成多份来进行处理, 最后 reduce 到一起来算 pXX.
 </p>
 
-<pre class="code"><code><span id="coderef-environment" class="coderef-off"><span class="linenr"> 1: </span><span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">env</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">ExecutionEnvironment</span>.getExecutionEnvironment <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;= 1</span></span>
+<pre class="code"><code><span id="coderef-environment" class="coderef-off"><span class="linenr"> 1: </span><span style="color: #81A1C1;">lazy</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">env</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">ExecutionEnvironment</span>.getExecutionEnvironment <span style="color: #677691;">// </span><span style="color: #677691;">&lt;= 1</span></span>
 <span class="linenr"> 2: </span>
-<span class="linenr"> 3: </span><span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">rawSources</span> <span style="color: #00008b;">=</span> (<span style="color: #6b8e23;">ZipkinClient</span>.datasources foldMap interp) unsafeRunSync ()
+<span class="linenr"> 3: </span><span style="color: #81A1C1;">lazy</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">rawSources</span> <span style="color: #81A1C1;">=</span> (<span style="color: #81A1C1;">ZipkinClient</span>.datasources foldMap interp) unsafeRunSync ()
 <span class="linenr"> 4: </span>
-<span class="linenr"> 5: </span><span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">datasources</span> <span style="color: #00008b;">=</span>
-<span id="coderef-dataset" class="coderef-off"><span class="linenr"> 6: </span>  env.fromCollection(rawSources.toList) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;= 2</span></span>
+<span class="linenr"> 5: </span><span style="color: #81A1C1;">lazy</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">datasources</span> <span style="color: #81A1C1;">=</span>
+<span id="coderef-dataset" class="coderef-off"><span class="linenr"> 6: </span>  env.fromCollection(rawSources.toList) <span style="color: #677691;">// </span><span style="color: #677691;">&lt;= 2</span></span>
 <span class="linenr"> 7: </span>
-<span class="linenr"> 8: </span><span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">program</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">DataSet</span>[<span style="color: #6b8e23;">Vector</span>[<span style="color: #6b8e23;">String</span>]] <span style="color: #00008b;">=</span> datasources
-<span id="coderef-split" class="coderef-off"><span class="linenr"> 9: </span>  .faltMap(splitByHour <span style="color: #00008b;">_</span>)        <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;= 3</span></span>
-<span id="coderef-rebalance" class="coderef-off"><span class="linenr">10: </span>  .rebalance()                   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;= 4</span></span>
-<span class="linenr">11: </span>  .map(source <span style="color: #00008b;">=&gt;</span>
-<span id="coderef-fetch" class="coderef-off"><span class="linenr">12: </span>    (<span style="color: #6b8e23;">ZipkinClient</span>.fetchTraces(source) foldMap interp) unsafeRunSync ()) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;= 5</span></span>
-<span id="coderef-group" class="coderef-off"><span class="linenr">13: </span>  .groupBy(<span style="color: #00008b;">_</span>._1.endpoint.id)   <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;= 6</span></span>
-<span id="coderef-reduce" class="coderef-off"><span class="linenr">14: </span>  .reduce((s1, s2) <span style="color: #00008b;">=&gt;</span> s1 |+| s2) <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;= 7</span></span>
-<span class="linenr">15: </span>  .map((traces<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">DataSource</span>, <span style="color: #6b8e23;">Vector</span>[<span style="color: #6b8e23;">Trace</span>])) <span style="color: #00008b;">=&gt;</span>
-<span id="coderef-aggregate" class="coderef-off"><span class="linenr">16: </span>    (<span style="color: #6b8e23;">ZipkinClient</span>.aggregate(traces) foldMap interp) unsafeRunSync ())  <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">&lt;= 8</span></span>
-<span class="linenr">17: </span>  .map((metrics<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">Vector</span>[<span style="color: #6b8e23;">LatencyMetrics</span>], <span style="color: #6b8e23;">DataSource</span>)) <span style="color: #00008b;">=&gt;</span>
-<span class="linenr">18: </span>    (<span style="color: #6b8e23;">CollectorService</span>
-<span class="linenr">19: </span>      .writeMetrics(metrics._1, <span style="color: #6b8e23;">Vector</span>(metrics._2)) foldMap interp) unsafeRunSync ())
+<span class="linenr"> 8: </span><span style="color: #81A1C1;">lazy</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">program</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">DataSet</span>[<span style="color: #81A1C1;">Vector</span>[<span style="color: #81A1C1;">String</span>]] <span style="color: #81A1C1;">=</span> datasources
+<span id="coderef-split" class="coderef-off"><span class="linenr"> 9: </span>  .faltMap(splitByHour <span style="color: #81A1C1;">_</span>)        <span style="color: #677691;">// </span><span style="color: #677691;">&lt;= 3</span></span>
+<span id="coderef-rebalance" class="coderef-off"><span class="linenr">10: </span>  .rebalance()                   <span style="color: #677691;">// </span><span style="color: #677691;">&lt;= 4</span></span>
+<span class="linenr">11: </span>  .map(source <span style="color: #81A1C1;">=&gt;</span>
+<span id="coderef-fetch" class="coderef-off"><span class="linenr">12: </span>    (<span style="color: #81A1C1;">ZipkinClient</span>.fetchTraces(source) foldMap interp) unsafeRunSync ()) <span style="color: #677691;">// </span><span style="color: #677691;">&lt;= 5</span></span>
+<span id="coderef-group" class="coderef-off"><span class="linenr">13: </span>  .groupBy(<span style="color: #81A1C1;">_</span>._1.endpoint.id)   <span style="color: #677691;">// </span><span style="color: #677691;">&lt;= 6</span></span>
+<span id="coderef-reduce" class="coderef-off"><span class="linenr">14: </span>  .reduce((s1, s2) <span style="color: #81A1C1;">=&gt;</span> s1 |+| s2) <span style="color: #677691;">// </span><span style="color: #677691;">&lt;= 7</span></span>
+<span class="linenr">15: </span>  .map((traces<span style="color: #81A1C1;">:</span> (<span style="color: #81A1C1;">DataSource</span>, <span style="color: #81A1C1;">Vector</span>[<span style="color: #81A1C1;">Trace</span>])) <span style="color: #81A1C1;">=&gt;</span>
+<span id="coderef-aggregate" class="coderef-off"><span class="linenr">16: </span>    (<span style="color: #81A1C1;">ZipkinClient</span>.aggregate(traces) foldMap interp) unsafeRunSync ())  <span style="color: #677691;">// </span><span style="color: #677691;">&lt;= 8</span></span>
+<span class="linenr">17: </span>  .map((metrics<span style="color: #81A1C1;">:</span> (<span style="color: #81A1C1;">Vector</span>[<span style="color: #81A1C1;">LatencyMetrics</span>], <span style="color: #81A1C1;">DataSource</span>)) <span style="color: #81A1C1;">=&gt;</span>
+<span class="linenr">18: </span>    (<span style="color: #81A1C1;">CollectorService</span>
+<span class="linenr">19: </span>      .writeMetrics(metrics._1, <span style="color: #81A1C1;">Vector</span>(metrics._2)) foldMap interp) unsafeRunSync ())
 <span class="linenr">20: </span>
 </code></pre>
 
@@ -176,7 +154,7 @@ Free Monad, 免费获得自定义数据类型的 Monad, 好将副作用与业务
 </ol>
 
 
-<figure id="org58c44ca">
+<figure id="orgd882c43">
 <img src="https://user-images.githubusercontent.com/1235045/46709689-8d226a80-cc90-11e8-9f7c-5c110d48302c.png" alt="46709689-8d226a80-cc90-11e8-9f7c-5c110d48302c.png">
 
 </figure>
@@ -189,9 +167,9 @@ Free Monad, 免费获得自定义数据类型的 Monad, 好将副作用与业务
 <b>但是</b> 跑cluster 在单个 jvm 中会耗费大量资源, 所以最佳实践其实是根据运行环境, 选择不同的 <code>ExecutionEnvironment</code>
 </p>
 
-<pre class="code"><code><span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">env</span> <span style="color: #00008b;">=</span> envOrNone(<span style="color: #8b0000;">"EXECUTION_IN_LOCAL"</span>)
-  .map(<span style="color: #00008b;">_</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">ExecutionEnvironment</span>.createCollectionsEnvironment)
-  .getOrElse(<span style="color: #6b8e23;">ExecutionEnvironment</span>.getExecutionEnvironment)
+<pre class="code"><code><span style="color: #81A1C1;">lazy</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">env</span> <span style="color: #81A1C1;">=</span> envOrNone(<span style="color: #D08770;">"EXECUTION_IN_LOCAL"</span>)
+  .map(<span style="color: #81A1C1;">_</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">ExecutionEnvironment</span>.createCollectionsEnvironment)
+  .getOrElse(<span style="color: #81A1C1;">ExecutionEnvironment</span>.getExecutionEnvironment)
 </code></pre>
 
 <p>
@@ -263,7 +241,7 @@ jobmanager 相当于 zookeeper, taskmanager 是真正跑任务的 slave
 </p>
 
 
-<figure id="orge4ab49b">
+<figure id="org988f765">
 <img src="https://screenshotscdn.firefoxusercontent.com/images/4279a294-bbb8-4367-980b-f542b063709e.png" alt="4279a294-bbb8-4367-980b-f542b063709e.png">
 
 </figure>
@@ -273,19 +251,19 @@ jobmanager 相当于 zookeeper, taskmanager 是真正跑任务的 slave
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 Zipkin 是 twitter 用的分布式系统 tracing 收集服务 <a href="https://zipkin.io/">https://zipkin.io/</a>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 pecentile XX <a href="https://en.wikipedia.org/wiki/Percentile">https://en.wikipedia.org/wiki/Percentile</a>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 Free Monad, 免费获得自定义数据类型的 Monad, 好将副作用与业务逻辑分开  <a href="https://typelevel.org/cats/datatypes/freemonad.html">https://typelevel.org/cats/datatypes/freemonad.html</a>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4" role="doc-backlink">4</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 并行化代码基本上只需要这么一行
 </p>
 <pre class="code"><code>(program unsafeRunSync ()).parSequence
@@ -302,7 +280,7 @@ Free Monad, 免费获得自定义数据类型的 Monad, 好将副作用与业务
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2018-10-20 Sat 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

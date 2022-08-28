@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:31 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>JavaScript玩转Clojure大法之 - Trampoline</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Jichao Ouyang">
-<meta name="description" content="在函数式编程中, 递归可以说是最关健甚至唯一的循环手段, Clojure的recur可以保证得到 /尾递归/ 优化, 而相互递归则不能用recur来保证得到优化, 因此, 另一个大法出现了 -- /Trampoline/"
->
-<meta name="keywords" content="clojure, javascript,js, trampoline, functional, fp, recursive, recur, mutual">
+<meta name="author" content="Jichao Ouyang" />
+<meta name="description" content="在函数式编程中, 递归可以说是最关健甚至唯一的循环手段, Clojure的recur可以保证得到 /尾递归/ 优化, 而相互递归则不能用recur来保证得到优化, 因此, 另一个大法出现了 -- /Trampoline/" />
+<meta name="keywords" content="clojure, javascript,js, trampoline, functional, fp, recursive, recur, mutual" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -17,28 +16,6 @@
 <link rel="stylesheet" href="/style/toc.css"/>
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -55,12 +32,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">JavaScript玩转Clojure大法之 - Trampoline</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#org2c2f5a7">尾递归(tail recursion)</a></li>
 <li><a href="#org230666e">相互递归(mutual recursion)</a>
@@ -93,7 +70,7 @@ Clojure的recur可以保证得到 <i>尾递归</i> 优化, 而相互递归则不
 </p>
 
 
-<figure id="org01c8ce6">
+<figure id="org7da2b32">
 <img src="./images/multi-recur.gif" alt="multi-recur.gif">
 
 </figure>
@@ -141,9 +118,9 @@ ok, 这就是相互递归(mutual recursion)
 <p>
 很容易就可以写出来
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">fact</span>(<span style="color: #b8860b;">n</span>){
-    <span style="color: #00008b;">if</span>(n==0)<span style="color: #00008b;">return</span> 1;
-    <span style="color: #00008b;">return</span> n*fact(n-1);
+<pre class="code"><code><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">fact</span>(<span style="font-weight: bold;">n</span>){
+    <span style="color: #81A1C1;">if</span>(n==0)<span style="color: #81A1C1;">return</span> 1;
+    <span style="color: #81A1C1;">return</span> n*fact(n-1);
 }
 </code></pre>
 
@@ -159,9 +136,9 @@ ok, 这就是相互递归(mutual recursion)
 那么怎么才是尾递归, 当然是最后一个操作一定是调用自己.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">fact</span>(<span style="color: #b8860b;">n</span>, <span style="color: #b8860b;">acc</span>){
-    <span style="color: #00008b;">if</span>(n==0)<span style="color: #00008b;">return</span> acc;
-    <span style="color: #00008b;">return</span> fact(n-1, acc*n)
+<pre class="code"><code><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">fact</span>(<span style="font-weight: bold;">n</span>, <span style="font-weight: bold;">acc</span>){
+    <span style="color: #81A1C1;">if</span>(n==0)<span style="color: #81A1C1;">return</span> acc;
+    <span style="color: #81A1C1;">return</span> fact(n-1, acc*n)
 }
 </code></pre>
 <p>
@@ -175,13 +152,13 @@ ok, 这就是相互递归(mutual recursion)
 <p>
 由于tail recur非常容易改写成循环, 编译器容易对其进行优化
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">fact</span>(<span style="color: #b8860b;">n</span>){
-    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">acc</span>=1,<span style="color: #b8860b;">i</span>=n
-    <span style="color: #00008b;">while</span>(i!=0){
+<pre class="code"><code><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">fact</span>(<span style="font-weight: bold;">n</span>){
+    <span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">acc</span>=1,<span style="font-weight: bold;">i</span>=n
+    <span style="color: #81A1C1;">while</span>(i!=0){
         acc=acc*i;
         i-=1;
     }
-    <span style="color: #00008b;">return</span> acc
+    <span style="color: #81A1C1;">return</span> acc
 }
 </code></pre>
 
@@ -236,30 +213,30 @@ ok, 这就是相互递归(mutual recursion)
 <p>
 好吧, 我们来实现一把
 </p>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">eat_money</span>(<span style="color: #b8860b;">input_seq</span>){
-    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">input</span> = input_seq.shift()
-    <span style="color: #00008b;">if</span>(input== <span style="color: #8b0000;">'&#20116;&#22359;'</span>)
-        console.log(<span style="color: #8b0000;">'&#25910;&#21040;&#21602;,&#36873;&#20010;&#24039;&#20811;&#21147;&#21543;^_^'</span>)
+<pre class="code"><code><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">eat_money</span>(<span style="font-weight: bold;">input_seq</span>){
+    <span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">input</span> = input_seq.shift()
+    <span style="color: #81A1C1;">if</span>(input== <span style="color: #D08770;">'&#20116;&#22359;'</span>)
+        console.log(<span style="color: #D08770;">'&#25910;&#21040;&#21602;,&#36873;&#20010;&#24039;&#20811;&#21147;&#21543;^_^'</span>)
         choose(input_seq)
-    <span style="color: #00008b;">else</span>
+    <span style="color: #81A1C1;">else</span>
         eat_money(input_seq)
 }
 
-<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">choose</span>(<span style="color: #b8860b;">input_seq</span>){
-    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">input</span> = input_seq.shift()
-    <span style="color: #00008b;">if</span>(input== <span style="color: #8b0000;">'&#24039;&#20811;&#21147;'</span>)
-        console.log(<span style="color: #8b0000;">'&#36873;&#20102;&#24039;&#20811;&#21147;, &#25353;&#19979;&#25214;&#38646;&#25353;&#38062;, &#25105;&#36824;&#27424;&#20320;&#20004;&#22359;&#38065;&#21734;'</span>)
+<span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">choose</span>(<span style="font-weight: bold;">input_seq</span>){
+    <span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">input</span> = input_seq.shift()
+    <span style="color: #81A1C1;">if</span>(input== <span style="color: #D08770;">'&#24039;&#20811;&#21147;'</span>)
+        console.log(<span style="color: #D08770;">'&#36873;&#20102;&#24039;&#20811;&#21147;, &#25353;&#19979;&#25214;&#38646;&#25353;&#38062;, &#25105;&#36824;&#27424;&#20320;&#20004;&#22359;&#38065;&#21734;'</span>)
         changes(input_seq)
-    <span style="color: #00008b;">else</span>
+    <span style="color: #81A1C1;">else</span>
         choose(input_seq)
 }
 
-<span style="color: #00008b;">function</span> <span style="color: #6a5acd;">changes</span>(<span style="color: #b8860b;">input_seq</span>){
-    <span style="color: #00008b;">var</span> <span style="color: #b8860b;">input</span> = input_seq.shift()
-    <span style="color: #00008b;">if</span>(input==<span style="color: #8b0000;">'&#25214;&#38646;'</span>)
-        console.log(<span style="color: #8b0000;">'&#27426;&#36814;&#20877;&#27425;&#20809;&#20020;'</span>)
+<span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">changes</span>(<span style="font-weight: bold;">input_seq</span>){
+    <span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">input</span> = input_seq.shift()
+    <span style="color: #81A1C1;">if</span>(input==<span style="color: #D08770;">'&#25214;&#38646;'</span>)
+        console.log(<span style="color: #D08770;">'&#27426;&#36814;&#20877;&#27425;&#20809;&#20020;'</span>)
         eat_money(input_seq)
-    <span style="color: #00008b;">else</span>
+    <span style="color: #81A1C1;">else</span>
         changes(input_seq)
 }
 </code></pre>
@@ -281,16 +258,16 @@ ok, 这就是相互递归(mutual recursion)
 <p>
 现在问题来了, 如果我的 <code>input_seq</code> 非常长, 比如
 </p>
-<pre class="code"><code><span style="color: #00008b;">for</span>(<span style="color: #00008b;">var</span> <span style="color: #b8860b;">n</span>=15;n&gt;0;n--){
+<pre class="code"><code><span style="color: #81A1C1;">for</span>(<span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">n</span>=15;n&gt;0;n--){
   input_seq=input_seq.concat(input_seq)
 }
-input_seq.length <span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">=&gt; 294912</span>
+input_seq.length <span style="color: #677691;">// </span><span style="color: #677691;">=&gt; 294912</span>
 </code></pre>
 <p>
 现在 <code>input_seq</code> 非常大, 再试试(请到node上试)
 </p>
 
-<pre class="example" id="orga6dec18">
+<pre class="example" id="orgba2b6c4">
 ...
 收到呢,选个巧克力吧^_^
 RangeError: Maximum call stack size exceeded
@@ -324,17 +301,17 @@ trampoline是一个函数:
 比如可以把贩卖机简单的改造一下, 让他返回函数, 而不是直接调用其他函数, 注意第<a href="#coderef-trampoline" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-trampoline');" onmouseout="CodeHighlightOff(this, 'coderef-trampoline');">6</a>行
 </p>
 
-<pre class="code"><code><span class="linenr"> 1: </span><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">eat_money</span>(<span style="color: #b8860b;">input_seq</span>){
-<span class="linenr"> 2: </span>  <span style="color: #00008b;">if</span>(input_seq.length==0)<span style="color: #00008b;">return</span>
-<span class="linenr"> 3: </span>  <span style="color: #00008b;">var</span> <span style="color: #b8860b;">input</span> = input_seq.shift()
-<span class="linenr"> 4: </span>  <span style="color: #00008b;">if</span>(input== <span style="color: #8b0000;">'&#20116;&#22359;'</span>){
-<span class="linenr"> 5: </span>    console.log(<span style="color: #8b0000;">'&#25910;&#21040;&#21602;,&#36873;&#20010;&#24039;&#20811;&#21147;&#21543;^_^'</span>)
-<span id="coderef-trampoline" class="coderef-off"><span class="linenr"> 6: </span>    <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(){</span>
-<span class="linenr"> 7: </span>      <span style="color: #00008b;">return</span> choose(input_seq)
+<pre class="code"><code><span class="linenr"> 1: </span><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">eat_money</span>(<span style="font-weight: bold;">input_seq</span>){
+<span class="linenr"> 2: </span>  <span style="color: #81A1C1;">if</span>(input_seq.length==0)<span style="color: #81A1C1;">return</span>
+<span class="linenr"> 3: </span>  <span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">input</span> = input_seq.shift()
+<span class="linenr"> 4: </span>  <span style="color: #81A1C1;">if</span>(input== <span style="color: #D08770;">'&#20116;&#22359;'</span>){
+<span class="linenr"> 5: </span>    console.log(<span style="color: #D08770;">'&#25910;&#21040;&#21602;,&#36873;&#20010;&#24039;&#20811;&#21147;&#21543;^_^'</span>)
+<span id="coderef-trampoline" class="coderef-off"><span class="linenr"> 6: </span>    <span style="color: #81A1C1;">return</span> <span style="color: #81A1C1;">function</span>(){</span>
+<span class="linenr"> 7: </span>      <span style="color: #81A1C1;">return</span> choose(input_seq)
 <span class="linenr"> 8: </span>    }
-<span class="linenr"> 9: </span>  }<span style="color: #00008b;">else</span>{
-<span class="linenr">10: </span>    <span style="color: #00008b;">return</span> <span style="color: #00008b;">function</span>(){
-<span class="linenr">11: </span>      <span style="color: #00008b;">return</span> eat_money(input_seq)
+<span class="linenr"> 9: </span>  }<span style="color: #81A1C1;">else</span>{
+<span class="linenr">10: </span>    <span style="color: #81A1C1;">return</span> <span style="color: #81A1C1;">function</span>(){
+<span class="linenr">11: </span>      <span style="color: #81A1C1;">return</span> eat_money(input_seq)
 <span class="linenr">12: </span>    }
 <span class="linenr">13: </span>  } 
 <span class="linenr">14: </span>}
@@ -359,14 +336,14 @@ trampoline是一个函数:
 </p>
 
 
-<figure id="org2185e3d">
+<figure id="orgd757f67">
 <img src="./images/stack.gif" alt="stack.gif">
 
 </figure>
-<pre class="code"><code><span style="color: #00008b;">function</span> <span style="color: #6a5acd;">eat_money</span>(<span style="color: #b8860b;">input_seq</span>){
-    <span style="color: #00008b;">return</span> choose(input_seq){
-        <span style="color: #00008b;">return</span> changes(input_seq){
-            <span style="color: #00008b;">return</span> ...
+<pre class="code"><code><span style="color: #81A1C1;">function</span> <span style="font-weight: bold;">eat_money</span>(<span style="font-weight: bold;">input_seq</span>){
+    <span style="color: #81A1C1;">return</span> choose(input_seq){
+        <span style="color: #81A1C1;">return</span> changes(input_seq){
+            <span style="color: #81A1C1;">return</span> ...
         }
     }
 }
@@ -378,16 +355,16 @@ trampoline是一个函数:
 </p>
 
 
-<figure id="org2bbd333">
+<figure id="org2ca4953">
 <img src="./images/conga.jpg" alt="conga.jpg">
 
 </figure>
 
-<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">res</span> = eat_money(input_seq)
-<span style="color: #00008b;">while</span>(<span style="color: #6b8e23;">true</span>){
-    <span style="color: #00008b;">if</span>(<span style="color: #00008b;">typeof</span> res ==<span style="color: #8b0000;">'function'</span>)res = res()
-    <span style="color: #00008b;">else</span>
-        <span style="color: #00008b;">break</span>
+<pre class="code"><code><span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">res</span> = eat_money(input_seq)
+<span style="color: #81A1C1;">while</span>(<span style="color: #81A1C1;">true</span>){
+    <span style="color: #81A1C1;">if</span>(<span style="color: #81A1C1;">typeof</span> res ==<span style="color: #D08770;">'function'</span>)res = res()
+    <span style="color: #81A1C1;">else</span>
+        <span style="color: #81A1C1;">break</span>
 }
 </code></pre>
 
@@ -411,7 +388,7 @@ trampoline是一个函数:
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2015-05-30 Sat 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

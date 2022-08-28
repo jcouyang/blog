@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Rank N Types in Scala 3</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Jichao Ouyang">
-<meta name="description" content="You probably don't need Cats"
->
-<meta name="keywords" content="Scala,Dotty,Haskell,Scala 3,FunctionK,Rank N Types,Rank 2 Types,Polymorphic function types">
+<meta name="author" content="Jichao Ouyang" />
+<meta name="description" content="You probably don't need Cats" />
+<meta name="keywords" content="Scala,Dotty,Haskell,Scala 3,FunctionK,Rank N Types,Rank 2 Types,Polymorphic function types" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -21,28 +20,6 @@
 <meta property="og:description" content="You probably don't need Cats" />
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -59,12 +36,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">Rank N Types in Scala 3</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#org2500d06">Scala 2</a></li>
 <li><a href="#orgc70f012">Scala 3</a></li>
@@ -111,8 +88,8 @@ There is no <a href="https://wiki.haskell.org/Rank-N_types">Rank N Types</a> in 
 <p>
 This is a Rank 1:
 </p>
-<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">forall a b c. (b, c) -&gt; (a -&gt; a) -&gt; (b, c)</span>
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">rank</span>[<span style="color: #6b8e23;">A</span>,<span style="color: #6b8e23;">B</span>,<span style="color: #6b8e23;">C</span>](a<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>), doSomething<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">A</span>)<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>) <span style="color: #00008b;">=</span> (doSomething(a._1), doSomething(a._2))
+<pre class="code"><code><span style="color: #677691;">// </span><span style="color: #677691;">forall a b c. (b, c) -&gt; (a -&gt; a) -&gt; (b, c)</span>
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">rank</span>[<span style="color: #81A1C1;">A</span>,<span style="color: #81A1C1;">B</span>,<span style="color: #81A1C1;">C</span>](a<span style="color: #81A1C1;">:</span> (<span style="color: #81A1C1;">B</span>, <span style="color: #81A1C1;">C</span>), doSomething<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">A</span>)<span style="color: #81A1C1;">:</span> (<span style="color: #81A1C1;">B</span>, <span style="color: #81A1C1;">C</span>) <span style="color: #81A1C1;">=</span> (doSomething(a._1), doSomething(a._2))
 </code></pre>
 
 <p>
@@ -129,7 +106,7 @@ are no proof of <code>B = C</code>.
 Simplest way to make Scala 2 is to use Cats FunctionK:
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">rank</span>[<span style="color: #6b8e23;">B</span>,<span style="color: #6b8e23;">C</span>](a<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>), doSomething<span style="color: #00008b;">:</span> <span style="color: #36648b;">Id</span> ~&gt; <span style="color: #6b8e23;">Id</span>)<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>) <span style="color: #00008b;">=</span> (doSomething(a._1), doSomething(a._2))
+<pre class="code"><code><span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">rank</span>[<span style="color: #81A1C1;">B</span>,<span style="color: #81A1C1;">C</span>](a<span style="color: #81A1C1;">:</span> (<span style="color: #81A1C1;">B</span>, <span style="color: #81A1C1;">C</span>), doSomething<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Id</span> ~&gt; <span style="color: #81A1C1;">Id</span>)<span style="color: #81A1C1;">:</span> (<span style="color: #81A1C1;">B</span>, <span style="color: #81A1C1;">C</span>) <span style="color: #81A1C1;">=</span> (doSomething(a._1), doSomething(a._2))
 </code></pre>
 
 <p>
@@ -140,8 +117,8 @@ to confuse about.
 <p>
 While it is not totally free to use cats, there are some boilerplate you have to do when defining <code>doSomething</code>:
 </p>
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">doSomething</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Id</span> ~&gt; <span style="color: #6b8e23;">Id</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> (<span style="color: #6b8e23;">Id</span> ~&gt; <span style="color: #6b8e23;">Id</span>) {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">apply</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">Id</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Id</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> a
+<pre class="code"><code><span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">doSomething</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Id</span> ~&gt; <span style="color: #81A1C1;">Id</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">new</span> (<span style="color: #81A1C1;">Id</span> ~&gt; <span style="color: #81A1C1;">Id</span>) {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">apply</span>[<span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Id</span>[<span style="color: #81A1C1;">A</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Id</span>[<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=</span> a
 }
 </code></pre>
 
@@ -158,15 +135,15 @@ Type <code>A</code> is hidden in the <code>apply</code> method.
 Now in Scala 3, you can simply do the same thing natively with <a href="https://dotty.epfl.ch/blog/2019/06/11/16th-dotty-milestone-release.html#polymorphic-function-types">Polymorphic function types</a>.
 </p>
 
-<pre class="code"><code><span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">rank 2 type (forall a. a -&gt; a)</span>
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">id</span> <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> (a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">=&gt;</span> a
+<pre class="code"><code><span style="color: #677691;">// </span><span style="color: #677691;">rank 2 type (forall a. a -&gt; a)</span>
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">id</span> <span style="color: #81A1C1;">=</span> [<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=&gt;</span> (a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>) <span style="color: #81A1C1;">=&gt;</span> a
 
-<span style="color: #8c8c8c; font-style: italic;">// </span><span style="color: #8c8c8c; font-style: italic;">forall b c. (b, c) -&gt; (forall a. a -&gt; a) -&gt; (b, c)</span>
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">rank2</span>[<span style="color: #6b8e23;">B</span>,<span style="color: #6b8e23;">C</span>](a<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>), doSomething<span style="color: #00008b;">:</span> [<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">A</span>)<span style="color: #00008b;">:</span> (<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>) <span style="color: #00008b;">=</span> (doSomething(a._1), doSomething(a._2))
+<span style="color: #677691;">// </span><span style="color: #677691;">forall b c. (b, c) -&gt; (forall a. a -&gt; a) -&gt; (b, c)</span>
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">rank2</span>[<span style="color: #81A1C1;">B</span>,<span style="color: #81A1C1;">C</span>](a<span style="color: #81A1C1;">:</span> (<span style="color: #81A1C1;">B</span>, <span style="color: #81A1C1;">C</span>), doSomething<span style="color: #81A1C1;">:</span> [<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">A</span>)<span style="color: #81A1C1;">:</span> (<span style="color: #81A1C1;">B</span>, <span style="color: #81A1C1;">C</span>) <span style="color: #81A1C1;">=</span> (doSomething(a._1), doSomething(a._2))
 
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">main</span>(args<span style="color: #00008b;">:</span> <span style="color: #36648b;">Array</span>[<span style="color: #6b8e23;">String</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">Unit</span> <span style="color: #00008b;">=</span> {
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">main</span>(args<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Array</span>[<span style="color: #81A1C1;">String</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Unit</span> <span style="color: #81A1C1;">=</span> {
   println(
-    rank2((<span style="color: #6b8e23;">1</span>, <span style="color: #8b0000;">"2"</span>), id)
+    rank2((<span style="color: #81A1C1;">1</span>, <span style="color: #D08770;">"2"</span>), id)
   )
 }
 </code></pre>
@@ -175,7 +152,7 @@ Now in Scala 3, you can simply do the same thing natively with <a href="https://
 The trick is now <code>A</code> is defined <code>[A] =&gt; A =&gt; A</code>, no in method type parameters.
 It is quite similar to how we define rank n types in Haskell
 </p>
-<pre class="code"><code><span style="color: #6a5acd;">forall</span> b c<span style="color: #b8860b;">.</span> (b, c) <span style="color: #b8860b;">-&gt;</span> (forall a<span style="color: #b8860b;">.</span> a <span style="color: #b8860b;">-&gt;</span> a) <span style="color: #b8860b;">-&gt;</span> (b, c)
+<pre class="code"><code><span style="font-weight: bold;">forall</span> b c<span style="font-weight: bold;">.</span> (b, c) <span style="font-weight: bold;">-&gt;</span> (forall a<span style="font-weight: bold;">.</span> a <span style="font-weight: bold;">-&gt;</span> a) <span style="font-weight: bold;">-&gt;</span> (b, c)
 </code></pre>
 
 <p>
@@ -200,7 +177,7 @@ Or clone the repo and play locally: <a href="https://github.com/jcouyang/meow">h
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2020-05-06 Wed 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Type Classes in Scala 3</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Jichao Ouyang">
-<meta name="description" content="Let's try something more practical this time: redesigning a Category Theory library for Scala 3."
->
-<meta name="keywords" content="typeclasses,type classes,scala 3,dotty,meow,cats">
+<meta name="author" content="Jichao Ouyang" />
+<meta name="description" content="Let's try something more practical this time: redesigning a Category Theory library for Scala 3." />
+<meta name="keywords" content="typeclasses,type classes,scala 3,dotty,meow,cats" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -21,28 +20,6 @@
 <meta property="og:description" content="" />
 <meta property="og:type" content="article" />
 <meta content="https://blog.oyanglul.us/images/dotty-logo.png" property="og:image">
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -59,12 +36,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">Type Classes in Scala 3</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#org5595119">Implicits</a>
 <ul>
@@ -127,8 +104,8 @@ Defining a type class in Scala 3 is less boilerplate than in Scala 2.
 <p>
 For instance, a Functor:
 </p>
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span>
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fmap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">B</span>]
+<pre class="code"><code><span style="color: #81A1C1;">trait</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]]<span style="color: #81A1C1;">:</span>
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">fmap</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">B</span>]
 </code></pre>
 
 <p>
@@ -139,17 +116,17 @@ the type class.
 <p>
 An <code>Option</code> is mappable, so there exist a <code>Functor</code> instance for <code>Option</code>:
 </p>
-<pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Functor</span><span style="color: #00008b;">:</span>
-  <span style="color: #00008b;">given</span> <span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">Option</span>] <span style="color: #00008b;">with</span>
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fmap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> (oa<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=&gt;</span> oa.map(f)
+<pre class="code"><code><span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">Functor</span><span style="color: #81A1C1;">:</span>
+  <span style="color: #81A1C1;">given</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">Option</span>] <span style="color: #81A1C1;">with</span>
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">fmap</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Option</span>[<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Option</span>[<span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span> (oa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Option</span>[<span style="color: #81A1C1;">A</span>]) <span style="color: #81A1C1;">=&gt;</span> oa.map(f)
 </code></pre>
 
 <p>
 Let me just remind you how it was done in Scala 2:
 </p>
-<pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Functor</span> {
-  <span style="color: #228b22;">implicit</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">functorOption</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">Option</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">Option</span>] {
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fmap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Option</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> (oa<span style="color: #00008b;">:</span> <span style="color: #36648b;">Option</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=&gt;</span> oa.map(f)
+<pre class="code"><code><span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">Functor</span> {
+  <span style="color: #81A1C1;">implicit</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">functorOption</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">Option</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">Option</span>] {
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">fmap</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Option</span>[<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Option</span>[<span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span> (oa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Option</span>[<span style="color: #81A1C1;">A</span>]) <span style="color: #81A1C1;">=&gt;</span> oa.map(f)
   }
 }
 </code></pre>
@@ -174,11 +151,11 @@ different in different places.
 Let's say we like a global universal function <code>map</code>, that can map any data type which has a Functor instance:
 </p>
 
-<pre class="code"><code><span class="linenr">1: </span><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span>
-<span id="coderef-rankntype" class="coderef-off"><span class="linenr">2: </span>  [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>]                       <span style="color: #00008b;">=&gt;</span></span>
-<span class="linenr">3: </span>  (f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)                  <span style="color: #00008b;">=&gt;</span>
-<span id="coderef-using" class="coderef-off"><span class="linenr">4: </span>  (<span style="color: #00008b;">using</span> functor<span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">F</span>])  <span style="color: #00008b;">=&gt;</span></span>
-<span class="linenr">5: </span>  (fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])                   <span style="color: #00008b;">=&gt;</span> functor.fmap(f)(fa)
+<pre class="code"><code><span class="linenr">1: </span><span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">map</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]] <span style="color: #81A1C1;">=</span>
+<span id="coderef-rankntype" class="coderef-off"><span class="linenr">2: </span>  [<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>]                       <span style="color: #81A1C1;">=&gt;</span></span>
+<span class="linenr">3: </span>  (f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>)                  <span style="color: #81A1C1;">=&gt;</span>
+<span id="coderef-using" class="coderef-off"><span class="linenr">4: </span>  (<span style="color: #81A1C1;">using</span> functor<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">F</span>])  <span style="color: #81A1C1;">=&gt;</span></span>
+<span class="linenr">5: </span>  (fa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>])                   <span style="color: #81A1C1;">=&gt;</span> functor.fmap(f)(fa)
 </code></pre>
 
 <ul class="org-ul">
@@ -199,22 +176,22 @@ There are some other forms of <code>using</code>, i.e. you can omit the <code>us
 <a href="https://dotty.epfl.ch/docs/reference/contextual/context-functions.html">https://dotty.epfl.ch/docs/reference/contextual/context-functions.html</a> 
 </span>.
 </p>
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span>
-  [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>]                       <span style="color: #00008b;">=&gt;</span>
-  (f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)                  <span style="color: #00008b;">=&gt;</span>
-  (functor<span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">F</span>])       ?=&gt;
-  (fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])                   <span style="color: #00008b;">=&gt;</span> functor.fmap(f)(fa)
+<pre class="code"><code><span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">map</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]] <span style="color: #81A1C1;">=</span>
+  [<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>]                       <span style="color: #81A1C1;">=&gt;</span>
+  (f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>)                  <span style="color: #81A1C1;">=&gt;</span>
+  (functor<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">F</span>])       ?=&gt;
+  (fa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>])                   <span style="color: #81A1C1;">=&gt;</span> functor.fmap(f)(fa)
 </code></pre>
 
 <p>
 Or, omit the name of the instance:
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span>
-  [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>]                       <span style="color: #00008b;">=&gt;</span>
-  (f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)                  <span style="color: #00008b;">=&gt;</span>
-  (<span style="color: #00008b;">using</span> <span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">F</span>])           <span style="color: #00008b;">=&gt;</span>
-  (fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])                   <span style="color: #00008b;">=&gt;</span> summon[<span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">F</span>]].fmap(f)(fa)
+<pre class="code"><code><span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">map</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]] <span style="color: #81A1C1;">=</span>
+  [<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>]                       <span style="color: #81A1C1;">=&gt;</span>
+  (f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>)                  <span style="color: #81A1C1;">=&gt;</span>
+  (<span style="color: #81A1C1;">using</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">F</span>])           <span style="color: #81A1C1;">=&gt;</span>
+  (fa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>])                   <span style="color: #81A1C1;">=&gt;</span> summon[<span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">F</span>]].fmap(f)(fa)
 </code></pre>
 
 <p>
@@ -236,9 +213,8 @@ Meow has a significantly different design than Cats, namely the type class hiera
 </p>
 
 
-<figure id="org90ebcd2">
-<object type="image/svg+xml" data="https://cdn.rawgit.com/tpolecat/cats-infographic/master/cats.svg" class="org-svg">
-Sorry, your browser does not support SVG.</object>
+<figure id="org39a4bfe">
+<img src="https://cdn.rawgit.com/tpolecat/cats-infographic/master/cats.svg" alt="cats.svg" class="org-svg">
 
 </figure>
 
@@ -249,9 +225,9 @@ Meow uses context bounding to define type class dependencies, similar to Haskell
 <p>
 Such as, <code>Applicative</code>, which from Cats implementation, looks like:
 </p>
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Applicative</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">extends</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">F</span>] {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">pure</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>]
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">ap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](ff<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>])(fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>]
+<pre class="code"><code><span style="color: #81A1C1;">trait</span> <span style="color: #81A1C1;">Applicative</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]] <span style="color: #81A1C1;">extends</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">F</span>] {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">pure</span>[<span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>]
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">ap</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](ff<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>])(fa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">B</span>]
 }
 </code></pre>
 
@@ -289,9 +265,9 @@ whatever extends it.
 Instead of using OO style to add capability via <code>extends</code>, we can simply declare type class <code>Applicaitve</code> in a context where <code>Functor[F]</code> exists.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Applicative</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]<span style="color: #00008b;">:</span><span style="color: #36648b;">Functor</span>]<span style="color: #00008b;">:</span>
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">pure</span>[<span style="color: #6b8e23;">A</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>]
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">liftA2</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">C</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">C</span>]
+<pre class="code"><code><span style="color: #81A1C1;">trait</span> <span style="color: #81A1C1;">Applicative</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]<span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">Functor</span>]<span style="color: #81A1C1;">:</span>
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">pure</span>[<span style="color: #81A1C1;">A</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>]
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">liftA2</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>, <span style="color: #81A1C1;">C</span>](f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">C</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">C</span>]
 </code></pre>
 
 <p>
@@ -309,10 +285,10 @@ Or, should they even care?
 Now we can even safely define functions in global.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=&gt;</span> (f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>) <span style="color: #00008b;">=&gt;</span> (functor<span style="color: #00008b;">:</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">F</span>]) ?=&gt; (fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=&gt;</span> functor.fmap(f)(fa)
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">pure</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> (a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>) <span style="color: #00008b;">=&gt;</span> (applicative<span style="color: #00008b;">:</span> <span style="color: #36648b;">Applicative</span>[<span style="color: #6b8e23;">F</span>]) ?=&gt; applicative.pure(a)
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">liftA2</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">C</span>] <span style="color: #00008b;">=&gt;</span> (f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">C</span>) <span style="color: #00008b;">=&gt;</span> (<span style="color: #6b8e23;">A</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Applicative</span>[<span style="color: #6b8e23;">F</span>]) ?=&gt; <span style="color: #6b8e23;">A</span>.liftA2(f)
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">flatMap</span>[<span style="color: #6b8e23;">M</span>[<span style="color: #00008b;">_</span>]] <span style="color: #00008b;">=</span> [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=&gt;</span> (f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">M</span>[<span style="color: #6b8e23;">B</span>]) <span style="color: #00008b;">=&gt;</span> (monad<span style="color: #00008b;">:</span> <span style="color: #36648b;">Monad</span>[<span style="color: #6b8e23;">M</span>]) ?=&gt; (ma<span style="color: #00008b;">:</span> <span style="color: #36648b;">M</span>[<span style="color: #6b8e23;">A</span>]) <span style="color: #00008b;">=&gt;</span> monad.bind(f)(ma)
+<pre class="code"><code><span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">map</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]] <span style="color: #81A1C1;">=</span> [<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=&gt;</span> (f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>) <span style="color: #81A1C1;">=&gt;</span> (functor<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">F</span>]) ?=&gt; (fa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>]) <span style="color: #81A1C1;">=&gt;</span> functor.fmap(f)(fa)
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">pure</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]] <span style="color: #81A1C1;">=</span> [<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=&gt;</span> (a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>) <span style="color: #81A1C1;">=&gt;</span> (applicative<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Applicative</span>[<span style="color: #81A1C1;">F</span>]) ?=&gt; applicative.pure(a)
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">liftA2</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]] <span style="color: #81A1C1;">=</span> [<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>, <span style="color: #81A1C1;">C</span>] <span style="color: #81A1C1;">=&gt;</span> (f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">C</span>) <span style="color: #81A1C1;">=&gt;</span> (<span style="color: #81A1C1;">A</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Applicative</span>[<span style="color: #81A1C1;">F</span>]) ?=&gt; <span style="color: #81A1C1;">A</span>.liftA2(f)
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">flatMap</span>[<span style="color: #81A1C1;">M</span>[<span style="color: #81A1C1;">_</span>]] <span style="color: #81A1C1;">=</span> [<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=&gt;</span> (f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">M</span>[<span style="color: #81A1C1;">B</span>]) <span style="color: #81A1C1;">=&gt;</span> (monad<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Monad</span>[<span style="color: #81A1C1;">M</span>]) ?=&gt; (ma<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">M</span>[<span style="color: #81A1C1;">A</span>]) <span style="color: #81A1C1;">=&gt;</span> monad.bind(f)(ma)
 </code></pre>
 
 <p>
@@ -323,26 +299,26 @@ method belongs to which type class, they only need to memorize few useful functi
 <ul class="org-ul">
 <li>Option is map-able:</li>
 </ul>
-<pre class="code"><code>map[<span style="color: #6b8e23;">Option</span>]((a<span style="color: #00008b;">:</span><span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> a + <span style="color: #6b8e23;">1</span>)(<span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">1</span>))
+<pre class="code"><code>map[<span style="color: #81A1C1;">Option</span>]((a<span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">Int</span>) <span style="color: #81A1C1;">=&gt;</span> a + <span style="color: #81A1C1;">1</span>)(<span style="color: #81A1C1;">Option</span>(<span style="color: #81A1C1;">1</span>))
 </code></pre>
 
 <ul class="org-ul">
 <li>Option is pure-able and apply-able:</li>
 </ul>
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">fa</span> <span style="color: #00008b;">=</span> pure[<span style="color: #6b8e23;">Option</span>](<span style="color: #6b8e23;">1</span>)
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">fb</span> <span style="color: #00008b;">=</span> pure[<span style="color: #6b8e23;">Option</span>](<span style="color: #6b8e23;">2</span>)
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">f</span> <span style="color: #00008b;">=</span> (x<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> (y<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> x + y
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">fa</span> <span style="color: #81A1C1;">=</span> pure[<span style="color: #81A1C1;">Option</span>](<span style="color: #81A1C1;">1</span>)
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">fb</span> <span style="color: #81A1C1;">=</span> pure[<span style="color: #81A1C1;">Option</span>](<span style="color: #81A1C1;">2</span>)
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">f</span> <span style="color: #81A1C1;">=</span> (x<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Int</span>) <span style="color: #81A1C1;">=&gt;</span> (y<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Int</span>) <span style="color: #81A1C1;">=&gt;</span> x + y
 
-assertEquals(liftA2(f)(fa)(fb), <span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">3</span>))
+assertEquals(liftA2(f)(fa)(fb), <span style="color: #81A1C1;">Option</span>(<span style="color: #81A1C1;">3</span>))
 </code></pre>
 
 <ul class="org-ul">
 <li>Option is flatMap-able</li>
 </ul>
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">fa</span> <span style="color: #00008b;">=</span> pure[<span style="color: #6b8e23;">Option</span>](<span style="color: #6b8e23;">1</span>)
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">ff</span> <span style="color: #00008b;">=</span> (x<span style="color: #00008b;">:</span><span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Option</span>(x +<span style="color: #6b8e23;">1</span>)
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">fa</span> <span style="color: #81A1C1;">=</span> pure[<span style="color: #81A1C1;">Option</span>](<span style="color: #81A1C1;">1</span>)
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">ff</span> <span style="color: #81A1C1;">=</span> (x<span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">Int</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Option</span>(x +<span style="color: #81A1C1;">1</span>)
 
-assertEquals(flatMap[<span style="color: #6b8e23;">Option</span>](ff)(fa), <span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">2</span>))
+assertEquals(flatMap[<span style="color: #81A1C1;">Option</span>](ff)(fa), <span style="color: #81A1C1;">Option</span>(<span style="color: #81A1C1;">2</span>))
 </code></pre>
 
 <p>
@@ -362,20 +338,20 @@ Once again, I want to emphasize that type classes are not for users, type classe
 For example, if we implement <code>Functor[Option]</code>, <code>map</code> is the only function we need to implement, but from there we will also get a bunch of functions for free, thanks to <code>extension</code>:
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Functor</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]]<span style="color: #00008b;">:</span>
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">fmap</span>[<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">F</span>[<span style="color: #6b8e23;">B</span>]
-  <span style="color: #00008b;">extension</span> [<span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])
-    infix <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">map</span>(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> fmap(f)(fa)
+<pre class="code"><code><span style="color: #81A1C1;">trait</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]]<span style="color: #81A1C1;">:</span>
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">fmap</span>[<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">B</span>]
+  <span style="color: #81A1C1;">extension</span> [<span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](fa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>])
+    infix <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">map</span>(f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span> fmap(f)(fa)
 
-    <span style="color: #228b22;">@targetName</span>(<span style="color: #8b0000;">"mapFlipped"</span>)
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">&lt;#&gt;</span>(f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> fmap(f)(fa)
+    <span style="color: #81A1C1;">@targetName</span>(<span style="color: #D08770;">"mapFlipped"</span>)
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">&lt;#&gt;</span>(f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span> fmap(f)(fa)
 
-    <span style="color: #228b22;">@targetName</span>(<span style="color: #8b0000;">"voidLeft"</span>)
-    infix <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">`$&gt;`</span>(a<span style="color: #00008b;">:</span> <span style="color: #36648b;">B</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> fmap(const[<span style="color: #6b8e23;">B</span>, <span style="color: #6b8e23;">A</span>](a))(fa)
+    <span style="color: #81A1C1;">@targetName</span>(<span style="color: #D08770;">"voidLeft"</span>)
+    infix <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">`$&gt;`</span>(a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">B</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span> fmap(const[<span style="color: #81A1C1;">B</span>, <span style="color: #81A1C1;">A</span>](a))(fa)
 
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">void</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">Unit</span>] <span style="color: #00008b;">=</span> fmap(const[<span style="color: #6b8e23;">Unit</span>, <span style="color: #6b8e23;">A</span>](()))(fa)
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">void</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">Unit</span>] <span style="color: #81A1C1;">=</span> fmap(const[<span style="color: #81A1C1;">Unit</span>, <span style="color: #81A1C1;">A</span>](()))(fa)
 
-<span style="color: #00008b;">end</span> <span style="color: #6b8e23;">Functor</span>
+<span style="color: #81A1C1;">end</span> <span style="color: #81A1C1;">Functor</span>
 </code></pre>
 
 <p>
@@ -395,21 +371,21 @@ these function for <b>free</b>.
 <p>
 And you can add even more extensions, to its companion object too.
 </p>
-<pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">Functor</span><span style="color: #00008b;">:</span>
-  <span style="color: #00008b;">extension</span> [<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](f<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">B</span>)
-    <span style="color: #228b22;">@targetName</span>(<span style="color: #8b0000;">"fmap"</span>)
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">`&lt;$&gt;`</span>(fa<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>])(<span style="color: #00008b;">using</span> <span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">F</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>] <span style="color: #00008b;">=</span> fa map f
+<pre class="code"><code><span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">Functor</span><span style="color: #81A1C1;">:</span>
+  <span style="color: #81A1C1;">extension</span> [<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>], <span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](f<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">B</span>)
+    <span style="color: #81A1C1;">@targetName</span>(<span style="color: #D08770;">"fmap"</span>)
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">`&lt;$&gt;`</span>(fa<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>])(<span style="color: #81A1C1;">using</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">F</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">B</span>] <span style="color: #81A1C1;">=</span> fa map f
 
-  <span style="color: #00008b;">extension</span> [<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>], <span style="color: #6b8e23;">A</span>, <span style="color: #6b8e23;">B</span>](a<span style="color: #00008b;">:</span> <span style="color: #36648b;">A</span>)
-    <span style="color: #228b22;">@targetName</span>(<span style="color: #8b0000;">"voidRight"</span>)
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">`&lt;$`</span>(fb<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">B</span>])(<span style="color: #00008b;">using</span> <span style="color: #6b8e23;">Functor</span>[<span style="color: #6b8e23;">F</span>])<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">A</span>] <span style="color: #00008b;">=</span> fb.map(const(a))
+  <span style="color: #81A1C1;">extension</span> [<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>], <span style="color: #81A1C1;">A</span>, <span style="color: #81A1C1;">B</span>](a<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">A</span>)
+    <span style="color: #81A1C1;">@targetName</span>(<span style="color: #D08770;">"voidRight"</span>)
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">`&lt;$`</span>(fb<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">B</span>])(<span style="color: #81A1C1;">using</span> <span style="color: #81A1C1;">Functor</span>[<span style="color: #81A1C1;">F</span>])<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">A</span>] <span style="color: #81A1C1;">=</span> fb.map(const(a))
 </code></pre>
 
 <div class="epigraph"><blockquote>
 <p>
 <b>Quiz:</b> Guess what it will print? 2? 3? or 4?
 </p>
-<pre class="code"><code><span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">1</span>) `$&gt;` <span style="color: #6b8e23;">3</span> `&lt;$` <span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">2</span>) &lt;#&gt; (<span style="color: #00008b;">_</span> + <span style="color: #6b8e23;">1</span>)
+<pre class="code"><code><span style="color: #81A1C1;">Option</span>(<span style="color: #81A1C1;">1</span>) `$&gt;` <span style="color: #81A1C1;">3</span> `&lt;$` <span style="color: #81A1C1;">Option</span>(<span style="color: #81A1C1;">2</span>) &lt;#&gt; (<span style="color: #81A1C1;">_</span> + <span style="color: #81A1C1;">1</span>)
 </code></pre>
 
 </blockquote></div>
@@ -421,26 +397,26 @@ With extensions, the <code>Option</code> examples above can be rewritten to be m
 <ul class="org-ul">
 <li>Option is <code>&lt;$&gt;</code>-able:</li>
 </ul>
-<pre class="code"><code>(a<span style="color: #00008b;">:</span><span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> a + <span style="color: #6b8e23;">1</span> `&lt;$&gt;` <span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">1</span>)
+<pre class="code"><code>(a<span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">Int</span>) <span style="color: #81A1C1;">=&gt;</span> a + <span style="color: #81A1C1;">1</span> `&lt;$&gt;` <span style="color: #81A1C1;">Option</span>(<span style="color: #81A1C1;">1</span>)
 </code></pre>
 
 <ul class="org-ul">
 <li>Option is pure-able and <code>&lt;*&gt;</code>-able:</li>
 </ul>
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">fa</span> <span style="color: #00008b;">=</span> pure[<span style="color: #6b8e23;">Option</span>](<span style="color: #6b8e23;">1</span>)
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">fb</span> <span style="color: #00008b;">=</span> pure[<span style="color: #6b8e23;">Option</span>](<span style="color: #6b8e23;">2</span>)
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">f</span> <span style="color: #00008b;">=</span> (x<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> (y<span style="color: #00008b;">:</span> <span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> x + y
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">fa</span> <span style="color: #81A1C1;">=</span> pure[<span style="color: #81A1C1;">Option</span>](<span style="color: #81A1C1;">1</span>)
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">fb</span> <span style="color: #81A1C1;">=</span> pure[<span style="color: #81A1C1;">Option</span>](<span style="color: #81A1C1;">2</span>)
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">f</span> <span style="color: #81A1C1;">=</span> (x<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Int</span>) <span style="color: #81A1C1;">=&gt;</span> (y<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Int</span>) <span style="color: #81A1C1;">=&gt;</span> x + y
 
-assertEquals(f `&lt;$&gt;` fa &lt;*&gt; fb, <span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">3</span>))
+assertEquals(f `&lt;$&gt;` fa &lt;*&gt; fb, <span style="color: #81A1C1;">Option</span>(<span style="color: #81A1C1;">3</span>))
 </code></pre>
 
 <ul class="org-ul">
 <li>Option is <code>&gt;&gt;=</code>-able</li>
 </ul>
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">fa</span> <span style="color: #00008b;">=</span> pure[<span style="color: #6b8e23;">Option</span>](<span style="color: #6b8e23;">1</span>)
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">ff</span> <span style="color: #00008b;">=</span> (x<span style="color: #00008b;">:</span><span style="color: #36648b;">Int</span>) <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">Option</span>(x +<span style="color: #6b8e23;">1</span>)
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">fa</span> <span style="color: #81A1C1;">=</span> pure[<span style="color: #81A1C1;">Option</span>](<span style="color: #81A1C1;">1</span>)
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">ff</span> <span style="color: #81A1C1;">=</span> (x<span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">Int</span>) <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">Option</span>(x +<span style="color: #81A1C1;">1</span>)
 
-assertEquals(fa &gt;&gt;= ff, <span style="color: #6b8e23;">Option</span>(<span style="color: #6b8e23;">2</span>))
+assertEquals(fa &gt;&gt;= ff, <span style="color: #81A1C1;">Option</span>(<span style="color: #81A1C1;">2</span>))
 </code></pre>
 </div>
 </div>
@@ -456,10 +432,10 @@ new feature <code>export</code><label for="5" class="margin-toggle sidenote-numb
 </span>, which is also much cleaner than Cats <code>extends</code> approach.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">object</span> <span style="color: #6b8e23;">prelude</span><span style="color: #00008b;">:</span>
-  <span style="color: #00008b;">export</span> data.<span style="color: #6b8e23;">Functor</span>.{<span style="color: #00008b;">given</span>,*}
-  <span style="color: #00008b;">export</span> control.<span style="color: #6b8e23;">Applicative</span>.{<span style="color: #00008b;">given</span>,*}
-  <span style="color: #00008b;">export</span> control.<span style="color: #6b8e23;">Monad</span>.{<span style="color: #00008b;">given</span>,*}
+<pre class="code"><code><span style="color: #81A1C1;">object</span> <span style="color: #81A1C1;">prelude</span><span style="color: #81A1C1;">:</span>
+  <span style="color: #81A1C1;">export</span> data.<span style="color: #81A1C1;">Functor</span>.{<span style="color: #81A1C1;">given</span>,*}
+  <span style="color: #81A1C1;">export</span> control.<span style="color: #81A1C1;">Applicative</span>.{<span style="color: #81A1C1;">given</span>,*}
+  <span style="color: #81A1C1;">export</span> control.<span style="color: #81A1C1;">Monad</span>.{<span style="color: #81A1C1;">given</span>,*}
 </code></pre>
 
 <p>
@@ -484,23 +460,23 @@ To be continued&#x2026; in the next blogpost, I'll explain how to implement gene
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://dotty.epfl.ch/docs/reference/contextual/context-functions.html">https://dotty.epfl.ch/docs/reference/contextual/context-functions.html</a> 
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 If you follow the arrow on the graph it extends <code>FlatMap</code>, <code>Applicative</code>, <code>Apply</code>, <code>Functor</code>, <code>Semigroupal</code>, <code>Invariant</code>.
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 Or, should they even care? 
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4" role="doc-backlink">4</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://dotty.epfl.ch/docs/reference/other-new-features/targetName.html">https://dotty.epfl.ch/docs/reference/other-new-features/targetName.html</a> 
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5">5</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5" role="doc-backlink">5</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://dotty.epfl.ch/docs/reference/other-new-features/export.html">https://dotty.epfl.ch/docs/reference/other-new-features/export.html</a> 
 </p></div></div>
 
@@ -515,7 +491,7 @@ Or, should they even care?
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2021:05:24</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

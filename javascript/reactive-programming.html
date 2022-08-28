@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:31 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Monadic Reactive Programming in JavaScript</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="unknown">
-<meta name="description" content="当我们都用习惯 Promise Monad 之后，我再来介绍一个跟时间相关的 Monad reactive prograaming 中的 Stream"
->
+<meta name="author" content="unknown" />
+<meta name="description" content="当我们都用习惯 Promise Monad 之后，我再来介绍一个跟时间相关的 Monad reactive prograaming 中的 Stream" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -16,28 +15,6 @@
 <link rel="stylesheet" href="/style/toc.css"/>
 <link rel="stylesheet" href="/style/tufte.css"/>
 <link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -54,12 +31,12 @@
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">Monadic Reactive Programming in JavaScript</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#orgb83796b">Stream</a></li>
 <li><a href="#org8510de3">Functor</a></li>
@@ -73,7 +50,7 @@
 </p>
 
 
-<figure id="org25ba84c">
+<figure id="org8268cc9">
 <img src="./images/stream.gif" alt="stream.gif">
 
 </figure>
@@ -96,8 +73,8 @@
 而在前端世界，这种情况非常常见，比如一个简单的用户输入框 input，同样的，我想得到输的总和，似乎是有些棘手的一件事情，只是，对于函数式编程来说，对于状态的保存就非常头疼。当然如果不考虑函数式，弄一个全局变量来保存 acc 也是最直接的思路了。
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">acc</span> = 0;
-$(<span style="color: #8b0000;">'input'</span>).onChange(_=&gt;acc+=_)
+<pre class="code"><code><span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">acc</span> = 0;
+$(<span style="color: #D08770;">'input'</span>).onChange(_=&gt;acc+=_)
 </code></pre>
 
 <p>
@@ -112,7 +89,7 @@ $(<span style="color: #8b0000;">'input'</span>).onChange(_=&gt;acc+=_)
 下面开始用 <a href="https://github.com/cujojs/most">cujojs/most</a> :
 </p>
 
-<pre class="code"><code>most.fromEvent(<span style="color: #8b0000;">'input'</span>, document.querySelector(<span style="color: #8b0000;">'input'</span>))
+<pre class="code"><code>most.fromEvent(<span style="color: #D08770;">'input'</span>, document.querySelector(<span style="color: #D08770;">'input'</span>))
 .reduce((acc,x)=&gt;acc+x)
 .then(_=&gt;console.log(_))
 </code></pre>
@@ -130,9 +107,9 @@ $(<span style="color: #8b0000;">'input'</span>).onChange(_=&gt;acc+=_)
 每个 most 的 Stream 都是一个 functor，因此我们可以 map 一个函数到流上。
 </p>
 
-<pre class="code"><code><span id="coderef-mostfrom" class="coderef-off">most.from([1,2,3,4]) <span style="color: #8c8c8c; font-style: italic;">//</span> (mostfrom)</span>
+<pre class="code"><code><span id="coderef-mostfrom" class="coderef-off">most.from([1,2,3,4]) <span style="color: #677691;">//</span> (mostfrom)</span>
     .map(_=&gt;_*2)
-<span id="coderef-observe" class="coderef-off">    .observe(_=&gt;console.log(_)); <span style="color: #8c8c8c; font-style: italic;">//</span> (observe)</span>
+<span id="coderef-observe" class="coderef-off">    .observe(_=&gt;console.log(_)); <span style="color: #677691;">//</span> (observe)</span>
 </code></pre>
 
 <p>
@@ -152,7 +129,7 @@ $(<span style="color: #8b0000;">'input'</span>).onChange(_=&gt;acc+=_)
 不仅如此，Stream 还是 Applicative Functor，希望之前的概念还记得，Applicative 可以把含有函数的容器应用到另一个含有值的容器上，所以上例可以用 Applicative 这样做：
 </p>
 
-<pre class="code"><code>most.of(_=&gt;_*2)
+<pre class="code"><code>most.<span style="color: #81A1C1;">of</span>(_=&gt;_*2)
   .ap(most.from([1,2,3,4]))
   .observe(_=&gt;console.log(_))
 </code></pre>
@@ -161,9 +138,9 @@ $(<span style="color: #8b0000;">'input'</span>).onChange(_=&gt;acc+=_)
 除了使用 Applicative 之外，我们还可以把函数 lift 起来，这样在使用上跟一般的函数就没有什么区别了，只是现在 lifted 的函数可以操作 most 流。(虽然不知道为什么官网并没有推荐（deprecated） 使用 lift，反倒我觉得是用 lift 更适合函数的重用。)
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">var</span> <span style="color: #b8860b;">multiple2</span> = <span style="color: #00008b;">function</span>(<span style="color: #b8860b;">x</span>){<span style="color: #00008b;">return</span> x*2};
-<span style="color: #00008b;">var</span> <span style="color: #b8860b;">lifedMultiple2</span> = most.lift(multiple2);
-lifedMultiple2(most.of(3))
+<pre class="code"><code><span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">multiple2</span> = <span style="color: #81A1C1;">function</span>(<span style="font-weight: bold;">x</span>){<span style="color: #81A1C1;">return</span> x*2};
+<span style="color: #81A1C1;">var</span> <span style="font-weight: bold;">lifedMultiple2</span> = most.lift(multiple2);
+lifedMultiple2(most.<span style="color: #81A1C1;">of</span>(3))
   .observe(_=&gt;console.log(_)) 
 </code></pre>
 </div>
@@ -185,7 +162,7 @@ lifedMultiple2(most.of(3))
 思考一下这里如果是一个数组 <code>[1,2]</code> ，比如 flatMap <code>x=&gt;[x*2]</code> 会得到一个展开的数组 <code>[2,4]</code> ，而不是 <code>[[2],[4]]</code> 。 同样的，flatMap 一个流，得到应该是 flat 过的流，那么这里产生的两个流， <code>1-1-1-1-1</code> ，和 <code>2---2---2---2---2</code> ，想象一下要把两个流展开放到一个流里，空间的元素放到数组中是可以按空间排列，那么元素放到流中则是应该按照时间排列，我们做一个简单的对齐：
 </p>
 
-<pre class="example" id="orgadbcb94">
+<pre class="example" id="org3d35b05">
 1-1-1-1-1
 2- -2- -2--2--2
 
@@ -207,7 +184,7 @@ lifedMultiple2(most.of(3))
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2015-09-29 Tue 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>

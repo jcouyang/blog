@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-08-27 Sat 01:32 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-08-28 Sun 14:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Into ReaderT-verse</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Jichao Ouyang">
+<meta name="author" content="Jichao Ouyang" />
 <meta name="description" content="As what I've been discussed in [[https://blog.oyanglul.us/scala/3-layer-cake][3 Layer Scala Cake]] ReaderT pattern is pretty much enough
-for most case. So, let's dive into the ReaderT universe and see how can we factor those effects out."
->
-<meta name="keywords" content="Scala,Monad,MTL,ReaderT">
+for most case. So, let's dive into the ReaderT universe and see how can we factor those effects out." />
+<meta name="keywords" content="Scala,Monad,MTL,ReaderT" />
+<meta name="generator" content="Org Mode" />
 <link rel="icon" href="/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 <meta charset="utf-8">
@@ -21,28 +20,6 @@ for most case. So, let's dive into the ReaderT universe and see how can we facto
 <meta property="og:title" content="Into ReaderT-verse" />
 <meta property="og:description" content="ReaderT monad is all you need!!!" />
 <meta property="og:type" content="article" />
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -59,12 +36,12 @@ for most case. So, let's dive into the ReaderT universe and see how can we facto
     <a href="https://github.com/jcouyang/blog">GITHUB</a>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <header>
 <h1 class="title">Into ReaderT-verse</h1>
-</header><nav id="table-of-contents">
+</header><nav id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#orgc3ea460">The Program</a></li>
 <li><a href="#org2d831fa">The Problem</a></li>
@@ -88,14 +65,14 @@ To keep this article reletively small, lets scope our problem smaller
 I'll start with a simple deja vu program.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">sourceBucketName</span> <span style="color: #00008b;">=</span> <span style="color: #8b0000;">"source-bucket"</span>
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">fileName</span> <span style="color: #00008b;">=</span> <span style="color: #8b0000;">"fileA"</span>
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">targetBucketName</span> <span style="color: #00008b;">=</span> <span style="color: #8b0000;">"target-bucket"</span>
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">awsClient</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">AmazonS3ClientBuilder</span>.standard().build()
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">pureBusinessProcess</span>(content<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span> <span style="color: #00008b;">=</span> ???
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span> <span style="color: #00008b;">=</span> {
-  <span style="color: #00008b;">val</span> <span style="color: #b8860b;">content</span> <span style="color: #00008b;">=</span> awsClient.getObject(sourceBucketName, fileName)
-  <span style="color: #00008b;">val</span> <span style="color: #b8860b;">result</span> <span style="color: #00008b;">=</span> pureBusinessProcess(content)
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">sourceBucketName</span> <span style="color: #81A1C1;">=</span> <span style="color: #D08770;">"source-bucket"</span>
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">fileName</span> <span style="color: #81A1C1;">=</span> <span style="color: #D08770;">"fileA"</span>
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">targetBucketName</span> <span style="color: #81A1C1;">=</span> <span style="color: #D08770;">"target-bucket"</span>
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">awsClient</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">AmazonS3ClientBuilder</span>.standard().build()
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">pureBusinessProcess</span>(content<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span> <span style="color: #81A1C1;">=</span> ???
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">program</span> <span style="color: #81A1C1;">=</span> {
+  <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">content</span> <span style="color: #81A1C1;">=</span> awsClient.getObject(sourceBucketName, fileName)
+  <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">result</span> <span style="color: #81A1C1;">=</span> pureBusinessProcess(content)
   awsClient.putObject(targetBucketName, fileName)
 }
 </code></pre>
@@ -128,28 +105,28 @@ Such program looks pretty clean and readable but implementation like this is nev
 If we add those 3 factors, the <code>program</code> will not clean and readable anymore
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">awsClient</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">AmazonS3ClientBuilder</span>.standard().build()
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">pureBusinessProcess</span>(content<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span> <span style="color: #00008b;">=</span> ???
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">logger</span> <span style="color: #00008b;">=</span> org.log4s.getLogger
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span>(client<span style="color: #00008b;">:</span> <span style="color: #36648b;">AmazonS3</span>) <span style="color: #00008b;">=</span> {
-  <span style="color: #00008b;">val</span> <span style="color: #b8860b;">content</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">try</span> {
-    <span style="color: #00008b;">val</span> <span style="color: #b8860b;">content</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">try</span> {
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">awsClient</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">AmazonS3ClientBuilder</span>.standard().build()
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">pureBusinessProcess</span>(content<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span> <span style="color: #81A1C1;">=</span> ???
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">logger</span> <span style="color: #81A1C1;">=</span> org.log4s.getLogger
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">program</span>(client<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">AmazonS3</span>) <span style="color: #81A1C1;">=</span> {
+  <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">content</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">try</span> {
+    <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">content</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">try</span> {
       awsClient.getObject(sourceBucketName, fileName)
-    } <span style="color: #00008b;">catch</span> {
-      <span style="color: #00008b;">case</span> <span style="color: #b8860b;">e</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Throwable</span> <span style="color: #00008b;">=&gt;</span>
-        logger.error(<span style="color: #8b0000;">"error fetching file from S3"</span>)
-        <span style="color: #00008b;">throw</span> e
+    } <span style="color: #81A1C1;">catch</span> {
+      <span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">e</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Throwable</span> <span style="color: #81A1C1;">=&gt;</span>
+        logger.error(<span style="color: #D08770;">"error fetching file from S3"</span>)
+        <span style="color: #81A1C1;">throw</span> e
     }
-    <span style="color: #00008b;">val</span> <span style="color: #b8860b;">result</span> <span style="color: #00008b;">=</span> pureBusinessProcess(content)
-    <span style="color: #00008b;">try</span> {
+    <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">result</span> <span style="color: #81A1C1;">=</span> pureBusinessProcess(content)
+    <span style="color: #81A1C1;">try</span> {
       awsClient.putObject(targetBucketName, fileName)
-    } <span style="color: #00008b;">catch</span> {
-      <span style="color: #00008b;">case</span> <span style="color: #b8860b;">e</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Throwable</span> <span style="color: #00008b;">=&gt;</span>
-        logger.error(<span style="color: #8b0000;">"error puting file to S3"</span>)
-        <span style="color: #00008b;">throw</span> e
+    } <span style="color: #81A1C1;">catch</span> {
+      <span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">e</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Throwable</span> <span style="color: #81A1C1;">=&gt;</span>
+        logger.error(<span style="color: #D08770;">"error puting file to S3"</span>)
+        <span style="color: #81A1C1;">throw</span> e
     }
-  } <span style="color: #00008b;">catch</span> { 
-    <span style="color: #00008b;">case</span> <span style="color: #b8860b;">e</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Throwable</span> <span style="color: #00008b;">=&gt;</span> logger.error(s<span style="color: #8b0000;">"error processing </span><span style="color: #b8860b;">$fileName</span><span style="color: #8b0000;"> from </span><span style="color: #b8860b;">$sourceBucketName</span><span style="color: #8b0000;">: </span><span style="color: #b8860b;">${e.getMessage}</span><span style="color: #8b0000;">"</span>)
+  } <span style="color: #81A1C1;">catch</span> { 
+    <span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">e</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Throwable</span> <span style="color: #81A1C1;">=&gt;</span> logger.error(s<span style="color: #D08770;">"error processing </span><span style="font-weight: bold;">$fileName</span><span style="color: #D08770;"> from </span><span style="font-weight: bold;">$sourceBucketName</span><span style="color: #D08770;">: </span><span style="font-weight: bold;">${e.getMessage}</span><span style="color: #D08770;">"</span>)
   }
 }
 </code></pre>
@@ -181,13 +158,13 @@ thanks to <a href="https://typelevel.org/cats/api/cats/MonadError.html">MonadErr
 Instead of parameterize <code>client</code>, we change the return type of
 <code>program</code> to <code>ReaderT[IO, AmazonS3, Unit]</code>
 </p>
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">ReaderT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">AmazonS3</span>, <span style="color: #6b8e23;">Unit</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
-  content <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>(client <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(client.getObject(sourceBucketName, fileName)))
-    .onError{<span style="color: #00008b;">case</span> <span style="color: #b8860b;">e</span><span style="color: #00008b;">:</span><span style="color: #36648b;">Throwable</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(logger.error(<span style="color: #8b0000;">"error fetching file from S3: ${e.getMessage}"</span>))}
-  result <span style="color: #00008b;">=</span> pureBusinessProcess(content)
-  <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>(client <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(client.putObject(targetBucketName, fileName)))
-    .onError{<span style="color: #00008b;">case</span> <span style="color: #b8860b;">e</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Throwable</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(logger.error(<span style="color: #8b0000;">"error puting file to S3"</span>))}
-} <span style="color: #00008b;">yield</span> ()
+<pre class="code"><code><span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">program</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">ReaderT</span>[<span style="color: #81A1C1;">IO</span>, <span style="color: #81A1C1;">AmazonS3</span>, <span style="color: #81A1C1;">Unit</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">for</span> {
+  content <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">Kleisli</span>(client <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">IO</span>(client.getObject(sourceBucketName, fileName)))
+    .onError{<span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">e</span><span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">Throwable</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">IO</span>(logger.error(<span style="color: #D08770;">"error fetching file from S3: ${e.getMessage}"</span>))}
+  result <span style="color: #81A1C1;">=</span> pureBusinessProcess(content)
+  <span style="color: #81A1C1;">_</span> <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">Kleisli</span>(client <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">IO</span>(client.putObject(targetBucketName, fileName)))
+    .onError{<span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">e</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Throwable</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">IO</span>(logger.error(<span style="color: #D08770;">"error puting file to S3"</span>))}
+} <span style="color: #81A1C1;">yield</span> ()
 </code></pre>
 
 <p>
@@ -199,27 +176,27 @@ Now it's the best feature of functional programming, ReaderT is pure so you can 
 and give it a reasonable name.
 </p>
 
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">fetchContent</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>(client <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(client.getObject(sourceBucketName, fileName)))
-    .onError{<span style="color: #00008b;">case</span> <span style="color: #b8860b;">e</span><span style="color: #00008b;">:</span><span style="color: #36648b;">Throwable</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(logger.error(<span style="color: #8b0000;">"error fetching file from S3: ${e.getMessage}"</span>))}
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">fetchContent</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Kleisli</span>(client <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">IO</span>(client.getObject(sourceBucketName, fileName)))
+    .onError{<span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">e</span><span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">Throwable</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">IO</span>(logger.error(<span style="color: #D08770;">"error fetching file from S3: ${e.getMessage}"</span>))}
 
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">putContent</span>(content<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">Kleisli</span>(client <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(client.putObject(targetBucketName, fileName, content)))
-    .onError{<span style="color: #00008b;">case</span> <span style="color: #b8860b;">e</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Throwable</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(logger.error(<span style="color: #8b0000;">"error puting file to S3: ${e.getMessage}"</span>))}
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">putContent</span>(content<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>) <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">Kleisli</span>(client <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">IO</span>(client.putObject(targetBucketName, fileName, content)))
+    .onError{<span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">e</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Throwable</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">IO</span>(logger.error(<span style="color: #D08770;">"error puting file to S3: ${e.getMessage}"</span>))}
 
-<span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">ReaderT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">AmazonS3</span>, <span style="color: #6b8e23;">PutObjectResult</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
-  content <span style="color: #00008b;">&lt;-</span> fetchContent
-  result <span style="color: #00008b;">=</span> pureBusinessProcess(content)
-  <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> putContent(result)
-} <span style="color: #00008b;">yield</span> ()
+<span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">program</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">ReaderT</span>[<span style="color: #81A1C1;">IO</span>, <span style="color: #81A1C1;">AmazonS3</span>, <span style="color: #81A1C1;">PutObjectResult</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">for</span> {
+  content <span style="color: #81A1C1;">&lt;-</span> fetchContent
+  result <span style="color: #81A1C1;">=</span> pureBusinessProcess(content)
+  <span style="color: #81A1C1;">_</span> <span style="color: #81A1C1;">&lt;-</span> putContent(result)
+} <span style="color: #81A1C1;">yield</span> ()
 </code></pre>
 
 <p>
 Fine, that's better at readability, but testing journey won't be much difference, I still need to mock the <code>client</code>
 and stub <code>getObject</code> and <code>putObject</code>.
 </p>
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">fakeClient</span> <span style="color: #00008b;">=</span> mock[<span style="color: #6b8e23;">AmazonS3</span>]
-<span style="color: #00008b;">val</span> <span style="color: #b8860b;">res</span> <span style="color: #00008b;">=</span> mock[<span style="color: #6b8e23;">PutObjectResult</span>]
-fakeClient.getObject(sourceBucketName, fileName) returns <span style="color: #8b0000;">"some content"</span>
-fakeClient.putObject(targetBucketName, fileName, <span style="color: #8b0000;">"processed"</span>) returns res
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">fakeClient</span> <span style="color: #81A1C1;">=</span> mock[<span style="color: #81A1C1;">AmazonS3</span>]
+<span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">res</span> <span style="color: #81A1C1;">=</span> mock[<span style="color: #81A1C1;">PutObjectResult</span>]
+fakeClient.getObject(sourceBucketName, fileName) returns <span style="color: #D08770;">"some content"</span>
+fakeClient.putObject(targetBucketName, fileName, <span style="color: #D08770;">"processed"</span>) returns res
 program.run(fakeClient).unsafeRunSync must_== res
 </code></pre>
 
@@ -231,9 +208,9 @@ Not bad but not good either, we can avoid mocking and stubing by abstract anothe
 <div id="outline-container-org6159c21" class="outline-3">
 <h3 id="org6159c21">Layer 2</h3>
 <div class="outline-text-3" id="text-org6159c21">
-<pre class="code"><code><span style="color: #00008b;">trait</span> <span style="color: #36648b;">Interpreter</span>[<span style="color: #6b8e23;">F</span>[<span style="color: #00008b;">_</span>]] {
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">getObject</span>(bucketName<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, fileName<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">String</span>]
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">putObject</span>(bucketName<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, fileName<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, content<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)<span style="color: #00008b;">:</span> <span style="color: #36648b;">F</span>[<span style="color: #6b8e23;">PutObjectResult</span>]
+<pre class="code"><code><span style="color: #81A1C1;">trait</span> <span style="color: #81A1C1;">Interpreter</span>[<span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">_</span>]] {
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">getObject</span>(bucketName<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>, fileName<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">String</span>]
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">putObject</span>(bucketName<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>, fileName<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>, content<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>)<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">F</span>[<span style="color: #81A1C1;">PutObjectResult</span>]
 }
 </code></pre>
 </div>
@@ -242,21 +219,21 @@ Not bad but not good either, we can avoid mocking and stubing by abstract anothe
 <div id="outline-container-orge62a4aa" class="outline-3">
 <h3 id="orge62a4aa">Layer 3</h3>
 <div class="outline-text-3" id="text-orge62a4aa">
-<pre class="code"><code><span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">ReaderT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Interpreter</span>[<span style="color: #6b8e23;">IO</span>], <span style="color: #6b8e23;">PutObjectResult</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
-  content <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>(<span style="color: #00008b;">_</span>.getObject(sourceBucketName, fileName))
-  result <span style="color: #00008b;">=</span> pureBusinessProcess(content)
-  <span style="color: #00008b;">_</span> <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>(<span style="color: #00008b;">_</span>.putObject(targetBucketName, fileName, result))
-} <span style="color: #00008b;">yield</span> ()
+<pre class="code"><code><span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">program</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">ReaderT</span>[<span style="color: #81A1C1;">IO</span>, <span style="color: #81A1C1;">Interpreter</span>[<span style="color: #81A1C1;">IO</span>], <span style="color: #81A1C1;">PutObjectResult</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">for</span> {
+  content <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">Kleisli</span>(<span style="color: #81A1C1;">_</span>.getObject(sourceBucketName, fileName))
+  result <span style="color: #81A1C1;">=</span> pureBusinessProcess(content)
+  <span style="color: #81A1C1;">_</span> <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">Kleisli</span>(<span style="color: #81A1C1;">_</span>.putObject(targetBucketName, fileName, result))
+} <span style="color: #81A1C1;">yield</span> ()
 </code></pre>
 
 <p>
 A <code>Kleisli</code> before <code>_.getObject...</code> barely sacrifice our readability but the benifit we get is that we can
 swap Layer 2 with abitrary interpreter in test
 </p>
-<pre class="code"><code><span style="color: #00008b;">val</span> <span style="color: #b8860b;">res</span> <span style="color: #00008b;">=</span> mock[<span style="color: #6b8e23;">PutObjectResult</span>]
-program.run(<span style="color: #00008b;">new</span> <span style="color: #36648b;">Interpreter</span>[<span style="color: #6b8e23;">IO</span>] {
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">getObject</span>(bucketName<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, fileName<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">IO</span>(<span style="color: #8b0000;">"some content"</span>)
-  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">putObject</span>(bucketName<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, fileName<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, content<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">=</span> res
+<pre class="code"><code><span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">res</span> <span style="color: #81A1C1;">=</span> mock[<span style="color: #81A1C1;">PutObjectResult</span>]
+program.run(<span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Interpreter</span>[<span style="color: #81A1C1;">IO</span>] {
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">getObject</span>(bucketName<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>, fileName<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>) <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">IO</span>(<span style="color: #D08770;">"some content"</span>)
+  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">putObject</span>(bucketName<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>, fileName<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>, content<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>) <span style="color: #81A1C1;">=</span> res
 }).unsafeRunSync() must_== res
 
 </code></pre>
@@ -287,23 +264,23 @@ Same as Tagless Final
 </span></li>
 </ol>
 
-<pre class="code"><code>  <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">program</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">ReaderT</span>[<span style="color: #6b8e23;">IO</span>, <span style="color: #6b8e23;">Interpreter</span>[<span style="color: #6b8e23;">IO</span>], <span style="color: #6b8e23;">PutObjectResult</span>] <span style="color: #00008b;">=</span> <span style="color: #00008b;">for</span> {
-    env <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>(<span style="color: #00008b;">_</span>.getEnv)
-    content <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>(<span style="color: #00008b;">_</span>.getObject(env.source, env.fileName))
-    .onError{<span style="color: #00008b;">case</span> <span style="color: #b8860b;">e</span><span style="color: #00008b;">:</span><span style="color: #36648b;">Throwable</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(logger.error(s<span style="color: #8b0000;">"error fetching file from S3: </span><span style="color: #b8860b;">${e.getMessage}</span><span style="color: #8b0000;">"</span>))}
-    result <span style="color: #00008b;">=</span> pureBusinessProcess(content)
-    resp <span style="color: #00008b;">&lt;-</span> <span style="color: #6b8e23;">Kleisli</span>(<span style="color: #00008b;">_</span>.putObject(env.target, env.fileName, result))
-    .onError{<span style="color: #00008b;">case</span> <span style="color: #b8860b;">e</span><span style="color: #00008b;">:</span> <span style="color: #36648b;">Throwable</span> <span style="color: #00008b;">=&gt;</span> <span style="color: #6b8e23;">IO</span>(logger.error(s<span style="color: #8b0000;">"error puting file to S3: </span><span style="color: #b8860b;">${e.getMessage}</span><span style="color: #8b0000;">"</span>))}
-  } <span style="color: #00008b;">yield</span> resp
+<pre class="code"><code>  <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">program</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">ReaderT</span>[<span style="color: #81A1C1;">IO</span>, <span style="color: #81A1C1;">Interpreter</span>[<span style="color: #81A1C1;">IO</span>], <span style="color: #81A1C1;">PutObjectResult</span>] <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">for</span> {
+    env <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">Kleisli</span>(<span style="color: #81A1C1;">_</span>.getEnv)
+    content <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">Kleisli</span>(<span style="color: #81A1C1;">_</span>.getObject(env.source, env.fileName))
+    .onError{<span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">e</span><span style="color: #81A1C1;">:</span><span style="color: #81A1C1;">Throwable</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">IO</span>(logger.error(s<span style="color: #D08770;">"error fetching file from S3: </span><span style="font-weight: bold;">${e.getMessage}</span><span style="color: #D08770;">"</span>))}
+    result <span style="color: #81A1C1;">=</span> pureBusinessProcess(content)
+    resp <span style="color: #81A1C1;">&lt;-</span> <span style="color: #81A1C1;">Kleisli</span>(<span style="color: #81A1C1;">_</span>.putObject(env.target, env.fileName, result))
+    .onError{<span style="color: #81A1C1;">case</span> <span style="font-weight: bold;">e</span><span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">Throwable</span> <span style="color: #81A1C1;">=&gt;</span> <span style="color: #81A1C1;">IO</span>(logger.error(s<span style="color: #D08770;">"error puting file to S3: </span><span style="font-weight: bold;">${e.getMessage}</span><span style="color: #D08770;">"</span>))}
+  } <span style="color: #81A1C1;">yield</span> resp
 
-  <span style="color: #00008b;">case</span> <span style="color: #00008b;">class</span> <span style="color: #36648b;">Env</span>(source<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, target<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, fileName<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>)
-  <span style="color: #00008b;">val</span> <span style="color: #b8860b;">interpreter</span> <span style="color: #00008b;">=</span> <span style="color: #00008b;">new</span> <span style="color: #36648b;">Interpreter</span>[<span style="color: #6b8e23;">IO</span>] {
-    <span style="color: #228b22;">lazy</span> <span style="color: #00008b;">val</span> <span style="color: #b8860b;">awsClient</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">AmazonS3ClientBuilder</span>.standard().build()
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">getEnv</span> <span style="color: #00008b;">=</span> <span style="color: #6b8e23;">IO</span>(<span style="color: #6b8e23;">Env</span>(<span style="color: #8b0000;">"sourceBucket"</span>, <span style="color: #8b0000;">"targetBucket"</span>, <span style="color: #8b0000;">"fileA"</span>))
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">getObject</span>(bucketName<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, fileName<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">=</span>
-      <span style="color: #6b8e23;">IO</span>(awsClient.getObject(bucketName, fileName))
-    <span style="color: #00008b;">def</span> <span style="color: #6a5acd;">putObject</span>(bucketName<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, fileName<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>, content<span style="color: #00008b;">:</span> <span style="color: #36648b;">String</span>) <span style="color: #00008b;">=</span>
-      <span style="color: #6b8e23;">IO</span>(awsClient.putObject(bucketName, fileName, content))
+  <span style="color: #81A1C1;">case</span> <span style="color: #81A1C1;">class</span> <span style="color: #81A1C1;">Env</span>(source<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>, target<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>, fileName<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>)
+  <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">interpreter</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">new</span> <span style="color: #81A1C1;">Interpreter</span>[<span style="color: #81A1C1;">IO</span>] {
+    <span style="color: #81A1C1;">lazy</span> <span style="color: #81A1C1;">val</span> <span style="font-weight: bold;">awsClient</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">AmazonS3ClientBuilder</span>.standard().build()
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">getEnv</span> <span style="color: #81A1C1;">=</span> <span style="color: #81A1C1;">IO</span>(<span style="color: #81A1C1;">Env</span>(<span style="color: #D08770;">"sourceBucket"</span>, <span style="color: #D08770;">"targetBucket"</span>, <span style="color: #D08770;">"fileA"</span>))
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">getObject</span>(bucketName<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>, fileName<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>) <span style="color: #81A1C1;">=</span>
+      <span style="color: #81A1C1;">IO</span>(awsClient.getObject(bucketName, fileName))
+    <span style="color: #81A1C1;">def</span> <span style="font-weight: bold;">putObject</span>(bucketName<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>, fileName<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>, content<span style="color: #81A1C1;">:</span> <span style="color: #81A1C1;">String</span>) <span style="color: #81A1C1;">=</span>
+      <span style="color: #81A1C1;">IO</span>(awsClient.putObject(bucketName, fileName, content))
   }
 
 program.run(interpreter).unsafeRunSync()
@@ -314,19 +291,19 @@ program.run(interpreter).unsafeRunSync()
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 Dependency Injection
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 thanks to <a href="https://typelevel.org/cats/api/cats/MonadError.html">MonadError</a>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 by swaping out Layer 2
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4" role="doc-backlink">4</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 Same as Tagless Final
 </p></div></div>
 
@@ -341,7 +318,7 @@ Same as Tagless Final
     <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
   </p>
   <p>Created: 2019-04-06 Sat 00:00</p>
-  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.6) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
   <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
   <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
