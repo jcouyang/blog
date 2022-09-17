@@ -1,0 +1,66 @@
+#+title: Cryptography Cheatsheet for Developers
+#+description: With Examples in Haskell!
+#+keywords: devops,secops,haskell,cryptography,security,cipher,symmetric,asymmetric,hmac,pbkdf,scrypt,bcrypt,curve25519,ecc,rsa,dsa,ecdsa
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="Cryptography Cheatsheet for Developers" />
+#+HTML_HEAD_EXTRA: <meta property="og:description" content="With Examples in Haskell!" />
+#+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
+#+author: Jichao Ouyang
+#+date: <2022-09-17 Sat>
+#+index: DevOps!Cryptography Cheatsheet for Developers
+
+This is just a cheatsheet of cryptography, for developers just to tell when and how to use what. Read a book or paper if you're curious of the theory behind.
+
+#+begin_quote
+RULE No.1 of cryptograph: DO NOT implement or invent new cipher yourself!!!
+#+end_quote
+
+* Prerequisites
+  All you need is just [[https://nixos.org/download.html#download-nix][nix]]
+
+* Encoding
+  #+begin_quote
+  Encoding is not Encryption!!! It is just converting bytes from one format to another, for purposes like easier to store, transit etc. Although it looks scrambled, any one can convert it back and forth.
+  #+end_quote
+
+   Most developers are very familiar with =base64=[fn:1]
+
+   #+begin_example
+     nix-shell -p "haskellPackages.ghcWithPackages (pkgs: [ pkgs.memory])" --run ghci
+     GHCi, version 9.0.2: https://www.haskell.org/ghc/  :? for help
+     ghci> :set -XOverloadedStrings
+     ghci> import Data.ByteArray.Encoding
+     ghci> import Data.ByteString
+     ghci> convertToBase Base64 ("hello world" :: ByteString) :: ByteString
+     "aGVsbG8gd29ybGQ="
+     ghci> convertFromBase Base64 ("aGVsbG8gd29ybGQ=" :: ByteString) :: Either String ByteString
+     Right "hello world"
+     ghci> convertToBase Base16 ("hello world" :: ByteString) :: ByteString
+     "68656c6c6f20776f726c64"
+     ghci> convertFromBase Base16 ("68656c6c6f20776f726c64" :: ByteString) :: Either String ByteString
+     Right "hello world"
+   #+end_example
+
+   The number 64 or 16 indicates how large the alphabets table is. Usually the larger the table, the shorter encoded message.
+
+   For instance base64 has 64 alphabets(actually 63, === is for padding), hence each alphabet can describe 2^6 aka 6bit.
+
+   base16 is basically just hex since one alphabet map to 2^4(4bit) using US-ASCII.
+   
+   #+begin_example
+     Input:   h        e        l
+     Hex:     6   8    6   5    6   c  
+     8-bit:   01101000 01100101 01101100
+     6-bit:   011010 000110 010101 1101100
+     Decimal: 26     6      21     44     
+     Output:  a      G      V      s      
+   #+end_example
+
+* Hash
+  
+* Key Derivation Function(KDF)
+* Symmetric Ciphers
+* Asymmetric Ciphers
+
+* Footnotes
+
+[fn:1] https://www.rfc-editor.org/rfc/rfc4648 
