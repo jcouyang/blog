@@ -1,35 +1,48 @@
-#+title: Cryptography Cheatsheet for Developers
+#+title: Cryptography Cheat Sheet for Developers
 #+description: With Examples in Haskell!
 #+keywords: devops,secops,haskell,cryptography,security,cipher,symmetric,asymmetric,hmac,pbkdf,scrypt,bcrypt,curve25519,ecc,rsa,dsa,ecdsa
-#+HTML_HEAD_EXTRA: <meta property="og:title" content="Cryptography Cheatsheet for Developers" />
+#+HTML_HEAD_EXTRA: <meta property="og:title" content="Cryptography Cheat Sheet for Developers" />
 #+HTML_HEAD_EXTRA: <meta property="og:description" content="With Examples in Haskell!" />
 #+HTML_HEAD_EXTRA: <meta property="og:type" content="article" />
 #+author: Jichao Ouyang
 #+date: <2022-09-17 Sat>
-#+index: DevOps!Cryptography Cheatsheet for Developers
+#+index: DevOps!Cryptography Cheat Sheet for Developers
 
-This is just a cheatsheet of cryptography, for developers just to tell when and how to use what. Read a book or paper if you're curious of the theory behind.
+This is just a cheat sheet of cryptography, for developers just be able to tell when and how to use what. Read a book or paper if you're curious of the theory behind.
 
 #+begin_quote
-RULE No.1 of cryptograph: DO NOT implement or invent new cipher yourself!!!
+RULE No.1 of cryptography: DO NOT implement or invent new cipher yourself!!!
 #+end_quote
 
+Haskell is chosen as programming language for examples since it is concise, interactive, typesafe and cryptonite![fn:8]
+
 * Prerequisites
-  All you need is just [[https://nixos.org/download.html#download-nix][nix]]
+  All you need is just [[https://nixos.org/download.html#download-nix][nix]]!
+
+  All codes in examples are executable in interative shell GHCi.
+  
+  Please run the following to get into GHCi and config it correctly before trying any example.
+  #+begin_example
+    nix-shell -p "haskellPackages.ghcWithPackages (pkgs: [ pkgs.cryptonite pkgs.memory ])" --run ghci
+    GHCi, version 9.0.2: https://www.haskell.org/ghc/  :? for help
+    ghci> :set -XOverloadedStrings
+    ghci> import Data.ByteString
+  #+end_example
+
+  =openssl= CLI will be used in few examples as well.
 
 * Encoding
+  #+index: encoding
+
   #+begin_quote
   Encoding is not Encryption!!! It is just converting bytes from one format to another, for purposes like easier to store, transit etc. Although it looks scrambled, any one can convert it back and forth.
   #+end_quote
 
    Most developers are very familiar with =base64=[fn:1]
+  #+index: base64
 
    #+begin_example
-     nix-shell -p "haskellPackages.ghcWithPackages (pkgs: [ pkgs.memory])" --run ghci
-     GHCi, version 9.0.2: https://www.haskell.org/ghc/  :? for help
-     ghci> :set -XOverloadedStrings
      ghci> import Data.ByteArray.Encoding
-     ghci> import Data.ByteString
      ghci> convertToBase Base64 ("hello world" :: ByteString) :: ByteString
      "aGVsbG8gd29ybGQ="
      ghci> convertFromBase Base64 ("aGVsbG8gd29ybGQ=" :: ByteString) :: Either String ByteString
@@ -40,12 +53,14 @@ RULE No.1 of cryptograph: DO NOT implement or invent new cipher yourself!!!
      Right "hello world"
    #+end_example
 
-   The number 64 or 16 indicates how large the alphabets table is. Usually the larger the table, the shorter encoded message.
+   The number 64 or 16 indicates how large the alphabets table is. The larger the table, usually the shorter encoded message.
 
    For instance base64 has 64 alphabets(actually 63, === is for padding), hence each alphabet can describe 2^6 aka 6bit.
 
    base16 is basically just hex since one alphabet map to 2^4(4bit) using US-ASCII.
-   
+
+   The following example of base64 data from message "hel" [fn:2]
+
    #+begin_example
      Input:   h        e        l
      Hex:     6   8    6   5    6   c  
@@ -55,12 +70,114 @@ RULE No.1 of cryptograph: DO NOT implement or invent new cipher yourself!!!
      Output:  a      G      V      s      
    #+end_example
 
-* Hash
+* Hash Function
+  #+index: SHA
+  #+index: MD5
+  #+index: Blake
+
+  Hash function can map bytes to another ONE WAY only but not the other way around.
+  Common hash functions are SHA2, SHA3, MD5, Blake2...
+  Modern hash functions such as SHA2, SHA3, Blake2 are consider secure hash functions. Old funtions such as MD5 and SHA1 are not secure since collisions found, and should avoid using them.
+
+  Hash functions are commonly used to proof the content not tampered, for example if you download an executable file form internet, you should compare the hash provided by the site and the one caclulated locally. Collisions found will indicate the function is not secure anymore, for example if someone hijack the content and replace with another malware which can calculate to the same hash.
+
+  #+begin_example
+        ghci> import Crypto.Hash
+        ghci> hash ("hello world"::ByteString) :: Digest SHA1
+        2aae6c35c94fcfb415dbe95f408b9ce91ee846ed
+        ghci> hash ("hello world"::ByteString) :: Digest MD5
+        5eb63bbbe01eeed093cb22bb8f5acdc3
+        ghci> hash ("hello world"::ByteString) :: Digest SHA256
+        b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9
+        ghci> hash ("hello world"::ByteString) :: Digest SHA3_256
+        644bcc7e564373040999aac89e7622f3ca71fba1d972fd94a31c3bfbf24e3938
+        ghci> hash ("hello world"::ByteString) :: Digest Blake2s_256
+        9aec6806794561107e594b1f6a8a6b0c92a0cba9acf5e5e93cca06f781813b0b
+        ghci> hash ("hello world"::ByteString) :: Digest Blake2b_256
+        256c83b297114d201b30179f3f0ef0cace9783622da5974326b436178aeef610
+  #+end_example
+
+  The number =256= in SHA and Blake indicates the output bits length, usually more bits means higher collisions resistance.
+
+  #+begin_quote
+  Hashing is NOT encryption!!! DO NOT store hash of password in database. Although hash function is not reversible, if I have a large enough dictionary, I can definitly tell from database the password =5eb63bbbe01eeed093cb22bb8f5acdc3= is =hello world=
+  #+end_quote
+
+  There is example of Blake2b of "abc" and C implementation in rfc7693 [fn:3]
   
+* Message Authentication Code(MAC)
+  #+index: HMAC
+  MAC is basically a hash function + key.
+
+  For example HMAC SHA256 is HMAC scramble the message with a key and hash with SHA256.
+  
+  #+begin_example
+    ghci> import Crypto.MAC.HMAC
+    ghci> hmacGetDigest $ hmac ("secret key"::ByteString) ("hello world"::ByteString) :: Digest SHA256
+    c61b5198df58639edb9892514756b89a36856d826e5d85023ab181b48ea5d018
+  #+end_example
+
+  The scramble part is defined in rfc2104[fn:4], =H= is hash function e.g. SHA256, =K= is secret key and =,= is concat
+   #+begin_example
+     ipad = the byte 0x36 repeated B times
+     opad = the byte 0x5C repeated B times
+     H(K XOR opad, H(K XOR ipad, text))
+   #+end_example
+
+   MAC can be used in senario like:
+
+    - Exchange private message, append a MAC of the message to proof it is not tampered, very similar to usage of hash function, but hash function is mainly use for public messages, for example a file from public website that everyone can download.
+    - Pseudo Random Generator(PRG),  =HMAC(salt, seed)= generate a pretty random enough key can be used in KDF
+
 * Key Derivation Function(KDF)
-* Symmetric Ciphers
-* Asymmetric Ciphers
+  KDF is a function generates pseudo random key from password. Password is something we usually used to encrypt a file, or login to a website, because it is easy to remember or note for human, but not random enough to use directly as key to encrypt, and not secure to store in database.
+
+  You can think of KDF as just MAC, but run many iterations and consume some CPU and RAM.
+
+** PBKDF2[fn:6]
+   The following example of PBKDF using HMAC SHA256, iterate 1000 times, and output length 32 bytes.
+   #+begin_example
+     ghci> import Crypto.KDF.PBKDF2
+     ghci> generate (prfHMAC SHA256 :: PRF ByteString) (Parameters {iterCounts = 1000, outputLength = 32}) ("password":: ByteString) ("salt"::ByteString) :: ByteString
+     "c,(\DC2\228mF\EOT\DLE+\167a\142\157m}/\129(\246&kJ\ETX&M*\EOT`\183\220\179"
+   #+end_example
+   The output is 32 bytes length pseudo random bytestring, we can output hex format with base16 encoding
+
+   #+begin_example
+     ghci> convertToBase Base16 $ (generate (prfHMAC SHA256 :: PRF ByteString) (Parameters {iterCounts = 1000, outputLength = 32}) ("password":: ByteString) ("salt"::ByteString) :: ByteString) :: ByteString
+     "632c2812e46d4604102ba7618e9d6d7d2f8128f6266b4a03264d2a0460b7dcb3"
+   #+end_example
+
+   It is secure to store parameters( _salt_, _iterations count_, _output length_), together with the output bytes in database, in senario such as login, a server can run the same function again with the salt, iterations and length from the record, and compare the output bytes with the one stored in the database.
+   
+   Since PBKDF2 hash each password with HMAC and a random salt many iterations, it is resistanct to dictionary attacks[fn:7].
+   
+   PBKDF2 is a common KDF but it is consider less secure than modern KDF such as Scrypt, Argon2.
+** Scrypt[fn:5]
+    The following is a example of deriving 32 bytes length key in 1024 iterations, block size 8 and parallel 2.
+   #+begin_example
+     ghci> import Crypto.KDF.Scrypt
+     ghci> generate (Parameters {n=1024,r=8,p=2,outputLength=32}) ("password":: ByteString) ("salt"::ByteString) ::ByteString
+     "\ETBeHl\244\197Y\DEL\181\&0\141\SYN\185\151\148\215\211\160\189.\148d\185\172\177\202\&2\ETX\SUB\133\223\237"
+   #+end_example
+
+* TODO Symmetric Ciphers
+* TODO Asymmetric Ciphers
 
 * Footnotes
 
-[fn:1] https://www.rfc-editor.org/rfc/rfc4648 
+[fn:8]actually Haskell is chosen because I learnt most of the content in this article while implementing =age=  in Haskell for my new experimental project https://github.com/jcouyang/dhall-secret/pull/1  PR welcome btw :)
+
+[fn:7]https://datatracker.ietf.org/doc/html/rfc4949#page-102 
+
+[fn:6]https://datatracker.ietf.org/doc/html/rfc2898
+
+[fn:5]https://datatracker.ietf.org/doc/html/rfc7914
+
+[fn:4]https://datatracker.ietf.org/doc/html/rfc2104 
+
+[fn:3]https://datatracker.ietf.org/doc/html/rfc7693#appendix-A 
+
+[fn:2]https://datatracker.ietf.org/doc/html/rfc4648#section-9 
+
+[fn:1]https://datatracker.ietf.org/doc/html/rfc4648 
