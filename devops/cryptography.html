@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2022-09-17 Sat 08:03 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cryptography Cheat Sheet for Developers</title>
+<meta name="author" content="Jichao Ouyang" />
+<meta name="description" content="With Examples in Haskell!" />
+<meta name="keywords" content="devops,secops,haskell,cryptography,security,cipher,symmetric,asymmetric,hmac,pbkdf,scrypt,bcrypt,curve25519,ecc,rsa,dsa,ecdsa" />
+<meta name="generator" content="Org Mode" />
+<link rel="icon" href="/favicon.ico">
+<meta name="theme-color" content="#ffffff">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/style/toc.css"/>
+<link rel="stylesheet" href="/style/tufte.css"/>
+<link rel="stylesheet" href="/style/main.css"/>
+<link rel="alternate" type="application/rss+xml" title="Jichao Ouyang" href="https://feeds.oyanglul.us/JichaoOuyangsBlog"/>
+<meta property="og:title" content="Cryptography Cheat Sheet for Developers" />
+<meta property="og:description" content="With Examples in Haskell!" />
+<meta property="og:type" content="article" />
+</head>
+<body>
+<div id="preamble" class="status">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJRFJGX"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header>
+    <a accesskey="h" href="/index.html"> HOME </a> |
+    <a href="#" id="edit-in-github">EDIT</a> |
+    <a href="https://feeds.oyanglul.us/JichaoOuyangsBlog">RSS</a> |
+    <a href="https://blog.oyanglul.us/theindex">INDEX</a> |
+    <a accesskey="H" href="/jichao.ouyang.html">ABOUT</a> |
+    <a href="https://github.com/jcouyang/blog">GITHUB</a>
+</header>
+</div>
+<div id="content" class="content">
+<header>
+<h1 class="title">Cryptography Cheat Sheet for Developers</h1>
+</header><nav id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org65db9e5">Prerequisites</a></li>
+<li><a href="#org00c190e">Encoding</a></li>
+<li><a href="#org0d0ad90">Hash Function</a></li>
+<li><a href="#org2004a58">Message Authentication Code(MAC)</a></li>
+<li><a href="#org9e02139">Key Derivation Function(KDF)</a>
+<ul>
+<li><a href="#org97d1bd9">PBKDF2</a></li>
+<li><a href="#orge20d9d3">Scrypt</a></li>
+</ul>
+</li>
+<li><a href="#orge0161ed"><span class="todo TODO">TODO</span> Symmetric Ciphers</a></li>
+<li><a href="#org0f69fc6"><span class="todo TODO">TODO</span> Asymmetric Ciphers</a></li>
+</ul>
+</div>
+</nav>
+<p>
+This is just a cheat sheet of cryptography, for developers just be able to tell when and how to use what. Read a book or paper if you're curious of the theory behind.
+</p>
+
+<div class="epigraph"><blockquote>
+<p>
+RULE No.1 of cryptography: DO NOT implement or invent new cipher yourself!!!
+</p>
+
+</blockquote></div>
+
+<p>
+Haskell is chosen as programming language for examples since it is concise, interactive, typesafe and cryptonite!<label for="1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="1" class="margin-toggle"/><span class="sidenote">
+actually Haskell is chosen because I learnt most of the content in this article while implementing <code>age</code>  in Haskell for my new experimental project <a href="https://github.com/jcouyang/dhall-secret/pull/1">https://github.com/jcouyang/dhall-secret/pull/1</a>  PR welcome btw :)
+</span>
+</p>
+
+<div id="outline-container-org65db9e5" class="outline-2">
+<h2 id="org65db9e5">Prerequisites</h2>
+<div class="outline-text-2" id="text-org65db9e5">
+<p>
+All you need is just <a href="https://nixos.org/download.html#download-nix">nix</a>!
+</p>
+
+<p>
+All codes in examples are executable in interative shell GHCi.
+</p>
+
+<p>
+Please run the following to get into GHCi and config it correctly before trying any example.
+</p>
+<pre class="example" id="orga98093c">
+nix-shell -p "haskellPackages.ghcWithPackages (pkgs: [ pkgs.cryptonite pkgs.memory ])" --run ghci
+GHCi, version 9.0.2: https://www.haskell.org/ghc/  :? for help
+ghci&gt; :set -XOverloadedStrings
+ghci&gt; import Data.ByteString
+</pre>
+
+<p>
+<code>openssl</code> CLI will be used in few examples as well.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org00c190e" class="outline-2">
+<h2 id="org00c190e">Encoding</h2>
+<div class="outline-text-2" id="text-org00c190e">
+<div class="epigraph"><blockquote>
+<p>
+Encoding is not Encryption!!! It is just converting bytes from one format to another, for purposes like easier to store, transit etc. Although it looks scrambled, any one can convert it back and forth.
+</p>
+
+</blockquote></div>
+
+<p>
+Most developers are very familiar with <code>base64</code><label for="2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="2" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc4648">https://datatracker.ietf.org/doc/html/rfc4648</a> 
+</span>
+</p>
+<pre class="example" id="orga683c01">
+ghci&gt; import Data.ByteArray.Encoding
+ghci&gt; convertToBase Base64 ("hello world" :: ByteString) :: ByteString
+"aGVsbG8gd29ybGQ="
+ghci&gt; convertFromBase Base64 ("aGVsbG8gd29ybGQ=" :: ByteString) :: Either String ByteString
+Right "hello world"
+ghci&gt; convertToBase Base16 ("hello world" :: ByteString) :: ByteString
+"68656c6c6f20776f726c64"
+ghci&gt; convertFromBase Base16 ("68656c6c6f20776f726c64" :: ByteString) :: Either String ByteString
+Right "hello world"
+</pre>
+
+<p>
+The number 64 or 16 indicates how large the alphabets table is. The larger the table, usually the shorter encoded message.
+</p>
+
+<p>
+For instance base64 has 64 alphabets(actually 63, <code>=</code> is for padding), hence each alphabet can describe 2^6 aka 6bit.
+</p>
+
+<p>
+base16 is basically just hex since one alphabet map to 2^4(4bit) using US-ASCII.
+</p>
+
+<p>
+The following example of base64 data from message "hel" <label for="3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="3" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc4648#section-9">https://datatracker.ietf.org/doc/html/rfc4648#section-9</a> 
+</span>
+</p>
+
+<pre class="example" id="org1d8afa6">
+Input:   h        e        l
+Hex:     6   8    6   5    6   c  
+8-bit:   01101000 01100101 01101100
+6-bit:   011010 000110 010101 1101100
+Decimal: 26     6      21     44     
+Output:  a      G      V      s      
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org0d0ad90" class="outline-2">
+<h2 id="org0d0ad90">Hash Function</h2>
+<div class="outline-text-2" id="text-org0d0ad90">
+<p>
+Hash function can map bytes to another ONE WAY only but not the other way around.
+Common hash functions are SHA2, SHA3, MD5, Blake2&#x2026;
+Modern hash functions such as SHA2, SHA3, Blake2 are consider secure hash functions. Old funtions such as MD5 and SHA1 are not secure since collisions found, and should avoid using them.
+</p>
+
+<p>
+Hash functions are commonly used to proof the content not tampered, for example if you download an executable file form internet, you should compare the hash provided by the site and the one caclulated locally. Collisions found will indicate the function is not secure anymore, for example if someone hijack the content and replace with another malware which can calculate to the same hash.
+</p>
+
+<pre class="example" id="org6f241a1">
+ghci&gt; import Crypto.Hash
+ghci&gt; hash ("hello world"::ByteString) :: Digest SHA1
+2aae6c35c94fcfb415dbe95f408b9ce91ee846ed
+ghci&gt; hash ("hello world"::ByteString) :: Digest MD5
+5eb63bbbe01eeed093cb22bb8f5acdc3
+ghci&gt; hash ("hello world"::ByteString) :: Digest SHA256
+b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9
+ghci&gt; hash ("hello world"::ByteString) :: Digest SHA3_256
+644bcc7e564373040999aac89e7622f3ca71fba1d972fd94a31c3bfbf24e3938
+ghci&gt; hash ("hello world"::ByteString) :: Digest Blake2s_256
+9aec6806794561107e594b1f6a8a6b0c92a0cba9acf5e5e93cca06f781813b0b
+ghci&gt; hash ("hello world"::ByteString) :: Digest Blake2b_256
+256c83b297114d201b30179f3f0ef0cace9783622da5974326b436178aeef610
+</pre>
+
+<p>
+The number <code>256</code> in SHA and Blake indicates the output bits length, usually more bits means higher collisions resistance.
+</p>
+
+<div class="epigraph"><blockquote>
+<p>
+Hashing is NOT encryption!!! DO NOT store hash of password in database. Although hash function is not reversible, if I have a large enough dictionary, I can definitly tell from database the password <code>5eb63bbbe01eeed093cb22bb8f5acdc3</code> is <code>hello world</code>
+</p>
+
+</blockquote></div>
+
+<p>
+There is example of Blake2b of "abc" and C implementation in rfc7693 <label for="4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="4" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc7693#appendix-A">https://datatracker.ietf.org/doc/html/rfc7693#appendix-A</a> 
+</span>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2004a58" class="outline-2">
+<h2 id="org2004a58">Message Authentication Code(MAC)</h2>
+<div class="outline-text-2" id="text-org2004a58">
+<p>
+MAC is basically a hash function + key.
+</p>
+
+<p>
+For example HMAC SHA256 is HMAC scramble the message with a key and hash with SHA256.
+</p>
+
+<pre class="example" id="orge3dadd2">
+ghci&gt; import Crypto.MAC.HMAC
+ghci&gt; hmacGetDigest $ hmac ("secret key"::ByteString) ("hello world"::ByteString) :: Digest SHA256
+c61b5198df58639edb9892514756b89a36856d826e5d85023ab181b48ea5d018
+</pre>
+
+<p>
+The scramble part is defined in rfc2104<label for="5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="5" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc2104">https://datatracker.ietf.org/doc/html/rfc2104</a> 
+</span>, <code>H</code> is hash function e.g. SHA256, <code>K</code> is secret key and <code>,</code> is concat
+</p>
+<pre class="example" id="org1375d2c">
+ipad = the byte 0x36 repeated B times
+opad = the byte 0x5C repeated B times
+H(K XOR opad, H(K XOR ipad, text))
+</pre>
+
+<p>
+MAC can be used in senario like:
+</p>
+
+<ul class="org-ul">
+<li>Exchange private message, append a MAC of the message to proof it is not tampered, very similar to usage of hash function, but hash function is mainly use for public messages, for example a file from public website that everyone can download.</li>
+<li>Pseudo Random Generator(PRG),  <code>HMAC(salt, seed)</code> generate a pretty random enough key can be used in KDF</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org9e02139" class="outline-2">
+<h2 id="org9e02139">Key Derivation Function(KDF)</h2>
+<div class="outline-text-2" id="text-org9e02139">
+<p>
+KDF is a function generates pseudo random key from password. Password is something we usually used to encrypt a file, or login to a website, because it is easy to remember or note for human, but not random enough to use directly as key to encrypt, and not secure to store in database.
+</p>
+
+<p>
+You can think of KDF as just MAC, but run many iterations and consume some CPU and RAM.
+</p>
+</div>
+
+<div id="outline-container-org97d1bd9" class="outline-3">
+<h3 id="org97d1bd9">PBKDF2<label for="6" class="margin-toggle sidenote-number"></label><input type="checkbox" id="6" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc2898">https://datatracker.ietf.org/doc/html/rfc2898</a>
+</span></h3>
+<div class="outline-text-3" id="text-org97d1bd9">
+<p>
+The following example of PBKDF using HMAC SHA256, iterate 1000 times, and output length 32 bytes.
+</p>
+<pre class="example" id="org25666ac">
+ghci&gt; import Crypto.KDF.PBKDF2
+ghci&gt; generate (prfHMAC SHA256 :: PRF ByteString) (Parameters {iterCounts = 1000, outputLength = 32}) ("password":: ByteString) ("salt"::ByteString) :: ByteString
+"c,(\DC2\228mF\EOT\DLE+\167a\142\157m}/\129(\246&amp;kJ\ETX&amp;M*\EOT`\183\220\179"
+</pre>
+<p>
+The output is 32 bytes length pseudo random bytestring, we can output hex format with base16 encoding
+</p>
+
+<pre class="example" id="org97c511a">
+ghci&gt; convertToBase Base16 $ (generate (prfHMAC SHA256 :: PRF ByteString) (Parameters {iterCounts = 1000, outputLength = 32}) ("password":: ByteString) ("salt"::ByteString) :: ByteString) :: ByteString
+"632c2812e46d4604102ba7618e9d6d7d2f8128f6266b4a03264d2a0460b7dcb3"
+</pre>
+
+<p>
+It is secure to store parameters( <span class="underline">salt</span>, <span class="underline">iterations count</span>, <span class="underline">output length</span>), together with the output bytes in database, in senario such as login, a server can run the same function again with the salt, iterations and length from the record, and compare the output bytes with the one stored in the database.
+</p>
+
+<p>
+Since PBKDF2 hash each password with HMAC and a random salt many iterations, it is resistanct to dictionary attacks<label for="7" class="margin-toggle sidenote-number"></label><input type="checkbox" id="7" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc4949#page-102">https://datatracker.ietf.org/doc/html/rfc4949#page-102</a> 
+</span>.
+</p>
+
+<p>
+PBKDF2 is a common KDF but it is consider less secure than modern KDF such as Scrypt, Argon2.
+</p>
+</div>
+</div>
+<div id="outline-container-orge20d9d3" class="outline-3">
+<h3 id="orge20d9d3">Scrypt<label for="8" class="margin-toggle sidenote-number"></label><input type="checkbox" id="8" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc7914">https://datatracker.ietf.org/doc/html/rfc7914</a>
+</span></h3>
+<div class="outline-text-3" id="text-orge20d9d3">
+<p>
+The following is a example of deriving 32 bytes length key in 1024 iterations, block size 8 and parallel 2.
+</p>
+<pre class="example" id="org8661f6f">
+ghci&gt; import Crypto.KDF.Scrypt
+ghci&gt; generate (Parameters {n=1024,r=8,p=2,outputLength=32}) ("password":: ByteString) ("salt"::ByteString) ::ByteString
+"\ETBeHl\244\197Y\DEL\181\&amp;0\141\SYN\185\151\148\215\211\160\189.\148d\185\172\177\202\&amp;2\ETX\SUB\133\223\237"
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge0161ed" class="outline-2">
+<h2 id="orge0161ed"><span class="todo TODO">TODO</span> Symmetric Ciphers</h2>
+</div>
+<div id="outline-container-org0f69fc6" class="outline-2">
+<h2 id="org0f69fc6"><span class="todo TODO">TODO</span> Asymmetric Ciphers</h2>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+actually Haskell is chosen because I learnt most of the content in this article while implementing <code>age</code>  in Haskell for my new experimental project <a href="https://github.com/jcouyang/dhall-secret/pull/1">https://github.com/jcouyang/dhall-secret/pull/1</a>  PR welcome btw :)
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+<a href="https://datatracker.ietf.org/doc/html/rfc4648">https://datatracker.ietf.org/doc/html/rfc4648</a> 
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+<a href="https://datatracker.ietf.org/doc/html/rfc4648#section-9">https://datatracker.ietf.org/doc/html/rfc4648#section-9</a> 
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4" role="doc-backlink">4</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+<a href="https://datatracker.ietf.org/doc/html/rfc7693#appendix-A">https://datatracker.ietf.org/doc/html/rfc7693#appendix-A</a> 
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5" role="doc-backlink">5</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+<a href="https://datatracker.ietf.org/doc/html/rfc2104">https://datatracker.ietf.org/doc/html/rfc2104</a> 
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.6" class="footnum" href="#fnr.6" role="doc-backlink">6</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+<a href="https://datatracker.ietf.org/doc/html/rfc2898">https://datatracker.ietf.org/doc/html/rfc2898</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.7" class="footnum" href="#fnr.7" role="doc-backlink">7</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+<a href="https://datatracker.ietf.org/doc/html/rfc4949#page-102">https://datatracker.ietf.org/doc/html/rfc4949#page-102</a> 
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.8" class="footnum" href="#fnr.8" role="doc-backlink">8</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+<a href="https://datatracker.ietf.org/doc/html/rfc7914">https://datatracker.ietf.org/doc/html/rfc7914</a>
+</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<footer>
+  <p>Author: Jichao Ouyang
+    <a class="github-button" href="https://github.com/sponsors/jcouyang" data-icon="octicon-heart" aria-label="Sponsor @jcouyang on GitHub">Sponsor</a>
+    <a aria-label="Follow @jcouyang on GitHub" data-count-aria-label="# followers on GitHub" data-count-api="/users/jcouyang#followers" data-count-href="/jcouyang/followers" href="https://github.com/jcouyang" class="github-button">Follow</a>
+    <a href="https://twitter.com/oyanglulu" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @oyanglulu</a>
+  </p>
+  <p>Created: 2022-09-17 Sat 00:00</p>
+  <p>Generated by: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.1 (<a href="https://orgmode.org">Org</a> mode 9.5.3) &#215; <a href="https://github.com/jcouyang/orgpress">OrgPress</a></p>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License</a>.
+  <input type="swiftype" class="st-default-search-input" placeholder="Search"/>
+  <a class="gumroad-button" href="https://gum.co/grokking-monad?wanted=true" target="_blank" data-gumroad-single-product="true">范畴论装逼指南，请自觉排队装逼</a>
+  <div id="danmaku-comments"></div>
+  <div id="disqus_thread"></div>
+</footer>
+</div>
+</body>
+</html>
