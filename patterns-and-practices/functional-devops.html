@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-10-05 Wed 06:27 -->
+<!-- 2022-10-08 Sat 10:58 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Functional DevOps</title>
@@ -154,7 +154,7 @@ the same input.
 <div id="outline-container-is-this-oo" class="outline-3">
 <h3 id="is-this-oo">Is this OO?</h3>
 <div class="outline-text-3" id="text-is-this-oo">
-<pre class="example" id="orge59d1e1">
+<pre class="example" id="org2e80fcc">
 httpServer :: Request -&gt; DBState -&gt; Response
 </pre>
 
@@ -177,7 +177,7 @@ will get a pure function.
 <h2 id="infrastructure-as-code"><a href="https://www.thoughtworks.com/radar#adolescence-of-infrastructure-as-code">Infrastructure as Code</a></h2>
 <div class="outline-text-2" id="text-infrastructure-as-code">
 
-<figure id="org581dd66">
+<figure id="org0e421ea">
 <img src="https://paper-attachments.dropbox.com/s_57AB1806083E548AE8AB3A31935FB481380E6A828F40D016642DF3922BC7E794_1604039641363_image.png" alt="s_57AB1806083E548AE8AB3A31935FB481380E6A828F40D016642DF3922BC7E794_1604039641363_image.png">
 
 </figure>
@@ -306,7 +306,7 @@ will result different</li>
 <div id="outline-container-nixs-only-assumption" class="outline-3">
 <h3 id="nixs-only-assumption">Nix's only assumption</h3>
 <div class="outline-text-3" id="text-nixs-only-assumption">
-<pre class="example" id="orgbc3c897">
+<pre class="example" id="org3fd46b2">
 # for mac
 nix-channel --add https://nixos.org/channels/nixpkgs-20.09-darwin nixpkgs
 # for linux
@@ -319,7 +319,7 @@ Once everyone subscribes to the same channel, the version and binary of
 anything you installed should be exactly the same as everyone
 </p>
 
-<pre class="example" id="orge3ee361">
+<pre class="example" id="org48090d4">
 &gt; nix-env -i awscli
 &gt; nix-env --installed --query --out-path awscli
 awscli-1.18.80  /nix/store/2b2c56c44xi3gj4hvzcxcn1dp1lb579k-awscli-1.18.80
@@ -337,7 +337,7 @@ Which means we are not even assuming python version, everything awscli
 dependencies will be exactly the same.
 </p>
 
-<pre class="example" id="org6fa8fce">
+<pre class="example" id="orgeac8ae7">
 &gt; nix-store -q --references /nix/store/2b2c56c44xi3gj4hvzcxcn1dp1lb579k-awscli-1.18.80
 /nix/store/my66alsy3dhj9iz9s3sq7c9sni1b1a2d-bash-4.4-p23
 /nix/store/vlmz2mfdagyr67l4jxyyaqb0h4p5amkw-python3-3.8.3
@@ -380,7 +380,7 @@ dependencies will be exactly the same.
 If everyone is using brew, when you tell your friend to run
 </p>
 
-<pre class="example" id="orga89a284">
+<pre class="example" id="org9b1b9f3">
 sbt test
 </pre>
 
@@ -399,7 +399,7 @@ You have no idea your friend will have
 shell.nix
 </p>
 
-<pre class="example" id="org418a930">
+<pre class="example" id="org3808705">
 with import &lt;nixpkgs&gt; {};
 mkShell {
   shellHook = ''
@@ -448,7 +448,7 @@ Wrap up as previous FP concept, nix-shell is something like a pure
 function
 </p>
 
-<pre class="example" id="org2c1cb04">
+<pre class="example" id="orgd7c8f0e">
 nix-shell :: shell.nix -&gt; ConfigedRuntime
 </pre>
 </div>
@@ -464,7 +464,7 @@ another tool to make your Configuration immutable and reproducible as
 well.
 </p>
 
-<pre class="example" id="orgddda571">
+<pre class="example" id="org35e32ca">
 dhall :: xyz.dhall -&gt; configuration
 </pre>
 
@@ -497,7 +497,7 @@ with crypto hash It is not simply take sha256 of config file, it takes
 sha256 of normalized config
 </p>
 
-<pre class="example" id="org0d97cb7">
+<pre class="example" id="org93b07b0">
 let bk =
       https://raw.githubusercontent.com/jcouyang/buildkite.dhall/0.1.0/package.dhall sha256:3c5e9eb0182755e85c65d0b16a79b2b0f9614dcffde05151835e3b1daf587e20
 
@@ -537,7 +537,7 @@ Not matter how you refactor it, the hash won't change if the normalized
 value isn't change.
 </p>
 
-<pre class="example" id="org8f5ef0b">
+<pre class="example" id="org089035f">
 let bk =
       https://raw.githubusercontent.com/jcouyang/buildkite.dhall/0.1.0/package.dhall sha256:3c5e9eb0182755e85c65d0b16a79b2b0f9614dcffde05151835e3b1daf587e20
 
@@ -580,7 +580,7 @@ The refactor will result in exactly config as previous one, I'm 100%
 certain since the sha is exactly the same
 </p>
 
-<pre class="example" id="orgfaedd1a">
+<pre class="example" id="org6525de5">
 &gt; dhall hash &lt; .buildkite/pipeline.dhall
 sha256:8ce5c8a0c0144bc5ff48b89087e5ef11c3523b4d28db1614ef7715cda1485154
 </pre>
@@ -589,7 +589,7 @@ sha256:8ce5c8a0c0144bc5ff48b89087e5ef11c3523b4d28db1614ef7715cda1485154
 if any of the value actually changed, for instance I have a typo
 </p>
 
-<pre class="example" id="orgf23ef2b">
+<pre class="example" id="orgf289c79">
 -       , commands = [ "shellcheck -x ops/bin/*" ]
 +       , commands = [ "shellcheckasdf -x ops/bin/*" ]
 
@@ -603,7 +603,7 @@ You can even tell what is going wrong by compare with the remote config
 at master branch
 </p>
 
-<pre class="example" id="org6368c92">
+<pre class="example" id="orgce05348">
 dhall diff "./.buildkite/pipeline.dhall" "https://raw.githubusercontent.com/MYOB-Technology/odyssey/master/.buildkite/pipeline.dhall"
 [   &lt; …
     &gt;
@@ -627,7 +627,7 @@ Dhall has the most powerful type system, which is at type level more
 powerful than even Scala
 </p>
 
-<pre class="example" id="orga1e1727">
+<pre class="example" id="orgd894dba">
 Bool : Type  -- The expression `Bool` has type `Type`
 
 Type : Kind  -- The expression `Type` has type `Kind`
@@ -656,7 +656,7 @@ Type is first class citizen, normal function can consume Type and return
 Type
 </p>
 
-<pre class="example" id="org063ffd8">
+<pre class="example" id="org30cbc09">
 let DependentType = ∀(a : Type) → Optional a → Type
 </pre>
 
@@ -664,7 +664,7 @@ let DependentType = ∀(a : Type) → Optional a → Type
 the above function defines Type of Type, now let's define Type
 </p>
 
-<pre class="example" id="orgf8e0b4e">
+<pre class="example" id="org10269c8">
 let SomeTextOrNatural
     : DependentType
     = λ(x : Type) →
@@ -682,7 +682,7 @@ It is mix both Type and Value together which might be little confused but
 if you figure this out everything makes sense
 </p>
 
-<pre class="example" id="orge18a57b">
+<pre class="example" id="org7ec7d44">
 True : Bool : Type : Kind : Sort
 </pre>
 
@@ -698,7 +698,7 @@ because <code>Text</code> and <code>Natural</code> has type <code>Type</code></l
 Now we define some values, yay
 </p>
 
-<pre class="example" id="orgfa33808">
+<pre class="example" id="org5e45b9a">
 let value = "asdf"
 
 let someValue = Some value
@@ -708,7 +708,7 @@ let someValue = Some value
 And a value which has dependent type:
 </p>
 
-<pre class="example" id="orge60ee04">
+<pre class="example" id="orgdb3bfac">
 let someTextOrNatural
     : SomeTextOrNatural Text someValue
     = value
@@ -724,7 +724,7 @@ let someTextOrNatural
 When we change value of <code>someValue</code>
 </p>
 
-<pre class="example" id="org23ebb08">
+<pre class="example" id="orgc3e619f">
 let someValue = None Text
 
 let someTextOrNatural
@@ -737,7 +737,7 @@ a compile error will print because base on the value, type of
 <code>someTextOrNatural</code> is now <code>Natural</code>
 </p>
 
-<pre class="example" id="org994fabd">
+<pre class="example" id="orge29ab69">
 Error: Expression doesn't match annotation
 
 - Natural

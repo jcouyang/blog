@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-10-05 Wed 06:27 -->
+<!-- 2022-10-08 Sat 10:58 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cryptography Cheat Sheet for Developers</title>
@@ -48,17 +48,17 @@
 <li><a href="#org00c190e">Encoding</a>
 <ul>
 <li><a href="#orgecda775">Base</a></li>
-<li><a href="#org8295e95">Privacy-Enhanced Mail(PEM)</a></li>
-<li><a href="#org84ae3a0">Public Key Cryptography Standard(PKCS)</a>
+<li><a href="#org8ac329d">Privacy-Enhanced Mail(PEM)</a></li>
+<li><a href="#orgb649ec6">Public Key Cryptography Standard(PKCS)</a>
 <ul>
 <li><a href="#orge92c707">PKCS #8</a></li>
 <li><a href="#org25be44f">PKCS #1</a></li>
 </ul>
 </li>
-<li><a href="#org57ca379">JSON Web Token(JWT)</a>
+<li><a href="#orge1123cf">JSON Web Token(JWT)</a>
 <ul>
-<li><a href="#orge302425">JSON Web Signature (JWS)</a></li>
-<li><a href="#org2deab78">JSON Web Encryption (JWE)</a></li>
+<li><a href="#orge86d136">JSON Web Signature (JWS)</a></li>
+<li><a href="#orgd6726fb">JSON Web Encryption (JWE)</a></li>
 </ul>
 </li>
 </ul>
@@ -66,14 +66,15 @@
 <li><a href="#org0d0ad90">Hash Function</a></li>
 <li><a href="#org2004a58">Message Authentication Code(MAC)</a>
 <ul>
-<li><a href="#orge8c8c3c">Poly1305</a></li>
+<li><a href="#org7735b84">HMAC</a></li>
+<li><a href="#org4b420e2">Poly1305</a></li>
 </ul>
 </li>
 <li><a href="#org9e02139">Key Derivation Function(KDF)</a>
 <ul>
-<li><a href="#org55059fc">Password Based Key Derivation Function (PBKDF2)</a></li>
-<li><a href="#orge20d9d3">Scrypt</a></li>
-<li><a href="#org077fd0a">HMAC-based Extract-and-Expand Key Derivation Function (HKDF)</a></li>
+<li><a href="#org2ba445d">Password Based Key Derivation Function (PBKDF2)</a></li>
+<li><a href="#org7ab1382">Scrypt</a></li>
+<li><a href="#org44cb6d9">HMAC-based Extract-and-Expand Key Derivation Function (HKDF)</a></li>
 </ul>
 </li>
 <li><a href="#orge0161ed">Symmetric Ciphers</a>
@@ -81,17 +82,30 @@
 <li><a href="#org35b7d8d">AES</a>
 <ul>
 <li><a href="#org673c0ba">Counter Mode(CTR)</a></li>
-<li><a href="#org6c634b0">Galois/Counter ModeSynthetic Initialization Vector (GCM-SIV)</a></li>
+<li><a href="#org199504d">Galois/Counter Mode Synthetic Initialization Vector (GCM-SIV)</a></li>
 </ul>
 </li>
 <li><a href="#org06e81f3">ChaCha20</a>
 <ul>
-<li><a href="#orgb602646">ChaCha20-Poly1305</a></li>
+<li><a href="#orgd8a7e34">ChaCha20-Poly1305</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org0f69fc6"><span class="todo TODO">TODO</span> Asymmetric Ciphers</a></li>
+<li><a href="#org0f69fc6"><span class="todo TODO">TODO</span> Asymmetric Ciphers</a>
+<ul>
+<li><a href="#org85be216">Key Exchange</a></li>
+<li><a href="#org7a7fafb">Elliptic Curve Cryptography (ECC)</a>
+<ul>
+<li><a href="#orga15423f">Elliptic Curve Diffie-Hellman (ECDH)</a></li>
+<li><a href="#orge323d23">Curve25519/X25519</a></li>
+<li><a href="#org6f2d77a">Elliptic Curve Digital Signature Algorithm (ECDSA)</a></li>
+<li><a href="#org68b6afc">Edwards-Curve Digital Signature Algorithm (EdDSA)</a></li>
+</ul>
+</li>
+<li><a href="#org36c9406">RSA</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </nav>
@@ -141,14 +155,8 @@ actually Haskell is chosen because I learnt most of the content in this article 
 
 <tr>
 <td class="org-left">&#xa0;</td>
-<td class="org-left">X.509</td>
-<td class="org-left">&#xa0;</td>
-</tr>
-
-<tr>
-<td class="org-left">&#xa0;</td>
 <td class="org-left">JWT</td>
-<td class="org-left"><a href="#orge302425">JWS</a> <a href="#org2deab78">JWE</a> JWK</td>
+<td class="org-left"><a href="#orge86d136">JWS</a> <a href="#orgd6726fb">JWE</a> JWK</td>
 </tr>
 
 <tr>
@@ -159,7 +167,7 @@ actually Haskell is chosen because I learnt most of the content in this article 
 
 <tr>
 <td class="org-left">&#xa0;</td>
-<td class="org-left"><a href="#org84ae3a0">PKCS</a></td>
+<td class="org-left"><a href="#orgb649ec6">PKCS</a></td>
 <td class="org-left">PKCS1 PKCS5 PKCS8 PKCS12/PFX</td>
 </tr>
 </tbody>
@@ -185,26 +193,26 @@ actually Haskell is chosen because I learnt most of the content in this article 
 <tbody>
 <tr>
 <td class="org-left"><a href="#org2004a58">MAC</a></td>
-<td class="org-left">HMAC</td>
+<td class="org-left"><a href="#org7735b84">HMAC</a></td>
 <td class="org-left">&#xa0;</td>
 </tr>
 
 <tr>
 <td class="org-left">&#xa0;</td>
-<td class="org-left">Poly1305</td>
+<td class="org-left"><a href="#org4b420e2">Poly1305</a></td>
 <td class="org-left">&#xa0;</td>
 </tr>
 </tbody>
 <tbody>
 <tr>
 <td class="org-left"><a href="#org9e02139">KDF</a></td>
-<td class="org-left"><a href="#org55059fc">PBKDF2</a></td>
+<td class="org-left"><a href="#org2ba445d">PBKDF2</a></td>
 <td class="org-left">&#xa0;</td>
 </tr>
 
 <tr>
 <td class="org-left">&#xa0;</td>
-<td class="org-left"><a href="#org077fd0a">HKDF</a></td>
+<td class="org-left"><a href="#org44cb6d9">HKDF</a></td>
 <td class="org-left">&#xa0;</td>
 </tr>
 
@@ -216,7 +224,7 @@ actually Haskell is chosen because I learnt most of the content in this article 
 
 <tr>
 <td class="org-left">&#xa0;</td>
-<td class="org-left"><a href="#orge20d9d3">Scrypt​</a></td>
+<td class="org-left"><a href="#org7ab1382">Scrypt​</a></td>
 <td class="org-left">&#xa0;</td>
 </tr>
 </tbody>
@@ -224,7 +232,7 @@ actually Haskell is chosen because I learnt most of the content in this article 
 <tr>
 <td class="org-left"><a href="#orge0161ed">Symetric</a></td>
 <td class="org-left">AES</td>
-<td class="org-left">AES-GCM <a href="#org6c634b0">AES-GCM-SIV</a></td>
+<td class="org-left">AES-GCM <a href="#org199504d">AES-GCM-SIV</a></td>
 </tr>
 
 <tr>
@@ -236,14 +244,14 @@ actually Haskell is chosen because I learnt most of the content in this article 
 <tr>
 <td class="org-left">&#xa0;</td>
 <td class="org-left">ChaCha20</td>
-<td class="org-left"><a href="#orgb602646">ChaCha20-Poly1305</a></td>
+<td class="org-left"><a href="#orgd8a7e34">ChaCha20-Poly1305</a></td>
 </tr>
 </tbody>
 <tbody>
 <tr>
 <td class="org-left"><a href="#org0f69fc6">Asymetric</a></td>
 <td class="org-left">ECC</td>
-<td class="org-left">ECDSA EdDSA ECDH X25519 Ed25519</td>
+<td class="org-left"><a href="#org6f2d77a">ECDSA</a> <a href="#org68b6afc">EdDSA</a> <a href="#orga15423f">ECDH</a> <a href="#orge323d23">X25519</a> Ed25519</td>
 </tr>
 
 <tr>
@@ -276,7 +284,7 @@ All codes in examples are executable in interative repl GHCi.
 <p>
 Please run the following to get into GHCi and config it correctly before trying any example.
 </p>
-<pre class="example" id="org5447e58">
+<pre class="example" id="org2d30afb">
 nix-shell -p "haskellPackages.ghcWithPackages (pkgs: [ pkgs.cryptonite pkgs.memory ])" --run ghci
 GHCi, version 9.0.2: https://www.haskell.org/ghc/  :? for help
 ghci&gt; :set -XOverloadedStrings
@@ -308,7 +316,7 @@ Most developers are very familiar with <code>base64</code><label for="2" class="
 <a href="https://datatracker.ietf.org/doc/html/rfc4648">https://datatracker.ietf.org/doc/html/rfc4648</a> 
 </span>
 </p>
-<pre class="example" id="org04c7655">
+<pre class="example" id="orga97cde0">
 ghci&gt; import Data.ByteArray.Encoding
 ghci&gt; convertToBase Base64 ("hello world" :: ByteString) :: ByteString
 "aGVsbG8gd29ybGQ="
@@ -338,7 +346,7 @@ The following example of base64 data from message "hel" <label for="3" class="ma
 </span>
 </p>
 
-<pre class="example" id="orgb90b4ca">
+<pre class="example" id="orgfcb9c53">
 Input:   h        e        l
 Hex:     6   8    6   5    6   c  
 8-bit:   01101000 01100101 01101100
@@ -349,16 +357,16 @@ Output:  a      G      V      s
 </div>
 </div>
 
-<div id="outline-container-org8295e95" class="outline-3">
-<h3 id="org8295e95">Privacy-Enhanced Mail(PEM)<label for="4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="4" class="margin-toggle"/><span class="sidenote">
-<a href="https://datatracker.ietf.org/doc/html/rfc1421">https://datatracker.ietf.org/doc/html/rfc1421</a>
-</span></h3>
-<div class="outline-text-3" id="text-org8295e95">
+<div id="outline-container-org8ac329d" class="outline-3">
+<h3 id="org8ac329d">Privacy-Enhanced Mail(PEM)</h3>
+<div class="outline-text-3" id="text-org8ac329d">
 <p>
-PEM is baseline format for most of the public key encryption, which contains
+PEM<label for="4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="4" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc1421">https://datatracker.ietf.org/doc/html/rfc1421</a>
+</span> is baseline format for most of the public key encryption, which contains
 </p>
 <ul class="org-ul">
-<li>Boudary</li>
+<li>Boundary</li>
 <li>Headers</li>
 <li>Body</li>
 </ul>
@@ -366,7 +374,7 @@ PEM is baseline format for most of the public key encryption, which contains
 <p>
 Example PEM:
 </p>
-<pre class="example" id="orgd70f492">
+<pre class="example" id="org9a1eea7">
 -----BEGIN PRIVACY-ENHANCED MESSAGE-----
 Proc-Type: 4,ENCRYPTED
 Content-Domain: RFC822
@@ -388,27 +396,27 @@ dXd/H5LMDWnonNvPCwQUHt==
 </div>
 </div>
 
-<div id="outline-container-org84ae3a0" class="outline-3">
-<h3 id="org84ae3a0">Public Key Cryptography Standard(PKCS)<label for="5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="5" class="margin-toggle"/><span class="sidenote">
-<a href="https://datatracker.ietf.org/doc/html/rfc5958">https://datatracker.ietf.org/doc/html/rfc5958</a>
-</span></h3>
-<div class="outline-text-3" id="text-org84ae3a0">
+<div id="outline-container-orgb649ec6" class="outline-3">
+<h3 id="orgb649ec6">Public Key Cryptography Standard(PKCS)</h3>
+<div class="outline-text-3" id="text-orgb649ec6">
 <p>
 There are a lot of PKCS #X standards, maybe the most common one is RSA keys since you
-may have seen it quite often(something like <code>server.key</code>) when updating a website's certiciate.
+may have seen it quite often(something like <code>server.key</code>) when updating a website's certificate.
 </p>
 </div>
 <div id="outline-container-orge92c707" class="outline-4">
 <h4 id="orge92c707">PKCS #8</h4>
 <div class="outline-text-4" id="text-orge92c707">
 <p>
-PKCS8 in usually used as syntax of unencrypted RSA private key,
+PKCS8<label for="5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="5" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc5958">https://datatracker.ietf.org/doc/html/rfc5958</a>
+</span> in usually used as syntax of unencrypted RSA private key,
 </p>
 
 <p>
-you can simply generate a rsa key via openssl:
+you can simply generate a RSA key via openssl:
 </p>
-<pre class="example" id="orgddf8caa">
+<pre class="example" id="orge4ccce7">
 nix-shell -p openssl
 [nix-shell:/tmp]$ openssl genpkey -algorithm rsa -out test.key
 [nix-shell:/tmp]$ cat test.key
@@ -420,7 +428,7 @@ yRdkNiEmIKL4/ZQoTLdyQR4vJQ==
 -----END PRIVATE KEY-----
 </pre>
 
-<pre class="example" id="orge1341d8">
+<pre class="example" id="org6f9757f">
 [nix-shell:/tmp]$ openssl rsa -in test.key -noout -text
 RSA Private-Key: (2048 bit, 2 primes)
 modulus:
@@ -464,7 +472,7 @@ Private key is kind of too long as example, lets use public key to explain.
 RSA Public key can be generate from private key:
 </p>
 
-<pre class="example" id="org7ef60b2">
+<pre class="example" id="org172b64d">
 [nix-shell:/tmp]$ openssl rsa -in test.key -outform PEM -pubout
 writing RSA key
 -----BEGIN PUBLIC KEY-----
@@ -485,7 +493,7 @@ The output of the public key is in PKCS1 in ASN.1 syntax DER encoded in PEM form
 <p>
 PKCS1 represent RSA public key ASN.1 as
 </p>
-<pre class="example" id="org43e749d">
+<pre class="example" id="org3432cca">
 RSAPublicKey:
 
       RSAPublicKey ::= SEQUENCE {
@@ -497,7 +505,7 @@ RSAPublicKey:
 <p>
 You can read the same information as ASN.1 from
 </p>
-<pre class="example" id="org15e444a">
+<pre class="example" id="orgf55ac89">
 [nix-shell:/tmp]$ openssl rsa -in test.key -pubout -out test.pem
 [nix-shell:/tmp]$ openssl rsa -in test.pem -pubin -noout -text
 RSA Public-Key: (2048 bit)
@@ -538,14 +546,14 @@ This is the common format when you get a new cert.
 </div>
 </div>
 
-<div id="outline-container-org57ca379" class="outline-3">
-<h3 id="org57ca379">JSON Web Token(JWT)<label for="9" class="margin-toggle sidenote-number"></label><input type="checkbox" id="9" class="margin-toggle"/><span class="sidenote">
-<a href="https://datatracker.ietf.org/doc/html/rfc7519">https://datatracker.ietf.org/doc/html/rfc7519</a>
-</span></h3>
-<div class="outline-text-3" id="text-org57ca379">
+<div id="outline-container-orge1123cf" class="outline-3">
+<h3 id="orge1123cf">JSON Web Token(JWT)</h3>
+<div class="outline-text-3" id="text-orge1123cf">
 <div class="epigraph"><blockquote>
 <p>
-JSON Web Token (JWT) is a compact, URL-safe means of representing claims to be transferred between two parties
+JSON Web Token (JWT) is a compact, URL-safe means of representing claims to be transferred between two parties<label for="9" class="margin-toggle sidenote-number"></label><input type="checkbox" id="9" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc7519">https://datatracker.ietf.org/doc/html/rfc7519</a>
+</span>
 </p>
 
 </blockquote></div>
@@ -553,13 +561,13 @@ JSON Web Token (JWT) is a compact, URL-safe means of representing claims to be t
 JWT is either a JWS or JWE
 </p>
 </div>
-<div id="outline-container-orge302425" class="outline-4">
-<h4 id="orge302425">JSON Web Signature (JWS)<label for="10" class="margin-toggle sidenote-number"></label><input type="checkbox" id="10" class="margin-toggle"/><span class="sidenote">
-<a href="https://datatracker.ietf.org/doc/html/rfc7515">https://datatracker.ietf.org/doc/html/rfc7515</a>
-</span></h4>
-<div class="outline-text-4" id="text-orge302425">
+<div id="outline-container-orge86d136" class="outline-4">
+<h4 id="orge86d136">JSON Web Signature (JWS)</h4>
+<div class="outline-text-4" id="text-orge86d136">
 <p>
-JWS is commonly used in OIDC<label for="11" class="margin-toggle sidenote-number"></label><input type="checkbox" id="11" class="margin-toggle"/><span class="sidenote">
+JWS<label for="10" class="margin-toggle sidenote-number"></label><input type="checkbox" id="10" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc7515">https://datatracker.ietf.org/doc/html/rfc7515</a>
+</span> is commonly used in OIDC<label for="11" class="margin-toggle sidenote-number"></label><input type="checkbox" id="11" class="margin-toggle"/><span class="sidenote">
 <a href="https://openid.net/specs/openid-connect-core-1_0.html">https://openid.net/specs/openid-connect-core-1_0.html</a> 
 </span> as <code>id_token</code> and sometimes <code>access_token</code> too.
 </p>
@@ -567,7 +575,7 @@ JWS is commonly used in OIDC<label for="11" class="margin-toggle sidenote-number
 <p>
 The message is NOT ENCTYPTED, so anyone can actually see the claims in the JSON.
 </p>
-<pre class="example" id="orgd53a15f">
+<pre class="example" id="orgb4bd6d5">
 BASE64URL(UTF8(JWS Protected Header)) || '.' ||
 BASE64URL(JWS Payload) || '.' ||
 BASE64URL(JWS Signature)
@@ -576,7 +584,7 @@ BASE64URL(JWS Signature)
 <p>
 A example of JWS:(with line breaks for display purposes only):
 </p>
-<pre class="example" id="org02b9295">
+<pre class="example" id="orga5d3d9a">
 eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9
 .
 eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFt
@@ -591,17 +599,17 @@ JWS Signature basically is MAC, of <code>header || payload</code>
 </div>
 </div>
 
-<div id="outline-container-org2deab78" class="outline-4">
-<h4 id="org2deab78">JSON Web Encryption (JWE)<label for="12" class="margin-toggle sidenote-number"></label><input type="checkbox" id="12" class="margin-toggle"/><span class="sidenote">
-<a href="https://datatracker.ietf.org/doc/html/rfc7516">https://datatracker.ietf.org/doc/html/rfc7516</a> 
-</span></h4>
-<div class="outline-text-4" id="text-org2deab78">
+<div id="outline-container-orgd6726fb" class="outline-4">
+<h4 id="orgd6726fb">JSON Web Encryption (JWE)</h4>
+<div class="outline-text-4" id="text-orgd6726fb">
 <p>
-As the name indicate JWE can be use to encrypt messages, JWE is in the following format, where Ciphertext is the encrypted
+As the name indicate JWE<label for="12" class="margin-toggle sidenote-number"></label><input type="checkbox" id="12" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc7516">https://datatracker.ietf.org/doc/html/rfc7516</a> 
+</span> can be use to encrypt messages, JWE is in the following format, where Ciphertext is the encrypted
 message.
 </p>
 
-<pre class="example" id="orgecb0ee9">
+<pre class="example" id="org99ac929">
 BASE64URL(UTF8(JWE Protected Header)) ||
       '.' || BASE64URL(JWE Encrypted Key) || '.' || BASE64URL(JWE
       Initialization Vector) || '.' || BASE64URL(JWE Ciphertext) || '.'
@@ -611,7 +619,7 @@ BASE64URL(UTF8(JWE Protected Header)) ||
 <p>
 example:(with line breaks for display purposes only)
 </p>
-<pre class="example" id="org2d6b029">
+<pre class="example" id="orga9003d9">
 eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ.
 OKOawDo13gRp2ojaHV7LFpZcgV7T6DVZKTyKOMTYUmKoTCVJRgckCL9kiMT03JGe
 ipsEdY3mx_etLbbWSrFr05kLzcSr4qKAq7YN7e9jwQRb23nfa6c9d-StnImGyFDb
@@ -642,7 +650,7 @@ Modern hash functions such as SHA2, SHA3, Blake2 are consider secure hash functi
 Hash functions are commonly used to proof the content not tampered, for example if you download an executable file form internet, you should compare the hash provided by the site and the one caclulated locally. Collisions found will indicate the function is not secure anymore, for example if someone hijack the content and replace with another malware which can calculate to the same hash.
 </p>
 
-<pre class="example" id="org20c853b">
+<pre class="example" id="orgf6689d5">
 ghci&gt; import Crypto.Hash
 ghci&gt; hash ("hello world"::ByteString) :: Digest SHA1
 2aae6c35c94fcfb415dbe95f408b9ce91ee846ed
@@ -683,12 +691,19 @@ There is example of Blake2b of "abc" and C implementation in rfc7693 <label for=
 <p>
 MAC is basically a hash function + key.
 </p>
+</div>
 
+
+<div id="outline-container-org7735b84" class="outline-3">
+<h3 id="org7735b84">HMAC</h3>
+<div class="outline-text-3" id="text-org7735b84">
 <p>
-For example HMAC SHA256 is HMAC scramble the message with a key and hash with SHA256.
+For example HMAC<label for="14" class="margin-toggle sidenote-number"></label><input type="checkbox" id="14" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc2104">https://datatracker.ietf.org/doc/html/rfc2104</a> 
+</span> SHA256 is HMAC scramble the message with a key and hash with SHA256.
 </p>
 
-<pre class="example" id="org4184bc1">
+<pre class="example" id="orgbc3bf11">
 ghci&gt; import Crypto.MAC.HMAC
 ghci&gt; import Crypto.Hash
 ghci&gt; hmacGetDigest $ hmac ("secret key"::ByteString) ("hello world"::ByteString) :: Digest SHA256
@@ -702,7 +717,7 @@ The scramble part is defined in rfc2104<label for="14" class="margin-toggle side
 <a href="https://datatracker.ietf.org/doc/html/rfc2104">https://datatracker.ietf.org/doc/html/rfc2104</a> 
 </span>, <code>H</code> is hash function e.g. SHA256, <code>K</code> is secret key and <code>,</code> is concat
 </p>
-<pre class="example" id="org08caf6d">
+<pre class="example" id="orgcefe284">
 ipad = the byte 0x36 repeated B times
 opad = the byte 0x5C repeated B times
 H(K XOR opad, H(K XOR ipad, text))
@@ -717,15 +732,22 @@ MAC can be used in senario like:
 <li>Pseudo Random Generator(PRG),  <code>HMAC(salt, seed)</code> generate a pretty random enough key can be used in KDF</li>
 </ul>
 </div>
+</div>
 
 
 
-<div id="outline-container-orge8c8c3c" class="outline-3">
-<h3 id="orge8c8c3c">Poly1305<label for="15" class="margin-toggle sidenote-number"></label><input type="checkbox" id="15" class="margin-toggle"/><span class="sidenote">
+<div id="outline-container-org4b420e2" class="outline-3">
+<h3 id="org4b420e2">Poly1305</h3>
+<div class="outline-text-3" id="text-org4b420e2">
+<p>
+Poly1305<label for="15" class="margin-toggle sidenote-number"></label><input type="checkbox" id="15" class="margin-toggle"/><span class="sidenote">
 <a href="https://datatracker.ietf.org/doc/html/rfc8439">https://datatracker.ietf.org/doc/html/rfc8439</a>
-</span></h3>
+</span> is fast MAC
+</p>
 </div>
 </div>
+</div>
+
 <div id="outline-container-org9e02139" class="outline-2">
 <h2 id="org9e02139">Key Derivation Function(KDF)</h2>
 <div class="outline-text-2" id="text-org9e02139">
@@ -738,15 +760,15 @@ You can think of KDF as just MAC, but run many iterations and consume some CPU a
 </p>
 </div>
 
-<div id="outline-container-org55059fc" class="outline-3">
-<h3 id="org55059fc">Password Based Key Derivation Function (PBKDF2)<label for="16" class="margin-toggle sidenote-number"></label><input type="checkbox" id="16" class="margin-toggle"/><span class="sidenote">
-<a href="https://datatracker.ietf.org/doc/html/rfc2898">https://datatracker.ietf.org/doc/html/rfc2898</a>
-</span></h3>
-<div class="outline-text-3" id="text-org55059fc">
+<div id="outline-container-org2ba445d" class="outline-3">
+<h3 id="org2ba445d">Password Based Key Derivation Function (PBKDF2)</h3>
+<div class="outline-text-3" id="text-org2ba445d">
 <p>
-The following example of PBKDF using HMAC SHA256, iterate 1000 times, and output length 32 bytes.
+The following example of PBKDF<label for="16" class="margin-toggle sidenote-number"></label><input type="checkbox" id="16" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc2898">https://datatracker.ietf.org/doc/html/rfc2898</a>
+</span> using HMAC SHA256, iterate 1000 times, and output length 32 bytes.
 </p>
-<pre class="example" id="org059a4b8">
+<pre class="example" id="org2c8cd9b">
 ghci&gt; import Crypto.KDF.PBKDF2
 ghci&gt; generate (prfHMAC SHA256 :: PRF ByteString) (Parameters {iterCounts = 1000, outputLength = 32}) ("password":: ByteString) ("salt"::ByteString) :: ByteString
 "c,(\DC2\228mF\EOT\DLE+\167a\142\157m}/\129(\246&amp;kJ\ETX&amp;M*\EOT`\183\220\179"
@@ -755,7 +777,7 @@ ghci&gt; generate (prfHMAC SHA256 :: PRF ByteString) (Parameters {iterCounts = 1
 The output is 32 bytes length pseudo random bytestring, we can output hex format with base16 encoding
 </p>
 
-<pre class="example" id="org74536a3">
+<pre class="example" id="orgb0c6409">
 ghci&gt; convertToBase Base16 $ (generate (prfHMAC SHA256 :: PRF ByteString) (Parameters {iterCounts = 1000, outputLength = 32}) ("password":: ByteString) ("salt"::ByteString) :: ByteString) :: ByteString
 "632c2812e46d4604102ba7618e9d6d7d2f8128f6266b4a03264d2a0460b7dcb3"
 </pre>
@@ -775,27 +797,30 @@ PBKDF2 is a common KDF but it is consider less secure than modern KDF such as Sc
 </p>
 </div>
 </div>
-<div id="outline-container-orge20d9d3" class="outline-3">
-<h3 id="orge20d9d3">Scrypt<label for="18" class="margin-toggle sidenote-number"></label><input type="checkbox" id="18" class="margin-toggle"/><span class="sidenote">
-<a href="https://datatracker.ietf.org/doc/html/rfc7914">https://datatracker.ietf.org/doc/html/rfc7914</a>
-</span></h3>
-<div class="outline-text-3" id="text-orge20d9d3">
+<div id="outline-container-org7ab1382" class="outline-3">
+<h3 id="org7ab1382">Scrypt</h3>
+<div class="outline-text-3" id="text-org7ab1382">
 <p>
-The following is a example of deriving 32 bytes length key in 1024 iterations, block size 8 and parallel 2.
+The following is a example of deriving 32 bytes length key in 1024 iterations, block size 8 and parallel 2 using Scrypt<label for="18" class="margin-toggle sidenote-number"></label><input type="checkbox" id="18" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc7914">https://datatracker.ietf.org/doc/html/rfc7914</a>
+</span>.
 </p>
-<pre class="example" id="org26bf316">
+<pre class="example" id="orgae7c617">
 ghci&gt; import Crypto.KDF.Scrypt
 ghci&gt; generate (Parameters {n=1024,r=8,p=2,outputLength=32}) ("password":: ByteString) ("salt"::ByteString) ::ByteString
 "\ETBeHl\244\197Y\DEL\181\&amp;0\141\SYN\185\151\148\215\211\160\189.\148d\185\172\177\202\&amp;2\ETX\SUB\133\223\237"
 </pre>
 </div>
 </div>
-<div id="outline-container-org077fd0a" class="outline-3">
-<h3 id="org077fd0a">HMAC-based Extract-and-Expand Key Derivation Function (HKDF)<label for="19" class="margin-toggle sidenote-number"></label><input type="checkbox" id="19" class="margin-toggle"/><span class="sidenote">
+<div id="outline-container-org44cb6d9" class="outline-3">
+<h3 id="org44cb6d9">HMAC-based Extract-and-Expand Key Derivation Function (HKDF)</h3>
+<div class="outline-text-3" id="text-org44cb6d9">
+<p>
+Example of HKDF<label for="19" class="margin-toggle sidenote-number"></label><input type="checkbox" id="19" class="margin-toggle"/><span class="sidenote">
 <a href="https://datatracker.ietf.org/doc/html/rfc5869">https://datatracker.ietf.org/doc/html/rfc5869</a>
-</span></h3>
-<div class="outline-text-3" id="text-org077fd0a">
-<pre class="example" id="org7d4760e">
+</span>:
+</p>
+<pre class="example" id="orgc44d5fa">
 ghci&gt; import Crypto.KDF.HKDF
 ghci&gt; import Crypto.Hash (SHA256)
 ghci&gt; let pkr = extract ("salt" :: ByteString) ("secret" :: ByteString) :: PRK SHA256
@@ -808,29 +833,32 @@ ghci| in expand pkr ("payload" :: ByteString) 32 :: ByteString
 <div id="outline-container-orge0161ed" class="outline-2">
 <h2 id="orge0161ed">Symmetric Ciphers</h2>
 <div class="outline-text-2" id="text-orge0161ed">
+<p>
+Symmetric ciphers is very straightforward to use, encryption and decryption is based on the same key.
+</p>
+
+<p>
+Basically symmetric encryption use a Pseudo Random Key(PRK) xor the message. The
+</p>
 </div>
 <div id="outline-container-org35b7d8d" class="outline-3">
 <h3 id="org35b7d8d">AES</h3>
 <div class="outline-text-3" id="text-org35b7d8d">
-<p>
-AES requires a initial vector(IV), aka nonce
-</p>
 </div>
-
 <div id="outline-container-org673c0ba" class="outline-4">
 <h4 id="org673c0ba">Counter Mode(CTR)</h4>
 <div class="outline-text-4" id="text-org673c0ba">
 <p>
-The following is a example of AES CTR mode with a random key and 0 iv:
+AES requires a initial vector(IV), aka nonce. The following is a example of AES 256 CTR mode with a random 256-bit key and 0 as IV:
 </p>
 <div class="epigraph"><blockquote>
 <p>
-In practice key should be generated from one of the secure KDF, and iv should be a random number.
+In practice key should derive key from password with a secure KDF, and iv should be a random number.
 </p>
 
 </blockquote></div>
 
-<pre class="example" id="org3d7e42e">
+<pre class="example" id="org6522d5e">
 ghci&gt; import Crypto.Random
 ghci&gt; import Crypto.Cipher.Types
 ghci&gt; import Crypto.Cipher.AES (AES256)
@@ -844,15 +872,15 @@ ghci|
 </div>
 </div>
 
-<div id="outline-container-org6c634b0" class="outline-4">
-<h4 id="org6c634b0">Galois/Counter Mode<label for="20" class="margin-toggle sidenote-number"></label><input type="checkbox" id="20" class="margin-toggle"/><span class="sidenote">
-<a href="https://csrc.nist.gov/publications/detail/sp/800-38d/final">https://csrc.nist.gov/publications/detail/sp/800-38d/final</a>
-</span> Synthetic Initialization Vector (GCM-SIV)<label for="21" class="margin-toggle sidenote-number"></label><input type="checkbox" id="21" class="margin-toggle"/><span class="sidenote">
-<a href="https://datatracker.ietf.org/doc/html/rfc8452">https://datatracker.ietf.org/doc/html/rfc8452</a>
-</span></h4>
-<div class="outline-text-4" id="text-org6c634b0">
+<div id="outline-container-org199504d" class="outline-4">
+<h4 id="org199504d">Galois/Counter Mode Synthetic Initialization Vector (GCM-SIV)</h4>
+<div class="outline-text-4" id="text-org199504d">
 <p>
-CTR is good enough for common encryption case, while GCM added Authenticated Encryption with Additional Data (AEAD)<label for="22" class="margin-toggle sidenote-number"></label><input type="checkbox" id="22" class="margin-toggle"/><span class="sidenote">
+CTR is good enough for common encryption case, while GCM<label for="20" class="margin-toggle sidenote-number"></label><input type="checkbox" id="20" class="margin-toggle"/><span class="sidenote">
+<a href="https://csrc.nist.gov/publications/detail/sp/800-38d/final">https://csrc.nist.gov/publications/detail/sp/800-38d/final</a>
+</span>-SIV<label for="21" class="margin-toggle sidenote-number"></label><input type="checkbox" id="21" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc8452">https://datatracker.ietf.org/doc/html/rfc8452</a>
+</span> added Authenticated Encryption with Additional Data (AEAD)<label for="22" class="margin-toggle sidenote-number"></label><input type="checkbox" id="22" class="margin-toggle"/><span class="sidenote">
 <a href="https://datatracker.ietf.org/doc/html/rfc5116">https://datatracker.ietf.org/doc/html/rfc5116</a>
 </span>, and SIV to nonce misuse-resistant.
 </p>
@@ -865,7 +893,7 @@ AEAD basically bind extra data, or context to cipher text and generate a MAC, ak
 The following is example of AES-GCM-SIV encryption of "message" with additional data "context" and a nonce.
 </p>
 
-<pre class="example" id="org7bb7b8a">
+<pre class="example" id="org7d212df">
 ghci&gt; import Crypto.Cipher.AESGCMSIV
 ghci&gt; do
 ghci| key :: ByteString &lt;- getRandomBytes 32
@@ -886,13 +914,13 @@ ghci|
 ChaCha20 is high speed stream cipher, a vairant of Salsa20, usually combine with Poly1305 as AEAD construction.
 </p>
 </div>
-<div id="outline-container-orgb602646" class="outline-4">
-<h4 id="orgb602646">ChaCha20-Poly1305<label for="15" class="margin-toggle sidenote-number"></label><input type="checkbox" id="15" class="margin-toggle"/><span class="sidenote">
-<a href="https://datatracker.ietf.org/doc/html/rfc8439">https://datatracker.ietf.org/doc/html/rfc8439</a>
-</span></h4>
-<div class="outline-text-4" id="text-orgb602646">
+<div id="outline-container-orgd8a7e34" class="outline-4">
+<h4 id="orgd8a7e34">ChaCha20-Poly1305</h4>
+<div class="outline-text-4" id="text-orgd8a7e34">
 <p>
-ChaCha20-Poly1305 requires very similar inputs to AES:
+ChaCha20-Poly1305<label for="15" class="margin-toggle sidenote-number"></label><input type="checkbox" id="15" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc8439">https://datatracker.ietf.org/doc/html/rfc8439</a>
+</span> requires very similar inputs to AES:
 </p>
 
 <ul class="org-ul">
@@ -910,7 +938,7 @@ There are more steps to encrypt a message due to it is stream cipher aka state c
 <li>finalise a state will generate auth tag</li>
 </ul>
 
-<pre class="example" id="org914333c">
+<pre class="example" id="orgbc05bdb">
 ghci&gt; import Crypto.Error
 ghci&gt; import Crypto.Cipher.ChaChaPoly1305
 ghci| do
@@ -932,6 +960,224 @@ ghci| return $ (convertToBase Base16 out :: ByteString, convertToBase Base16 aut
 
 <div id="outline-container-org0f69fc6" class="outline-2">
 <h2 id="org0f69fc6"><span class="todo TODO">TODO</span> Asymmetric Ciphers</h2>
+<div class="outline-text-2" id="text-org0f69fc6">
+<p>
+Asymmetric ciphers aka public key cryptography, is more complex than symmetric(in term of usage not cipher implementation), because instead of using the same key to encrypt and decrypt, asymmetric needs public and private key pair.
+</p>
+
+<p>
+Common scenarios of asymmetric ciphers are:
+</p>
+<ul class="org-ul">
+<li>Encrypt data by public key and decrypt by private key</li>
+<li>Sign message(MAC) by private key and verify by public key</li>
+<li>Exchange key between 2 parties publicly</li>
+</ul>
+</div>
+
+<div id="outline-container-org85be216" class="outline-3">
+<h3 id="org85be216">Key Exchange</h3>
+<div class="outline-text-3" id="text-org85be216">
+<p>
+Key exchange usually happen when two parties want to establish a secure connection on a public channel, for example TLS Handshake.
+</p>
+
+<ul class="org-ul">
+<li>Client and Server each has a key pair, only client has access to the private key</li>
+<li>Server has a key pair, only server has access to the private key</li>
+<li>(Client private key * Base) * Server public key = shared key = Client public key (Base * Server Private key)</li>
+</ul>
+
+<p>
+Where private * base = public key
+<code>*</code> is a math irreversible operation that is associative, e.g. exponent of huge number
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7a7fafb" class="outline-3">
+<h3 id="org7a7fafb">Elliptic Curve Cryptography (ECC)</h3>
+<div class="outline-text-3" id="text-org7a7fafb">
+<p>
+Compared to RSA, ECC offers equivalent security with smaller key sizes(in bits).<label for="23" class="margin-toggle sidenote-number"></label><input type="checkbox" id="23" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc4492">https://datatracker.ietf.org/doc/html/rfc4492</a>
+</span>
+</p>
+
+<table>
+
+
+<colgroup>
+<col  class="org-right">
+
+<col  class="org-right">
+
+<col  class="org-right">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">Symmetric</td>
+<td class="org-right">ECC</td>
+<td class="org-right">DH/DSA/</td>
+</tr>
+
+<tr>
+<td class="org-right">80</td>
+<td class="org-right">163</td>
+<td class="org-right">1024</td>
+</tr>
+
+<tr>
+<td class="org-right">112</td>
+<td class="org-right">233</td>
+<td class="org-right">2048</td>
+</tr>
+
+<tr>
+<td class="org-right">128</td>
+<td class="org-right">283</td>
+<td class="org-right">3072</td>
+</tr>
+
+<tr>
+<td class="org-right">192</td>
+<td class="org-right">409</td>
+<td class="org-right">7680</td>
+</tr>
+
+<tr>
+<td class="org-right">256</td>
+<td class="org-right">571</td>
+<td class="org-right">15360</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+<div id="outline-container-orga15423f" class="outline-4">
+<h4 id="orga15423f">Elliptic Curve Diffie-Hellman (ECDH)</h4>
+<div class="outline-text-4" id="text-orga15423f">
+<p>
+ECDH process is very simple:
+</p>
+<ol class="org-ol">
+<li><p>
+choose a curve, there are a lot of curves available.
+</p>
+<pre class="example" id="orgbfccaf6">
+   ghci&gt; :info CurveName
+type CurveName :: *
+data CurveName
+  = SEC_p112r1
+  | SEC_p112r2
+  | SEC_p128r1
+  ...
+</pre></li>
+<li>Alice generate a private key</li>
+<li>Bob generate a private key</li>
+<li>Alice's private key * Base point * Bob's public key = share key = Alice's public key * Base point * Bob's private key</li>
+</ol>
+
+<pre class="example" id="org57f9344">
+ghci&gt; import Crypto.PubKey.ECC.DH
+ghci&gt; import Crypto.PubKey.ECC.Types
+ghci&gt; let curve = getCurveByName SEC_p384r1
+ghci&gt; do
+ghci| alicePrivateKey &lt;- generatePrivate curve
+ghci| let alicePublicKey = calculatePublic curve alicePrivateKey
+ghci| bobPrivateKey &lt;- generatePrivate curve
+ghci| let bobPublicKey = calculatePublic curve bobPrivateKey
+ghci| let aliceSharedKey = getShared curve alicePrivateKey bobPublicKey
+ghci| let bobSharedKey = getShared curve bobPrivateKey alicePublicKey
+ghci| return (aliceSharedKey == bobSharedKey)
+ghci| 
+True
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orge323d23" class="outline-4">
+<h4 id="orge323d23">Curve25519/X25519</h4>
+<div class="outline-text-4" id="text-orge323d23">
+<p>
+Another popular curve is Curve25519, which is 128-bit level, Curve448 is 256-bit level security.<label for="24" class="margin-toggle sidenote-number"></label><input type="checkbox" id="24" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc7748">https://datatracker.ietf.org/doc/html/rfc7748</a>
+</span>
+</p>
+
+<pre class="example" id="org10de104">
+do
+alicePrivateKey &lt;- generateSecretKey
+let alicePublicKey = toPublic alicePrivateKey
+bobPrivateKey &lt;- generateSecretKey
+let bobPublicKey = toPublic bobPrivateKey
+let aliceSharedKey = dh bobPublicKey alicePrivateKey
+let bobSharedKey = dh alicePublicKey bobPrivateKey
+return (aliceSharedKey == bobSharedKey)
+</pre>
+</div>
+</div>
+
+
+<div id="outline-container-org6f2d77a" class="outline-4">
+<h4 id="org6f2d77a">Elliptic Curve Digital Signature Algorithm (ECDSA)</h4>
+<div class="outline-text-4" id="text-org6f2d77a">
+<p>
+ECDSA<label for="25" class="margin-toggle sidenote-number"></label><input type="checkbox" id="25" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc6979">https://datatracker.ietf.org/doc/html/rfc6979</a>
+</span> won't encrypt the message, but just generate signature from sender's private key.
+</p>
+
+<p>
+The following example is how Alice sign the message with ECDSA on Curve25519 with her private key, and Bob
+can verify the message is from Alice public key.
+</p>
+
+<pre class="example" id="orgc79d56c">
+ghci&gt; import Crypto.PubKey.ECC.ECDSA
+ghci&gt; import Crypto.PubKey.ECC.Generate
+ghci&gt; import Crypto.Hash.Algorithms
+ghci&gt; do
+ghci| (alicePublicKey, alicePrivateKey) &lt;- generate curve
+ghci| toBob &lt;- sign alicePrivateKey SHA256 ("message to Bob"::ByteString)
+ghci| return $ verify SHA256 alicePublicKey toBob ("message to Bob"::ByteString)
+ghci| 
+True
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org68b6afc" class="outline-4">
+<h4 id="org68b6afc">Edwards-Curve Digital Signature Algorithm (EdDSA)</h4>
+<div class="outline-text-4" id="text-org68b6afc">
+<p>
+Usage of EdDSA<label for="26" class="margin-toggle sidenote-number"></label><input type="checkbox" id="26" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc8032">https://datatracker.ietf.org/doc/html/rfc8032</a> 
+</span> is basically the same as ECDSA, but on another curve edwards25519 or edwards448
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org36c9406" class="outline-3">
+<h3 id="org36c9406">RSA</h3>
+<div class="outline-text-3" id="text-org36c9406">
+<p>
+RSA<label for="27" class="margin-toggle sidenote-number"></label><input type="checkbox" id="27" class="margin-toggle"/><span class="sidenote">
+<a href="https://datatracker.ietf.org/doc/html/rfc8017">https://datatracker.ietf.org/doc/html/rfc8017</a>
+</span> is the most popular public key crypto, the following is a example of digital sign message with 2048-bit RSA key, in RSASSA-PKCS1-v1_5 scheme SHA256:
+</p>
+<pre class="example" id="org7c39fe8">
+ghci&gt; import Crypto.PubKey.RSA
+ghci&gt; import Crypto.PubKey.RSA.PKCS15
+ghci&gt; import Crypto.Hash.Algorithms
+ghci&gt; (publicKey, privateKey) &lt;- generate 256 65537
+ghci&gt; sign Nothing (Just SHA256) privateKey ("to Bob"::ByteString)
+Right "=\161\243j\STX]\251g=\234\GSx&gt;\159\248\128#\DEL\235\188\240\221U\232{\176\DLE\231\210\229z2\SI\212\212\216\235\239bO\205&amp;t\248\SOH\249K.\191R\169\175#\183\f\239\141\142\201\144\&amp;0\174[\ESC\228T`\136\239\221\EOT\214\235\&amp;8\NAK\255\245l\148\228?\FS\254N'pO\221\"n'\249&lt;\242\RS\146\DELl\210\157~[\254)\SYN@\249\232\ENQs\RSl\177u\213\207\239\129\159\ETX&amp;\141\DC13\243\250\232\187\222\DLEF\207\222\231\EM\186M\245Hv\238\n\ACK\SOw\254\196\173&amp;\209N\245\217\&amp;4m\234\161l\158\173\225;\SYN\187\217\v\r\199\b\193\v\167{Dk\234\194\174\133\150@\148\DEL\190\193\141\DC1\140S\141\GS\135\n\161)\253\179\241\199\230k&lt;G\135\158\225\DC2?h\211\240#;\183\192\182\168eS\\\195V\135mZ\rA\173\197\139\193\135\174\233\138&amp;r\SIK\197\156\r\a\DELV\ETX\218\FS\188d\NAKw\222\252\ESC\SO"
+</pre>
+</div>
+</div>
 </div>
 <div id="footnotes">
 <h2 class="footnotes">Footnotes: </h2>
@@ -1023,6 +1269,26 @@ This is the common format when you get a new cert.
 
 <div class="footdef"><sup><a id="fn.22" class="footnum" href="#fnr.22" role="doc-backlink">22</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://datatracker.ietf.org/doc/html/rfc5116">https://datatracker.ietf.org/doc/html/rfc5116</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.23" class="footnum" href="#fnr.23" role="doc-backlink">23</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+<a href="https://datatracker.ietf.org/doc/html/rfc4492">https://datatracker.ietf.org/doc/html/rfc4492</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.24" class="footnum" href="#fnr.24" role="doc-backlink">24</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+<a href="https://datatracker.ietf.org/doc/html/rfc7748">https://datatracker.ietf.org/doc/html/rfc7748</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.25" class="footnum" href="#fnr.25" role="doc-backlink">25</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+<a href="https://datatracker.ietf.org/doc/html/rfc6979">https://datatracker.ietf.org/doc/html/rfc6979</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.26" class="footnum" href="#fnr.26" role="doc-backlink">26</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+<a href="https://datatracker.ietf.org/doc/html/rfc8032">https://datatracker.ietf.org/doc/html/rfc8032</a> 
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.27" class="footnum" href="#fnr.27" role="doc-backlink">27</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+<a href="https://datatracker.ietf.org/doc/html/rfc8017">https://datatracker.ietf.org/doc/html/rfc8017</a>
 </p></div></div>
 
 
