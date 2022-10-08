@@ -20,28 +20,27 @@ Haskell is chosen as programming language for examples since it is concise, inte
 |                 |          | Variants/Schemes                |
 |-----------------+----------+---------------------------------|
 | [[*Encoding][Encoding/Format]] | [[*Base][Base]]     | Base16 Base32 Base64            |
-|                 | X.509    |                                 |
-|                 | JWT      | [[* JSON Web Signature (JWS)\[fn:22\]][JWS]] [[* JSON Web Encryption (JWE)\[fn:23\]][JWE]] JWK                     |
+|                 | JWT      | [[* JSON Web Signature (JWS)][JWS]] [[* JSON Web Encryption (JWE)][JWE]] JWK                     |
 |                 | PEM      |                                 |
-|                 | [[* Public Key Cryptography Standard(PKCS)\[fn:14\]][PKCS]]     | PKCS1 PKCS5 PKCS8 PKCS12/PFX    |
+|                 | [[* Public Key Cryptography Standard(PKCS)][PKCS]]     | PKCS1 PKCS5 PKCS8 PKCS12/PFX    |
 |-----------------+----------+---------------------------------|
 | [[* Hash Function][Hash]]            | MD5      |                                 |
 |                 | SHA      | SHA1 SHA2 SHA3                  |
 |                 | BLAKE2   | Blake2b Black2s                 |
 |-----------------+----------+---------------------------------|
-| [[* Message Authentication Code(MAC)][MAC]]             | HMAC     |                                 |
-|                 | Poly1305 |                                 |
+| [[* Message Authentication Code(MAC)][MAC]]             | [[* HMAC][HMAC]]     |                                 |
+|                 | [[* Poly1305][Poly1305]] |                                 |
 |-----------------+----------+---------------------------------|
-| [[* Key Derivation Function(KDF)][KDF]]             | [[*Password Based Key Derivation Function (PBKDF2)\[fn:6\]][PBKDF2]]   |                                 |
-|                 | [[*HMAC-based Extract-and-Expand Key Derivation Function (HKDF)\[fn:9\]][HKDF]]     |                                 |
+| [[* Key Derivation Function(KDF)][KDF]]             | [[*Password Based Key Derivation Function (PBKDF2)][PBKDF2]]   |                                 |
+|                 | [[*HMAC-based Extract-and-Expand Key Derivation Function (HKDF)][HKDF]]     |                                 |
 |                 | Bcrypt   |                                 |
-|                 | [[*Scrypt\[fn:5\]][Scrypt​]]   |                                 |
+|                 | [[*Scrypt][Scrypt​]]   |                                 |
 |-----------------+----------+---------------------------------|
-| [[* Symmetric Ciphers][Symetric]]        | AES      | AES-GCM [[* Galois/Counter Mode\[fn:11\] Synthetic Initialization Vector (GCM-SIV)\[fn:12\]][AES-GCM-SIV]]             |
+| [[* Symmetric Ciphers][Symetric]]        | AES      | AES-GCM [[* Galois/Counter Mode Synthetic Initialization Vector (GCM-SIV)][AES-GCM-SIV]]             |
 |                 |          |                                 |
-|                 | ChaCha20 | [[* ChaCha20-Poly1305\[fn:13\]][ChaCha20-Poly1305]]               |
+|                 | ChaCha20 | [[* ChaCha20-Poly1305][ChaCha20-Poly1305]]               |
 |-----------------+----------+---------------------------------|
-| [[* Asymmetric Ciphers][Asymetric]]       | ECC      | ECDSA EdDSA ECDH X25519 Ed25519 |
+| [[* Asymmetric Ciphers][Asymetric]]       | ECC      | [[* Elliptic Curve Digital Signature Algorithm (ECDSA)][ECDSA]] [[* Edwards-Curve Digital Signature Algorithm (EdDSA)][EdDSA]] [[* Elliptic Curve Diffie-Hellman (ECDH)][ECDH]] [[* Curve25519/X25519][X25519]] Ed25519 |
 |                 |          |                                 |
 |                 | RSA      |                                 |
 
@@ -100,9 +99,9 @@ Haskell is chosen as programming language for examples since it is concise, inte
      Output:  a      G      V      s      
    #+end_example
 
-** Privacy-Enhanced Mail(PEM)[fn:10]
-PEM is baseline format for most of the public key encryption, which contains
-- Boudary
+** Privacy-Enhanced Mail(PEM)
+PEM[fn:10] is baseline format for most of the public key encryption, which contains
+- Boundary
 - Headers
 - Body
 
@@ -127,13 +126,13 @@ Example PEM:
   -----END PRIVACY-ENHANCED MESSAGE-----
 #+end_example
 
-** Public Key Cryptography Standard(PKCS)[fn:14]
+** Public Key Cryptography Standard(PKCS)
 There are a lot of PKCS #X standards, maybe the most common one is RSA keys since you
-may have seen it quite often(something like =server.key=) when updating a website's certiciate.
+may have seen it quite often(something like =server.key=) when updating a website's certificate.
 *** PKCS #8
-PKCS8 in usually used as syntax of unencrypted RSA private key,
+PKCS8[fn:14] in usually used as syntax of unencrypted RSA private key,
 
-you can simply generate a rsa key via openssl:
+you can simply generate a RSA key via openssl:
 #+begin_example
 nix-shell -p openssl
 [nix-shell:/tmp]$ openssl genpkey -algorithm rsa -out test.key
@@ -235,13 +234,13 @@ So far all these PKCS are UNENCRYPTED, they are just encoded in certain format.
 
 There is a common standard for store and exchange certs and keys that is encypted - PKCS #12 Personal Information Exchange Syntax[fn:19] aka PFX[fn:20]
 
-** JSON Web Token(JWT)[fn:21]
+** JSON Web Token(JWT)
 #+begin_quote
-JSON Web Token (JWT) is a compact, URL-safe means of representing claims to be transferred between two parties
+JSON Web Token (JWT) is a compact, URL-safe means of representing claims to be transferred between two parties[fn:21]
 #+end_quote
 JWT is either a JWS or JWE
-*** JSON Web Signature (JWS)[fn:22]
-JWS is commonly used in OIDC[fn:24] as =id_token= and sometimes =access_token= too.
+*** JSON Web Signature (JWS)
+JWS[fn:22] is commonly used in OIDC[fn:24] as =id_token= and sometimes =access_token= too.
 
 The message is NOT ENCTYPTED, so anyone can actually see the claims in the JSON.
 #+begin_example
@@ -262,8 +261,8 @@ A example of JWS:(with line breaks for display purposes only):
 
 JWS Signature basically is MAC, of =header || payload=
 
-*** JSON Web Encryption (JWE)[fn:23]
-As the name indicate JWE can be use to encrypt messages, JWE is in the following format, where Ciphertext is the encrypted
+*** JSON Web Encryption (JWE)
+As the name indicate JWE[fn:23] can be use to encrypt messages, JWE is in the following format, where Ciphertext is the encrypted
 message.
 
 #+begin_example
@@ -327,7 +326,9 @@ example:(with line breaks for display purposes only)
   #+index: HMAC
   MAC is basically a hash function + key.
 
-  For example HMAC SHA256 is HMAC scramble the message with a key and hash with SHA256.
+  
+** HMAC
+  For example HMAC[fn:4] SHA256 is HMAC scramble the message with a key and hash with SHA256.
   
   #+begin_example
     ghci> import Crypto.MAC.HMAC
@@ -352,14 +353,16 @@ example:(with line breaks for display purposes only)
 
 
 
-** Poly1305[fn:13]
+** Poly1305
+Poly1305[fn:13] is fast MAC
+
 * Key Derivation Function(KDF)
   KDF is a function generates pseudo random key from password. Password is something we usually used to encrypt a file, or login to a website, because it is easy to remember or note for human, but not random enough to use directly as key to encrypt, and not secure to store in database.
 
   You can think of KDF as just MAC, but run many iterations and consume some CPU and RAM.
 
-** Password Based Key Derivation Function (PBKDF2)[fn:6]
-   The following example of PBKDF using HMAC SHA256, iterate 1000 times, and output length 32 bytes.
+** Password Based Key Derivation Function (PBKDF2)
+   The following example of PBKDF[fn:6] using HMAC SHA256, iterate 1000 times, and output length 32 bytes.
    #+begin_example
      ghci> import Crypto.KDF.PBKDF2
      ghci> generate (prfHMAC SHA256 :: PRF ByteString) (Parameters {iterCounts = 1000, outputLength = 32}) ("password":: ByteString) ("salt"::ByteString) :: ByteString
@@ -377,15 +380,15 @@ example:(with line breaks for display purposes only)
    Since PBKDF2 hash each password with HMAC and a random salt many iterations, it is resistanct to dictionary attacks[fn:7].
    
    PBKDF2 is a common KDF but it is consider less secure than modern KDF such as Scrypt, Argon2.
-** Scrypt[fn:5]
-    The following is a example of deriving 32 bytes length key in 1024 iterations, block size 8 and parallel 2.
+** Scrypt
+    The following is a example of deriving 32 bytes length key in 1024 iterations, block size 8 and parallel 2 using Scrypt[fn:5].
    #+begin_example
      ghci> import Crypto.KDF.Scrypt
      ghci> generate (Parameters {n=1024,r=8,p=2,outputLength=32}) ("password":: ByteString) ("salt"::ByteString) ::ByteString
      "\ETBeHl\244\197Y\DEL\181\&0\141\SYN\185\151\148\215\211\160\189.\148d\185\172\177\202\&2\ETX\SUB\133\223\237"
    #+end_example
-** HMAC-based Extract-and-Expand Key Derivation Function (HKDF)[fn:9]
-
+** HMAC-based Extract-and-Expand Key Derivation Function (HKDF)
+Example of HKDF[fn:9]:
 #+begin_example
   ghci> import Crypto.KDF.HKDF
   ghci> import Crypto.Hash (SHA256)
@@ -394,13 +397,15 @@ example:(with line breaks for display purposes only)
   "\DC4\147\223\v%\175\f\177\143\132\202\142\233\236\135\153\253\CANs\213wh\149\193\128\240\192t\DC1\UST,"
 #+end_example
 * Symmetric Ciphers
+Symmetric ciphers is very straightforward to use, encryption and decryption is based on the same key.
+
+Basically symmetric encryption use a Pseudo Random Key(PRK) xor the message. The
 ** AES
-AES requires a initial vector(IV), aka nonce
 
 *** Counter Mode(CTR)
-The following is a example of AES CTR mode with a random key and 0 iv:
+AES requires a initial vector(IV), aka nonce. The following is a example of AES 256 CTR mode with a random 256-bit key and 0 as IV:
 #+begin_quote
-In practice key should be generated from one of the secure KDF, and iv should be a random number.
+In practice key should derive key from password with a secure KDF, and iv should be a random number.
 #+end_quote
 
 #+begin_example
@@ -415,8 +420,8 @@ In practice key should be generated from one of the secure KDF, and iv should be
   "\208\207\SI\191\206\DELN"
 #+end_example
 
-*** Galois/Counter Mode[fn:11] Synthetic Initialization Vector (GCM-SIV)[fn:12]
-CTR is good enough for common encryption case, while GCM added Authenticated Encryption with Additional Data (AEAD)[fn:25], and SIV to nonce misuse-resistant.
+*** Galois/Counter Mode Synthetic Initialization Vector (GCM-SIV)
+CTR is good enough for common encryption case, while GCM[fn:11]-SIV[fn:12] added Authenticated Encryption with Additional Data (AEAD)[fn:25], and SIV to nonce misuse-resistant.
 
 AEAD basically bind extra data, or context to cipher text and generate a MAC, aka authentication tag, to be able to verify cipher text's integrity(not tampered), and authenticity(not cut-and-paste).
 
@@ -435,9 +440,9 @@ The following is example of AES-GCM-SIV encryption of "message" with additional 
 #+end_example
 ** ChaCha20
 ChaCha20 is high speed stream cipher, a vairant of Salsa20, usually combine with Poly1305 as AEAD construction.
-*** ChaCha20-Poly1305[fn:13]
+*** ChaCha20-Poly1305
 
-ChaCha20-Poly1305 requires very similar inputs to AES:
+ChaCha20-Poly1305[fn:13] requires very similar inputs to AES:
 
   - a 32 bytes (256-bit) key, can derive key from password with a secure KDF
   - a 12 bytes (96-bit) nonce aka IV
@@ -465,8 +470,121 @@ ghci| return $ (convertToBase Base16 out :: ByteString, convertToBase Base16 aut
 #+end_example
 
 * TODO Asymmetric Ciphers
+Asymmetric ciphers aka public key cryptography, is more complex than symmetric(in term of usage not cipher implementation), because instead of using the same key to encrypt and decrypt, asymmetric needs public and private key pair.
 
+Common scenarios of asymmetric ciphers are:
+- Encrypt data by public key and decrypt by private key
+- Sign message(MAC) by private key and verify by public key
+- Exchange key between 2 parties publicly
+
+** Key Exchange
+Key exchange usually happen when two parties want to establish a secure connection on a public channel, for example TLS Handshake.
+
+  - Client and Server each has a key pair, only client has access to the private key
+  - Server has a key pair, only server has access to the private key
+  - (Client private key * Base) * Server public key = shared key = Client public key (Base * Server Private key)
+
+Where private * base = public key
+=*= is a math irreversible operation that is associative, e.g. exponent of huge number
+
+** Elliptic Curve Cryptography (ECC)
+Compared to RSA, ECC offers equivalent security with smaller key sizes(in bits).[fn:26]
+
+| Symmetric | ECC | DH/DSA/ |
+|        80 | 163 |    1024 |
+|       112 | 233 |    2048 |
+|       128 | 283 |    3072 |
+|       192 | 409 |    7680 |
+|       256 | 571 |   15360 |
+
+
+*** Elliptic Curve Diffie-Hellman (ECDH)
+ECDH process is very simple:
+1. choose a curve, there are a lot of curves available.
+   #+begin_example
+   ghci> :info CurveName
+type CurveName :: *
+data CurveName
+  = SEC_p112r1
+  | SEC_p112r2
+  | SEC_p128r1
+  ...
+   #+end_example
+2. Alice generate a private key
+3. Bob generate a private key
+4. Alice's private key * Base point * Bob's public key = share key = Alice's public key * Base point * Bob's private key 
+
+#+begin_example
+  ghci> import Crypto.PubKey.ECC.DH
+  ghci> import Crypto.PubKey.ECC.Types
+  ghci> let curve = getCurveByName SEC_p384r1
+  ghci> do
+  ghci| alicePrivateKey <- generatePrivate curve
+  ghci| let alicePublicKey = calculatePublic curve alicePrivateKey
+  ghci| bobPrivateKey <- generatePrivate curve
+  ghci| let bobPublicKey = calculatePublic curve bobPrivateKey
+  ghci| let aliceSharedKey = getShared curve alicePrivateKey bobPublicKey
+  ghci| let bobSharedKey = getShared curve bobPrivateKey alicePublicKey
+  ghci| return (aliceSharedKey == bobSharedKey)
+  ghci| 
+  True
+#+end_example
+
+*** Curve25519/X25519
+Another popular curve is Curve25519, which is 128-bit level, Curve448 is 256-bit level security.[fn:28]
+
+#+begin_example
+  do
+  alicePrivateKey <- generateSecretKey
+  let alicePublicKey = toPublic alicePrivateKey
+  bobPrivateKey <- generateSecretKey
+  let bobPublicKey = toPublic bobPrivateKey
+  let aliceSharedKey = dh bobPublicKey alicePrivateKey
+  let bobSharedKey = dh alicePublicKey bobPrivateKey
+  return (aliceSharedKey == bobSharedKey)
+#+end_example
+
+
+*** Elliptic Curve Digital Signature Algorithm (ECDSA)
+ECDSA[fn:30] won't encrypt the message, but just generate signature from sender's private key.
+
+The following example is how Alice sign the message with ECDSA on Curve25519 with her private key, and Bob
+can verify the message is from Alice public key.
+
+#+begin_example
+  ghci> import Crypto.PubKey.ECC.ECDSA
+  ghci> import Crypto.PubKey.ECC.Generate
+  ghci> import Crypto.Hash.Algorithms
+  ghci> do
+  ghci| (alicePublicKey, alicePrivateKey) <- generate curve
+  ghci| toBob <- sign alicePrivateKey SHA256 ("message to Bob"::ByteString)
+  ghci| return $ verify SHA256 alicePublicKey toBob ("message to Bob"::ByteString)
+  ghci| 
+  True
+#+end_example
+
+*** Edwards-Curve Digital Signature Algorithm (EdDSA)
+Usage of EdDSA[fn:29] is basically the same as ECDSA, but on another curve edwards25519 or edwards448
+
+** RSA
+RSA[fn:31] is the most popular public key crypto, the following is a example of digital sign message with 2048-bit RSA key, in RSASSA-PKCS1-v1_5 scheme SHA256:
+#+begin_example
+  ghci> import Crypto.PubKey.RSA
+  ghci> import Crypto.PubKey.RSA.PKCS15
+  ghci> import Crypto.Hash.Algorithms
+  ghci> (publicKey, privateKey) <- generate 256 65537
+  ghci> sign Nothing (Just SHA256) privateKey ("to Bob"::ByteString)
+  Right "=\161\243j\STX]\251g=\234\GSx>\159\248\128#\DEL\235\188\240\221U\232{\176\DLE\231\210\229z2\SI\212\212\216\235\239bO\205&t\248\SOH\249K.\191R\169\175#\183\f\239\141\142\201\144\&0\174[\ESC\228T`\136\239\221\EOT\214\235\&8\NAK\255\245l\148\228?\FS\254N'pO\221\"n'\249<\242\RS\146\DELl\210\157~[\254)\SYN@\249\232\ENQs\RSl\177u\213\207\239\129\159\ETX&\141\DC13\243\250\232\187\222\DLEF\207\222\231\EM\186M\245Hv\238\n\ACK\SOw\254\196\173&\209N\245\217\&4m\234\161l\158\173\225;\SYN\187\217\v\r\199\b\193\v\167{Dk\234\194\174\133\150@\148\DEL\190\193\141\DC1\140S\141\GS\135\n\161)\253\179\241\199\230k<G\135\158\225\DC2?h\211\240#;\183\192\182\168eS\\\195V\135mZ\rA\173\197\139\193\135\174\233\138&r\SIK\197\156\r\a\DELV\ETX\218\FS\188d\NAKw\222\252\ESC\SO"
+#+end_example
 * Footnotes
+[fn:31]  https://datatracker.ietf.org/doc/html/rfc8017
+
+[fn:30] https://datatracker.ietf.org/doc/html/rfc6979
+[fn:29]https://datatracker.ietf.org/doc/html/rfc8032 
+
+[fn:28] https://datatracker.ietf.org/doc/html/rfc7748
+[fn:27] https://intensecrypto.org/public/index.html
+[fn:26] https://datatracker.ietf.org/doc/html/rfc4492
 [fn:25] https://datatracker.ietf.org/doc/html/rfc5116
 
 [fn:24]https://openid.net/specs/openid-connect-core-1_0.html 
