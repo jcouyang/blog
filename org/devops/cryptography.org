@@ -42,7 +42,9 @@ Haskell is chosen as programming language for examples since it is concise, inte
 |-----------------+----------+---------------------------------|
 | [[* Asymmetric Ciphers][Asymetric]]       | ECC      | [[* Elliptic Curve Digital Signature Algorithm (ECDSA)][ECDSA]] [[* Edwards-Curve Digital Signature Algorithm (EdDSA)][EdDSA]] [[* Elliptic Curve Diffie-Hellman (ECDH)][ECDH]] [[* Curve25519/X25519][X25519]] Ed25519 |
 |                 |          |                                 |
-|                 | RSA      |                                 |
+|                 | [[* RSA][RSA]]      | RSASSA-PKCS RSASSA-PSS          |
+|                 |          | RSAES-OAEP                      |
+
 
 * Prerequisites
   All you need is just [[https://nixos.org/download.html#download-nix][nix]]!
@@ -100,6 +102,7 @@ Haskell is chosen as programming language for examples since it is concise, inte
    #+end_example
 
 ** Privacy-Enhanced Mail(PEM)
+#+index: PEM
 PEM[fn:10] is baseline format for most of the public key encryption, which contains
 - Boundary
 - Headers
@@ -324,6 +327,7 @@ example:(with line breaks for display purposes only)
   
 * Message Authentication Code(MAC)
   #+index: HMAC
+  #+index: Poly1305
   MAC is basically a hash function + key.
 
   
@@ -362,6 +366,7 @@ Poly1305[fn:13] is fast MAC
   You can think of KDF as just MAC, but run many iterations and consume some CPU and RAM.
 
 ** Password Based Key Derivation Function (PBKDF2)
+#+index: PBKDF2
    The following example of PBKDF[fn:6] using HMAC SHA256, iterate 1000 times, and output length 32 bytes.
    #+begin_example
      ghci> import Crypto.KDF.PBKDF2
@@ -381,6 +386,7 @@ Poly1305[fn:13] is fast MAC
    
    PBKDF2 is a common KDF but it is consider less secure than modern KDF such as Scrypt, Argon2.
 ** Scrypt
+#+index: Scrypt
     The following is a example of deriving 32 bytes length key in 1024 iterations, block size 8 and parallel 2 using Scrypt[fn:5].
    #+begin_example
      ghci> import Crypto.KDF.Scrypt
@@ -388,6 +394,7 @@ Poly1305[fn:13] is fast MAC
      "\ETBeHl\244\197Y\DEL\181\&0\141\SYN\185\151\148\215\211\160\189.\148d\185\172\177\202\&2\ETX\SUB\133\223\237"
    #+end_example
 ** HMAC-based Extract-and-Expand Key Derivation Function (HKDF)
+#+index: HKDF
 Example of HKDF[fn:9]:
 #+begin_example
   ghci> import Crypto.KDF.HKDF
@@ -401,7 +408,7 @@ Symmetric ciphers is very straightforward to use, encryption and decryption is b
 
 Basically symmetric encryption use a Pseudo Random Key(PRK) xor the message. The
 ** AES
-
+  #+index: AES
 *** Counter Mode(CTR)
 AES requires a initial vector(IV), aka nonce. The following is a example of AES 256 CTR mode with a random 256-bit key and 0 as IV:
 #+begin_quote
@@ -421,6 +428,7 @@ In practice key should derive key from password with a secure KDF, and iv should
 #+end_example
 
 *** Galois/Counter Mode Synthetic Initialization Vector (GCM-SIV)
+  #+index: AES-GCM-SIV
 CTR is good enough for common encryption case, while GCM[fn:11]-SIV[fn:12] added Authenticated Encryption with Additional Data (AEAD)[fn:25], and SIV to nonce misuse-resistant.
 
 AEAD basically bind extra data, or context to cipher text and generate a MAC, aka authentication tag, to be able to verify cipher text's integrity(not tampered), and authenticity(not cut-and-paste).
@@ -439,9 +447,10 @@ The following is example of AES-GCM-SIV encryption of "message" with additional 
   (AuthTag {unAuthTag = "\239|\229V\USNT3\ACKf\NAK\STXC\251\134\FS"},"\149\229\142SW\209Z")
 #+end_example
 ** ChaCha20
+  #+index: ChaCha20
 ChaCha20 is high speed stream cipher, a vairant of Salsa20, usually combine with Poly1305 as AEAD construction.
 *** ChaCha20-Poly1305
-
+  #+index: ChaCha20-Poly1305
 ChaCha20-Poly1305[fn:13] requires very similar inputs to AES:
 
   - a 32 bytes (256-bit) key, can derive key from password with a secure KDF
@@ -469,7 +478,7 @@ ghci| return $ (convertToBase Base16 out :: ByteString, convertToBase Base16 aut
 ("f0dd593fb3cac0","4a29dd7ae8b51ac748b37092ed485e88")
 #+end_example
 
-* TODO Asymmetric Ciphers
+* Asymmetric Ciphers
 Asymmetric ciphers aka public key cryptography, is more complex than symmetric(in term of usage not cipher implementation), because instead of using the same key to encrypt and decrypt, asymmetric needs public and private key pair.
 
 Common scenarios of asymmetric ciphers are:
@@ -488,6 +497,7 @@ Where private * base = public key
 =*= is a math irreversible operation that is associative, e.g. exponent of huge number
 
 ** Elliptic Curve Cryptography (ECC)
+  #+index: ECC
 Compared to RSA, ECC offers equivalent security with smaller key sizes(in bits).[fn:26]
 
 | Symmetric | ECC | DH/DSA/ |
@@ -499,6 +509,7 @@ Compared to RSA, ECC offers equivalent security with smaller key sizes(in bits).
 
 
 *** Elliptic Curve Diffie-Hellman (ECDH)
+  #+index: ECDH
 ECDH process is very simple:
 1. choose a curve, there are a lot of curves available.
    #+begin_example
@@ -531,6 +542,7 @@ data CurveName
 #+end_example
 
 *** Curve25519/X25519
+  #+index: X25519
 Another popular curve is Curve25519, which is 128-bit level, Curve448 is 256-bit level security.[fn:28]
 
 #+begin_example
@@ -546,6 +558,7 @@ Another popular curve is Curve25519, which is 128-bit level, Curve448 is 256-bit
 
 
 *** Elliptic Curve Digital Signature Algorithm (ECDSA)
+  #+index: ECDSA
 ECDSA[fn:30] won't encrypt the message, but just generate signature from sender's private key.
 
 The following example is how Alice sign the message with ECDSA on Curve25519 with her private key, and Bob
@@ -564,9 +577,11 @@ can verify the message is from Alice public key.
 #+end_example
 
 *** Edwards-Curve Digital Signature Algorithm (EdDSA)
+  #+index: EdDSA
 Usage of EdDSA[fn:29] is basically the same as ECDSA, but on another curve edwards25519 or edwards448
 
 ** RSA
+  #+index: RSA
 RSA[fn:31] is the most popular public key crypto, the following is a example of digital sign message with 2048-bit RSA key, in RSASSA-PKCS1-v1_5 scheme SHA256:
 #+begin_example
   ghci> import Crypto.PubKey.RSA
