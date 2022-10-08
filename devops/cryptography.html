@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-10-08 Sat 10:58 -->
+<!-- 2022-10-08 Sat 11:06 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cryptography Cheat Sheet for Developers</title>
@@ -92,7 +92,7 @@
 </li>
 </ul>
 </li>
-<li><a href="#org0f69fc6"><span class="todo TODO">TODO</span> Asymmetric Ciphers</a>
+<li><a href="#org0f69fc6">Asymmetric Ciphers</a>
 <ul>
 <li><a href="#org85be216">Key Exchange</a></li>
 <li><a href="#org7a7fafb">Elliptic Curve Cryptography (ECC)</a>
@@ -262,13 +262,20 @@ actually Haskell is chosen because I learnt most of the content in this article 
 
 <tr>
 <td class="org-left">&#xa0;</td>
-<td class="org-left">RSA</td>
+<td class="org-left"><a href="#org36c9406">RSA</a></td>
+<td class="org-left">RSASSA-PKCS RSASSA-PSS</td>
+</tr>
+
+<tr>
 <td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">RSAES-OAEP</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+
 
 <div id="outline-container-org65db9e5" class="outline-2">
 <h2 id="org65db9e5">Prerequisites</h2>
@@ -284,7 +291,7 @@ All codes in examples are executable in interative repl GHCi.
 <p>
 Please run the following to get into GHCi and config it correctly before trying any example.
 </p>
-<pre class="example" id="org2d30afb">
+<pre class="example" id="org97c828c">
 nix-shell -p "haskellPackages.ghcWithPackages (pkgs: [ pkgs.cryptonite pkgs.memory ])" --run ghci
 GHCi, version 9.0.2: https://www.haskell.org/ghc/  :? for help
 ghci&gt; :set -XOverloadedStrings
@@ -316,7 +323,7 @@ Most developers are very familiar with <code>base64</code><label for="2" class="
 <a href="https://datatracker.ietf.org/doc/html/rfc4648">https://datatracker.ietf.org/doc/html/rfc4648</a> 
 </span>
 </p>
-<pre class="example" id="orga97cde0">
+<pre class="example" id="orgcd1bc7c">
 ghci&gt; import Data.ByteArray.Encoding
 ghci&gt; convertToBase Base64 ("hello world" :: ByteString) :: ByteString
 "aGVsbG8gd29ybGQ="
@@ -346,7 +353,7 @@ The following example of base64 data from message "hel" <label for="3" class="ma
 </span>
 </p>
 
-<pre class="example" id="orgfcb9c53">
+<pre class="example" id="org9294658">
 Input:   h        e        l
 Hex:     6   8    6   5    6   c  
 8-bit:   01101000 01100101 01101100
@@ -374,7 +381,7 @@ PEM<label for="4" class="margin-toggle sidenote-number"></label><input type="che
 <p>
 Example PEM:
 </p>
-<pre class="example" id="org9a1eea7">
+<pre class="example" id="org9b079ed">
 -----BEGIN PRIVACY-ENHANCED MESSAGE-----
 Proc-Type: 4,ENCRYPTED
 Content-Domain: RFC822
@@ -416,7 +423,7 @@ PKCS8<label for="5" class="margin-toggle sidenote-number"></label><input type="c
 <p>
 you can simply generate a RSA key via openssl:
 </p>
-<pre class="example" id="orge4ccce7">
+<pre class="example" id="orgbe2c984">
 nix-shell -p openssl
 [nix-shell:/tmp]$ openssl genpkey -algorithm rsa -out test.key
 [nix-shell:/tmp]$ cat test.key
@@ -428,7 +435,7 @@ yRdkNiEmIKL4/ZQoTLdyQR4vJQ==
 -----END PRIVATE KEY-----
 </pre>
 
-<pre class="example" id="org6f9757f">
+<pre class="example" id="orgc2132d6">
 [nix-shell:/tmp]$ openssl rsa -in test.key -noout -text
 RSA Private-Key: (2048 bit, 2 primes)
 modulus:
@@ -472,7 +479,7 @@ Private key is kind of too long as example, lets use public key to explain.
 RSA Public key can be generate from private key:
 </p>
 
-<pre class="example" id="org172b64d">
+<pre class="example" id="orgacf4627">
 [nix-shell:/tmp]$ openssl rsa -in test.key -outform PEM -pubout
 writing RSA key
 -----BEGIN PUBLIC KEY-----
@@ -493,7 +500,7 @@ The output of the public key is in PKCS1 in ASN.1 syntax DER encoded in PEM form
 <p>
 PKCS1 represent RSA public key ASN.1 as
 </p>
-<pre class="example" id="org3432cca">
+<pre class="example" id="orgd462151">
 RSAPublicKey:
 
       RSAPublicKey ::= SEQUENCE {
@@ -505,7 +512,7 @@ RSAPublicKey:
 <p>
 You can read the same information as ASN.1 from
 </p>
-<pre class="example" id="orgf55ac89">
+<pre class="example" id="orgf576231">
 [nix-shell:/tmp]$ openssl rsa -in test.key -pubout -out test.pem
 [nix-shell:/tmp]$ openssl rsa -in test.pem -pubin -noout -text
 RSA Public-Key: (2048 bit)
@@ -575,7 +582,7 @@ JWS<label for="10" class="margin-toggle sidenote-number"></label><input type="ch
 <p>
 The message is NOT ENCTYPTED, so anyone can actually see the claims in the JSON.
 </p>
-<pre class="example" id="orgb4bd6d5">
+<pre class="example" id="orgeeda908">
 BASE64URL(UTF8(JWS Protected Header)) || '.' ||
 BASE64URL(JWS Payload) || '.' ||
 BASE64URL(JWS Signature)
@@ -584,7 +591,7 @@ BASE64URL(JWS Signature)
 <p>
 A example of JWS:(with line breaks for display purposes only):
 </p>
-<pre class="example" id="orga5d3d9a">
+<pre class="example" id="orga68e009">
 eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9
 .
 eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFt
@@ -609,7 +616,7 @@ As the name indicate JWE<label for="12" class="margin-toggle sidenote-number"></
 message.
 </p>
 
-<pre class="example" id="org99ac929">
+<pre class="example" id="orgcec5176">
 BASE64URL(UTF8(JWE Protected Header)) ||
       '.' || BASE64URL(JWE Encrypted Key) || '.' || BASE64URL(JWE
       Initialization Vector) || '.' || BASE64URL(JWE Ciphertext) || '.'
@@ -619,7 +626,7 @@ BASE64URL(UTF8(JWE Protected Header)) ||
 <p>
 example:(with line breaks for display purposes only)
 </p>
-<pre class="example" id="orga9003d9">
+<pre class="example" id="org651a02d">
 eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ.
 OKOawDo13gRp2ojaHV7LFpZcgV7T6DVZKTyKOMTYUmKoTCVJRgckCL9kiMT03JGe
 ipsEdY3mx_etLbbWSrFr05kLzcSr4qKAq7YN7e9jwQRb23nfa6c9d-StnImGyFDb
@@ -650,7 +657,7 @@ Modern hash functions such as SHA2, SHA3, Blake2 are consider secure hash functi
 Hash functions are commonly used to proof the content not tampered, for example if you download an executable file form internet, you should compare the hash provided by the site and the one caclulated locally. Collisions found will indicate the function is not secure anymore, for example if someone hijack the content and replace with another malware which can calculate to the same hash.
 </p>
 
-<pre class="example" id="orgf6689d5">
+<pre class="example" id="org9e029a5">
 ghci&gt; import Crypto.Hash
 ghci&gt; hash ("hello world"::ByteString) :: Digest SHA1
 2aae6c35c94fcfb415dbe95f408b9ce91ee846ed
@@ -703,7 +710,7 @@ For example HMAC<label for="14" class="margin-toggle sidenote-number"></label><i
 </span> SHA256 is HMAC scramble the message with a key and hash with SHA256.
 </p>
 
-<pre class="example" id="orgbc3bf11">
+<pre class="example" id="org4f9903a">
 ghci&gt; import Crypto.MAC.HMAC
 ghci&gt; import Crypto.Hash
 ghci&gt; hmacGetDigest $ hmac ("secret key"::ByteString) ("hello world"::ByteString) :: Digest SHA256
@@ -717,7 +724,7 @@ The scramble part is defined in rfc2104<label for="14" class="margin-toggle side
 <a href="https://datatracker.ietf.org/doc/html/rfc2104">https://datatracker.ietf.org/doc/html/rfc2104</a> 
 </span>, <code>H</code> is hash function e.g. SHA256, <code>K</code> is secret key and <code>,</code> is concat
 </p>
-<pre class="example" id="orgcefe284">
+<pre class="example" id="org53f68ef">
 ipad = the byte 0x36 repeated B times
 opad = the byte 0x5C repeated B times
 H(K XOR opad, H(K XOR ipad, text))
@@ -768,7 +775,7 @@ The following example of PBKDF<label for="16" class="margin-toggle sidenote-numb
 <a href="https://datatracker.ietf.org/doc/html/rfc2898">https://datatracker.ietf.org/doc/html/rfc2898</a>
 </span> using HMAC SHA256, iterate 1000 times, and output length 32 bytes.
 </p>
-<pre class="example" id="org2c8cd9b">
+<pre class="example" id="org8071d8b">
 ghci&gt; import Crypto.KDF.PBKDF2
 ghci&gt; generate (prfHMAC SHA256 :: PRF ByteString) (Parameters {iterCounts = 1000, outputLength = 32}) ("password":: ByteString) ("salt"::ByteString) :: ByteString
 "c,(\DC2\228mF\EOT\DLE+\167a\142\157m}/\129(\246&amp;kJ\ETX&amp;M*\EOT`\183\220\179"
@@ -777,7 +784,7 @@ ghci&gt; generate (prfHMAC SHA256 :: PRF ByteString) (Parameters {iterCounts = 1
 The output is 32 bytes length pseudo random bytestring, we can output hex format with base16 encoding
 </p>
 
-<pre class="example" id="orgb0c6409">
+<pre class="example" id="org41fc878">
 ghci&gt; convertToBase Base16 $ (generate (prfHMAC SHA256 :: PRF ByteString) (Parameters {iterCounts = 1000, outputLength = 32}) ("password":: ByteString) ("salt"::ByteString) :: ByteString) :: ByteString
 "632c2812e46d4604102ba7618e9d6d7d2f8128f6266b4a03264d2a0460b7dcb3"
 </pre>
@@ -805,7 +812,7 @@ The following is a example of deriving 32 bytes length key in 1024 iterations, b
 <a href="https://datatracker.ietf.org/doc/html/rfc7914">https://datatracker.ietf.org/doc/html/rfc7914</a>
 </span>.
 </p>
-<pre class="example" id="orgae7c617">
+<pre class="example" id="org4b974fe">
 ghci&gt; import Crypto.KDF.Scrypt
 ghci&gt; generate (Parameters {n=1024,r=8,p=2,outputLength=32}) ("password":: ByteString) ("salt"::ByteString) ::ByteString
 "\ETBeHl\244\197Y\DEL\181\&amp;0\141\SYN\185\151\148\215\211\160\189.\148d\185\172\177\202\&amp;2\ETX\SUB\133\223\237"
@@ -820,7 +827,7 @@ Example of HKDF<label for="19" class="margin-toggle sidenote-number"></label><in
 <a href="https://datatracker.ietf.org/doc/html/rfc5869">https://datatracker.ietf.org/doc/html/rfc5869</a>
 </span>:
 </p>
-<pre class="example" id="orgc44d5fa">
+<pre class="example" id="org7ccce15">
 ghci&gt; import Crypto.KDF.HKDF
 ghci&gt; import Crypto.Hash (SHA256)
 ghci&gt; let pkr = extract ("salt" :: ByteString) ("secret" :: ByteString) :: PRK SHA256
@@ -858,7 +865,7 @@ In practice key should derive key from password with a secure KDF, and iv should
 
 </blockquote></div>
 
-<pre class="example" id="org6522d5e">
+<pre class="example" id="org5e067c8">
 ghci&gt; import Crypto.Random
 ghci&gt; import Crypto.Cipher.Types
 ghci&gt; import Crypto.Cipher.AES (AES256)
@@ -893,7 +900,7 @@ AEAD basically bind extra data, or context to cipher text and generate a MAC, ak
 The following is example of AES-GCM-SIV encryption of "message" with additional data "context" and a nonce.
 </p>
 
-<pre class="example" id="org7d212df">
+<pre class="example" id="org6dd723c">
 ghci&gt; import Crypto.Cipher.AESGCMSIV
 ghci&gt; do
 ghci| key :: ByteString &lt;- getRandomBytes 32
@@ -938,7 +945,7 @@ There are more steps to encrypt a message due to it is stream cipher aka state c
 <li>finalise a state will generate auth tag</li>
 </ul>
 
-<pre class="example" id="orgbc05bdb">
+<pre class="example" id="org808eb42">
 ghci&gt; import Crypto.Error
 ghci&gt; import Crypto.Cipher.ChaChaPoly1305
 ghci| do
@@ -959,7 +966,7 @@ ghci| return $ (convertToBase Base16 out :: ByteString, convertToBase Base16 aut
 </div>
 
 <div id="outline-container-org0f69fc6" class="outline-2">
-<h2 id="org0f69fc6"><span class="todo TODO">TODO</span> Asymmetric Ciphers</h2>
+<h2 id="org0f69fc6">Asymmetric Ciphers</h2>
 <div class="outline-text-2" id="text-org0f69fc6">
 <p>
 Asymmetric ciphers aka public key cryptography, is more complex than symmetric(in term of usage not cipher implementation), because instead of using the same key to encrypt and decrypt, asymmetric needs public and private key pair.
@@ -1065,7 +1072,7 @@ ECDH process is very simple:
 <li><p>
 choose a curve, there are a lot of curves available.
 </p>
-<pre class="example" id="orgbfccaf6">
+<pre class="example" id="org79c5fee">
    ghci&gt; :info CurveName
 type CurveName :: *
 data CurveName
@@ -1079,7 +1086,7 @@ data CurveName
 <li>Alice's private key * Base point * Bob's public key = share key = Alice's public key * Base point * Bob's private key</li>
 </ol>
 
-<pre class="example" id="org57f9344">
+<pre class="example" id="org25c24ec">
 ghci&gt; import Crypto.PubKey.ECC.DH
 ghci&gt; import Crypto.PubKey.ECC.Types
 ghci&gt; let curve = getCurveByName SEC_p384r1
@@ -1106,7 +1113,7 @@ Another popular curve is Curve25519, which is 128-bit level, Curve448 is 256-bit
 </span>
 </p>
 
-<pre class="example" id="org10de104">
+<pre class="example" id="orgef15328">
 do
 alicePrivateKey &lt;- generateSecretKey
 let alicePublicKey = toPublic alicePrivateKey
@@ -1134,7 +1141,7 @@ The following example is how Alice sign the message with ECDSA on Curve25519 wit
 can verify the message is from Alice public key.
 </p>
 
-<pre class="example" id="orgc79d56c">
+<pre class="example" id="org463694b">
 ghci&gt; import Crypto.PubKey.ECC.ECDSA
 ghci&gt; import Crypto.PubKey.ECC.Generate
 ghci&gt; import Crypto.Hash.Algorithms
@@ -1168,7 +1175,7 @@ RSA<label for="27" class="margin-toggle sidenote-number"></label><input type="ch
 <a href="https://datatracker.ietf.org/doc/html/rfc8017">https://datatracker.ietf.org/doc/html/rfc8017</a>
 </span> is the most popular public key crypto, the following is a example of digital sign message with 2048-bit RSA key, in RSASSA-PKCS1-v1_5 scheme SHA256:
 </p>
-<pre class="example" id="org7c39fe8">
+<pre class="example" id="org1ea7491">
 ghci&gt; import Crypto.PubKey.RSA
 ghci&gt; import Crypto.PubKey.RSA.PKCS15
 ghci&gt; import Crypto.Hash.Algorithms

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-10-08 Sat 10:58 -->
+<!-- 2022-10-08 Sat 11:06 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Http4s Guides</title>
@@ -141,7 +141,7 @@ To make sure our dev environment is 100% reproducible, please lock the nix chann
 <div id="outline-container-org95b53a1" class="outline-4">
 <h4 id="org95b53a1">for macOS</h4>
 <div class="outline-text-4" id="text-org95b53a1">
-<pre class="example" id="orga882463">
+<pre class="example" id="org09f598a">
 nix-channel --add https://nixos.org/channels/nixpkgs-20.09-darwin nixpkgs
 nix-channel --update
 </pre>
@@ -151,7 +151,7 @@ nix-channel --update
 <div id="outline-container-orgc5bf5f9" class="outline-4">
 <h4 id="orgc5bf5f9">for Linux(or Windows WSL)</h4>
 <div class="outline-text-4" id="text-orgc5bf5f9">
-<pre class="example" id="orged1ff60">
+<pre class="example" id="org74873fc">
 nix-channel --add https://nixos.org/channels/nixos-20.09 nixpkgs
 nix-channel --update
 </pre>
@@ -162,7 +162,7 @@ nix-channel --update
 <div id="outline-container-orgbaca50c" class="outline-3">
 <h3 id="orgbaca50c">Creating a new Http4s Application</h3>
 <div class="outline-text-3" id="text-orgbaca50c">
-<pre class="example" id="orge195662">
+<pre class="example" id="org6e729a2">
 ~ nix-shell -p sbt
 &gt; sbt new jcouyang/http4s.g8
 </pre>
@@ -178,7 +178,7 @@ You can either answer all those question that it prompt or press <code>Enter</co
 <p>
 exit the previous temporary <code>nix-shell -p sbt</code> if you are still in
 </p>
-<pre class="example" id="org4547cd6">
+<pre class="example" id="org7824828">
 &gt; exit
 </pre>
 
@@ -193,7 +193,7 @@ Enter nix-shell and start the server
 
 </blockquote></div>
 
-<pre class="example" id="orgcb90fb7">
+<pre class="example" id="org812f843">
 ~ nix-shell
 &gt; sbt ~reStart
 </pre>
@@ -208,14 +208,14 @@ Enter nix-shell and start the server
 <p>
 You should able to see an empty list <code>[]</code> since there is nothing in database yet.
 </p>
-<pre class="example" id="org12b5c92">
+<pre class="example" id="org1695640">
 ~ curl localhost:8080/joke
 </pre>
 
 <p>
 To run test simply
 </p>
-<pre class="example" id="orgb21d9c3">
+<pre class="example" id="org5469e28">
 &gt; sbt test
 </pre>
 
@@ -295,7 +295,7 @@ Now you have a proven working environment for the service to test and run, let u
 <div id="outline-container-org3c08723" class="outline-4">
 <h4 id="org3c08723">source structure</h4>
 <div class="outline-text-4" id="text-org3c08723">
-<pre class="example" id="org4af00f8">
+<pre class="example" id="org94ee307">
 ~ tree src
 src
 ├── main
@@ -476,7 +476,7 @@ Where <code>POSTGRES_DB=joke</code> will help creating the database and name it 
 <p>
 You don't need to run DB migration manually most of the time, since nix-shell hook will run it for you.
 </p>
-<pre class="example" id="orga03452f">
+<pre class="example" id="org060f008">
 shellHook = ''
           set -a
           source app.env
@@ -491,7 +491,7 @@ shellHook = ''
 <p>
 Every time you enter <code>nix-shell</code>, you will see the migration log:
 </p>
-<pre class="example" id="orgec79d6f">
+<pre class="example" id="org32f9962">
 nix-shell
 Creating network "http4s-example_default" with the default driver
 Creating http4s-example_zipkin_1 ... done
@@ -519,14 +519,14 @@ INFO: Migrating schema "public" to version 1.0 - CreateJokeTable
 <p>
 To manually migrate when schema changed:
 </p>
-<pre class="example" id="org1216131">
+<pre class="example" id="orged405f7">
 &gt; sbt "db/run migration"
 </pre>
 
 <p>
 Migration file located in <code>db/src/main/scala/db/migration</code>
 </p>
-<pre class="example" id="orgc2c8b67">
+<pre class="example" id="org16335e9">
 ~ tree db/src
 db/src
 └── main
@@ -605,7 +605,7 @@ can execute it in one transaction.</li>
 </p>
 
 
-<figure id="org48eb215">
+<figure id="orgeea971c">
 <img src="https://www.evernote.com/l/ABeuNCR1bIpMa4xqHKyccGy5mbbxVrzlj2AB/image.png" alt="image.png">
 
 </figure>
@@ -801,7 +801,7 @@ Finagle already provide sophisticated tracing and metrics, zipkin tracing is by 
 but it is sample rate is 0.1%, to verify it work, we could start the server with parameter
 </p>
 
-<pre class="example" id="org9bcd31d">
+<pre class="example" id="orgb3564ca">
 &gt; sbt '~reStart -zipkin.initialSampleRate=1'
 </pre>
 
@@ -809,7 +809,7 @@ but it is sample rate is 0.1%, to verify it work, we could start the server with
 Sample rate 1 means 100% of trace will report to zipkin.
 </p>
 
-<pre class="example" id="orgd3263ce">
+<pre class="example" id="orgfabde19">
 curl localhost:8080/random-joke
 </pre>
 </div>
@@ -819,7 +819,7 @@ curl localhost:8080/random-joke
 <p>
 You can see the server console will print something like:
 </p>
-<pre class="example" id="org9e34961">
+<pre class="example" id="org722b268">
 root [7cb6f08c27a8b33c finagle/netty4-2-2] INFO  c.y.d.h.r.joke - generating random joke
 root [7cb6f08c27a8b33c finagle/netty4-2-2] INFO  c.y.d.h.r.joke - getting dad joke...
 </pre>
@@ -845,7 +845,7 @@ if you grab <code>7cb6f08c27a8b33c</code> and search as trace id in <code>localh
 </p>
 
 
-<figure id="org1cdf287">
+<figure id="orgb2d8eeb">
 <img src="https://www.evernote.com/l/ABdFXDYBcnBAFYGQ-8X_us6xcsq42kL2Vn0B/image.png" alt="image.png">
 
 </figure>
@@ -965,21 +965,21 @@ To test all CRUD we just need scalacheck to randomly generate arbitrary create r
 <p>
 To package the server into a runable binary, simply:
 </p>
-<pre class="example" id="orgc81eb8e">
+<pre class="example" id="org846d88d">
 &gt; sbt bootstrap
 </pre>
 
 <p>
 To run:
 </p>
-<pre class="example" id="org96ed5fc">
+<pre class="example" id="orgb9d4b76">
 &gt; ./http4s-example
 </pre>
 
 <p>
 Package it to docker to ship to heroku or k8s
 </p>
-<pre class="example" id="org432779f">
+<pre class="example" id="orgc0b18c3">
 &gt; docker build . -t http4s-example
 </pre>
 
@@ -987,7 +987,7 @@ Package it to docker to ship to heroku or k8s
 The same way we can package and deploy migration scripts as well
 </p>
 
-<pre class="example" id="org465f10c">
+<pre class="example" id="org67d7c80">
 &gt; sbt db/bootstrap
 &gt; ./http4s-example-db-migration migrate
 </pre>
